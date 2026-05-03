@@ -1,6 +1,6 @@
-import { BrowserRouter } from 'react-router-dom'
+﻿import { BrowserRouter } from 'react-router-dom'
 
-import Rutas from '@/enrutamiento/Rutas'
+import Rutas from '@/routing/Rutas'
 
 /**
  * Componente raíz de la aplicación.
