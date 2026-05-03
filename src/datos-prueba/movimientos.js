@@ -1,0 +1,27 @@
+/**
+ * Datos de prueba: Movimientos de inventario.
+ * Al menos 20 movimientos de varios tipos.
+ */
+export const movimientos = [
+  { id: 'mov-001', tipo: 'entrada', productoId: 'prod-001', loteId: 'lot-001', cantidad: 200, ubicacionId: 'ub-001', motivo: 'Compra a proveedor Medifarma — Orden #OC-2024-001', usuarioId: 'usr-001', fechaHora: '2024-06-15T09:00:00' },
+  { id: 'mov-002', tipo: 'entrada', productoId: 'prod-001', loteId: 'lot-002', cantidad: 250, ubicacionId: 'ub-001', motivo: 'Compra a proveedor Medifarma — Orden #OC-2024-015', usuarioId: 'usr-001', fechaHora: '2024-08-01T10:30:00' },
+  { id: 'mov-003', tipo: 'salida', productoId: 'prod-001', loteId: 'lot-001', cantidad: 50, ubicacionId: 'ub-001', motivo: 'Transferencia a Botica Miraflores — TR-001', usuarioId: 'usr-001', fechaHora: '2024-09-10T14:00:00' },
+  { id: 'mov-004', tipo: 'entrada', productoId: 'prod-002', loteId: 'lot-003', cantidad: 100, ubicacionId: 'ub-001', motivo: 'Compra a proveedor Genfar — Orden #OC-2024-020', usuarioId: 'usr-001', fechaHora: '2024-05-20T08:00:00' },
+  { id: 'mov-005', tipo: 'salida', productoId: 'prod-002', loteId: 'lot-003', cantidad: 30, ubicacionId: 'ub-001', motivo: 'Transferencia a Botica Miraflores — TR-002', usuarioId: 'usr-001', fechaHora: '2024-10-01T11:00:00' },
+  { id: 'mov-006', tipo: 'entrada', productoId: 'prod-003', loteId: 'lot-005', cantidad: 320, ubicacionId: 'ub-001', motivo: 'Compra a proveedor Farmindustria — Orden #OC-2024-030', usuarioId: 'usr-001', fechaHora: '2024-10-25T09:00:00' },
+  { id: 'mov-007', tipo: 'entrada', productoId: 'prod-004', loteId: 'lot-006', cantidad: 50, ubicacionId: 'ub-001', motivo: 'Compra a proveedor IQFarma — Orden #OC-2024-035', usuarioId: 'usr-001', fechaHora: '2024-05-10T10:00:00' },
+  { id: 'mov-008', tipo: 'salida', productoId: 'prod-004', loteId: 'lot-006', cantidad: 35, ubicacionId: 'ub-001', motivo: 'Venta directa en mostrador', usuarioId: 'usr-001', fechaHora: '2025-03-15T16:00:00' },
+  { id: 'mov-009', tipo: 'merma', productoId: 'prod-004', loteId: 'lot-006', cantidad: 10, ubicacionId: 'ub-001', motivo: 'Producto dañado por humedad en almacén — Acta de merma #MER-001', usuarioId: 'usr-001', fechaHora: '2025-04-01T08:30:00' },
+  { id: 'mov-010', tipo: 'entrada', productoId: 'prod-005', loteId: 'lot-007', cantidad: 180, ubicacionId: 'ub-001', motivo: 'Compra a proveedor Medifarma — Orden #OC-2025-002', usuarioId: 'usr-001', fechaHora: '2025-01-15T09:00:00' },
+  { id: 'mov-011', tipo: 'entrada', productoId: 'prod-001', loteId: 'lot-008', cantidad: 85, ubicacionId: 'ub-002', motivo: 'Recepción de transferencia desde Droguería Central — TR-003', usuarioId: 'usr-002', fechaHora: '2025-02-01T10:00:00' },
+  { id: 'mov-012', tipo: 'salida', productoId: 'prod-001', loteId: 'lot-008', cantidad: 10, ubicacionId: 'ub-002', motivo: 'Venta a cliente — Boleta #B-2025-0501', usuarioId: 'usr-002', fechaHora: '2025-04-15T15:00:00' },
+  { id: 'mov-013', tipo: 'ajuste', productoId: 'prod-003', loteId: 'lot-005', cantidad: 5, ubicacionId: 'ub-001', motivo: 'Ajuste positivo por conteo físico — Inventario mensual abril 2025', usuarioId: 'usr-001', fechaHora: '2025-04-30T17:00:00' },
+  { id: 'mov-014', tipo: 'entrada', productoId: 'prod-007', loteId: 'lot-009', cantidad: 500, ubicacionId: 'ub-002', motivo: 'Recepción de transferencia desde Droguería Central — TR-004', usuarioId: 'usr-002', fechaHora: '2025-03-15T11:00:00' },
+  { id: 'mov-015', tipo: 'merma', productoId: 'prod-002', loteId: 'lot-003', cantidad: 5, ubicacionId: 'ub-001', motivo: 'Producto próximo a vencer — Retiro preventivo', usuarioId: 'usr-001', fechaHora: '2026-04-20T09:00:00' },
+  { id: 'mov-016', tipo: 'entrada', productoId: 'prod-001', loteId: 'lot-011', cantidad: 60, ubicacionId: 'ub-003', motivo: 'Recepción de transferencia desde Droguería Central — TR-005', usuarioId: 'usr-003', fechaHora: '2025-02-28T10:30:00' },
+  { id: 'mov-017', tipo: 'salida', productoId: 'prod-005', loteId: 'lot-007', cantidad: 25, ubicacionId: 'ub-001', motivo: 'Transferencia a Botica San Borja — TR-006', usuarioId: 'usr-001', fechaHora: '2025-03-20T14:00:00' },
+  { id: 'mov-018', tipo: 'entrada', productoId: 'prod-008', loteId: 'lot-013', cantidad: 22, ubicacionId: 'ub-003', motivo: 'Compra directa a proveedor IQFarma', usuarioId: 'usr-001', fechaHora: '2025-04-01T09:00:00' },
+  { id: 'mov-019', tipo: 'ajuste', productoId: 'prod-001', loteId: 'lot-001', cantidad: -3, ubicacionId: 'ub-001', motivo: 'Ajuste negativo por diferencia en conteo físico — Inventario abril 2025', usuarioId: 'usr-001', fechaHora: '2025-04-30T17:30:00' },
+  { id: 'mov-020', tipo: 'entrada', productoId: 'prod-006', loteId: null, cantidad: 120, ubicacionId: 'ub-001', motivo: 'Compra a proveedor Genfar — Orden #OC-2025-010', usuarioId: 'usr-001', fechaHora: '2025-01-20T08:00:00' },
+  { id: 'mov-021', tipo: 'salida', productoId: 'prod-006', loteId: null, cantidad: 120, ubicacionId: 'ub-001', motivo: 'Venta total de stock — Producto con alta rotación', usuarioId: 'usr-001', fechaHora: '2026-04-28T16:00:00' },
+]

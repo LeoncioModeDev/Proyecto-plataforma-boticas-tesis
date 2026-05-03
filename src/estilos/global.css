@@ -1,0 +1,75 @@
+/* Estilos globales de botica-demand-ml */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Variables CSS de la paleta */
+:root {
+  /* Verde */
+  --verde-principal: #107C41;
+  --verde-oscuro: #0B5C30;
+  --verde-claro: #E6F4EC;
+  --verde-acento: #2DA66B;
+
+  /* Neutros */
+  --blanco: #FFFFFF;
+  --blanco-suave: #F8F9FA;
+  --gris-borde: #E1E1E1;
+  --gris-texto: #605E5C;
+  --negro: #1B1B1B;
+  --negro-suave: #323130;
+
+  /* Semánticos */
+  --critico: #A4262C;
+  --critico-fondo: #FDE7E9;
+  --advertencia: #C19C00;
+  --advertencia-fondo: #FFF8E1;
+  --info: #0078D4;
+  --info-fondo: #E6F2FF;
+}
+
+/* Base global */
+body {
+  font-family: "Segoe UI", "Inter", system-ui, -apple-system, sans-serif;
+  background-color: var(--blanco-suave);
+  color: var(--negro-suave);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  margin: 0;
+  padding: 0;
+}
+
+/* Scrollbar discreta */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--gris-borde);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--gris-texto);
+}
+
+/* Foco accesible */
+*:focus-visible {
+  outline: 2px solid var(--verde-principal);
+  outline-offset: 2px;
+}
+
+/* Reset de enlace */
+a {
+  color: var(--verde-principal);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
