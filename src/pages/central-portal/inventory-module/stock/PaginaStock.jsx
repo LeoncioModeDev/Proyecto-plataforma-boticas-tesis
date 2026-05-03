@@ -1,0 +1,70 @@
+import { useState } from 'react'
+import { Boxes, AlertTriangle, XCircle, TrendingUp } from 'lucide-react'
+import TarjetaMetrica from '@/components/charts/TarjetaMetrica'
+import Tabla from '@/components/common/Tabla'
+import Insignia from '@/components/common/Insignia'
+import { stock } from '@/mock-data/stock'
+import { productos } from '@/mock-data/productos'
+import { boticas, OPCIONES_UBICACION } from '@/mock-data/boticas'
+import { clasificarAlerta, COLORES_ESTADO_STOCK, ETIQUETAS_ESTADO_STOCK } from '@/utilities/clasificarAlerta'
+import { formatearFechaRelativa } from '@/utilities/formatearFecha'
+import { formatearNumero } from '@/utilities/formatearMoneda'
+
+export default function PaginaStock() {
+  const [filtroUbicacion, setFiltroUbicacion] = useState('')
+  const [filtroEstado, setFiltroEstado] = useState('')
+
+  const datosEnriquecidos = stock.map(s => {
+    const producto = productos.find(p => p.id === s.productoId)
+    const ubicacion = boticas.find(b => b.id === s.ubicacionId)
+    const estadoAlerta = clasificarAlerta(s)
+    return { ...s, nombreProducto: producto?.nombreComercial || s.productoId, nombreUbicacion: ubicacion?.nombre || s.ubicacionId, estadoAlerta }
+  })
+
+  let filtrados = [...datosEnriquecidos]
+  if (filtroUbicacion) filtrados = filtrados.filter(s => s.ubicacionId === filtroUbicacion)
+  if (filtroEstado) filtrados = filtrados.filter(s => s.estadoAlerta === filtroEstado)
+
+  const totalStock = filtrados.reduce((a, s) => a + s.stockDisponible, 0)
+  const bajoStock = filtrados.filter(s => s.estadoAlerta === 'bajo').length
+  const sinStock = filtrados.filter(s => s.estadoAlerta === 'sin_stock').length
+  const sobrestock = filtrados.filter(s => s.estadoAlerta === 'sobrestock').length
+
+  const columnas = [
+    { campo: 'nombreProducto', encabezado: 'Producto' },
+    { campo: 'nombreUbicacion', encabezado: 'Ubicación' },
+    { campo: 'stockDisponible', encabezado: 'Stock Disponible', render: (r) => (
+      <span className="flex items-center gap-2">
+        <span className={r.stockDisponible === 0 ? 'text-estado-critico font-semibold' : r.stockDisponible < r.stockMinimo ? 'text-estado-advertencia font-semibold' : ''}>{r.stockDisponible}</span>
+        {r.stockDisponible === 0 && <XCircle className="h-4 w-4 text-estado-critico" />}
+        {r.stockDisponible > 0 && r.stockDisponible < r.stockMinimo && <AlertTriangle className="h-4 w-4 text-estado-advertencia" />}
+      </span>
+    )},
+    { campo: 'stockMinimo', encabezado: 'Stock Mínimo' },
+    { campo: 'estadoAlerta', encabezado: 'Estado', render: (r) => <Insignia color={COLORES_ESTADO_STOCK[r.estadoAlerta]}>{ETIQUETAS_ESTADO_STOCK[r.estadoAlerta]}</Insignia> },
+    { campo: 'ultimaActualizacion', encabezado: 'Últ. Actualización', render: (r) => <span className="text-etiqueta text-neutro-gris-texto">{formatearFechaRelativa(r.ultimaActualizacion)}</span> },
+  ]
+
+  return (
+    <div className="space-y-6">
+      <h1 className="text-h1 text-neutro-negro">Stock y Existencias</h1>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <TarjetaMetrica etiqueta="Stock Total" valor={formatearNumero(totalStock)} icono={Boxes} />
+        <TarjetaMetrica etiqueta="Bajo Stock" valor={bajoStock} icono={AlertTriangle} />
+        <TarjetaMetrica etiqueta="Sin Stock" valor={sinStock} icono={XCircle} />
+        <TarjetaMetrica etiqueta="Sobrestock" valor={sobrestock} icono={TrendingUp} />
+      </div>
+      <div className="flex gap-4">
+        <select value={filtroUbicacion} onChange={e => setFiltroUbicacion(e.target.value)} className="px-3 py-2 text-cuerpo bg-white border border-neutro-gris-borde rounded-boton">
+          <option value="">Todas las ubicaciones</option>
+          {OPCIONES_UBICACION.map(o => <option key={o.valor} value={o.valor}>{o.etiqueta}</option>)}
+        </select>
+        <select value={filtroEstado} onChange={e => setFiltroEstado(e.target.value)} className="px-3 py-2 text-cuerpo bg-white border border-neutro-gris-borde rounded-boton">
+          <option value="">Todos los estados</option>
+          <option value="normal">Normal</option><option value="bajo">Bajo Stock</option><option value="sin_stock">Sin Stock</option><option value="sobrestock">Sobrestock</option>
+        </select>
+      </div>
+      <Tabla columnas={columnas} datos={filtrados} />
+    </div>
+  )
+}

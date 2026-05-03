@@ -119,66 +119,66 @@ npm run lint     # Linter ESLint
 botica-demand-ml/
 ├── modelo-ml/                        # Servicio Python (Fase futura)
 │   ├── api/                          # Endpoints FastAPI
-│   ├── entrenamiento/                # Scripts de entrenamiento
-│   ├── modelos_guardados/            # Modelos serializados
-│   ├── datos/                        # Datasets
+│   ├── training/                     # Scripts de entrenamiento
+│   ├── saved_models/                 # Modelos serializados
+│   ├── data/                         # Datasets
 │   ├── notebooks/                    # Exploración
 │   ├── requirements.txt
 │   └── Dockerfile
 │
 ├── src/
-│   ├── activos/                      # Recursos estáticos
-│   │   ├── imagenes/
-│   │   ├── iconos/
-│   │   └── fuentes/
+│   ├── assets/                       # Recursos estáticos
+│   │   ├── images/
+│   │   ├── icons/
+│   │   └── fonts/
 │   │
-│   ├── componentes/
-│   │   ├── comunes/                  # Boton, Tarjeta, Modal, Tabla, Insignia,
+│   ├── components/
+│   │   ├── common/                   # Boton, Tarjeta, Modal, Tabla, Insignia,
 │   │   │                             # Alerta, Cargando, CampoBusqueda,
 │   │   │                             # ErrorFrontend, SinDatos
-│   │   ├── formularios/              # CampoTexto, CampoSeleccion, CampoFecha,
+│   │   ├── forms/                    # CampoTexto, CampoSeleccion, CampoFecha,
 │   │   │                             # CampoNumero, CampoTextoArea
-│   │   ├── graficas/                 # GraficaLinea, GraficaBarras, GraficaArea,
+│   │   ├── charts/                   # GraficaLinea, GraficaBarras, GraficaArea,
 │   │   │                             # GraficaRadar, TarjetaMetrica
-│   │   └── navegacion/               # BarraLateral, BarraSuperior,
+│   │   └── navigation/               # BarraLateral, BarraSuperior,
 │   │                                 # MigaDePan, MenuMovil
 │   │
-│   ├── paginas/
-│   │   ├── autenticacion/            # InicioSesion, RestablecerContrasena
-│   │   ├── portal-central/
+│   ├── pages/
+│   │   ├── auth/                     # InicioSesion, RestablecerContrasena
+│   │   ├── central-portal/
 │   │   │   ├── PaginaDashboardCentral.jsx
-│   │   │   ├── modulo-inventario/
-│   │   │   │   ├── catalogo/         # PaginaCatalogo, FormularioProducto, DetalleProducto
+│   │   │   ├── inventory-module/
+│   │   │   │   ├── catalog/          # PaginaCatalogo, FormularioProducto, DetalleProducto
 │   │   │   │   ├── stock/            # PaginaStock
-│   │   │   │   ├── lotes/            # PaginaLotes
-│   │   │   │   ├── movimientos/      # PaginaMovimientos
-│   │   │   │   ├── ajustes/          # PaginaAjustes
-│   │   │   │   └── reportes/         # PaginaReportes, ReporteKardex,
+│   │   │   │   ├── lots/             # PaginaLotes
+│   │   │   │   ├── movements/        # PaginaMovimientos
+│   │   │   │   ├── adjustments/      # PaginaAjustes
+│   │   │   │   └── reports/          # PaginaReportes, ReporteKardex,
 │   │   │   │                         # ReporteStockCritico, ReporteMovimientos
-│   │   │   ├── modulo-distribucion/  # PaginaDistribucion (placeholder)
-│   │   │   └── modulo-proveedores/   # PaginaProveedores (placeholder)
-│   │   ├── portal-boticas/           # PaginaStockBotica, PaginaLotesBotica,
+│   │   │   ├── distribution-module/  # PaginaDistribucion (placeholder)
+│   │   │   └── suppliers-module/     # PaginaProveedores (placeholder)
+│   │   ├── pharmacy-portal/          # PaginaStockBotica, PaginaLotesBotica,
 │   │   │                             # PaginaMovimientosBotica
-│   │   └── panel-ml/                 # PaginaPredicciones, PaginaAlertas,
+│   │   └── ml-panel/                 # PaginaPredicciones, PaginaAlertas,
 │   │                                 # PaginaRecomendaciones
 │   │
-│   ├── enrutamiento/
+│   ├── routing/
 │   │   ├── Rutas.jsx                 # Todas las rutas con layouts anidados
 │   │   └── RutaProtegida.jsx         # HOC de protección por rol
 │   │
-│   ├── estado/                       # Zustand stores
+│   ├── state/                        # Zustand stores
 │   │   ├── useAutenticacion.js
 │   │   ├── useInventario.js
 │   │   ├── useAlertas.js
 │   │   └── usePredicciones.js
 │   │
-│   ├── servicios/
+│   ├── services/
 │   │   ├── supabase/                 # cliente, productos, stock, lotes,
 │   │   │                             # movimientos, transferencias, predicciones,
 │   │   │                             # autenticacion — todos mock con setTimeout
-│   │   └── modelo-ml/                # clienteML, prediccion, metricas — mock
+│   │   └── ml-model/                 # clienteML, prediccion, metricas — mock
 │   │
-│   ├── datos-prueba/                 # Datos mock farmacéuticos peruanos
+│   ├── mock-data/                    # Datos mock farmacéuticos peruanos
 │   │   ├── productos.js              # 12 productos (Paracetamol, Amoxicilina...)
 │   │   ├── stock.js                  # 16 registros en 3 ubicaciones
 │   │   ├── lotes.js                  # 14 lotes con fechas variadas
@@ -189,14 +189,14 @@ botica-demand-ml/
 │   │   ├── boticas.js                # Droguería Central + 2 boticas Lima
 │   │   └── usuarios.js               # 3 usuarios (1 por rol)
 │   │
-│   ├── esquemas/                     # Validaciones Zod
+│   ├── schemas/                      # Validaciones Zod
 │   │   ├── productoEsquema.js
 │   │   ├── loteEsquema.js
 │   │   ├── movimientoEsquema.js
 │   │   ├── transferenciaEsquema.js
 │   │   └── ajusteEsquema.js
 │   │
-│   ├── utilidades/                   # Funciones puras
+│   ├── utilities/                    # Funciones puras
 │   │   ├── cn.js                     # clsx + tailwind-merge
 │   │   ├── formatearFecha.js         # date-fns con locale ES
 │   │   ├── formatearMoneda.js        # Soles peruanos (S/)
@@ -205,7 +205,7 @@ botica-demand-ml/
 │   │   ├── clasificarAlerta.js       # Estado de stock (normal/bajo/sin_stock/sobrestock)
 │   │   └── generarColorATC.js        # Colores por familia ATC
 │   │
-│   ├── constantes/                   # Valores fijos del dominio
+│   ├── constants/                    # Valores fijos del dominio
 │   │   ├── roles.js                  # ROLES, ETIQUETAS_ROLES
 │   │   ├── tiposMovimiento.js        # entrada/salida/ajuste/merma
 │   │   ├── clasificacionProducto.js  # OTC/receta/genérico
@@ -213,7 +213,7 @@ botica-demand-ml/
 │   │   ├── tiposAlerta.js            # quiebre/sobrestock/vencimiento/prediccion
 │   │   └── familiasATC.js            # 14 familias ATC con código y descripción
 │   │
-│   └── estilos/
+│   └── styles/
 │       ├── global.css                # Tailwind + variables CSS + scrollbar
 │       └── tema.js                   # Tokens de diseño exportados como JS
 │
