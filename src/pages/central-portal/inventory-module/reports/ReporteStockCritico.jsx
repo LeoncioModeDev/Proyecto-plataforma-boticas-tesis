@@ -5,11 +5,11 @@ import { productos } from '@/mock-data/productos'
 import { boticas } from '@/mock-data/boticas'
 
 export default function ReporteStockCritico() {
-  const criticos = stock.filter(s => s.stockDisponible < s.stockMinimo).map(s => ({
+  const criticos = stock.filter(s => s.cantidadDisponible < s.stockMinimo).map(s => ({
     ...s,
     nombreProducto: productos.find(p => p.id === s.productoId)?.nombreComercial || s.productoId,
     nombreUbicacion: boticas.find(b => b.id === s.ubicacionId)?.nombre || s.ubicacionId,
-    faltante: s.stockMinimo - s.stockDisponible,
+    faltante: s.stockMinimo - s.cantidadDisponible,
   })).sort((a, b) => b.faltante - a.faltante)
 
   return (
@@ -27,10 +27,10 @@ export default function ReporteStockCritico() {
                 <tr key={c.id} className="border-b border-neutro-gris-borde last:border-0 hover:bg-marca-claro transition-colors">
                   <td className="py-2.5 font-medium">{c.nombreProducto}</td>
                   <td className="py-2.5">{c.nombreUbicacion}</td>
-                  <td className="py-2.5 text-right">{c.stockDisponible}</td>
+                  <td className="py-2.5 text-right">{c.cantidadDisponible}</td>
                   <td className="py-2.5 text-right">{c.stockMinimo}</td>
                   <td className="py-2.5 text-right font-semibold text-estado-critico">{c.faltante}</td>
-                  <td className="py-2.5"><Insignia color={c.stockDisponible === 0 ? 'rojo' : 'amarillo'}>{c.stockDisponible === 0 ? 'Sin Stock' : 'Bajo Stock'}</Insignia></td>
+                  <td className="py-2.5"><Insignia color={c.cantidadDisponible === 0 ? 'rojo' : 'amarillo'}>{c.cantidadDisponible === 0 ? 'Sin Stock' : 'Bajo Stock'}</Insignia></td>
                 </tr>
               ))}
             </tbody>

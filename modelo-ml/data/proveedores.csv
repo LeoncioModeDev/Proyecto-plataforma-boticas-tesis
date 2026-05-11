@@ -1,0 +1,6 @@
+id,org_id,razon_social,tipo_identificacion,numero_identificacion,pais_origen,lead_time_dias,contacto,activo
+fcef20c3-3b4f-4b08-aab6-7235c731966b,f24329ad-c71d-4afc-9275-174a64919b33,Distribuidora Drokasa S.A.,ruc,20100123456,PE,3,,True
+20b60cde-b821-4132-a7a7-671372d62a23,f24329ad-c71d-4afc-9275-174a64919b33,Quicornac Distribuciones S.A.C.,ruc,20100789012,PE,5,,True
+d3c765a1-1b4f-4ecd-a9ea-7fce0fc12f53,f24329ad-c71d-4afc-9275-174a64919b33,Albis Pharma Perú S.A.,ruc,20100345678,PE,7,,True
+afc81de3-643a-4ca0-8784-172bdb2acccf,f24329ad-c71d-4afc-9275-174a64919b33,Farmacéutica Internacional S.A.,ruc,20100901234,PE,10,,True
+119b48de-7b10-4bbd-98ef-76f4c2a4f56a,f24329ad-c71d-4afc-9275-174a64919b33,Laboratorios Roche del Perú,ruc,20100567890,PE,14,,True

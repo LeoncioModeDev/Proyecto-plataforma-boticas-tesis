@@ -28,12 +28,12 @@ export default function PaginaAjustes() {
   const [modalAbierto, setModalAbierto] = useState(false)
   const [exito, setExito] = useState(false)
   const opcionesProducto = productos.map(p => ({ valor: p.id, etiqueta: p.nombreComercial }))
-  const ajustesYMermas = movimientos.filter(m => m.tipo === 'ajuste' || m.tipo === 'merma').sort((a, b) => new Date(b.fechaHora) - new Date(a.fechaHora))
+  const ajustesYMermas = movimientos.filter(m => m.tipo === 'ajuste' || m.tipo === 'merma').sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
   const { register, handleSubmit, formState: { errors }, reset } = useForm({ resolver: zodResolver(ajusteEsquema) })
   const alEnviar = (datos) => { console.log('[Mock] Ajuste:', datos); setExito(true); reset(); setTimeout(() => { setExito(false); setModalAbierto(false) }, 1500) }
 
   const columnas = [
-    { campo: 'fechaHora', encabezado: 'Fecha', render: (r) => formatearFechaHora(r.fechaHora) },
+    { campo: 'createdAt', encabezado: 'Fecha', render: (r) => formatearFechaHora(r.createdAt) },
     { campo: 'tipo', encabezado: 'Tipo', render: (r) => <Insignia color={COLORES_MOVIMIENTO[r.tipo]}>{ETIQUETAS_MOVIMIENTO[r.tipo]}</Insignia> },
     { campo: 'productoId', encabezado: 'Producto', render: (r) => productos.find(p => p.id === r.productoId)?.nombreComercial || r.productoId },
     { campo: 'cantidad', encabezado: 'Cantidad' },

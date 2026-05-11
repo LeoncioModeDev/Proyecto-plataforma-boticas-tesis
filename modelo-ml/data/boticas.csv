@@ -1,0 +1,7 @@
+id,org_id,nombre,ubigeo,distrito,activa
+c5960936-7bdf-41cf-973f-9d6375d3e16a,f24329ad-c71d-4afc-9275-174a64919b33,Droguería Central D&R,150101,Cercado de Lima,True
+7903f667-029c-41ae-b85e-992d943325b9,f24329ad-c71d-4afc-9275-174a64919b33,Botica D&R Miraflores,150122,Miraflores,True
+3c93df29-79fe-4e7c-beeb-7246124add00,f24329ad-c71d-4afc-9275-174a64919b33,Botica D&R San Borja,150131,San Borja,True
+c6a209ae-39ac-4b9d-8fe1-68708e30ccff,f24329ad-c71d-4afc-9275-174a64919b33,Botica D&R San Miguel,150136,San Miguel,True
+10fc9bf3-5ea6-4927-99d1-87df7f5934df,f24329ad-c71d-4afc-9275-174a64919b33,Botica D&R Surco,150141,Santiago de Surco,True
+372afa41-92c8-417d-a5a7-e6067cd1bed0,f24329ad-c71d-4afc-9275-174a64919b33,Botica D&R La Molina,150114,La Molina,True

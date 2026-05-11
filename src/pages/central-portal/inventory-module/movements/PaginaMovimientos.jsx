@@ -24,13 +24,13 @@ export default function PaginaMovimientos() {
   const [exito, setExito] = useState(false)
   const opcionesProducto = productos.map(p => ({ valor: p.id, etiqueta: p.nombreComercial }))
   const obtenerNombre = (id, lista, campo) => lista.find(i => i.id === id)?.[campo] || id
-  let filtrados = [...movimientos].sort((a, b) => new Date(b.fechaHora) - new Date(a.fechaHora))
+  let filtrados = [...movimientos].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
   if (filtroTipo) filtrados = filtrados.filter(m => m.tipo === filtroTipo)
   const { register, handleSubmit, formState: { errors }, reset } = useForm({ resolver: zodResolver(movimientoEsquema) })
   const alEnviar = (datos) => { console.log('[Mock] Movimiento:', datos); setExito(true); reset(); setTimeout(() => { setExito(false); setModalAbierto(false) }, 1500) }
 
   const columnas = [
-    { campo: 'fechaHora', encabezado: 'Fecha y Hora', render: (r) => formatearFechaHora(r.fechaHora) },
+    { campo: 'createdAt', encabezado: 'Fecha y Hora', render: (r) => formatearFechaHora(r.createdAt) },
     { campo: 'tipo', encabezado: 'Tipo', render: (r) => <Insignia color={COLORES_MOVIMIENTO[r.tipo]}>{ETIQUETAS_MOVIMIENTO[r.tipo]}</Insignia> },
     { campo: 'productoId', encabezado: 'Producto', render: (r) => obtenerNombre(r.productoId, productos, 'nombreComercial') },
     { campo: 'cantidad', encabezado: 'Cantidad', render: (r) => <span className={r.tipo === 'entrada' || r.tipo === 'ajuste' ? 'text-marca-principal font-semibold' : 'text-estado-critico font-semibold'}>{r.tipo === 'entrada' ? '+' : '-'}{Math.abs(r.cantidad)}</span> },

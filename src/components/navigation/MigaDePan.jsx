@@ -1,10 +1,6 @@
 import { Link, useLocation } from 'react-router-dom'
 import { ChevronRight } from 'lucide-react'
 
-/**
- * Breadcrumbs que muestran la jerarquía de navegación actual.
- */
-
 const NOMBRES_RUTA = {
   central: 'Portal Central',
   dashboard: 'Dashboard',
@@ -33,19 +29,19 @@ export default function MigaDePan() {
   if (segmentos.length === 0) return null
 
   return (
-    <nav className="flex items-center gap-1 text-secundario">
+    <nav className="flex items-center gap-1 text-xs sm:text-sm text-secundario overflow-hidden">
       {segmentos.map((segmento, i) => {
         const ruta = '/' + segmentos.slice(0, i + 1).join('/')
         const esUltimo = i === segmentos.length - 1
         const nombre = NOMBRES_RUTA[segmento] || segmento
 
         return (
-          <span key={ruta} className="flex items-center gap-1">
-            {i > 0 && <ChevronRight className="h-3 w-3 text-neutro-gris-texto" />}
+          <span key={ruta} className="flex items-center gap-0.5 sm:gap-1 whitespace-nowrap">
+            {i > 0 && <ChevronRight className="h-3 w-3 text-secundario" />}
             {esUltimo ? (
-              <span className="text-neutro-negro font-medium">{nombre}</span>
+              <span className="text-principal font-medium">{nombre}</span>
             ) : (
-              <Link to={ruta} className="text-neutro-gris-texto hover:text-marca-principal transition-colors">
+              <Link to={ruta} className="text-secundario hover:text-marca-principal transition-colors">
                 {nombre}
               </Link>
             )}

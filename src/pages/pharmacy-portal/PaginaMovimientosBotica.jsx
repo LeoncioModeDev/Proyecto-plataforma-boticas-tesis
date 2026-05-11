@@ -11,10 +11,10 @@ import { formatearFechaHora } from '@/utilities/formatearFecha'
  */
 export default function PaginaMovimientosBotica() {
   const { usuario } = useAutenticacion()
-  const datos = movimientos.filter(m => m.ubicacionId === usuario?.boticaId).sort((a, b) => new Date(b.fechaHora) - new Date(a.fechaHora))
+  const datos = movimientos.filter(m => m.ubicacionId === usuario?.boticaId).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
 
   const columnas = [
-    { campo: 'fechaHora', encabezado: 'Fecha', render: (r) => formatearFechaHora(r.fechaHora) },
+    { campo: 'createdAt', encabezado: 'Fecha', render: (r) => formatearFechaHora(r.createdAt) },
     { campo: 'tipo', encabezado: 'Tipo', render: (r) => <Insignia color={COLORES_MOVIMIENTO[r.tipo]}>{ETIQUETAS_MOVIMIENTO[r.tipo]}</Insignia> },
     { campo: 'productoId', encabezado: 'Producto', render: (r) => productos.find(p => p.id === r.productoId)?.nombreComercial || r.productoId },
     { campo: 'cantidad', encabezado: 'Cantidad' },

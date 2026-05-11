@@ -2,18 +2,14 @@
 import { X } from 'lucide-react'
 import { cn } from '@/utilities/cn'
 
-/**
- * Modal con overlay semitransparente.
- * Cierra con Escape y clic fuera del contenido.
- */
-
 const tamanos = {
-  sm: 'max-w-md',
+  sm: 'max-w-sm',
   md: 'max-w-lg',
   lg: 'max-w-2xl',
+  xl: 'max-w-4xl',
 }
 
-export default function Modal({ abierto, alCerrar, titulo, children, tamano = 'md' }) {
+export default function Modal({ abierto, alCerrar, titulo, children, tamano = 'md', className }) {
   const refContenido = useRef(null)
 
   useEffect(() => {
@@ -40,26 +36,27 @@ export default function Modal({ abierto, alCerrar, titulo, children, tamano = 'm
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
       onClick={manejarClicOverlay}
     >
       <div
         ref={refContenido}
         className={cn(
-          'bg-white rounded-tarjeta shadow-media w-full mx-4 max-h-[85vh] flex flex-col',
-          tamanos[tamano]
+          'bg-fondo-secundario rounded-lg shadow-estilo-lg w-full max-h-[90vh] flex flex-col',
+          tamanos[tamano],
+          className
         )}
       >
-        <div className="flex items-center justify-between px-6 py-4 border-b border-neutro-gris-borde">
-          <h2 className="text-h3 text-neutro-negro">{titulo}</h2>
+        <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-estilo shrink-0">
+          <h2 className="text-lg sm:text-h3 text-principal font-semibold">{titulo}</h2>
           <button
             onClick={alCerrar}
-            className="p-1 rounded hover:bg-neutro-blanco-suave text-neutro-gris-texto transition-colors"
+            className="p-1.5 rounded-md hover:bg-fondo text-secundario transition-colors"
           >
             <X className="h-5 w-5" />
           </button>
         </div>
-        <div className="p-6 overflow-y-auto">{children}</div>
+        <div className="p-4 sm:p-6 overflow-y-auto">{children}</div>
       </div>
     </div>
   )

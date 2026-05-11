@@ -1,6 +1,7 @@
 ﻿import { BrowserRouter } from 'react-router-dom'
 
 import Rutas from '@/routing/Rutas'
+import ProveedorTema from '@/components/common/ProveedorTema'
 
 /**
  * Componente raíz de la aplicación.
@@ -9,7 +10,9 @@ import Rutas from '@/routing/Rutas'
 function App() {
   return (
     <BrowserRouter>
-      <Rutas />
+      <ProveedorTema>
+        <Rutas />
+      </ProveedorTema>
     </BrowserRouter>
   )
 }

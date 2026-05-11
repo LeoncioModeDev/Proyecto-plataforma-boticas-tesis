@@ -1,6 +1,7 @@
-﻿import { Routes, Route, Navigate, Outlet } from 'react-router-dom'
+import { Routes, Route, Navigate, Outlet } from 'react-router-dom'
 
 import useAutenticacion from '@/state/useAutenticacion'
+import useBarraLateral from '@/state/useBarraLateral'
 import RutaProtegida from './RutaProtegida'
 import { ROLES } from '@/constants/roles'
 
@@ -24,8 +25,13 @@ import PaginaReportes from '@/pages/central-portal/inventory-module/reports/Pagi
 import ReporteKardex from '@/pages/central-portal/inventory-module/reports/ReporteKardex'
 import ReporteStockCritico from '@/pages/central-portal/inventory-module/reports/ReporteStockCritico'
 import ReporteMovimientos from '@/pages/central-portal/inventory-module/reports/ReporteMovimientos'
-import PaginaDistribucion from '@/pages/central-portal/distribution-module/PaginaDistribucion'
+import PaginaTransferencias from '@/pages/central-portal/distribution-module/PaginaDistribucion'
+import PaginaDespachos from '@/pages/central-portal/distribution-module/despachos/PaginaDespachos'
+import PaginaRecepciones from '@/pages/central-portal/distribution-module/recepciones/PaginaRecepciones'
+import PaginaHistorialDistribucion from '@/pages/central-portal/distribution-module/historial/PaginaHistorialDistribucion'
 import PaginaProveedores from '@/pages/central-portal/suppliers-module/PaginaProveedores'
+import PaginaNuevoProveedor from '@/pages/central-portal/suppliers-module/new/PaginaNuevoProveedor'
+import PaginaEditarProveedor from '@/pages/central-portal/suppliers-module/edit/PaginaEditarProveedor'
 
 // Portal Boticas
 import PaginaStockBotica from '@/pages/pharmacy-portal/PaginaStockBotica'
@@ -37,15 +43,14 @@ import PaginaPredicciones from '@/pages/ml-panel/PaginaPredicciones'
 import PaginaAlertas from '@/pages/ml-panel/PaginaAlertas'
 import PaginaRecomendaciones from '@/pages/ml-panel/PaginaRecomendaciones'
 
-/**
- * Layout principal con barra lateral y superior.
- */
 function LayoutPrincipal() {
+  const { colapsada } = useBarraLateral()
+
   return (
-    <div className="min-h-screen bg-neutro-blanco-suave">
+    <div className="min-h-screen bg-fondo transition-colors">
       <BarraLateral />
       <BarraSuperior />
-      <main className="ml-60 mt-14 p-8">
+      <main className={`mt-14 p-4 lg:p-8 transition-all duration-200 ${colapsada ? 'ml-16' : 'ml-56 lg:ml-60'}`}>
         <Outlet />
       </main>
     </div>
@@ -103,8 +108,13 @@ export default function Rutas() {
         <Route path="/central/inventario/reportes/kardex" element={<ReporteKardex />} />
         <Route path="/central/inventario/reportes/stock-critico" element={<ReporteStockCritico />} />
         <Route path="/central/inventario/reportes/movimientos" element={<ReporteMovimientos />} />
-        <Route path="/central/distribucion" element={<PaginaDistribucion />} />
+        <Route path="/central/distribucion/transferencias" element={<PaginaTransferencias />} />
+        <Route path="/central/distribucion/despachos" element={<PaginaDespachos />} />
+        <Route path="/central/distribucion/recepciones" element={<PaginaRecepciones />} />
+        <Route path="/central/distribucion/historial" element={<PaginaHistorialDistribucion />} />
         <Route path="/central/proveedores" element={<PaginaProveedores />} />
+        <Route path="/central/proveedores/nuevo" element={<PaginaNuevoProveedor />} />
+        <Route path="/central/proveedores/:id" element={<PaginaEditarProveedor />} />
       </Route>
 
       {/* Portal Boticas */}

@@ -1,8 +1,9 @@
 /**
  * Clasificaciones de productos farmacéuticos.
+ * Alineado con Arquitectura Lógica v4 — productos.clasificacion enum.
  */
 export const CLASIFICACION_PRODUCTO = {
-  OTC: 'otc',
+  OTC: 'OTC',
   RECETA: 'receta',
   GENERICO: 'generico',
 }

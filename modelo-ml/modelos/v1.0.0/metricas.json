@@ -1,0 +1,83 @@
+{
+  "version": "v1.0.0",
+  "algoritmo": "SARIMA+XGBoost",
+  "fecha_entrenamiento": "2026-05-11T02:04:31.754238+00:00",
+  "datos_desde": "2024-01-01",
+  "datos_hasta": "2026-03-16",
+  "mae": 9.406,
+  "rmse": 15.051,
+  "mape": 18.331,
+  "mape_objetivo": 20.0,
+  "fill_rate": 90.25,
+  "fill_rate_meta": 85.0,
+  "tasa_sobrestock": 64.0,
+  "series_totales": 150,
+  "series_entrenadas_sarima": 150,
+  "series_fallback_naive": 0,
+  "cumple_meta_acp": true,
+  "psi_baseline_jsonb": {
+    "cantidad_vendida": {
+      "bins": [
+        0,
+        5,
+        10,
+        20,
+        50,
+        100,
+        200,
+        500
+      ],
+      "frecuencias": [
+        0.0005172413793103448,
+        0.0034482758620689655,
+        0.044367816091954025,
+        0.3492528735632184,
+        0.4922988505747126,
+        0.10718390804597701,
+        0.0029310344827586207
+      ]
+    },
+    "precio_venta": {
+      "bins": [
+        0,
+        5,
+        10,
+        20,
+        50,
+        100,
+        500
+      ],
+      "frecuencias": [
+        0.8666666666666667,
+        0.1,
+        0.03333333333333333,
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    "stock_actual": {
+      "bins": [
+        0,
+        10,
+        20,
+        50,
+        100,
+        200,
+        500
+      ],
+      "frecuencias": [
+        0.0,
+        0.006711409395973154,
+        0.026845637583892617,
+        0.2550335570469799,
+        0.3624161073825503,
+        0.348993288590604
+      ]
+    }
+  },
+  "hash": "801bf862005eb6a5242d0b1780c50c93e91ae33ff9d3cca636211e414bef5241",
+  "modelo_version_id": "b17f05c2-955a-47f5-8695-83d205b29779",
+  "tiempo_entrenamiento_s": 10.103404521942139,
+  "tiempo_inferencia_por_sku_s": 0.06735603014628093
+}

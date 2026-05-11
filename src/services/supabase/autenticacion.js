@@ -2,7 +2,7 @@
 
 const LATENCIA = 300
 
-export async function iniciarSesion(email, password) {
+export async function iniciarSesion(email) {
   await new Promise(r => setTimeout(r, LATENCIA))
   const usuario = usuarios.find(u => u.email === email)
   if (usuario) return { usuario, error: null }

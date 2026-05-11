@@ -1,15 +1,15 @@
-﻿import { Bell, Search, User, LogOut } from 'lucide-react'
+import { Bell, Search, User, LogOut } from 'lucide-react'
 import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import useAutenticacion from '@/state/useAutenticacion'
 import useAlertas from '@/state/useAlertas'
+import useBarraLateral from '@/state/useBarraLateral'
 import MigaDePan from './MigaDePan'
+import ControlesInterfaz from '@/components/common/ControlesInterfaz'
 
-/**
- * Barra superior fija con título, búsqueda, notificaciones y avatar.
- */
 export default function BarraSuperior() {
   const { usuario, cerrarSesion } = useAutenticacion()
+  const { colapsada } = useBarraLateral()
   const contadorAlertas = useAlertas(s => s.obtenerContadorNoLeidas())
   const navegar = useNavigate()
   const [menuAbierto, setMenuAbierto] = useState(false)
@@ -24,21 +24,19 @@ export default function BarraSuperior() {
   }, [])
 
   return (
-    <header className="fixed top-0 right-0 left-60 h-14 bg-white border-b border-neutro-gris-borde flex items-center justify-between px-6 z-30">
-      {/* Breadcrumbs */}
+    <header className={`fixed top-0 right-0 h-14 bg-fondo-secundario border-b border-estilo flex items-center justify-between px-4 lg:px-6 z-30 transition-all duration-200 ${colapsada ? 'left-16' : 'left-56 lg:left-60'}`}>
       <MigaDePan />
 
-      {/* Lado derecho */}
-      <div className="flex items-center gap-3">
-        {/* Búsqueda decorativa */}
-        <div className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-neutro-blanco-suave rounded-boton border border-neutro-gris-borde w-56">
-          <Search className="h-4 w-4 text-neutro-gris-texto" />
-          <span className="text-secundario text-neutro-gris-texto">Buscar...</span>
+      <div className="flex items-center gap-2 lg:gap-3">
+        <div className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-fondo border border-estilo rounded-md w-44 lg:w-56">
+          <Search className="h-4 w-4 text-secundario" />
+          <span className="text-secundario text-sm">Buscar...</span>
         </div>
 
-        {/* Notificaciones */}
-        <button className="relative p-2 rounded-boton hover:bg-neutro-blanco-suave transition-colors">
-          <Bell className="h-[18px] w-[18px] text-neutro-negro-suave" />
+        <ControlesInterfaz />
+
+        <button className="relative p-2 rounded-md hover:bg-fondo transition-colors">
+          <Bell className="h-[18px] w-[18px] text-secundario" />
           {contadorAlertas > 0 && (
             <span className="absolute -top-0.5 -right-0.5 bg-estado-critico text-white text-[10px] font-bold rounded-full h-4 min-w-[16px] flex items-center justify-center px-1">
               {contadorAlertas}
@@ -46,26 +44,25 @@ export default function BarraSuperior() {
           )}
         </button>
 
-        {/* Avatar con dropdown */}
         <div className="relative" ref={refMenu}>
           <button
             onClick={() => setMenuAbierto(!menuAbierto)}
-            className="flex items-center gap-2 p-1.5 rounded-boton hover:bg-neutro-blanco-suave transition-colors"
+            className="flex items-center gap-2 p-1.5 rounded-md hover:bg-fondo transition-colors"
           >
-            <div className="w-8 h-8 bg-marca-claro rounded-full flex items-center justify-center">
+            <div className="w-8 h-8 bg-marca-claro dark:bg-marca-claro rounded-full flex items-center justify-center">
               <User className="h-4 w-4 text-marca-principal" />
             </div>
           </button>
 
           {menuAbierto && (
-            <div className="absolute right-0 mt-1 w-56 bg-white border border-neutro-gris-borde rounded-tarjeta shadow-media py-1 z-50">
-              <div className="px-4 py-3 border-b border-neutro-gris-borde">
-                <p className="text-cuerpo font-medium text-neutro-negro">{usuario?.nombre}</p>
-                <p className="text-etiqueta text-neutro-gris-texto">{usuario?.email}</p>
+            <div className="absolute right-0 mt-1 w-56 bg-fondo-secundario border border-estilo rounded-lg shadow-estilo-lg py-1 z-50">
+              <div className="px-4 py-3 border-b border-estilo">
+                <p className="text-cuerpo font-medium text-principal">{usuario?.nombre}</p>
+                <p className="text-etiqueta text-secundario">{usuario?.email}</p>
               </div>
               <button
                 onClick={() => { cerrarSesion(); navegar('/iniciar-sesion'); }}
-                className="flex items-center gap-2 w-full px-4 py-2.5 text-cuerpo text-neutro-negro-suave hover:bg-neutro-blanco-suave transition-colors"
+                className="flex items-center gap-2 w-full px-4 py-2.5 text-cuerpo text-secundario hover:bg-fondo transition-colors"
               >
                 <LogOut className="h-4 w-4" />
                 <span>Cerrar sesión</span>

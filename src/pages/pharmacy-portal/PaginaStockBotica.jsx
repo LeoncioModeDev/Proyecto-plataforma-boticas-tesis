@@ -12,6 +12,7 @@ export default function PaginaStockBotica() {
   const { usuario } = useAutenticacion()
   const datos = stock.filter(s => s.ubicacionId === usuario?.boticaId).map(s => ({
     ...s,
+    stockDisponible: s.cantidadDisponible,
     nombreProducto: productos.find(p => p.id === s.productoId)?.nombreComercial || s.productoId,
     estadoAlerta: clasificarAlerta(s),
   }))

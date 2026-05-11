@@ -1,17 +1,14 @@
-import { Menu, X } from 'lucide-react'
+import { Menu } from 'lucide-react'
 import { useState } from 'react'
 import BarraLateral from './BarraLateral'
 
-/**
- * Menú hamburguesa para pantallas móviles.
- */
 export default function MenuMovil() {
   const [abierto, setAbierto] = useState(false)
 
   return (
     <div className="lg:hidden">
-      <button onClick={() => setAbierto(true)} className="p-2 rounded hover:bg-neutro-blanco-suave">
-        <Menu className="h-5 w-5 text-neutro-negro-suave" />
+      <button onClick={() => setAbierto(true)} className="p-2 rounded-md hover:bg-fondo transition-colors">
+        <Menu className="h-5 w-5 text-principal" />
       </button>
 
       {abierto && (

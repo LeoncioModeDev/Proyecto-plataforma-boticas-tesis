@@ -18,7 +18,7 @@ export default function PaginaStock() {
     const producto = productos.find(p => p.id === s.productoId)
     const ubicacion = boticas.find(b => b.id === s.ubicacionId)
     const estadoAlerta = clasificarAlerta(s)
-    return { ...s, nombreProducto: producto?.nombreComercial || s.productoId, nombreUbicacion: ubicacion?.nombre || s.ubicacionId, estadoAlerta }
+    return { ...s, stockDisponible: s.cantidadDisponible, ultimaActualizacion: s.updatedAt, nombreProducto: producto?.nombreComercial || s.productoId, nombreUbicacion: ubicacion?.nombre || s.ubicacionId, estadoAlerta }
   })
 
   let filtrados = [...datosEnriquecidos]

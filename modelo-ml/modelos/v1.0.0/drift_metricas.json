@@ -1,0 +1,22 @@
+{
+  "modelo_version_id": "803cd5de-ed8b-4c27-921b-daf7f674245e",
+  "fecha_calculo": "2026-05-11T02:04:31.918135+00:00",
+  "ventana_dias": 28,
+  "psi_features": {
+    "cantidad_vendida": 0.0203,
+    "precio_venta": 0.0,
+    "stock_actual": 0.0
+  },
+  "psi_max": 0.0203,
+  "mape_rolling": 18.331,
+  "mape_baseline": 18.331,
+  "ratio_mape": 1.0,
+  "tendencia": "estable",
+  "requiere_retraining": false,
+  "alerta_critica": false,
+  "reentrenamiento_disparado": false,
+  "umbral_retrain_psi": 0.2,
+  "umbral_retrain_ratio_mape": 1.25,
+  "umbral_alerta_psi": 0.3,
+  "umbral_alerta_ratio_mape": 1.5
+}

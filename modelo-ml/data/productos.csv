@@ -1,0 +1,31 @@
+id,org_id,codigo_interno,nombre_comercial,principio_activo,forma_farmaceutica,concentracion,laboratorio,codigo_barras,categoria_terapeutica,clasificacion,requiere_receta,estado
+052e72f5-2bdb-4d64-b3cc-977e3db241c9,f24329ad-c71d-4afc-9275-174a64919b33,SKU-001,Paracetamol 500mg,Paracetamol,Tableta,500mg,Farmindustria,775123000001,Analgésico,OTC,False,activo
+d610d22c-8999-4740-bab7-f272260cae1f,f24329ad-c71d-4afc-9275-174a64919b33,SKU-002,Paracetamol 1g,Paracetamol,Tableta,1g,Farmindustria,775123000002,Analgésico,OTC,False,activo
+377243c7-e5da-434c-aa77-e46a5e4c4f70,f24329ad-c71d-4afc-9275-174a64919b33,SKU-003,Ibuprofeno 400mg,Ibuprofeno,Tableta,400mg,Medifarma,775123000003,Antiinflamatorio,OTC,False,activo
+262d0c61-ea05-44ba-99b8-e6536207de1d,f24329ad-c71d-4afc-9275-174a64919b33,SKU-004,Ibuprofeno 600mg,Ibuprofeno,Tableta,600mg,Medifarma,775123000004,Antiinflamatorio,receta,True,activo
+f1e2e2a5-68bc-4559-90fe-905395ebf20a,f24329ad-c71d-4afc-9275-174a64919b33,SKU-005,Diclofenaco 50mg,Diclofenaco,Tableta,50mg,Farmindustria,775123000005,Antiinflamatorio,OTC,False,activo
+ced00eaa-3575-4280-bb93-e84b44f60cc4,f24329ad-c71d-4afc-9275-174a64919b33,SKU-006,Dipirona 500mg,Metamizol,Tableta,500mg,Farmindustria,775123000006,Analgésico,OTC,False,activo
+3440eac0-ef56-43bf-bb77-a8c7e51f1389,f24329ad-c71d-4afc-9275-174a64919b33,SKU-007,Amoxicilina 500mg,Amoxicilina,Cápsula,500mg,GlaxoSmithKline,775123000007,Antibiótico,receta,True,activo
+c883f94a-b773-4d28-b0c4-88db3cdd9a23,f24329ad-c71d-4afc-9275-174a64919b33,SKU-008,Amoxicilina jarabe,Amoxicilina,Suspensión,250mg/5ml,GlaxoSmithKline,775123000008,Antibiótico,receta,True,activo
+a83062df-e2a8-4db3-8d31-d05302f234ed,f24329ad-c71d-4afc-9275-174a64919b33,SKU-009,Azitromicina 500mg,Azitromicina,Tableta,500mg,Pfizer,775123000009,Antibiótico,receta,True,activo
+c1acb4ed-c637-40fc-86fe-12fd0eeeead3,f24329ad-c71d-4afc-9275-174a64919b33,SKU-010,Ciprofloxacino 500mg,Ciprofloxacino,Tableta,500mg,Bayer,775123000010,Antibiótico,receta,True,activo
+2c7de6c8-caaa-4666-8a5e-fd192120f9e3,f24329ad-c71d-4afc-9275-174a64919b33,SKU-011,Metronidazol 500mg,Metronidazol,Tableta,500mg,Medifarma,775123000011,Antibiótico,receta,True,activo
+964a921d-246f-4fb4-a42e-77fccbff6d08,f24329ad-c71d-4afc-9275-174a64919b33,SKU-012,Loratadina 10mg,Loratadina,Tableta,10mg,Schering-Plough,775123000012,Antihistamínico,OTC,False,activo
+a5a2cc30-c797-4a85-9ae4-cfbcdae7d498,f24329ad-c71d-4afc-9275-174a64919b33,SKU-013,Loratadina jarabe,Loratadina,Jarabe,5mg/5ml,Schering-Plough,775123000013,Antihistamínico,OTC,False,activo
+12e7e3cb-6f24-4f9a-abc2-ddd1ddf20a77,f24329ad-c71d-4afc-9275-174a64919b33,SKU-014,Cetirizina 10mg,Cetirizina,Tableta,10mg,UCB Pharma,775123000014,Antihistamínico,OTC,False,activo
+80fa3ac8-2698-4e76-83d4-2d853c8cda93,f24329ad-c71d-4afc-9275-174a64919b33,SKU-015,Omeprazol 20mg,Omeprazol,Cápsula,20mg,AstraZeneca,775123000015,Antiulceroso,receta,True,activo
+7164d5f9-3626-47db-8b49-6ea56dd42272,f24329ad-c71d-4afc-9275-174a64919b33,SKU-016,Omeprazol 40mg,Omeprazol,Cápsula,40mg,AstraZeneca,775123000016,Antiulceroso,receta,True,activo
+1f613c8d-46da-474e-8233-1817e5dd9037,f24329ad-c71d-4afc-9275-174a64919b33,SKU-017,Ranitidina 150mg,Ranitidina,Tableta,150mg,Medifarma,775123000017,Antiulceroso,OTC,False,activo
+493c838e-65a2-4aee-98ca-e1dad26b391a,f24329ad-c71d-4afc-9275-174a64919b33,SKU-018,Metformina 850mg,Metformina,Tableta,850mg,Merck,775123000018,Antidiabético,receta,True,activo
+d0aec182-389e-418d-a0b3-e5493c8b8267,f24329ad-c71d-4afc-9275-174a64919b33,SKU-019,Enalapril 10mg,Enalapril,Tableta,10mg,AC Farma,775123000019,Antihipertensivo,receta,True,activo
+bbb6a6b5-2862-4641-8400-991c7d63fe9b,f24329ad-c71d-4afc-9275-174a64919b33,SKU-020,Losartán 50mg,Losartán,Tableta,50mg,AC Farma,775123000020,Antihipertensivo,receta,True,activo
+fd32e855-7a53-46d8-b6b0-b248bf882c34,f24329ad-c71d-4afc-9275-174a64919b33,SKU-021,Atorvastatina 20mg,Atorvastatina,Tableta,20mg,Pfizer,775123000021,Hipolipemiante,receta,True,activo
+b6b6a283-c34c-4221-a242-b5d50e7afbfe,f24329ad-c71d-4afc-9275-174a64919b33,SKU-022,Salbutamol inhalador,Salbutamol,Inhalador,100mcg,GlaxoSmithKline,775123000022,Broncodilatador,receta,True,activo
+b042f881-9c02-46f1-8c5b-c7da463d2406,f24329ad-c71d-4afc-9275-174a64919b33,SKU-023,Dexametasona 4mg,Dexametasona,Inyectable,4mg/ml,AC Farma,775123000023,Corticosteroide,receta,True,activo
+f435da16-45f9-465a-850a-2210de90b9be,f24329ad-c71d-4afc-9275-174a64919b33,SKU-024,Clotrimazol crema,Clotrimazol,Crema,1%,Bayer,775123000024,Antifúngico,OTC,False,activo
+d0f34ca8-a65a-4d11-8b66-8424bca08961,f24329ad-c71d-4afc-9275-174a64919b33,SKU-025,Vitamina C 500mg,Ácido ascórbico,Tableta,500mg,Farmindustria,775123000025,Vitamina,OTC,False,activo
+1e77fa2c-0209-4767-ae31-fb54cb12f50e,f24329ad-c71d-4afc-9275-174a64919b33,SKU-026,Complejo B,Vitaminas B,Tableta,Complejo,Roemmers,775123000026,Vitamina,OTC,False,activo
+ce9769c5-5763-474c-aaed-4d172d30fd10,f24329ad-c71d-4afc-9275-174a64919b33,SKU-027,Calcio + Vit D,Carbonato Ca,Tableta,500mg+200UI,Roemmers,775123000027,Suplemento,OTC,False,activo
+93098570-745e-478e-8730-6e1ad2021194,f24329ad-c71d-4afc-9275-174a64919b33,SKU-028,Sulfato Ferroso,Sulfato ferroso,Tableta,325mg,Farmindustria,775123000028,Suplemento,OTC,False,activo
+f0bdcc6f-9864-47e0-8924-5327ae436c53,f24329ad-c71d-4afc-9275-174a64919b33,SKU-029,Tramadol 50mg,Tramadol,Cápsula,50mg,AC Farma,775123000029,Analgésico,receta,True,activo
+67779ad5-19b9-49da-ab6b-7f4669e0ba01,f24329ad-c71d-4afc-9275-174a64919b33,SKU-030,Betahistina 16mg,Betahistina,Tableta,16mg,AC Farma,775123000030,Antivertiginoso,receta,True,activo

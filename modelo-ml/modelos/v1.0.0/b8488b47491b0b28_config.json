@@ -1,0 +1,36 @@
+{
+  "ruta_features": "data\\features_entrenamiento.csv",
+  "dir_modelos": "modelos",
+  "version": "v1.0.0",
+  "algoritmo": "SARIMA+XGBoost",
+  "semilla": 42,
+  "frecuencia": "W-MON",
+  "semanas_holdout": 8,
+  "horizonte_semanas": 12,
+  "semanas_minimas_serie": 12,
+  "ventas_minimas_serie": 10,
+  "sarima_order": [
+    1,
+    1,
+    1
+  ],
+  "sarima_seasonal_order": [
+    1,
+    1,
+    1,
+    26
+  ],
+  "xgb_n_estimators": 200,
+  "xgb_max_depth": 4,
+  "xgb_learning_rate": 0.05,
+  "xgb_subsample": 0.8,
+  "xgb_colsample_bytree": 0.8,
+  "mape_objetivo": 20.0,
+  "nivel_confianza": 0.9,
+  "ventana_dias_drift": 28,
+  "umbral_retrain_psi": 0.2,
+  "umbral_retrain_ratio_mape": 1.25,
+  "umbral_alerta_psi": 0.3,
+  "umbral_alerta_ratio_mape": 1.5,
+  "hash": "b8488b47491b0b286877ef40b34e6f1b7e2d035b25c70afb318de8e63c1e37e8"
+}
