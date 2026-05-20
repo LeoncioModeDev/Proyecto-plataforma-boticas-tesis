@@ -7,6 +7,7 @@ import Tabla from '@/components/common/Tabla'
 import Insignia from '@/components/common/Insignia'
 import Alerta from '@/components/common/Alerta'
 import Modal from '@/components/common/Modal'
+import TarjetaMetrica from '@/components/charts/TarjetaMetrica'
 import { proveedores as proveedoresMock } from '@/mock-data/proveedores'
 
 const ESTADOS_PROVEEDOR = {
@@ -159,33 +160,9 @@ export default function PaginaProveedores() {
       {exito && <Alerta tipo="exito" titulo={exito} className="mb-4" />}
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <Tarjeta className="p-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-marca-claro rounded-lg"><Package className="h-5 w-5 text-marca-principal" /></div>
-            <div>
-              <p className="text-2xl font-bold text-principal">{estadisticas.total}</p>
-              <p className="text-etiqueta text-secundario">Total Proveedores</p>
-            </div>
-          </div>
-        </Tarjeta>
-        <Tarjeta className="p-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-verde-claro rounded-lg"><ToggleRight className="h-5 w-5 text-estado-exito" /></div>
-            <div>
-              <p className="text-2xl font-bold text-principal">{estadisticas.activos}</p>
-              <p className="text-etiqueta text-secundario">Activos</p>
-            </div>
-          </div>
-        </Tarjeta>
-        <Tarjeta className="p-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-fondo rounded-lg"><ToggleLeft className="h-5 w-5 text-secundario" /></div>
-            <div>
-              <p className="text-2xl font-bold text-principal">{estadisticas.inactivos}</p>
-              <p className="text-etiqueta text-secundario">Inactivos</p>
-            </div>
-          </div>
-        </Tarjeta>
+        <TarjetaMetrica etiqueta="Total Proveedores" valor={estadisticas.total} icono={Package} />
+        <TarjetaMetrica etiqueta="Activos" valor={estadisticas.activos} icono={ToggleRight} />
+        <TarjetaMetrica etiqueta="Inactivos" valor={estadisticas.inactivos} icono={ToggleLeft} />
       </div>
 
       <div className="flex flex-col sm:flex-row gap-4">

@@ -55,6 +55,9 @@ El frontend está **completamente construido y funcional**. No hay conexión rea
 ### Diseño
 - Estilo **Microsoft Fluent** — plano, limpio
 - Paleta verde (`#107C41`) / blanco / negro
+- Soporte nativo para **Modo Oscuro** (Dark Mode) y temas personalizados a través de variables CSS globales (`--color-fondo`, `--color-texto`).
+- Sistema de diseño "Theme-aware" en Tailwind CSS (ej: `bg-fondo`, `text-principal`).
+- Soporte para vista de pantalla completa (Fullscreen).
 - Sidebar colapsable con highlight verde en módulo y sub-items activos
 - Header fijo con breadcrumbs y contador de alertas
 
@@ -377,6 +380,15 @@ botica-demand-ml/
 - Un componente por archivo
 - Todos los formularios con Zod + React Hook Form
 - FEFO obligatorio en lógica de sortie de lotes
+
+---
+
+## Consideraciones de Desarrollo Actuales
+
+- **No TypeScript**: El proyecto está construido enteramente en JavaScript (ES6+). No hay validación de tipos estática en tiempo de compilación.
+- **Sin Testing**: No se ha configurado ningún framework de pruebas (unitarias, integración o e2e).
+- **Sin CI/CD**: No existen hooks de pre-commit ni flujos de trabajo automatizados para despliegue por ahora.
+- **Estado Global**: Manejado principalmente con Zustand en el directorio `src/state/`. Configuraciones como el tema oscuro (`useTema.js`) son persistidas en el almacenamiento local.
 
 ---
 

@@ -19,13 +19,17 @@ import FormularioProducto from '@/pages/central-portal/inventory-module/catalog/
 import DetalleProducto from '@/pages/central-portal/inventory-module/catalog/DetalleProducto'
 import PaginaStock from '@/pages/central-portal/inventory-module/stock/PaginaStock'
 import PaginaLotes from '@/pages/central-portal/inventory-module/lots/PaginaLotes'
+import FormularioLote from '@/pages/central-portal/inventory-module/lots/FormularioLote'
 import PaginaMovimientos from '@/pages/central-portal/inventory-module/movements/PaginaMovimientos'
+import FormularioMovimiento from '@/pages/central-portal/inventory-module/movements/FormularioMovimiento'
 import PaginaAjustes from '@/pages/central-portal/inventory-module/adjustments/PaginaAjustes'
+import FormularioAjuste from '@/pages/central-portal/inventory-module/adjustments/FormularioAjuste'
 import PaginaReportes from '@/pages/central-portal/inventory-module/reports/PaginaReportes'
 import ReporteKardex from '@/pages/central-portal/inventory-module/reports/ReporteKardex'
 import ReporteStockCritico from '@/pages/central-portal/inventory-module/reports/ReporteStockCritico'
 import ReporteMovimientos from '@/pages/central-portal/inventory-module/reports/ReporteMovimientos'
 import PaginaTransferencias from '@/pages/central-portal/distribution-module/PaginaDistribucion'
+import FormularioTransferencia from '@/pages/central-portal/distribution-module/FormularioTransferencia'
 import PaginaDespachos from '@/pages/central-portal/distribution-module/despachos/PaginaDespachos'
 import PaginaRecepciones from '@/pages/central-portal/distribution-module/recepciones/PaginaRecepciones'
 import PaginaHistorialDistribucion from '@/pages/central-portal/distribution-module/historial/PaginaHistorialDistribucion'
@@ -102,13 +106,17 @@ export default function Rutas() {
         <Route path="/central/inventario/catalogo/:id" element={<DetalleProducto />} />
         <Route path="/central/inventario/stock" element={<PaginaStock />} />
         <Route path="/central/inventario/lotes" element={<PaginaLotes />} />
+        <Route path="/central/inventario/lotes/nuevo" element={<FormularioLote />} />
         <Route path="/central/inventario/movimientos" element={<PaginaMovimientos />} />
+        <Route path="/central/inventario/movimientos/nuevo" element={<FormularioMovimiento />} />
         <Route path="/central/inventario/ajustes" element={<PaginaAjustes />} />
+        <Route path="/central/inventario/ajustes/nuevo" element={<FormularioAjuste />} />
         <Route path="/central/inventario/reportes" element={<PaginaReportes />} />
         <Route path="/central/inventario/reportes/kardex" element={<ReporteKardex />} />
         <Route path="/central/inventario/reportes/stock-critico" element={<ReporteStockCritico />} />
         <Route path="/central/inventario/reportes/movimientos" element={<ReporteMovimientos />} />
         <Route path="/central/distribucion/transferencias" element={<PaginaTransferencias />} />
+        <Route path="/central/distribucion/transferencias/nueva" element={<FormularioTransferencia />} />
         <Route path="/central/distribucion/despachos" element={<PaginaDespachos />} />
         <Route path="/central/distribucion/recepciones" element={<PaginaRecepciones />} />
         <Route path="/central/distribucion/historial" element={<PaginaHistorialDistribucion />} />

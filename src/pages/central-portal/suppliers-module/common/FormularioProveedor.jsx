@@ -67,18 +67,18 @@ export default function FormularioProveedor({ proveedorEditar, alGuardar }) {
       </div>
       <Tarjeta>
         <form onSubmit={handleSubmit(alEnviar)} className="space-y-5">
-          <div className="border-b border-estilo pb-4 mb-4">
+          <div className="border-b border-neutro-gris-borde pb-4 mb-4">
             <h2 className="text-cuerpo font-semibold text-principal mb-4">Información del Proveedor</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <CampoTexto nombre="razonSocial" etiqueta="Razón Social" requerido register={register} error={errors.razonSocial?.message} />
               <CampoSeleccion nombre="tipoIdentificacion" etiqueta="Tipo de Identificación" opciones={OPCIONES_IDENTIFICACION} requerido register={register} error={errors.tipoIdentificacion?.message} />
               <CampoTexto nombre="numeroIdentificacion" etiqueta="Número de Identificación" requerido register={register} error={errors.numeroIdentificacion?.message} placeholder="Según tipo seleccionado" />
               <CampoSeleccion nombre="paisOrigen" etiqueta="País de Origen" opciones={OPCIONES_PAIS} requerido register={register} error={errors.paisOrigen?.message} />
             </div>
           </div>
-          <div className="border-b border-estilo pb-4 mb-4">
+          <div className="border-b border-neutro-gris-borde pb-4 mb-4">
             <h2 className="text-cuerpo font-semibold text-principal mb-4">Datos de Contacto</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <CampoTexto nombre="contacto" etiqueta="Nombre del Contacto" requerido register={register} error={errors.contacto?.message} />
               <CampoTexto nombre="telefono" etiqueta="Teléfono" requerido register={register} error={errors.telefono?.message} />
               <CampoTexto nombre="correo" etiqueta="Correo" tipo="email" requerido register={register} error={errors.correo?.message} />
@@ -89,12 +89,12 @@ export default function FormularioProveedor({ proveedorEditar, alGuardar }) {
           </div>
           <div>
             <h2 className="text-cuerpo font-semibold text-principal mb-4">Condiciones Comerciales</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <CampoNumero nombre="leadTimeDias" etiqueta="Lead Time (días)" requerido register={register} error={errors.leadTimeDias?.message} />
               <CampoSeleccion nombre="condicionesPago" etiqueta="Condiciones de Pago" opciones={OPCIONES_CONDICIONES_PAGO} requerido register={register} error={errors.condicionesPago?.message} />
             </div>
           </div>
-          <div className="flex justify-end gap-3 pt-4 border-t border-estilo">
+          <div className="flex justify-end gap-3 pt-4 border-t border-neutro-gris-borde">
             <Boton variante="secundario" onClick={() => navegar('/central/proveedores')}>Cancelar</Boton>
             <Boton tipo="submit" variante="primario" icono={Save} cargando={isSubmitting}>
               {esEdicion ? 'Actualizar' : 'Crear'} Proveedor

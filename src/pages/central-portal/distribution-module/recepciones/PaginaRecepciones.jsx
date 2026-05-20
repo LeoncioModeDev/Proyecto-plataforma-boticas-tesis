@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { PackageCheck, Truck, Clock, CheckCircle, Package } from 'lucide-react'
 import Tabla from '@/components/common/Tabla'
 import Insignia from '@/components/common/Insignia'
+import TarjetaMetrica from '@/components/charts/TarjetaMetrica'
 import { transferencias as transferenciasMock } from '@/mock-data/transferencias'
 import { boticas } from '@/mock-data/boticas'
 import { usuarios } from '@/mock-data/usuarios'
@@ -55,24 +56,9 @@ export default function PaginaRecepciones() {
       <h1 className="text-h1 text-neutro-negro">Recepciones</h1>
 
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-        <div className="bg-fondo p-4 rounded-tarjeta border border-estilo">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-marca-claro rounded-lg"><Truck className="h-5 w-5 text-marca-principal" /></div>
-            <div><p className="text-2xl font-bold text-principal">{estadisticas.total}</p><p className="text-etiqueta text-secundario">Total</p></div>
-          </div>
-        </div>
-        <div className="bg-fondo p-4 rounded-tarjeta border border-estilo">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-amarillo-claro rounded-lg"><Clock className="h-5 w-5 text-amarillo" /></div>
-            <div><p className="text-2xl font-bold text-principal">{estadisticas.pendientes}</p><p className="text-etiqueta text-secundario">Por Recibir</p></div>
-          </div>
-        </div>
-        <div className="bg-fondo p-4 rounded-tarjeta border border-estilo">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-verde-claro rounded-lg"><CheckCircle className="h-5 w-5 text-estado-exito" /></div>
-            <div><p className="text-2xl font-bold text-principal">{estadisticas.recibidos}</p><p className="text-etiqueta text-secundario">Recibidos</p></div>
-          </div>
-        </div>
+        <TarjetaMetrica etiqueta="Total" valor={estadisticas.total} icono={Truck} />
+        <TarjetaMetrica etiqueta="Por Recibir" valor={estadisticas.pendientes} icono={Clock} />
+        <TarjetaMetrica etiqueta="Recibidos" valor={estadisticas.recibidos} icono={CheckCircle} />
       </div>
 
       <div className="flex gap-4">

@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { FileText, Truck, PackageCheck, XCircle } from 'lucide-react'
 import Tabla from '@/components/common/Tabla'
 import Insignia from '@/components/common/Insignia'
+import TarjetaMetrica from '@/components/charts/TarjetaMetrica'
 import { transferencias as transferenciasMock } from '@/mock-data/transferencias'
 import { boticas } from '@/mock-data/boticas'
 import { formatearFechaCorta } from '@/utilities/formatearFecha'
@@ -70,30 +71,10 @@ export default function PaginaHistorialDistribucion() {
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="bg-fondo p-4 rounded-tarjeta border border-estilo">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-marca-claro rounded-lg"><FileText className="h-5 w-5 text-marca-principal" /></div>
-            <div><p className="text-2xl font-bold text-principal">{historial.length}</p><p className="text-etiqueta text-secundario">Total</p></div>
-          </div>
-        </div>
-        <div className="bg-fondo p-4 rounded-tarjeta border border-estilo">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-verde-claro rounded-lg"><PackageCheck className="h-5 w-5 text-estado-exito" /></div>
-            <div><p className="text-2xl font-bold text-principal">{historial.filter(t => t.estado === 'recibida').length}</p><p className="text-etiqueta text-secundario">Recibidas</p></div>
-          </div>
-        </div>
-        <div className="bg-fondo p-4 rounded-tarjeta border border-estilo">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-azul-claro rounded-lg"><Truck className="h-5 w-5 text-azul" /></div>
-            <div><p className="text-2xl font-bold text-principal">{historial.filter(t => t.estado === 'en_transito').length}</p><p className="text-etiqueta text-secundario">En Tránsito</p></div>
-          </div>
-        </div>
-        <div className="bg-fondo p-4 rounded-tarjeta border border-estilo">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-rojo-claro rounded-lg"><XCircle className="h-5 w-5 text-estado-critico" /></div>
-            <div><p className="text-2xl font-bold text-principal">{historial.filter(t => t.estado === 'creada').length}</p><p className="text-etiqueta text-secundario">Creadas</p></div>
-          </div>
-        </div>
+        <TarjetaMetrica etiqueta="Total" valor={historial.length} icono={FileText} />
+        <TarjetaMetrica etiqueta="Recibidas" valor={historial.filter(t => t.estado === 'recibida').length} icono={PackageCheck} />
+        <TarjetaMetrica etiqueta="En Tránsito" valor={historial.filter(t => t.estado === 'en_transito').length} icono={Truck} />
+        <TarjetaMetrica etiqueta="Creadas" valor={historial.filter(t => t.estado === 'creada').length} icono={XCircle} />
       </div>
 
       <Tabla columnas={columnas} datos={filtrado} />

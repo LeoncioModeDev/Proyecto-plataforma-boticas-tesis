@@ -33,7 +33,12 @@ export default function MigaDePan() {
       {segmentos.map((segmento, i) => {
         const ruta = '/' + segmentos.slice(0, i + 1).join('/')
         const esUltimo = i === segmentos.length - 1
-        const nombre = NOMBRES_RUTA[segmento] || segmento
+        const nombrePorDefecto = segmento
+          .split('-')
+          .map(palabra => palabra.charAt(0).toUpperCase() + palabra.slice(1))
+          .join(' ')
+          
+        const nombre = NOMBRES_RUTA[segmento] || nombrePorDefecto
 
         return (
           <span key={ruta} className="flex items-center gap-0.5 sm:gap-1 whitespace-nowrap">

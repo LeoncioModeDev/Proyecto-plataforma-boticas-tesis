@@ -4,6 +4,7 @@ import Boton from '@/components/common/Boton'
 import Tabla from '@/components/common/Tabla'
 import Insignia from '@/components/common/Insignia'
 import Modal from '@/components/common/Modal'
+import TarjetaMetrica from '@/components/charts/TarjetaMetrica'
 import { boticas } from '@/mock-data/boticas'
 import { formatearFechaCorta } from '@/utilities/formatearFecha'
 
@@ -61,30 +62,10 @@ export default function PaginaDespachos() {
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="bg-fondo p-4 rounded-tarjeta border border-estilo">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-marca-claro rounded-lg"><Truck className="h-5 w-5 text-marca-principal" /></div>
-            <div><p className="text-2xl font-bold text-principal">{estadisticas.total}</p><p className="text-etiqueta text-secundario">Total</p></div>
-          </div>
-        </div>
-        <div className="bg-fondo p-4 rounded-tarjeta border border-estilo">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-azul-claro rounded-lg"><Clock className="h-5 w-5 text-azul" /></div>
-            <div><p className="text-2xl font-bold text-principal">{estadisticas.programados}</p><p className="text-etiqueta text-secundario">Programados</p></div>
-          </div>
-        </div>
-        <div className="bg-fondo p-4 rounded-tarjeta border border-estilo">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-amarillo-claro rounded-lg"><MapPin className="h-5 w-5 text-amarillo" /></div>
-            <div><p className="text-2xl font-bold text-principal">{estadisticas.enRuta}</p><p className="text-etiqueta text-secundario">En Ruta</p></div>
-          </div>
-        </div>
-        <div className="bg-fondo p-4 rounded-tarjeta border border-estilo">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-verde-claro rounded-lg"><CheckCircle className="h-5 w-5 text-estado-exito" /></div>
-            <div><p className="text-2xl font-bold text-principal">{estadisticas.entregados}</p><p className="text-etiqueta text-secundario">Entregados</p></div>
-          </div>
-        </div>
+        <TarjetaMetrica etiqueta="Total" valor={estadisticas.total} icono={Truck} />
+        <TarjetaMetrica etiqueta="Programados" valor={estadisticas.programados} icono={Clock} />
+        <TarjetaMetrica etiqueta="En Ruta" valor={estadisticas.enRuta} icono={MapPin} />
+        <TarjetaMetrica etiqueta="Entregados" valor={estadisticas.entregados} icono={CheckCircle} />
       </div>
 
       <div className="flex gap-4">
