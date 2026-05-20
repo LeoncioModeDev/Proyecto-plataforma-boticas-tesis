@@ -28,10 +28,15 @@ El frontend está **completamente construido y funcional**. No hay conexión rea
 - **Dashboard** — KPI cards, gráfica de tendencia de stock, alertas recientes y predicciones destacadas
 - **Módulo de Inventario** con 6 submódulos:
   - **Catálogo de Productos** — con codigoInterno, categoriaTerapeutica, requiereReceta, clasificación OTC/receta/generico
+    - Formulario de alta/edición con validaciones Zod
+    - Vista de detalle del producto
   - **Stock** — por ubicación con alertas visuales (verde/amarillo/rojo)
   - **Lotes** — ordenados por FEFO, colores de urgencia por vencimiento
+    - Formulario de alta de lote
   - **Movimientos** — historial inmutable con tipos: entrada/salida/ajuste/merma/devolucion
+    - Formulario de movimiento (entrada/salida)
   - **Ajustes** — ajustes positivos/negativos y mermas
+    - Formulario de ajuste de inventario
   - **Reportes** — Kardex, Stock Crítico, Resumen de Movimientos
 - **Módulo de Distribución** completo:
   - **Transferencias** — crear, enviar, recibir, estados: creada/en_transito/recibida
@@ -190,8 +195,9 @@ botica-demand-ml/
 │   │   │   ├── PaginaDashboardCentral.jsx
 │   │   │   │
 │   │   │   ├── distribution-module/
-│   │   │   │   ├── PaginaDistribucion.jsx
-│   │   │   │   ├── despachos/
+│   │   │   │   │   ├── FormularioTransferencia.jsx
+│   │   │   │   │   ├── PaginaDistribucion.jsx
+│   │   │   │   │   ├── despachos/
 │   │   │   │   │   └── PaginaDespachos.jsx
 │   │   │   │   ├── historial/
 │   │   │   │   │   └── PaginaHistorialDistribucion.jsx
@@ -200,14 +206,17 @@ botica-demand-ml/
 │   │   │   │
 │   │   │   ├── inventory-module/
 │   │   │   │   ├── adjustments/
-│   │   │   │   │   ��── PaginaAjustes.jsx
+│   │   │   │   │   ├── FormularioAjuste.jsx
+│   │   │   │   │   └── PaginaAjustes.jsx
 │   │   │   │   ├── catalog/
 │   │   │   │   │   ├── DetalleProducto.jsx
 │   │   │   │   │   ├── FormularioProducto.jsx
 │   │   │   │   │   └── PaginaCatalogo.jsx
 │   │   │   │   ├── lots/
+│   │   │   │   │   ├── FormularioLote.jsx
 │   │   │   │   │   └── PaginaLotes.jsx
 │   │   │   │   ├── movements/
+│   │   │   │   │   ├── FormularioMovimiento.jsx
 │   │   │   │   │   └── PaginaMovimientos.jsx
 │   │   │   │   ├── reports/
 │   │   │   │   │   ├── PaginaReportes.jsx
@@ -345,15 +354,19 @@ botica-demand-ml/
 | `/central/inventario/catalogo` | Catálogo Productos | Admin Central |
 | `/central/inventario/catalogo/nuevo` | Nuevo Producto | Admin Central |
 | `/central/inventario/catalogo/:id` | Detalle Producto | Admin Central |
+| `/central/inventario/catalogo/:id/editar` | Editar Producto | Admin Central |
 | `/central/inventario/stock` | Stock | Admin Central |
 | `/central/inventario/lotes` | Lotes | Admin Central |
+| `/central/inventario/lotes/nuevo` | Nuevo Lote | Admin Central |
 | `/central/inventario/movimientos` | Movimientos | Admin Central |
+| `/central/inventario/movimientos/nuevo` | Nuevo Movimiento | Admin Central |
 | `/central/inventario/ajustes` | Ajustes | Admin Central |
 | `/central/inventario/reportes` | Reportes | Admin Central |
 | `/central/inventario/reportes/kardex` | Kardex | Admin Central |
 | `/central/inventario/reportes/stock-critico` | Stock Crítico | Admin Central |
 | `/central/inventario/reportes/movimientos` | Resumen Movimientos | Admin Central |
 | `/central/distribucion/transferencias` | Transferencias | Admin Central |
+| `/central/distribucion/transferencias/nueva` | Nueva Transferencia | Admin Central |
 | `/central/distribucion/despachos` | Despachos | Admin Central |
 | `/central/distribucion/recepciones` | Recepciones | Admin Central |
 | `/central/distribucion/historial` | Historial | Admin Central |

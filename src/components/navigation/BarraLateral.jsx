@@ -58,7 +58,7 @@ function ItemModulo({ item, colapsada }) {
     return (
       <NavLink
         to={item.ruta}
-        className={({ isActive }) => cn(
+        className={() => cn(
           'flex items-center justify-center p-2 rounded-md transition-all mb-0.5',
           tieneSubActivo || estaActivo
             ? 'bg-marca-claro text-marca-principal font-medium'
