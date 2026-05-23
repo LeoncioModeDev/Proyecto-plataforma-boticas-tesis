@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Plus, Edit, ToggleLeft, ToggleRight, Package, Mail, Phone, Clock, Building } from 'lucide-react'
 import Boton from '@/components/common/Boton'
-import Tarjeta from '@/components/common/Tarjeta'
 import Tabla from '@/components/common/Tabla'
 import Insignia from '@/components/common/Insignia'
 import Alerta from '@/components/common/Alerta'
@@ -149,7 +148,7 @@ export default function PaginaProveedores() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-h1 text-neutro-negro">Proveedores</h1>
+          <h1 className="text-h1 text-principal">Proveedores</h1>
           <p className="text-cuerpo text-secundario mt-1">Gestión de proveedores y condiciones comerciales</p>
         </div>
         <Boton variante="primario" icono={Plus} onClick={() => navegar('/central/proveedores/nuevo')}>

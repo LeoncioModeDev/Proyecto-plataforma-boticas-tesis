@@ -28,7 +28,7 @@ import PaginaReportes from '@/pages/central-portal/inventory-module/reports/Pagi
 import ReporteKardex from '@/pages/central-portal/inventory-module/reports/ReporteKardex'
 import ReporteStockCritico from '@/pages/central-portal/inventory-module/reports/ReporteStockCritico'
 import ReporteMovimientos from '@/pages/central-portal/inventory-module/reports/ReporteMovimientos'
-import PaginaTransferencias from '@/pages/central-portal/distribution-module/PaginaDistribucion'
+import PaginaTransferencias from '@/pages/central-portal/distribution-module/PaginaTransferencias'
 import FormularioTransferencia from '@/pages/central-portal/distribution-module/FormularioTransferencia'
 import PaginaDespachos from '@/pages/central-portal/distribution-module/despachos/PaginaDespachos'
 import PaginaRecepciones from '@/pages/central-portal/distribution-module/recepciones/PaginaRecepciones'
@@ -36,16 +36,44 @@ import PaginaHistorialDistribucion from '@/pages/central-portal/distribution-mod
 import PaginaProveedores from '@/pages/central-portal/suppliers-module/PaginaProveedores'
 import PaginaNuevoProveedor from '@/pages/central-portal/suppliers-module/new/PaginaNuevoProveedor'
 import PaginaEditarProveedor from '@/pages/central-portal/suppliers-module/edit/PaginaEditarProveedor'
+import PaginaUsuarios from '@/pages/central-portal/administration-module/PaginaUsuarios'
+import PaginaBoticas from '@/pages/central-portal/administration-module/PaginaBoticas'
+import PaginaConfiguracionGeneral from '@/pages/central-portal/administration-module/PaginaConfiguracionGeneral'
+import PaginaAuditoria from '@/pages/central-portal/administration-module/PaginaAuditoria'
+import PaginaNuevaBotica from '@/pages/central-portal/administration-module/new/PaginaNuevaBotica'
+import PaginaEditarBotica from '@/pages/central-portal/administration-module/edit/PaginaEditarBotica'
 
 // Portal Boticas
 import PaginaStockBotica from '@/pages/pharmacy-portal/PaginaStockBotica'
 import PaginaLotesBotica from '@/pages/pharmacy-portal/PaginaLotesBotica'
 import PaginaMovimientosBotica from '@/pages/pharmacy-portal/PaginaMovimientosBotica'
+import PaginaDashboardBotica from '@/pages/pharmacy-portal/PaginaDashboardBotica'
+import PaginaTransferenciasBotica from '@/pages/pharmacy-portal/PaginaTransferenciasBotica'
+import PaginaAlertasBotica from '@/pages/pharmacy-portal/PaginaAlertasBotica'
+import PaginaMLBotica from '@/pages/pharmacy-portal/PaginaMLBotica'
+import PaginaRecomendacionesBotica from '@/pages/pharmacy-portal/PaginaRecomendacionesBotica'
+
+// Portal Operaciones
+import PaginaDashboardOperaciones from '@/pages/operations-portal/PaginaDashboardOperaciones'
+import PaginaCatalogoOperaciones from '@/pages/operations-portal/inventory-module/PaginaCatalogo'
+import PaginaStockOperaciones from '@/pages/operations-portal/inventory-module/PaginaStock'
+import PaginaLotesOperaciones from '@/pages/operations-portal/inventory-module/PaginaLotes'
+import PaginaMovimientosOperaciones from '@/pages/operations-portal/inventory-module/PaginaMovimientos'
+import PaginaAjustesOperaciones from '@/pages/operations-portal/inventory-module/PaginaAjustes'
+import PaginaReportesOperaciones from '@/pages/operations-portal/inventory-module/PaginaReportes'
+import PaginaTransferenciasOperaciones from '@/pages/operations-portal/distribution-module/PaginaTransferencias'
+import PaginaRedistribucionOperaciones from '@/pages/operations-portal/distribution-module/PaginaRedistribucion'
+import PaginaProveedoresOperaciones from '@/pages/operations-portal/suppliers-module/PaginaProveedores'
+import PaginaOrdenesCompraOperaciones from '@/pages/operations-portal/suppliers-module/PaginaOrdenesCompra'
+import PaginaAlertasOperaciones from '@/pages/operations-portal/PaginaAlertas'
+import PaginaPrediccionesOperaciones from '@/pages/operations-portal/ml-module/PaginaPredicciones'
+import PaginaAlertasDemandaOperaciones from '@/pages/operations-portal/ml-module/PaginaAlertasDemanda'
 
 // Panel ML
 import PaginaPredicciones from '@/pages/ml-panel/PaginaPredicciones'
 import PaginaAlertas from '@/pages/ml-panel/PaginaAlertas'
 import PaginaRecomendaciones from '@/pages/ml-panel/PaginaRecomendaciones'
+import PaginaMonitoreoML from '@/pages/ml-panel/PaginaMonitoreoML'
 
 function LayoutPrincipal() {
   const { colapsada } = useBarraLateral()
@@ -72,9 +100,9 @@ function RedirectPorRol() {
     case ROLES.ADMIN_CENTRAL:
       return <Navigate to="/central/dashboard" replace />
     case ROLES.OPERADOR_DROGUERIA:
-      return <Navigate to="/botica/stock" replace />
+      return <Navigate to="/operaciones/dashboard" replace />
     case ROLES.VISOR_BOTICA:
-      return <Navigate to="/ml/predicciones" replace />
+      return <Navigate to="/botica/dashboard" replace />
     default:
       return <Navigate to="/iniciar-sesion" replace />
   }
@@ -93,17 +121,17 @@ export default function Rutas() {
       <Route path="/iniciar-sesion" element={<InicioSesion />} />
       <Route path="/restablecer-contrasena" element={<RestablecerContrasena />} />
 
-      {/* Rutas protegidas con layout */}
+      {/* Portal Central (solo ADMIN) */}
       <Route element={
         <RutaProtegida rolesPermitidos={[ROLES.ADMIN_CENTRAL]}>
           <LayoutPrincipal />
         </RutaProtegida>
       }>
-        {/* Portal Central */}
         <Route path="/central/dashboard" element={<PaginaDashboardCentral />} />
         <Route path="/central/inventario/catalogo" element={<PaginaCatalogo />} />
         <Route path="/central/inventario/catalogo/nuevo" element={<FormularioProducto />} />
         <Route path="/central/inventario/catalogo/:id" element={<DetalleProducto />} />
+        <Route path="/central/inventario/catalogo/:id/editar" element={<FormularioProducto />} />
         <Route path="/central/inventario/stock" element={<PaginaStock />} />
         <Route path="/central/inventario/lotes" element={<PaginaLotes />} />
         <Route path="/central/inventario/lotes/nuevo" element={<FormularioLote />} />
@@ -123,28 +151,62 @@ export default function Rutas() {
         <Route path="/central/proveedores" element={<PaginaProveedores />} />
         <Route path="/central/proveedores/nuevo" element={<PaginaNuevoProveedor />} />
         <Route path="/central/proveedores/:id" element={<PaginaEditarProveedor />} />
+        <Route path="/central/administracion/usuarios" element={<PaginaUsuarios />} />
+        <Route path="/central/administracion/boticas" element={<PaginaBoticas />} />
+        <Route path="/central/administracion/boticas/nueva" element={<PaginaNuevaBotica />} />
+        <Route path="/central/administracion/boticas/:id" element={<PaginaEditarBotica />} />
+        <Route path="/central/administracion/configuracion" element={<PaginaConfiguracionGeneral />} />
+        <Route path="/central/administracion/auditoria" element={<PaginaAuditoria />} />
       </Route>
 
-      {/* Portal Boticas */}
+      {/* Portal Botica (VISOR + ADMIN) */}
       <Route element={
-        <RutaProtegida rolesPermitidos={[ROLES.OPERADOR_DROGUERIA, ROLES.ADMIN_CENTRAL]}>
+        <RutaProtegida rolesPermitidos={[ROLES.VISOR_BOTICA, ROLES.ADMIN_CENTRAL]}>
           <LayoutPrincipal />
         </RutaProtegida>
       }>
         <Route path="/botica/stock" element={<PaginaStockBotica />} />
         <Route path="/botica/lotes" element={<PaginaLotesBotica />} />
         <Route path="/botica/movimientos" element={<PaginaMovimientosBotica />} />
+        <Route path="/botica/dashboard" element={<PaginaDashboardBotica />} />
+        <Route path="/botica/transferencias" element={<PaginaTransferenciasBotica />} />
+        <Route path="/botica/alertas" element={<PaginaAlertasBotica />} />
+        <Route path="/botica/ml" element={<PaginaMLBotica />} />
+        <Route path="/botica/recomendaciones" element={<PaginaRecomendacionesBotica />} />
       </Route>
 
-      {/* Panel ML */}
+      {/* Portal Operaciones (solo OPERADOR) */}
       <Route element={
-        <RutaProtegida rolesPermitidos={[ROLES.VISOR_BOTICA, ROLES.ADMIN_CENTRAL]}>
+        <RutaProtegida rolesPermitidos={[ROLES.OPERADOR_DROGUERIA, ROLES.ADMIN_CENTRAL]}>
+          <LayoutPrincipal />
+        </RutaProtegida>
+      }>
+        <Route path="/operaciones/dashboard" element={<PaginaDashboardOperaciones />} />
+        <Route path="/operaciones/inventario/catalogo" element={<PaginaCatalogoOperaciones />} />
+        <Route path="/operaciones/inventario/stock" element={<PaginaStockOperaciones />} />
+        <Route path="/operaciones/inventario/lotes" element={<PaginaLotesOperaciones />} />
+        <Route path="/operaciones/inventario/movimientos" element={<PaginaMovimientosOperaciones />} />
+        <Route path="/operaciones/inventario/ajustes" element={<PaginaAjustesOperaciones />} />
+        <Route path="/operaciones/inventario/reportes" element={<PaginaReportesOperaciones />} />
+        <Route path="/operaciones/distribucion/transferencias" element={<PaginaTransferenciasOperaciones />} />
+        <Route path="/operaciones/distribucion/redistribucion" element={<PaginaRedistribucionOperaciones />} />
+        <Route path="/operaciones/proveedores" element={<PaginaProveedoresOperaciones />} />
+        <Route path="/operaciones/ordenes-compra" element={<PaginaOrdenesCompraOperaciones />} />
+        <Route path="/operaciones/alertas" element={<PaginaAlertasOperaciones />} />
+        <Route path="/operaciones/ml/predicciones" element={<PaginaPrediccionesOperaciones />} />
+        <Route path="/operaciones/ml/alertas-demanda" element={<PaginaAlertasDemandaOperaciones />} />
+      </Route>
+
+      {/* Panel ML (solo ADMIN) */}
+      <Route element={
+        <RutaProtegida rolesPermitidos={[ROLES.ADMIN_CENTRAL]}>
           <LayoutPrincipal />
         </RutaProtegida>
       }>
         <Route path="/ml/predicciones" element={<PaginaPredicciones />} />
         <Route path="/ml/alertas" element={<PaginaAlertas />} />
         <Route path="/ml/recomendaciones" element={<PaginaRecomendaciones />} />
+        <Route path="/ml/monitoreo" element={<PaginaMonitoreoML />} />
       </Route>
 
       {/* Ruta no encontrada */}

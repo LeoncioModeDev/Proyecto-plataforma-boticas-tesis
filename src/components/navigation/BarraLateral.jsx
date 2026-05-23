@@ -4,12 +4,13 @@ import {
   LayoutDashboard, Package, Boxes, CalendarClock, ArrowLeftRight,
   ClipboardList, FileBarChart, Truck, Users, BrainCircuit, Bell,
   Lightbulb, LogOut, ChevronLeft, ChevronRight, PackageCheck,
-  ChevronDown, ChevronUp,
+  ChevronDown, ChevronUp, Settings, Building2, Activity,
 } from 'lucide-react'
 import { cn } from '@/utilities/cn'
 import useAutenticacion from '@/state/useAutenticacion'
 import useBarraLateral from '@/state/useBarraLateral'
 import { ROLES, ETIQUETAS_ROLES } from '@/constants/roles'
+import { obtenerPortal } from '@/utilities/permisos'
 
 const itemsNavegacion = {
   [ROLES.ADMIN_CENTRAL]: [
@@ -31,21 +32,52 @@ const itemsNavegacion = {
     { tipo: 'modulo', etiqueta: 'Proveedores', icono: Users, ruta: '/central/proveedores', subItems: [
       { etiqueta: 'Listar Proveedores', ruta: '/central/proveedores', icono: Users },
     ]},
+    { tipo: 'modulo', etiqueta: 'Administración', icono: Settings, ruta: '/central/administracion/usuarios', subItems: [
+      { etiqueta: 'Usuarios', ruta: '/central/administracion/usuarios', icono: Users },
+      { etiqueta: 'Boticas', ruta: '/central/administracion/boticas', icono: Building2 },
+      { etiqueta: 'Configuración', ruta: '/central/administracion/configuracion', icono: Settings },
+      { etiqueta: 'Auditoría', ruta: '/central/administracion/auditoria', icono: ClipboardList },
+    ]},
     { tipo: 'modulo', etiqueta: 'Machine Learning', icono: BrainCircuit, ruta: '/ml/predicciones', subItems: [
       { etiqueta: 'Predicciones', ruta: '/ml/predicciones', icono: BrainCircuit },
       { etiqueta: 'Alertas ML', ruta: '/ml/alertas', icono: Bell },
       { etiqueta: 'Recomendaciones', ruta: '/ml/recomendaciones', icono: Lightbulb },
+      { etiqueta: 'Monitoreo', ruta: '/ml/monitoreo', icono: Activity },
     ]},
   ],
   [ROLES.OPERADOR_DROGUERIA]: [
+    { etiqueta: 'Dashboard', ruta: '/operaciones/dashboard', icono: LayoutDashboard },
+    { tipo: 'modulo', etiqueta: 'Inventario', icono: Package, ruta: '/operaciones/inventario/catalogo', subItems: [
+      { etiqueta: 'Catálogo', ruta: '/operaciones/inventario/catalogo', icono: Package },
+      { etiqueta: 'Stock Global', ruta: '/operaciones/inventario/stock', icono: Boxes },
+      { etiqueta: 'Lotes', ruta: '/operaciones/inventario/lotes', icono: CalendarClock },
+      { etiqueta: 'Movimientos', ruta: '/operaciones/inventario/movimientos', icono: ArrowLeftRight },
+      { etiqueta: 'Ajustes', ruta: '/operaciones/inventario/ajustes', icono: ClipboardList },
+      { etiqueta: 'Reportes', ruta: '/operaciones/inventario/reportes', icono: FileBarChart },
+    ]},
+    { tipo: 'modulo', etiqueta: 'Distribución', icono: Truck, ruta: '/operaciones/distribucion/transferencias', subItems: [
+      { etiqueta: 'Transferencias', ruta: '/operaciones/distribucion/transferencias', icono: ArrowLeftRight },
+      { etiqueta: 'Redistribución', ruta: '/operaciones/distribucion/redistribucion', icono: Truck },
+    ]},
+    { tipo: 'modulo', etiqueta: 'Proveedores', icono: Users, ruta: '/operaciones/proveedores', subItems: [
+      { etiqueta: 'Listar Proveedores', ruta: '/operaciones/proveedores', icono: Users },
+      { etiqueta: 'Órdenes de Compra', ruta: '/operaciones/ordenes-compra', icono: ClipboardList },
+    ]},
+    { etiqueta: 'Alertas', ruta: '/operaciones/alertas', icono: Bell },
+    { tipo: 'modulo', etiqueta: 'Machine Learning', icono: BrainCircuit, ruta: '/operaciones/ml/predicciones', subItems: [
+      { etiqueta: 'Predicciones', ruta: '/operaciones/ml/predicciones', icono: BrainCircuit },
+      { etiqueta: 'Alertas Demanda', ruta: '/operaciones/ml/alertas-demanda', icono: Bell },
+    ]},
+  ],
+  [ROLES.VISOR_BOTICA]: [
+    { etiqueta: 'Dashboard', ruta: '/botica/dashboard', icono: LayoutDashboard },
     { etiqueta: 'Stock', ruta: '/botica/stock', icono: Boxes },
     { etiqueta: 'Lotes', ruta: '/botica/lotes', icono: CalendarClock },
     { etiqueta: 'Movimientos', ruta: '/botica/movimientos', icono: ArrowLeftRight },
-  ],
-  [ROLES.VISOR_BOTICA]: [
-    { etiqueta: 'Predicciones', ruta: '/ml/predicciones', icono: BrainCircuit },
-    { etiqueta: 'Alertas', ruta: '/ml/alertas', icono: Bell },
-    { etiqueta: 'Recomendaciones', ruta: '/ml/recomendaciones', icono: Lightbulb },
+    { etiqueta: 'Transferencias', ruta: '/botica/transferencias', icono: Truck },
+    { etiqueta: 'Alertas', ruta: '/botica/alertas', icono: Bell },
+    { etiqueta: 'Pronóstico ML', ruta: '/botica/ml', icono: BrainCircuit },
+    { etiqueta: 'Recomendaciones', ruta: '/botica/recomendaciones', icono: Lightbulb },
   ],
 }
 
@@ -117,6 +149,13 @@ export default function BarraLateral() {
   if (!usuario) return null
 
   const items = itemsNavegacion[usuario.rol] || []
+  const portal = obtenerPortal(usuario)
+  const NOMBRES_PORTAL = {
+    central: 'Portal Central',
+    operaciones: 'Portal Operaciones',
+    botica: 'Portal Botica',
+  }
+  const nombrePortal = NOMBRES_PORTAL[portal] || 'Botica ML'
 
   const manejarCerrarSesion = () => {
     cerrarSesion()
@@ -132,7 +171,7 @@ export default function BarraLateral() {
         <div className="w-8 h-8 bg-marca-principal rounded-lg flex items-center justify-center shrink-0">
           <span className="text-white font-bold text-sm">B</span>
         </div>
-        {!colapsada && <span className="font-semibold text-principal text-cuerpo truncate">Botica ML</span>}
+        {!colapsada && <span className="font-semibold text-principal text-cuerpo truncate">{nombrePortal}</span>}
       </div>
 
       <nav className="flex-1 overflow-y-auto py-3 px-2 space-y-1">

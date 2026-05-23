@@ -1,7 +1,3 @@
-/**
- * Datos de prueba: Ubicaciones (droguería y boticas).
- * Alineado con Arquitectura Lógica v4 — tabla boticas.
- */
 export const boticas = [
   {
     id: 'ub-001',
@@ -13,6 +9,8 @@ export const boticas = [
     telefono: '01-4567890',
     encargado: 'Carlos Mendoza',
     activa: true,
+    organizacionId: 'org-001',
+    createdAt: '2024-01-01T08:00:00',
   },
   {
     id: 'ub-002',
@@ -24,6 +22,8 @@ export const boticas = [
     telefono: '01-2345678',
     encargado: 'Ana Torres',
     activa: true,
+    organizacionId: 'org-001',
+    createdAt: '2024-01-15T09:00:00',
   },
   {
     id: 'ub-003',
@@ -35,6 +35,34 @@ export const boticas = [
     telefono: '01-3456789',
     encargado: 'Luis García',
     activa: true,
+    organizacionId: 'org-001',
+    createdAt: '2024-02-01T10:00:00',
+  },
+  {
+    id: 'ub-004',
+    nombre: 'Botica Surco',
+    tipo: 'botica',
+    ubigeo: '150114',
+    distrito: 'Santiago de Surco',
+    direccion: 'Av. El Derby 567, Surco',
+    telefono: '01-5678901',
+    encargado: 'Rosa Fernández',
+    activa: false,
+    organizacionId: 'org-001',
+    createdAt: '2024-03-01T08:30:00',
+  },
+  {
+    id: 'ub-005',
+    nombre: 'Botica Los Olivos',
+    tipo: 'botica',
+    ubigeo: '150116',
+    distrito: 'Los Olivos',
+    direccion: 'Av. Universitaria 3456, Los Olivos',
+    telefono: '01-6789012',
+    encargado: null,
+    activa: true,
+    organizacionId: 'org-001',
+    createdAt: '2024-04-10T11:00:00',
   },
 ]
 
@@ -42,3 +70,8 @@ export const OPCIONES_UBICACION = boticas.map(b => ({
   valor: b.id,
   etiqueta: b.nombre,
 }))
+
+export const OPCIONES_TIPO_BOTICA = [
+  { valor: 'drogueria', etiqueta: 'Droguería' },
+  { valor: 'botica', etiqueta: 'Botica' },
+]

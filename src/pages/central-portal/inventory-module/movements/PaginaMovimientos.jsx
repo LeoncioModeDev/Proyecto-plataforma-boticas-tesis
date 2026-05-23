@@ -24,18 +24,18 @@ export default function PaginaMovimientos() {
     { campo: 'productoId', encabezado: 'Producto', render: (r) => obtenerNombre(r.productoId, productos, 'nombreComercial') },
     { campo: 'cantidad', encabezado: 'Cantidad', render: (r) => <span className={r.tipo === 'entrada' || r.tipo === 'ajuste' ? 'text-marca-principal font-semibold' : 'text-estado-critico font-semibold'}>{r.tipo === 'entrada' ? '+' : '-'}{Math.abs(r.cantidad)}</span> },
     { campo: 'ubicacionId', encabezado: 'Ubicación', render: (r) => obtenerNombre(r.ubicacionId, boticas, 'nombre') },
-    { campo: 'motivo', encabezado: 'Motivo', render: (r) => <span className="text-etiqueta text-neutro-gris-texto line-clamp-1 max-w-[200px]">{r.motivo}</span> },
+    { campo: 'motivo', encabezado: 'Motivo', render: (r) => <span className="text-etiqueta text-secundario line-clamp-1 max-w-[200px]">{r.motivo}</span> },
     { campo: 'usuarioId', encabezado: 'Usuario', render: (r) => obtenerNombre(r.usuarioId, usuarios, 'nombre') },
   ]
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-h1 text-neutro-negro">Movimientos de Inventario</h1>
+        <h1 className="text-h1 text-principal">Movimientos de Inventario</h1>
         <Boton variante="primario" icono={Plus} onClick={() => navegar('/central/inventario/movimientos/nuevo')}>Registrar movimiento</Boton>
       </div>
       <div className="flex gap-4">
-        <select value={filtroTipo} onChange={e => setFiltroTipo(e.target.value)} className="px-3 py-2 text-cuerpo bg-white border border-neutro-gris-borde rounded-boton">
+        <select value={filtroTipo} onChange={e => setFiltroTipo(e.target.value)} className="px-3 py-2 text-cuerpo bg-fondo border border-estilo rounded-md">
           <option value="">Todos los tipos</option>
           {OPCIONES_MOVIMIENTO.map(o => <option key={o.valor} value={o.valor}>{o.etiqueta}</option>)}
         </select>

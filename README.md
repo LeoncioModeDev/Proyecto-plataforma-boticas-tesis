@@ -15,21 +15,25 @@ El frontend está **completamente construido y funcional**. No hay conexión rea
 ## Características implementadas
 
 ### Sistema de autenticación y roles
+
 - Pantalla de login con selector de rol para modo desarrollo
-- Tres roles con vistas completamente distintas:
-  - **Admin Central** — acceso completo al portal central, portal boticas y panel ML
-  - **Operador de Droguería** — acceso solo al portal de su botica
-  - **Visor de Botica** — acceso solo al panel ML (predicciones, alertas, recomendaciones)
-- Protección de rutas por rol con `RutaProtegida`
+- Tres roles con portales y permisos completamente distintos:
+  - **Admin Central** (`ADMIN_CENTRAL`) — acceso total a los 3 portales (Central, Operaciones, Botica) y Panel ML completo
+  - **Operador Logístico Central** (`OPERADOR_DROGUERIA`) — acceso al Portal Operaciones (dashboard, inventario, distribución, proveedores, boticas) y Panel ML (predicciones, alertas, recomendaciones). Sin restricción RLS.
+  - **Visor Local de Botica** (`VISOR_BOTICA`) — acceso solo al Portal Botica con datos filtrados por RLS a su botica asignada
+- Protección de rutas por rol con `RutaProtegia` (4 grupos: Portal Operaciones, Admin Central, Portal Botica, Panel ML)
 - Redirección automática desde `/` según el rol activo
-- Sidebar con highlight visual indicando módulo activo y sub-items activos
+- Sidebar con branding dinámico ("Portal Central", "Portal Operaciones", "Portal Botica") según el rol
+- Breadcrumbs contextuales por portal en `MigaDePan.jsx`
+- Sistema de permisos RLS centralizado en `src/utilities/permisos.js`
 
 ### Portal Central (Admin Central)
+
 - **Dashboard** — KPI cards, gráfica de tendencia de stock, alertas recientes y predicciones destacadas
 - **Módulo de Inventario** con 6 submódulos:
   - **Catálogo de Productos** — con codigoInterno, categoriaTerapeutica, requiereReceta, clasificación OTC/receta/generico
     - Formulario de alta/edición con validaciones Zod
-    - Vista de detalle del producto
+    - Vista de detalle del producto con botón editar y desactivar/activar
   - **Stock** — por ubicación con alertas visuales (verde/amarillo/rojo)
   - **Lotes** — ordenados por FEFO, colores de urgencia por vencimiento
     - Formulario de alta de lote
@@ -46,25 +50,46 @@ El frontend está **completamente construido y funcional**. No hay conexión rea
 - **Módulo de Proveedores**:
   - Listado con identificación polimórfica (RUC/NIT/Tax ID/VAT por país)
   - Formulario con tipo de identificación, país de origen, lead time
+  - Activar/desactivar proveedor con confirmación
+- **Módulo de Administración** (solo Admin Central):
+  - **Usuarios** — CRUD completo: tabla con búsqueda y filtros, modal crear/editar, toggle activo/inactivo
+  - **Boticas** — CRUD completo: gestión de ubicaciones tipo droguería/botica, modal crear/editar, toggle activa/inactiva
+  - **Configuración General** — nombre del sistema, zona horaria, idioma, formato fecha, alertas, seguridad
+  - **Auditoría** — tabla de logs con búsqueda, filtros por nivel/acción y modal de detalle
+  - **Configuración Avanzada** — API endpoints, ML service, base de datos, cache, rate limiting, feature flags
 
-### Portal Boticas (Operador de Droguería)
-- Stock filtrado por la botica asignada
-- Lotes activos con orden FEFO
-- Movimientos de la botica
+### Portal Operaciones (Admin Central + Operador Logístico)
 
-### Panel ML (Visor de Botica / Admin Central)
-- **Predicciones** — serie histórica + pronóstico a 3 meses con intervalos de confianza
-- **Alertas** — diferenciadas: regla (quiebre/vencimiento/sobrestock) vs predictiva (modelo)
-- **Recomendaciones** — cantidad sugerida y justificación
+- Dashboard, Inventario, Distribución, Proveedores y Boticas (lectura global sin RLS)
+- Panel ML con Predicciones, Alertas ML y Recomendaciones
+
+### Portal Botica (Visor Local + Admin Central + Operador Logístico)
+
+- **Dashboard** — métricas y resumen de la botica
+- **Stock** — filtrado por botica asignada
+- **Lotes** — activos con orden FEFO, filtrados por botica
+- **Movimientos** — historial de la botica
+- **Transferencias** — entrantes y salientes de la botica
+- **Alertas** — alertas activas de la botica
+- **Pronóstico ML** — predicciones filtradas por botica
+- **Recomendaciones** — sugerencias de compra filtradas por botica
+
+### Panel ML (segmentado por privilegio)
+
+- **Predicciones** — serie histórica + pronóstico a 3 meses con intervalos de confianza (Admin + Operador)
+- **Alertas** — diferenciadas: regla (quiebre/vencimiento/sobrestock) vs predictiva (modelo) (Admin + Operador)
+- **Recomendaciones** — cantidad sugerida y justificación (Admin + Operador)
+- **Monitoreo ML** — monitoreo técnico del modelo, solo Admin Central
 
 ### Diseño
+
 - Estilo **Microsoft Fluent** — plano, limpio
 - Paleta verde (`#107C41`) / blanco / negro
 - Soporte nativo para **Modo Oscuro** (Dark Mode) y temas personalizados a través de variables CSS globales (`--color-fondo`, `--color-texto`).
 - Sistema de diseño "Theme-aware" en Tailwind CSS (ej: `bg-fondo`, `text-principal`).
 - Soporte para vista de pantalla completa (Fullscreen).
-- Sidebar colapsable con highlight verde en módulo y sub-items activos
-- Header fijo con breadcrumbs y contador de alertas
+- Sidebar colapsable con highlight verde en módulo y sub-items activos, branding dinámico por portal
+- Header fijo con breadcrumbs dinámicos, icono de portal contextual y contador de alertas
 
 ---
 
@@ -88,8 +113,8 @@ npm run dev
 ```bash
 npm run dev      # Servidor de desarrollo con HMR
 npm run build    # Build de producción
-npm run preview # Preview del build
-npm run lint    # Linter ESLint
+npm run preview  # Preview del build
+npm run lint     # Linter ESLint
 ```
 
 ---
@@ -111,9 +136,11 @@ npm run lint    # Linter ESLint
 | Iconos | Lucide React |
 
 ### Backend (no conectado — Fase 2+)
+
 - **Supabase** — PostgreSQL, Auth JWT, Row-Level Security, Edge Functions, Realtime
 
 ### Servicio ML (no conectado — Fase 3+)
+
 - **Python 3.10+** con **FastAPI**, SARIMA, XGBoost, scikit-learn
 
 ---
@@ -171,20 +198,21 @@ botica-demand-ml/
 │   │   └── tiposMovimiento.js
 │   │
 │   ├── mock-data/
-│   │   ├── alertas.js            # Alertas con tipoOrigen
+│   │   ├── alertas.js
+│   │   ├── auditoria.js          # Logs de auditoría (nuevo)
 │   │   ├── boticas.js            # ubigeo, distrito
-│   │   ├── lotes.js              # ubicacionTipo
+│   │   ├── lotes.js
 │   │   ├── metricasKPI.js
-│   │   ├── movimientos.js        # devolucion
-│   │   ├── organizaciones.js      # tipoIdentificacion polimórfico
-│   │   ├── predicciones.js      # Serie histórica + forecasts
-│   │   ├── precios.js           # precioVenta, precioCosto
-│   │   ├── productos.js          # codigoInterno, categoriaTerapeutica
-│   │   ├── proveedores.js        # leadTimeDias, paisOrigen
-│   │   ├── stock.js            # cantidadDisponible
-│   │   ├── transferencias.js   # boticaId, estados
-│   │   ├── ubigeos.js           # Seed INEI
-│   │   └── usuarios.js
+│   │   ├── movimientos.js
+│   │   ├── organizaciones.js
+│   │   ├── predicciones.js
+│   │   ├── precios.js
+│   │   ├── productos.js
+│   │   ├── proveedores.js
+│   │   ├── stock.js
+│   │   ├── transferencias.js
+│   │   ├── ubigeos.js
+│   │   └── usuarios.js           # 8 usuarios con datos expandidos
 │   │
 │   ├── pages/
 │   │   ├── auth/
@@ -194,10 +222,17 @@ botica-demand-ml/
 │   │   ├── central-portal/
 │   │   │   ├── PaginaDashboardCentral.jsx
 │   │   │   │
+│   │   │   ├── administration-module/    # Nuevo — solo Admin Central
+│   │   │   │   ├── PaginaUsuarios.jsx
+│   │   │   │   ├── PaginaBoticas.jsx
+│   │   │   │   ├── PaginaConfiguracionGeneral.jsx
+│   │   │   │   ├── PaginaAuditoria.jsx
+│   │   │   │   └── PaginaConfiguracionAvanzada.jsx
+│   │   │   │
 │   │   │   ├── distribution-module/
-│   │   │   │   │   ├── FormularioTransferencia.jsx
-│   │   │   │   │   ├── PaginaDistribucion.jsx
-│   │   │   │   │   ├── despachos/
+│   │   │   │   ├── FormularioTransferencia.jsx
+│   │   │   │   ├── PaginaTransferencias.jsx
+│   │   │   │   ├── despachos/
 │   │   │   │   │   └── PaginaDespachos.jsx
 │   │   │   │   ├── historial/
 │   │   │   │   │   └── PaginaHistorialDistribucion.jsx
@@ -237,13 +272,19 @@ botica-demand-ml/
 │   │   │
 │   │   ├── ml-panel/
 │   │   │   ├── PaginaAlertas.jsx
+│   │   │   ├── PaginaMonitoreoML.jsx      # Nuevo — solo Admin Central
 │   │   │   ├── PaginaPredicciones.jsx
 │   │   │   └── PaginaRecomendaciones.jsx
 │   │   │
-│   │   └── pharmacy-portal/
+│   │   └── pharmacy-portal/              # Portal Botica — 8 páginas
+│   │       ├── PaginaAlertasBotica.jsx
+│   │       ├── PaginaDashboardBotica.jsx
 │   │       ├── PaginaLotesBotica.jsx
+│   │       ├── PaginaMLBotica.jsx
 │   │       ├── PaginaMovimientosBotica.jsx
-│   │       └── PaginaStockBotica.jsx
+│   │       ├── PaginaRecomendacionesBotica.jsx
+│   │       ├── PaginaStockBotica.jsx
+│   │       └── PaginaTransferenciasBotica.jsx
 │   │
 │   ├── routing/
 │   │   ├── RutaProtegida.jsx
@@ -292,7 +333,8 @@ botica-demand-ml/
 │       ├── cn.js
 │       ├── formatearFecha.js
 │       ├── formatearMoneda.js
-│       └── generarColorATC.js
+│       ├── generarColorATC.js
+│       └── permisos.js                  # Nuevo — RLS y permisos centralizados
 │
 ├── public/
 │   └── index.html
@@ -321,14 +363,16 @@ botica-demand-ml/
 | `organizaciones.js` | `tipoIdentificacion` (ruc/nit/tax_id/vat), `numeroIdentificacion`, `paisOrigen` |
 | `proveedores.js` | `tipoIdentificacion`, `numeroIdentificacion`, `paisOrigen`, `leadTimeDias` |
 | `productos.js` | `codigoInterno`, `categoriaTerapeutica`, `requiereReceta`, `clasificacion` (OTC/receta/generico) |
-| `boticas.js` | `ubigeo` (char(6)), `distrito` |
+| `boticas.js` | `ubigeo` (char(6)), `distrito`, `tipo` (drogueria/botica) |
 | `stock.js` | `ubicacionTipo` (drogueria/botica), `cantidadDisponible` |
 | `lotes.js` | `ubicacionTipo`, `fechaVencimiento` |
-| `movimientos.js` | `ubicacionTipo`, `transferenciaId`, `tipo` (entrada/salida/ajuste/merma/**devolucion**) |
+| `movimientos.js` | `ubicacionTipo`, `transferenciaId`, `tipo` (entrada/salida/ajuste/merma/devolucion) |
 | `transferencias.js` | `boticaId`, `estado` (creada/en_transito/recibida), `items[]` |
 | `precios.js` | `precioVenta`, `precioCosto` |
 | `alertas.js` | `tipoOrigen` (regla/modelo), `tipo` (+prediccion), `resuelta` |
 | `ubigeos.js` | Seed INEI con `codigo`, `distrito`, `provincia`, `departamento` |
+| `usuarios.js` | `rol` (admin_central/operador_drogueria/visor_botica), `boticaId` |
+| `auditoria.js` | `nivel` (info/advertencia/error), `accion`, `entidad`, `detalle` |
 
 ---
 
@@ -336,8 +380,8 @@ botica-demand-ml/
 
 | Archivo | Enum |
 |---|---|
-| `tiposMovimiento.js` | `entrada`, `salida`, `ajuste`, `merma`, **`devolucion`** |
-| `tiposAlerta.js` | `quiebre`, `sobrestock`, `vencimiento`, **`prediccion`** |
+| `tiposMovimiento.js` | `entrada`, `salida`, `ajuste`, `merma`, `devolucion` |
+| `tiposAlerta.js` | `quiebre`, `sobrestock`, `vencimiento`, `prediccion` |
 | `clasificacionProducto.js` | `OTC`, `receta`, `generico` |
 | `estadoProducto.js` | `activo`, `inactivo`, `descontinuado` |
 | `roles.js` | `ADMIN_CENTRAL`, `OPERADOR_DROGUERIA`, `VISOR_BOTICA` |
@@ -346,40 +390,93 @@ botica-demand-ml/
 
 ## Rutas del Sistema
 
-| Ruta | Página | Rol |
+### Portal Operaciones (Admin Central + Operador Logístico)
+
+| Ruta | Página |
+|---|---|
+| `/central/dashboard` | Dashboard |
+| `/central/inventario/catalogo` | Catálogo Productos |
+| `/central/inventario/catalogo/nuevo` | Nuevo Producto |
+| `/central/inventario/catalogo/:id` | Detalle Producto |
+| `/central/inventario/catalogo/:id/editar` | Editar Producto |
+| `/central/inventario/stock` | Stock |
+| `/central/inventario/lotes` | Lotes |
+| `/central/inventario/lotes/nuevo` | Nuevo Lote |
+| `/central/inventario/movimientos` | Movimientos |
+| `/central/inventario/movimientos/nuevo` | Nuevo Movimiento |
+| `/central/inventario/ajustes` | Ajustes |
+| `/central/inventario/reportes` | Reportes |
+| `/central/inventario/reportes/kardex` | Kardex |
+| `/central/inventario/reportes/stock-critico` | Stock Crítico |
+| `/central/inventario/reportes/movimientos` | Resumen Movimientos |
+| `/central/distribucion/transferencias` | Transferencias |
+| `/central/distribucion/transferencias/nueva` | Nueva Transferencia |
+| `/central/distribucion/despachos` | Despachos |
+| `/central/distribucion/recepciones` | Recepciones |
+| `/central/distribucion/historial` | Historial |
+| `/central/proveedores` | Proveedores |
+| `/central/proveedores/nuevo` | Nuevo Proveedor |
+| `/central/proveedores/:id` | Editar Proveedor |
+
+### Admin Central (solo Admin Central)
+
+| Ruta | Página |
+|---|---|
+| `/central/administracion/usuarios` | Gestión de Usuarios |
+| `/central/administracion/boticas` | Gestión de Boticas |
+| `/central/administracion/configuracion` | Configuración General |
+| `/central/administracion/auditoria` | Logs y Auditoría |
+| `/central/administracion/configuracion-avanzada` | Configuración Avanzada |
+
+### Portal Botica (Visor Local + Admin Central + Operador Logístico)
+
+| Ruta | Página |
+|---|---|
+| `/botica/dashboard` | Dashboard Botica |
+| `/botica/stock` | Stock Botica |
+| `/botica/lotes` | Lotes Botica |
+| `/botica/movimientos` | Movimientos Botica |
+| `/botica/transferencias` | Transferencias Botica |
+| `/botica/alertas` | Alertas Botica |
+| `/botica/ml` | Pronóstico ML Botica |
+| `/botica/recomendaciones` | Recomendaciones Botica |
+
+### Panel ML (Admin Central + Operador Logístico; Monitoreo solo Admin)
+
+| Ruta | Página |
+|---|---|
+| `/ml/predicciones` | Predicciones ML |
+| `/ml/alertas` | Alertas ML |
+| `/ml/recomendaciones` | Recomendaciones |
+| `/ml/monitoreo` | Monitoreo ML |
+
+### Autenticación
+
+| Ruta | Página | Acceso |
 |---|---|---|
 | `/` | Redirección por rol | — |
 | `/iniciar-sesion` | Login | Público |
-| `/central/dashboard` | Dashboard Central | Admin Central |
-| `/central/inventario/catalogo` | Catálogo Productos | Admin Central |
-| `/central/inventario/catalogo/nuevo` | Nuevo Producto | Admin Central |
-| `/central/inventario/catalogo/:id` | Detalle Producto | Admin Central |
-| `/central/inventario/catalogo/:id/editar` | Editar Producto | Admin Central |
-| `/central/inventario/stock` | Stock | Admin Central |
-| `/central/inventario/lotes` | Lotes | Admin Central |
-| `/central/inventario/lotes/nuevo` | Nuevo Lote | Admin Central |
-| `/central/inventario/movimientos` | Movimientos | Admin Central |
-| `/central/inventario/movimientos/nuevo` | Nuevo Movimiento | Admin Central |
-| `/central/inventario/ajustes` | Ajustes | Admin Central |
-| `/central/inventario/reportes` | Reportes | Admin Central |
-| `/central/inventario/reportes/kardex` | Kardex | Admin Central |
-| `/central/inventario/reportes/stock-critico` | Stock Crítico | Admin Central |
-| `/central/inventario/reportes/movimientos` | Resumen Movimientos | Admin Central |
-| `/central/distribucion/transferencias` | Transferencias | Admin Central |
-| `/central/distribucion/transferencias/nueva` | Nueva Transferencia | Admin Central |
-| `/central/distribucion/despachos` | Despachos | Admin Central |
-| `/central/distribucion/recepciones` | Recepciones | Admin Central |
-| `/central/distribucion/historial` | Historial | Admin Central |
-| `/central/proveedores` | Proveedores | Admin Central |
-| `/central/proveedores/nuevo` | Nuevo Proveedor | Admin Central |
-| `/central/proveedores/:id` | Editar Proveedor | Admin Central |
-| `/botica/stock` | Stock Botica | Operador |
-| `/botica/lotes` | Lotes Botica | Operador |
-| `/botica/movimientos` | Movimientos Botica | Operador |
-| `/ml/predicciones` | Predicciones ML | Visor/Admin |
-| `/ml/alertas` | Alertas ML | Visor/Admin |
-| `/ml/recomendaciones` | Recomendaciones | Visor/Admin |
-| `*` | 404 | — |
+| `/restablecer-contrasena` | Restablecer Contraseña | Público |
+| `*` | Redirección a `/` | — |
+
+---
+
+## Sistema de Permisos (RLS)
+
+Archivo `src/utilities/permisos.js` — lógica centralizada de Row-Level Security:
+
+| Función | Propósito |
+|---|---|
+| `debeFiltrarPorBotica(usuario)` | True si el usuario tiene restricción RLS (VISOR_BOTICA) |
+| `obtenerFiltroBotica(usuario)` | Retorna el `boticaId` del usuario o null |
+| `filtrarPorBotica(usuario, datos, campo)` | Filtra un array por ubicación |
+| `puedeEditar(usuario)` | Admin Central u Operador Logístico |
+| `puedeConfigurar(usuario)` | Solo Admin Central |
+| `puedeVerMLTecnico(usuario)` | Solo Admin Central |
+| `puedeVerMLCompleto(usuario)` | Admin Central u Operador Logístico |
+| `obtenerPortal(usuario)` | `central` / `operaciones` / `botica` según rol |
+
+Las 8 páginas del Portal Botica usan `filtrarPorBotica()` en lugar de acceder directamente a `usuario.boticaId`.
 
 ---
 
@@ -391,7 +488,7 @@ botica-demand-ml/
 - **Constantes**: `SCREAMING_SNAKE_CASE` → `ROLES.ADMIN_CENTRAL`
 - **Imports**: libs externas → `@` absolute → relativos
 - Un componente por archivo
-- Todos los formularios con Zod + React Hook Form
+- Formularios con Zod + React Hook Form cuando aplica
 - FEFO obligatorio en lógica de sortie de lotes
 
 ---

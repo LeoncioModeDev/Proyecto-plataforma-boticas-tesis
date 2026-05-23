@@ -9,13 +9,13 @@ export default function PaginaReportes() {
   ]
   return (
     <div className="space-y-6">
-      <h1 className="text-h1 text-neutro-negro">Consultas y Reportes</h1>
+      <h1 className="text-h1 text-principal">Consultas y Reportes</h1>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {reportes.map(r => (
-          <Link key={r.ruta} to={r.ruta} className="block bg-white border border-neutro-gris-borde rounded-tarjeta shadow-suave p-6 hover:border-marca-principal hover:shadow-media transition-all group">
+          <Link key={r.ruta} to={r.ruta} className="block bg-fondo-secundario border border-estilo rounded-lg shadow-estilo p-6 hover:border-marca-principal transition-all group">
             <r.icono className="h-8 w-8 text-marca-principal mb-3" />
-            <h3 className="text-h3 text-neutro-negro group-hover:text-marca-principal transition-colors">{r.titulo}</h3>
-            <p className="text-secundario text-neutro-gris-texto mt-1">{r.descripcion}</p>
+            <h3 className="text-h3 text-principal group-hover:text-marca-principal transition-colors">{r.titulo}</h3>
+            <p className="text-secundario mt-1">{r.descripcion}</p>
           </Link>
         ))}
       </div>

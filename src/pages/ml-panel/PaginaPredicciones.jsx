@@ -20,13 +20,13 @@ export default function PaginaPredicciones() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-h1 text-neutro-negro">Predicciones de Demanda</h1>
-      <p className="text-cuerpo text-neutro-gris-texto">Modelo híbrido SARIMA + XGBoost</p>
+      <h1 className="text-h1 text-principal">Predicciones de Demanda</h1>
+      <p className="text-cuerpo text-secundario">Modelo híbrido SARIMA + XGBoost</p>
 
       <div className="flex gap-4 items-end">
         <div className="flex flex-col gap-1.5">
-          <label className="text-etiqueta font-medium text-neutro-negro-suave">Producto</label>
-          <select value={seleccionado} onChange={e => setSeleccionado(e.target.value)} className="px-3 py-2 text-cuerpo bg-white border border-neutro-gris-borde rounded-boton min-w-[300px]">
+          <label className="text-etiqueta font-medium text-principal">Producto</label>
+          <select value={seleccionado} onChange={e => setSeleccionado(e.target.value)} className="px-3 py-2 text-cuerpo bg-fondo border border-estilo rounded-md min-w-[300px]">
             {predicciones.map(p => <option key={p.id} value={p.id}>{p.nombreProducto} — {p.nombreBotica}</option>)}
           </select>
         </div>
@@ -47,16 +47,16 @@ export default function PaginaPredicciones() {
           <Tarjeta titulo="Detalle del Pronóstico">
             <div className="overflow-x-auto">
               <table className="w-full text-cuerpo">
-                <thead><tr className="text-left text-etiqueta text-neutro-gris-texto border-b border-neutro-gris-borde">
+                <thead><tr className="text-left text-etiqueta text-secundario border-b border-estilo">
                   <th className="pb-2">Período</th><th className="pb-2 text-right">Predicción</th><th className="pb-2 text-right">Límite Inferior</th><th className="pb-2 text-right">Límite Superior</th><th className="pb-2 text-right">Rango</th>
                 </tr></thead>
                 <tbody>
                   {pred.pronostico.map(p => (
-                    <tr key={p.mes} className="border-b border-neutro-gris-borde last:border-0 hover:bg-marca-claro transition-colors">
+                    <tr key={p.mes} className="border-b border-estilo last:border-0 hover:bg-marca-claro transition-colors">
                       <td className="py-2.5">{p.mes}</td>
                       <td className="py-2.5 text-right font-semibold text-marca-principal">{p.predicho}</td>
-                      <td className="py-2.5 text-right text-neutro-gris-texto">{p.intervaloInf}</td>
-                      <td className="py-2.5 text-right text-neutro-gris-texto">{p.intervaloSup}</td>
+                      <td className="py-2.5 text-right text-secundario">{p.intervaloInf}</td>
+                      <td className="py-2.5 text-right text-secundario">{p.intervaloSup}</td>
                       <td className="py-2.5 text-right">±{Math.round((p.intervaloSup - p.intervaloInf) / 2)}</td>
                     </tr>
                   ))}

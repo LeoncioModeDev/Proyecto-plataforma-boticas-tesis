@@ -24,10 +24,10 @@ export default function InicioSesion() {
         navegar('/central/dashboard')
         break
       case ROLES.OPERADOR_DROGUERIA:
-        navegar('/botica/stock')
+        navegar('/operaciones/dashboard')
         break
       case ROLES.VISOR_BOTICA:
-        navegar('/ml/predicciones')
+        navegar('/botica/dashboard')
         break
       default:
         navegar('/')

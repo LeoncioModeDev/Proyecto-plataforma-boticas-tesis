@@ -6,7 +6,10 @@ const estilosVariante = {
     "bg-marca-principal !text-white hover:bg-marca-oscuro focus-visible:ring-marca-principal",
   secundario:
     "bg-fondo-secundario text-principal border border-estilo hover:bg-fondo",
+  peligro:
+    "bg-estado-critico !text-white hover:bg-red-700 focus-visible:ring-estado-critico",
   texto: "bg-transparent text-marca-principal hover:underline",
+  icono: "bg-transparent text-secundario hover:bg-fondo p-2",
 };
 
 const estilosTamano = {

@@ -4,13 +4,11 @@ import useAutenticacion from '@/state/useAutenticacion'
 import { stock } from '@/mock-data/stock'
 import { productos } from '@/mock-data/productos'
 import { clasificarAlerta, COLORES_ESTADO_STOCK, ETIQUETAS_ESTADO_STOCK } from '@/utilities/clasificarAlerta'
+import { filtrarPorBotica } from '@/utilities/permisos'
 
-/**
- * Stock filtrado por la botica del usuario operador.
- */
 export default function PaginaStockBotica() {
   const { usuario } = useAutenticacion()
-  const datos = stock.filter(s => s.ubicacionId === usuario?.boticaId).map(s => ({
+  const datos = filtrarPorBotica(usuario, stock, 'ubicacionId').map(s => ({
     ...s,
     stockDisponible: s.cantidadDisponible,
     nombreProducto: productos.find(p => p.id === s.productoId)?.nombreComercial || s.productoId,
@@ -26,7 +24,7 @@ export default function PaginaStockBotica() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-h1 text-neutro-negro">Stock de mi Botica</h1>
+      <h1 className="text-h1 text-principal">Stock de mi Botica</h1>
       <Tabla columnas={columnas} datos={datos} />
     </div>
   )

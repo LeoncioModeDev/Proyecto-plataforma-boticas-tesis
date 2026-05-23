@@ -9,7 +9,7 @@ export const ROLES = {
 
 export const ETIQUETAS_ROLES = {
   [ROLES.ADMIN_CENTRAL]: 'Admin Central',
-  [ROLES.OPERADOR_DROGUERIA]: 'Operador de Droguería',
+  [ROLES.OPERADOR_DROGUERIA]: 'Operador Logístico Central',
   [ROLES.VISOR_BOTICA]: 'Visor de Botica',
 }
 

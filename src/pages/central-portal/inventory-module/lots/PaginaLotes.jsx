@@ -29,7 +29,7 @@ export default function PaginaLotes() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-h1 text-neutro-negro">Lotes y Vencimientos</h1>
+        <h1 className="text-h1 text-principal">Lotes y Vencimientos</h1>
         <Boton variante="primario" icono={Plus} onClick={() => navegar('/central/inventario/lotes/nuevo')}>Registrar lote</Boton>
       </div>
       <Tabla columnas={columnas} datos={lotesOrdenados} />

@@ -14,17 +14,17 @@ export default function ReporteStockCritico() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-h1 text-neutro-negro">Reporte de Stock Crítico</h1>
-      <p className="text-cuerpo text-neutro-gris-texto">{criticos.length} productos por debajo del stock mínimo</p>
+      <h1 className="text-h1 text-principal">Reporte de Stock Crítico</h1>
+      <p className="text-cuerpo text-secundario">{criticos.length} productos por debajo del stock mínimo</p>
       <Tarjeta>
         <div className="overflow-x-auto">
           <table className="w-full text-cuerpo">
-            <thead><tr className="text-left text-etiqueta text-neutro-gris-texto border-b border-neutro-gris-borde">
+            <thead><tr className="text-left text-etiqueta text-secundario border-b border-estilo">
               <th className="pb-2">Producto</th><th className="pb-2">Ubicación</th><th className="pb-2 text-right">Disponible</th><th className="pb-2 text-right">Mínimo</th><th className="pb-2 text-right">Faltante</th><th className="pb-2">Estado</th>
             </tr></thead>
             <tbody>
               {criticos.map(c => (
-                <tr key={c.id} className="border-b border-neutro-gris-borde last:border-0 hover:bg-marca-claro transition-colors">
+                <tr key={c.id} className="border-b border-estilo last:border-0 hover:bg-marca-claro transition-colors">
                   <td className="py-2.5 font-medium">{c.nombreProducto}</td>
                   <td className="py-2.5">{c.nombreUbicacion}</td>
                   <td className="py-2.5 text-right">{c.cantidadDisponible}</td>

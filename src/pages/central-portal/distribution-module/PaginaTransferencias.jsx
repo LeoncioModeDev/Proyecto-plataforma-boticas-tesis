@@ -26,7 +26,6 @@ const OPCIONES_ESTADO = [
 export default function PaginaTransferencias() {
   const navegar = useNavigate()
   const [filtroEstado, setFiltroEstado] = useState('')
-  const [exito, setExito] = useState(null)
   const [transferencias, setTransferencias] = useState(transferenciasMock)
 
   const filtradas = filtroEstado 
@@ -48,8 +47,6 @@ export default function PaginaTransferencias() {
       }
       return t
     }))
-    setExito(`Transferencia actualizada a ${ESTADOS_TRANSFERENCIA[nuevoEstado].etiqueta}`)
-    setTimeout(() => setExito(null), 2000)
   }
 
   const columnas = [
@@ -144,7 +141,7 @@ export default function PaginaTransferencias() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-h1 text-neutro-negro">Transferencias</h1>
+        <h1 className="text-h1 text-principal">Transferencias</h1>
         <Boton variante="primario" icono={Plus} onClick={() => navegar('/central/distribucion/transferencias/nueva')}>
           Nueva Transferencia
         </Boton>
@@ -161,7 +158,7 @@ export default function PaginaTransferencias() {
         <select 
           value={filtroEstado} 
           onChange={e => setFiltroEstado(e.target.value)}
-          className="px-3 py-2 text-cuerpo bg-white border border-neutro-gris-borde rounded-boton"
+          className="px-3 py-2 text-cuerpo bg-fondo border border-estilo rounded-md"
         >
           {OPCIONES_ESTADO.map(o => <option key={o.valor} value={o.valor}>{o.etiqueta}</option>)}
         </select>

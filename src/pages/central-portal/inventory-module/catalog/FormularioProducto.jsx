@@ -40,7 +40,7 @@ export default function FormularioProducto({ productoEditar }) {
     <div className="space-y-6 max-w-2xl">
       <div className="flex items-center gap-4">
         <Boton variante="texto" icono={ArrowLeft} onClick={() => navegar(-1)}>Volver</Boton>
-        <h1 className="text-h1 text-neutro-negro">{esEdicion ? 'Editar Producto' : 'Nuevo Producto'}</h1>
+        <h1 className="text-h1 text-principal">{esEdicion ? 'Editar Producto' : 'Nuevo Producto'}</h1>
       </div>
       {exito && <Alerta tipo="exito" titulo="¡Guardado exitosamente!" mensaje="El producto ha sido registrado correctamente." />}
       <Tarjeta>
@@ -54,7 +54,7 @@ export default function FormularioProducto({ productoEditar }) {
             <CampoTexto nombre="codigoBarras" etiqueta="Código de Barras" register={register} error={errors.codigoBarras?.message} />
             <CampoSeleccion nombre="clasificacion" etiqueta="Clasificación" opciones={OPCIONES_CLASIFICACION} requerido register={register} error={errors.clasificacion?.message} />
           </div>
-          <div className="flex justify-end gap-3 pt-4 border-t border-neutro-gris-borde">
+          <div className="flex justify-end gap-3 pt-4 border-t border-estilo">
             <Boton variante="secundario" onClick={() => navegar(-1)}>Cancelar</Boton>
             <Boton tipo="submit" variante="primario" icono={Save} cargando={isSubmitting}>Guardar producto</Boton>
           </div>

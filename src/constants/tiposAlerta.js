@@ -21,10 +21,3 @@ export const COLORES_ALERTA = {
   [TIPOS_ALERTA.VENCIMIENTO]: 'amarillo',
   [TIPOS_ALERTA.PREDICCION]: 'verde',
 }
-
-export const ICONOS_ALERTA = {
-  [TIPOS_ALERTA.QUIEBRE]: 'AlertTriangle',
-  [TIPOS_ALERTA.SOBRESTOCK]: 'TrendingUp',
-  [TIPOS_ALERTA.VENCIMIENTO]: 'Clock',
-  [TIPOS_ALERTA.PREDICCION]: 'Brain',
-}

@@ -42,12 +42,12 @@ export default function PaginaStock() {
     )},
     { campo: 'stockMinimo', encabezado: 'Stock Mínimo' },
     { campo: 'estadoAlerta', encabezado: 'Estado', render: (r) => <Insignia color={COLORES_ESTADO_STOCK[r.estadoAlerta]}>{ETIQUETAS_ESTADO_STOCK[r.estadoAlerta]}</Insignia> },
-    { campo: 'ultimaActualizacion', encabezado: 'Últ. Actualización', render: (r) => <span className="text-etiqueta text-neutro-gris-texto">{formatearFechaRelativa(r.ultimaActualizacion)}</span> },
+    { campo: 'ultimaActualizacion', encabezado: 'Últ. Actualización', render: (r) => <span className="text-etiqueta text-secundario">{formatearFechaRelativa(r.ultimaActualizacion)}</span> },
   ]
 
   return (
     <div className="space-y-6">
-      <h1 className="text-h1 text-neutro-negro">Stock y Existencias</h1>
+      <h1 className="text-h1 text-principal">Stock y Existencias</h1>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <TarjetaMetrica etiqueta="Stock Total" valor={formatearNumero(totalStock)} icono={Boxes} />
         <TarjetaMetrica etiqueta="Bajo Stock" valor={bajoStock} icono={AlertTriangle} />
@@ -55,11 +55,11 @@ export default function PaginaStock() {
         <TarjetaMetrica etiqueta="Sobrestock" valor={sobrestock} icono={TrendingUp} />
       </div>
       <div className="flex gap-4">
-        <select value={filtroUbicacion} onChange={e => setFiltroUbicacion(e.target.value)} className="px-3 py-2 text-cuerpo bg-white border border-neutro-gris-borde rounded-boton">
+        <select value={filtroUbicacion} onChange={e => setFiltroUbicacion(e.target.value)} className="px-3 py-2 text-cuerpo bg-fondo border border-estilo rounded-md">
           <option value="">Todas las ubicaciones</option>
           {OPCIONES_UBICACION.map(o => <option key={o.valor} value={o.valor}>{o.etiqueta}</option>)}
         </select>
-        <select value={filtroEstado} onChange={e => setFiltroEstado(e.target.value)} className="px-3 py-2 text-cuerpo bg-white border border-neutro-gris-borde rounded-boton">
+        <select value={filtroEstado} onChange={e => setFiltroEstado(e.target.value)} className="px-3 py-2 text-cuerpo bg-fondo border border-estilo rounded-md">
           <option value="">Todos los estados</option>
           <option value="normal">Normal</option><option value="bajo">Bajo Stock</option><option value="sin_stock">Sin Stock</option><option value="sobrestock">Sobrestock</option>
         </select>

@@ -5,13 +5,11 @@ import { lotes } from '@/mock-data/lotes'
 import { productos } from '@/mock-data/productos'
 import { calcularFEFO } from '@/utilities/calcularFEFO'
 import { formatearFechaCorta, diasRestantes } from '@/utilities/formatearFecha'
+import { filtrarPorBotica } from '@/utilities/permisos'
 
-/**
- * Lotes filtrados por la botica del usuario operador.
- */
 export default function PaginaLotesBotica() {
   const { usuario } = useAutenticacion()
-  const datos = calcularFEFO(lotes.filter(l => l.ubicacionId === usuario?.boticaId))
+  const datos = calcularFEFO(filtrarPorBotica(usuario, lotes, 'ubicacionId'))
 
   const columnas = [
     { campo: 'productoId', encabezado: 'Producto', render: (r) => productos.find(p => p.id === r.productoId)?.nombreComercial || r.productoId },
@@ -25,7 +23,7 @@ export default function PaginaLotesBotica() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-h1 text-neutro-negro">Lotes de mi Botica</h1>
+      <h1 className="text-h1 text-principal">Lotes de mi Botica</h1>
       <Tabla columnas={columnas} datos={datos} />
     </div>
   )

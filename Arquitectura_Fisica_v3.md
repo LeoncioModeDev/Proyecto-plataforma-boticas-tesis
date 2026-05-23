@@ -9,14 +9,14 @@
 
 ## Objetivos y métricas que esta arquitectura debe soportar (ACP v1.3)
 
-| Objetivo | Indicador | Meta | Componente físico que lo soporta |
-|---|---|---|---|
-| OE2 — Arquitectura física aprobada | Diagramas elaborados | 100% aprobados por asesor | Este documento |
-| OE2 — Integración coherente | Auth, RLS, Realtime validados | 100% validados | Supabase Auth + RLS + Realtime WebSocket |
-| OE3 — Precisión del modelo | MAPE en piloto | **≤ 20%** | Cloud Run: FastAPI + SARIMA + XGBoost → `modelos_ml.mape` |
-| OE3 — Fill Rate | Tasa de servicio | **≥ 85%** | `movimientos_inventario` (salidas) + dashboard React |
-| OE3 — Tasa de Sobrestock | SKU cobertura > 60 días | **Reducción ≥ 25%** | `stock_ubicaciones` + `movimientos_inventario` (últimos 90 días) |
-| OE4 — Continuidad | Plan documentado | 100% componentes | Supabase free tier + Cloud Run scale-to-zero |
+| Objetivo                           | Indicador                     | Meta                      | Componente físico que lo soporta                                 |
+| ---------------------------------- | ----------------------------- | ------------------------- | ---------------------------------------------------------------- |
+| OE2 — Arquitectura física aprobada | Diagramas elaborados          | 100% aprobados por asesor | Este documento                                                   |
+| OE2 — Integración coherente        | Auth, RLS, Realtime validados | 100% validados            | Supabase Auth + RLS + Realtime WebSocket                         |
+| OE3 — Precisión del modelo         | MAPE en piloto                | **≤ 20%**                 | Cloud Run: FastAPI + SARIMA + XGBoost → `modelos_ml.mape`        |
+| OE3 — Fill Rate                    | Tasa de servicio              | **≥ 85%**                 | `movimientos_inventario` (salidas) + dashboard React             |
+| OE3 — Tasa de Sobrestock           | SKU cobertura > 60 días       | **Reducción ≥ 25%**       | `stock_ubicaciones` + `movimientos_inventario` (últimos 90 días) |
+| OE4 — Continuidad                  | Plan documentado              | 100% componentes          | Supabase free tier + Cloud Run scale-to-zero                     |
 
 ---
 
@@ -37,28 +37,28 @@ El diferenciador es la orquestación in-database: `pg_cron` + `pg_net` + Supabas
 
 ### Stack frontend
 
-| Componente | Tecnología | Versión | Propósito |
-|---|---|---|---|
-| Framework UI | React | 19 (instalado) | SPA |
-| Bundler | Vite | 5+ | Build + HMR |
-| Routing | React Router DOM | v6 | Navegación por rol |
-| Estilos | Tailwind CSS | v3 | Design system Fluent |
-| Estado global | Zustand | v4 | Estado de autenticación, inventario, alertas, predicciones |
-| Tablas | TanStack Table | v8 | Tablas con filtros y paginación |
-| Gráficas | Recharts | v2 | Gráfica de área (predicciones + histórico + IC), barras, línea |
-| Formularios | React Hook Form | v7 | Formularios con validación |
-| Validación | Zod | v3 | Schemas de validación |
-| Fechas | date-fns | v3 | Formateo con locale ES |
-| Iconos | Lucide React | — | Iconografía |
-| CSS utils | clsx + tailwind-merge | — | Composición de clases |
+| Componente    | Tecnología            | Versión        | Propósito                                                      |
+| ------------- | --------------------- | -------------- | -------------------------------------------------------------- |
+| Framework UI  | React                 | 19 (instalado) | SPA                                                            |
+| Bundler       | Vite                  | 5+             | Build + HMR                                                    |
+| Routing       | React Router DOM      | v6             | Navegación por rol                                             |
+| Estilos       | Tailwind CSS          | v3             | Design system Fluent                                           |
+| Estado global | Zustand               | v4             | Estado de autenticación, inventario, alertas, predicciones     |
+| Tablas        | TanStack Table        | v8             | Tablas con filtros y paginación                                |
+| Gráficas      | Recharts              | v2             | Gráfica de área (predicciones + histórico + IC), barras, línea |
+| Formularios   | React Hook Form       | v7             | Formularios con validación                                     |
+| Validación    | Zod                   | v3             | Schemas de validación                                          |
+| Fechas        | date-fns              | v3             | Formateo con locale ES                                         |
+| Iconos        | Lucide React          | —              | Iconografía                                                    |
+| CSS utils     | clsx + tailwind-merge | —              | Composición de clases                                          |
 
 ### Portales y roles
 
-| Portal | Rol | Rutas principales |
-|---|---|---|
-| Portal Central | Admin Central | `/central/dashboard`, `/central/inventario/*`, `/central/distribucion`, `/central/proveedores` |
-| Portal Boticas | Operador de Droguería | `/botica/stock`, `/botica/lotes`, `/botica/movimientos` |
-| Panel ML | Visor de Botica / Admin Central | `/ml/predicciones`, `/ml/alertas`, `/ml/recomendaciones` |
+| Portal         | Rol                             | Rutas principales                                                                              |
+| -------------- | ------------------------------- | ---------------------------------------------------------------------------------------------- |
+| Portal Central | Admin Central                   | `/central/dashboard`, `/central/inventario/*`, `/central/distribucion`, `/central/proveedores` |
+| Portal Boticas | Operador de Droguería           | `/botica/stock`, `/botica/lotes`, `/botica/movimientos`                                        |
+| Panel ML       | Visor de Botica / Admin Central | `/ml/predicciones`, `/ml/alertas`, `/ml/recomendaciones`                                       |
 
 ### Control de acceso (frontend)
 
@@ -80,11 +80,11 @@ Usuario (navegador HTTPS)
 
 ### Suscripciones Realtime del frontend
 
-| Canal | Tabla | Filtro | Suscriptor |
-|---|---|---|---|
-| `alertas_ml` | `alertas_ml` | `botica_id=eq.{boticaId}` | Portal Central + Panel ML |
-| `predicciones_ml` | `predicciones_ml` | `botica_id=eq.{boticaId}` | Panel ML |
-| `drift_metricas` | `drift_metricas` | — | Panel ML (Admin) |
+| Canal             | Tabla             | Filtro                    | Suscriptor                |
+| ----------------- | ----------------- | ------------------------- | ------------------------- |
+| `alertas_ml`      | `alertas_ml`      | `botica_id=eq.{boticaId}` | Portal Central + Panel ML |
+| `predicciones_ml` | `predicciones_ml` | `botica_id=eq.{boticaId}` | Panel ML                  |
+| `drift_metricas`  | `drift_metricas`  | —                         | Panel ML (Admin)          |
 
 > RLS filtra automáticamente los eventos Realtime según el `botica_id` del JWT del usuario.
 
@@ -105,39 +105,39 @@ Supabase provee todos los servicios de backend sin servidor dedicado. Esta es la
 
 #### Tablas transaccionales
 
-| Tabla | Propósito | Notas |
-|---|---|---|
-| `organizaciones` | Empresa propietaria de la red | Identificación polimórfica (RUC / NIT / Tax ID / VAT) |
-| `boticas` | Locales físicos | `ubigeo char(6)` FK → `ubigeos`, `distrito` para ML |
-| `productos` | Catálogo maestro de medicamentos | `codigo_interno` (SKU), `categoria_terapeutica`, `requiere_receta` |
-| `precios` | Historial de precios (venta + costo) | Feature ML de elasticidad precio-demanda |
-| `proveedores` | Proveedores nacionales e internacionales | `lead_time_dias` — feature "oro" para punto de pedido |
-| `stock_ubicaciones` | Fuente de verdad del stock actual | Actualizada por trigger en cada movimiento |
-| `lotes` | Lotes activos con fecha de vencimiento | FEFO: `fecha_vencimiento` es feature ML |
-| `movimientos_inventario` | Log inmutable de auditoría | `tipo_movimiento` enum: entrada/salida/ajuste/merma/devolucion |
-| `transferencias` | Despachos droguería → boticas | Estados: creada/en_transito/recibida |
-| `transferencias_items` | Detalle de lotes por transferencia | Selección con criterio FEFO |
-| `ubigeos` | Padrón INEI (referencia estática) | Seed único; no cambia |
+| Tabla                    | Propósito                                | Notas                                                              |
+| ------------------------ | ---------------------------------------- | ------------------------------------------------------------------ |
+| `organizaciones`         | Empresa propietaria de la red            | Identificación polimórfica (RUC / NIT / Tax ID / VAT)              |
+| `boticas`                | Locales físicos                          | `ubigeo char(6)` FK → `ubigeos`, `distrito` para ML                |
+| `productos`              | Catálogo maestro de medicamentos         | `codigo_interno` (SKU), `categoria_terapeutica`, `requiere_receta` |
+| `precios`                | Historial de precios (venta + costo)     | Feature ML de elasticidad precio-demanda                           |
+| `proveedores`            | Proveedores nacionales e internacionales | `lead_time_dias` — feature "oro" para punto de pedido              |
+| `stock_ubicaciones`      | Fuente de verdad del stock actual        | Actualizada por trigger en cada movimiento                         |
+| `lotes`                  | Lotes activos con fecha de vencimiento   | FEFO: `fecha_vencimiento` es feature ML                            |
+| `movimientos_inventario` | Log inmutable de auditoría               | `tipo_movimiento` enum: entrada/salida/ajuste/merma/devolucion     |
+| `transferencias`         | Despachos droguería → boticas            | Estados: creada/en_transito/recibida                               |
+| `transferencias_items`   | Detalle de lotes por transferencia       | Selección con criterio FEFO                                        |
+| `ubigeos`                | Padrón INEI (referencia estática)        | Seed único; no cambia                                              |
 
 #### Tablas MLOps (diferenciador arquitectónico)
 
-| Tabla | Propósito | Campos clave |
-|---|---|---|
-| `modelos_ml` | Model registry completo | `status` (staging/production/archived), `hash`, `mape`, `psi_baseline_jsonb`, `algoritmo` |
-| `predicciones_ml` | Salida del servicio ML | `modelo_version_id` FK, `intervalo_inf`, `intervalo_sup`, `confianza` |
-| `inferencias` | Audit log por predicción individual | `features_jsonb`, `valor_real` (backfill diario), `error_absoluto` |
-| `drift_metricas` | Historial semanal de drift | `psi_max`, `ratio_mape`, `requiere_retraining`, `reentrenamiento_disparado` |
-| `alertas_ml` | Alertas automáticas | `tipo_origen` (regla/modelo), `tipo` (quiebre/sobrestock/vencimiento_proximo/prediccion) |
+| Tabla             | Propósito                           | Campos clave                                                                              |
+| ----------------- | ----------------------------------- | ----------------------------------------------------------------------------------------- |
+| `modelos_ml`      | Model registry completo             | `status` (staging/production/archived), `hash`, `mape`, `psi_baseline_jsonb`, `algoritmo` |
+| `predicciones_ml` | Salida del servicio ML              | `modelo_version_id` FK, `intervalo_inf`, `intervalo_sup`, `confianza`                     |
+| `inferencias`     | Audit log por predicción individual | `features_jsonb`, `valor_real` (backfill diario), `error_absoluto`                        |
+| `drift_metricas`  | Historial semanal de drift          | `psi_max`, `ratio_mape`, `requiere_retraining`, `reentrenamiento_disparado`               |
+| `alertas_ml`      | Alertas automáticas                 | `tipo_origen` (regla/modelo), `tipo` (quiebre/sobrestock/vencimiento_proximo/prediccion)  |
 
 **Constraint crítico:** `CREATE UNIQUE INDEX idx_modelos_ml_production ON modelos_ml (status) WHERE status = 'production'` — garantiza que solo un modelo esté en producción simultáneamente.
 
 #### Extensiones PostgreSQL habilitadas
 
-| Extensión | Propósito |
-|---|---|
-| `pg_cron` | Scheduler nativo — 4 jobs automatizados |
-| `pg_net` | HTTP async desde SQL — invoca Cloud Run |
-| `pg_trgm` | Búsqueda de texto (catálogo de productos) |
+| Extensión      | Propósito                                     |
+| -------------- | --------------------------------------------- |
+| `pg_cron`      | Scheduler nativo — 4 jobs automatizados       |
+| `pg_net`       | HTTP async desde SQL — invoca Cloud Run       |
+| `pg_trgm`      | Búsqueda de texto (catálogo de productos)     |
 | Supabase Vault | Almacén cifrado de secretos (token Cloud Run) |
 
 #### Seguridad — RLS
@@ -189,37 +189,37 @@ WHERE m.tipo_movimiento = 'salida'
 
 ### Servicios Supabase
 
-| Servicio | Propósito en la plataforma |
-|---|---|
+| Servicio      | Propósito en la plataforma                                                                                               |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------ |
 | **PostgREST** | API REST auto-generada desde el esquema SQL; usada por el frontend (supabase-js) y por el ETL de Cloud Run (service key) |
-| **Auth** | JWT + Refresh tokens; RLS usa el JWT para filtrar datos por rol y botica |
-| **Realtime** | WebSocket a tablas `alertas_ml`, `predicciones_ml`, `drift_metricas`; `REPLICA IDENTITY FULL` habilitado |
-| **Storage** | Artefactos ML: `models/{version}/{hash}.pkl` y `models/{version}/{hash}_config.json` |
+| **Auth**      | JWT + Refresh tokens; RLS usa el JWT para filtrar datos por rol y botica                                                 |
+| **Realtime**  | WebSocket a tablas `alertas_ml`, `predicciones_ml`, `drift_metricas`; `REPLICA IDENTITY FULL` habilitado                 |
+| **Storage**   | Artefactos ML: `models/{version}/{hash}.pkl` y `models/{version}/{hash}_config.json`                                     |
 
 ### Jobs pg_cron — Orquestación in-database
 
-| Job | Función | Schedule | Descripción |
-|---|---|---|---|
-| Job 1 | `calc_drift_semanal()` | Lunes 03:00 UTC | Calcula PSI (Yurdakul, 2018) entre features actuales vs `psi_baseline_jsonb`. Calcula MAPE rolling 4 semanas desde `inferencias`. Escribe en `drift_metricas`. |
-| Job 2 | `decide_retrain()` | Lunes 03:15 UTC | Lee `drift_metricas`. Si `psi_max > 0.2` o `ratio_mape > 1.25` por 2 semanas consecutivas → `pg_net.http_post` a Cloud Run `/retrain`. Si no → 0 costo de cómputo. |
-| Job 3 | `cleanup()` | Diario 02:00 UTC | Marca lotes expirados, limpia registros obsoletos. |
+| Job   | Función                  | Schedule         | Descripción                                                                                                                                                         |
+| ----- | ------------------------ | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Job 1 | `calc_drift_semanal()`   | Lunes 03:00 UTC  | Calcula PSI (Yurdakul, 2018) entre features actuales vs `psi_baseline_jsonb`. Calcula MAPE rolling 4 semanas desde `inferencias`. Escribe en `drift_metricas`.      |
+| Job 2 | `decide_retrain()`       | Lunes 03:15 UTC  | Lee `drift_metricas`. Si `psi_max > 0.2` o `ratio_mape > 1.25` por 2 semanas consecutivas → `pg_net.http_post` a Cloud Run `/retrain`. Si no → 0 costo de cómputo.  |
+| Job 3 | `cleanup()`              | Diario 02:00 UTC | Marca lotes expirados, limpia registros obsoletos.                                                                                                                  |
 | Job 4 | `backfill_inferencias()` | Diario 02:30 UTC | Cruza `inferencias.fecha_pred` con `movimientos_inventario` (salidas del día anterior). Actualiza `valor_real` y `error_absoluto`. Base de datos para MAPE rolling. |
 
 > El Job 4 es el mecanismo que cierra el bucle: sin él, `drift_metricas.mape_rolling` no tiene datos con qué calcularse.
 
 **Umbrales diferenciados:**
 
-| Umbral | Valor | Acción |
-|---|---|---|
-| Reentrenamiento via pg_net | `psi_max > 0.2` o `ratio_mape > 1.25` (2 semanas consecutivas) | Job 2 → `pg_net.http_post → /retrain` |
-| Alerta crítica via Edge Fn | `psi_max > 0.3` o `ratio_mape > 1.5` | Job 1 → `alert_dispatch.ts` → push a `alertas_ml` |
+| Umbral                     | Valor                                                          | Acción                                            |
+| -------------------------- | -------------------------------------------------------------- | ------------------------------------------------- |
+| Reentrenamiento via pg_net | `psi_max > 0.2` o `ratio_mape > 1.25` (2 semanas consecutivas) | Job 2 → `pg_net.http_post → /retrain`             |
+| Alerta crítica via Edge Fn | `psi_max > 0.3` o `ratio_mape > 1.5`                           | Job 1 → `alert_dispatch.ts` → push a `alertas_ml` |
 
 ### Edge Functions (Deno, máx. 150s, stateless)
 
-| Función | Trigger | Lógica |
-|---|---|---|
-| `promote_model.ts` | Llamada por Cloud Run al finalizar `/retrain` | Compara `mape` del nuevo modelo (staging) vs el modelo en production. Si mejora ≥ 5% → nuevo = production, anterior = archived. |
-| `alert_dispatch.ts` | Llamada por Job 1 cuando `psi_max > 0.3` o `ratio_mape > 1.5` | Inserta en `alertas_ml` con `tipo_origen = 'modelo'` y `urgencia = 'alta'`. Realtime propaga la alerta al dashboard. |
+| Función             | Trigger                                                       | Lógica                                                                                                                          |
+| ------------------- | ------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| `promote_model.ts`  | Llamada por Cloud Run al finalizar `/retrain`                 | Compara `mape` del nuevo modelo (staging) vs el modelo en production. Si mejora ≥ 5% → nuevo = production, anterior = archived. |
+| `alert_dispatch.ts` | Llamada por Job 1 cuando `psi_max > 0.3` o `ratio_mape > 1.5` | Inserta en `alertas_ml` con `tipo_origen = 'modelo'` y `urgencia = 'alta'`. Realtime propaga la alerta al dashboard.            |
 
 ---
 
@@ -239,21 +239,22 @@ Config Cloud Run:
 
 ### FastAPI — Endpoints
 
-| Endpoint | Invocador | Descripción |
-|---|---|---|
-| `POST /retrain` | `pg_net` (desde `decide_retrain()`) | ETL + entrenamiento + validación holdout + escribe `modelos_ml` (staging) + escribe `predicciones_ml` + llama `promote_model.ts` |
-| `POST /predict_batch` | `pg_net` (inferencia masiva nocturna) | Genera predicciones batch para todos los SKU activos de todas las boticas |
-| `GET /health` | Cloud Run warm-up | Devuelve 200 OK; carga el modelo en memoria para reducir cold start en la primera inferencia |
+| Endpoint              | Invocador                             | Descripción                                                                                                                      |
+| --------------------- | ------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| `POST /retrain`       | `pg_net` (desde `decide_retrain()`)   | ETL + entrenamiento + validación holdout + escribe `modelos_ml` (staging) + escribe `predicciones_ml` + llama `promote_model.ts` |
+| `POST /predict_batch` | `pg_net` (inferencia masiva nocturna) | Genera predicciones batch para todos los SKU activos de todas las boticas                                                        |
+| `GET /health`         | Cloud Run warm-up                     | Devuelve 200 OK; carga el modelo en memoria para reducir cold start en la primera inferencia                                     |
 
 ### Modelo híbrido SARIMA + XGBoost
 
-| Componente | Librería | Propósito |
-|---|---|---|
-| SARIMA | statsmodels | Captura tendencia y estacionalidad temporal (semanal, mensual, anual). Línea base (benchmark). |
-| XGBoost | xgboost | Captura efectos no lineales de variables cruzadas sobre los residuos del SARIMA. |
-| scikit-learn | scikit-learn | Preprocesamiento, split cronológico, métricas (MAPE, RMSE, MAE) |
+| Componente   | Librería     | Propósito                                                                                      |
+| ------------ | ------------ | ---------------------------------------------------------------------------------------------- |
+| SARIMA       | statsmodels  | Captura tendencia y estacionalidad temporal (semanal, mensual, anual). Línea base (benchmark). |
+| XGBoost      | xgboost      | Captura efectos no lineales de variables cruzadas sobre los residuos del SARIMA.               |
+| scikit-learn | scikit-learn | Preprocesamiento, split cronológico, métricas (MAPE, RMSE, MAE)                                |
 
 **Métricas objetivo (alineadas con ACP OE3.I1):**
+
 - MAPE ≤ 20% en holdout
 - Horizonte de predicción: 3 meses
 - Tiempo de inferencia: < 7s por SKU
@@ -332,19 +333,20 @@ def calcular_psi(baseline_bins, baseline_freq, actual_data, bins):
 
 En la Fase 1, todos los datos provienen de archivos mock en `src/mock-data/`. Los servicios de Supabase y ML existen como funciones simuladas con `setTimeout`, reemplazables sin cambios en la arquitectura del frontend.
 
-| Archivo | Contenido |
-|---|---|
-| `productos.js` | 12 medicamentos (Paracetamol, Amoxicilina, etc.) |
-| `stock.js` | 16 registros en 3 ubicaciones |
-| `lotes.js` | 14 lotes con fechas variadas (FEFO) |
-| `movimientos.js` | 21 movimientos de todos los tipos |
-| `transferencias.js` | 6 transferencias en distintos estados |
-| `alertas.js` | 9 alertas activas (regla + predictivas) |
-| `predicciones.js` | 5 predicciones con serie histórica de 11 meses |
-| `boticas.js` | Droguería Central + 2 boticas Lima |
-| `usuarios.js` | 3 usuarios (1 por rol) |
+| Archivo             | Contenido                                        |
+| ------------------- | ------------------------------------------------ |
+| `productos.js`      | 12 medicamentos (Paracetamol, Amoxicilina, etc.) |
+| `stock.js`          | 16 registros en 3 ubicaciones                    |
+| `lotes.js`          | 14 lotes con fechas variadas (FEFO)              |
+| `movimientos.js`    | 21 movimientos de todos los tipos                |
+| `transferencias.js` | 6 transferencias en distintos estados            |
+| `alertas.js`        | 9 alertas activas (regla + predictivas)          |
+| `predicciones.js`   | 5 predicciones con serie histórica de 11 meses   |
+| `boticas.js`        | Droguería Central + 2 boticas Lima               |
+| `usuarios.js`       | 3 usuarios (1 por rol)                           |
 
 Los servicios mock viven en:
+
 - `src/services/supabase/` — funciones que simulan PostgREST con `setTimeout`
 - `src/services/ml-model/` — funciones que simulan la FastAPI con datos de `predicciones.js`
 
@@ -418,55 +420,55 @@ pg_cron Job 4 (diario 02:30 UTC)
 
 ## Observabilidad y monitoreo
 
-| Componente | Qué monitorear | Fuente |
-|---|---|---|
-| Calidad del modelo | MAPE rolling vs baseline | `drift_metricas.ratio_mape` + dashboard React |
-| Drift de features | PSI por feature | `drift_metricas.psi_features` |
-| Ejecución de jobs | Resultado de cada job pg_cron | `cron.job_run_details` (tabla de Supabase) |
-| Llamadas HTTP de pg_net | Respuesta de Cloud Run | `net._http_response` (tabla de Supabase) |
-| Estado del modelo | Versión actual en production | `modelos_ml WHERE status='production'` |
-| Alertas operativas | Alertas no resueltas por tipo | `alertas_ml WHERE resuelta=false` |
-| Fill Rate | Tasa de servicio actual | `movimientos_inventario` + cálculo en dashboard |
-| Tasa de Sobrestock | SKU con cobertura > 60 días | `stock_ubicaciones` + cálculo en dashboard |
+| Componente              | Qué monitorear                | Fuente                                          |
+| ----------------------- | ----------------------------- | ----------------------------------------------- |
+| Calidad del modelo      | MAPE rolling vs baseline      | `drift_metricas.ratio_mape` + dashboard React   |
+| Drift de features       | PSI por feature               | `drift_metricas.psi_features`                   |
+| Ejecución de jobs       | Resultado de cada job pg_cron | `cron.job_run_details` (tabla de Supabase)      |
+| Llamadas HTTP de pg_net | Respuesta de Cloud Run        | `net._http_response` (tabla de Supabase)        |
+| Estado del modelo       | Versión actual en production  | `modelos_ml WHERE status='production'`          |
+| Alertas operativas      | Alertas no resueltas por tipo | `alertas_ml WHERE resuelta=false`               |
+| Fill Rate               | Tasa de servicio actual       | `movimientos_inventario` + cálculo en dashboard |
+| Tasa de Sobrestock      | SKU con cobertura > 60 días   | `stock_ubicaciones` + cálculo en dashboard      |
 
 ---
 
 ## Roadmap de fases
 
-| Fase | Estado | Descripción |
-|---|---|---|
-| **Fase 1** | ✅ Completada | Frontend completo con datos mock. Sin conexión real a Supabase ni ML. |
-| **Fase 2** | Pendiente | Conexión a Supabase: Auth real, PostgreSQL, RLS, Realtime. Seed de ubigeos INEI. |
-| **Fase 3** | Pendiente | Implementación de FastAPI con SARIMA + XGBoost. Docker. ETL Pipeline. |
-| **Fase 4** | Pendiente | Integración completa frontend ↔ Supabase ↔ modelo ML. pg_cron jobs activos. |
-| **Fase 5** | Pendiente | Despliegue en producción: Vercel + Google Cloud Run. Piloto en boticas Lima. |
+| Fase       | Estado        | Descripción                                                                      |
+| ---------- | ------------- | -------------------------------------------------------------------------------- |
+| **Fase 1** | ✅ Completada | Frontend completo con datos mock. Sin conexión real a Supabase ni ML.            |
+| **Fase 2** | Pendiente     | Conexión a Supabase: Auth real, PostgreSQL, RLS, Realtime. Seed de ubigeos INEI. |
+| **Fase 3** | Pendiente     | Implementación de FastAPI con SARIMA + XGBoost. Docker. ETL Pipeline.            |
+| **Fase 4** | Pendiente     | Integración completa frontend ↔ Supabase ↔ modelo ML. pg_cron jobs activos.      |
+| **Fase 5** | Pendiente     | Despliegue en producción: Vercel + Google Cloud Run. Piloto en boticas Lima.     |
 
 ---
 
 ## Restricciones de infraestructura (ACP v1.3)
 
-| Restricción | Implementación |
-|---|---|
-| No despliegue en infraestructura de alta disponibilidad | Supabase free tier + Cloud Run scale-to-zero (`min-instances=0`) |
-| No automatización de reposición física | Solo predicciones, alertas y visualizaciones |
-| No app móvil | Solo web (React SPA) |
-| No integración con POS, ERP, WMS | Solo datos históricos en formato digital (CSV/Excel vía Supabase Storage) |
-| No autenticación biométrica ni OAuth corporativo | Solo Supabase Auth (JWT + RLS) |
-| No gestión de servidor propio de BD | Supabase Cloud |
-| Variables exógenas excluidas del modelo ML | ETL filtra solo features internos definidos en la arquitectura lógica |
-| Dataset limitado a medicamentos (sin dispositivos médicos, higiene, etc.) | Filtro por `productos.clasificacion` y `productos.estado` en el ETL |
-| Excluir medicamentos con cambios regulatorios o refrigeración | Filtro explícito en ETL (`estado='activo'` + flag de exclusión) |
+| Restricción                                                               | Implementación                                                            |
+| ------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| No despliegue en infraestructura de alta disponibilidad                   | Supabase free tier + Cloud Run scale-to-zero (`min-instances=0`)          |
+| No automatización de reposición física                                    | Solo predicciones, alertas y visualizaciones                              |
+| No app móvil                                                              | Solo web (React SPA)                                                      |
+| No integración con POS, ERP, WMS                                          | Solo datos históricos en formato digital (CSV/Excel vía Supabase Storage) |
+| No autenticación biométrica ni OAuth corporativo                          | Solo Supabase Auth (JWT + RLS)                                            |
+| No gestión de servidor propio de BD                                       | Supabase Cloud                                                            |
+| Variables exógenas excluidas del modelo ML                                | ETL filtra solo features internos definidos en la arquitectura lógica     |
+| Dataset limitado a medicamentos (sin dispositivos médicos, higiene, etc.) | Filtro por `productos.clasificacion` y `productos.estado` en el ETL       |
+| Excluir medicamentos con cambios regulatorios o refrigeración             | Filtro explícito en ETL (`estado='activo'` + flag de exclusión)           |
 
 ---
 
 ## Costos estimados de operación
 
-| Componente | Tier | Costo estimado |
-|---|---|---|
-| Supabase | Free tier (500 MB DB, 1 GB Storage, 50k usuarios/mes) | $0 USD/mes |
-| Google Cloud Run | scale-to-zero, ~4 reentrenamientos/mes × ~5 min cada uno | < $2 USD/mes |
-| Vercel | Hobby tier (Fase 5) | $0 USD/mes |
-| **Total** | | **< $5 USD/mes** |
+| Componente       | Tier                                                     | Costo estimado   |
+| ---------------- | -------------------------------------------------------- | ---------------- |
+| Supabase         | Free tier (500 MB DB, 1 GB Storage, 50k usuarios/mes)    | $0 USD/mes       |
+| Google Cloud Run | scale-to-zero, ~4 reentrenamientos/mes × ~5 min cada uno | < $2 USD/mes     |
+| Vercel           | Hobby tier (Fase 5)                                      | $0 USD/mes       |
+| **Total**        |                                                          | **< $5 USD/mes** |
 
 > El diferenciador drift-aware reduce el cómputo: en lugar de reentrenar semanalmente (4 veces/mes), solo reentrena cuando hay drift real. Si el modelo es estable, el costo de Cloud Run es $0.
 
@@ -474,15 +476,15 @@ pg_cron Job 4 (diario 02:30 UTC)
 
 ## Alineación con la arquitectura lógica
 
-| Componente físico | Respaldo en arquitectura lógica |
-|---|---|
-| `pg_cron` Job 4 (backfill) | `inferencias.valor_real` + mecanismo SQL documentado |
-| Realtime en 3 tablas | Sección "Suscripciones Realtime" con canales y filtros |
-| `alertas_ml.tipo_origen` | Campo nuevo que distingue regla vs modelo |
-| `alertas_ml.tipo = 'prediccion'` | Enum extendido (alineado con mock del frontend) |
-| Storage naming convention | `models/{version}/{hash}.pkl` — documentado en `modelos_ml` |
-| UNIQUE INDEX parcial `production` | Documentado como constraint explícito |
-| Umbrales diferenciados (0.2/1.25 vs 0.3/1.5) | Tabla de umbrales en la sección de jobs pg_cron |
-| `precios` tabla | Listada en tablas transaccionales |
-| `ubigeos` tabla | Listada como seed estático |
-| `devolucion` en ETL | Documentado en filtros del ETL Pipeline |
+| Componente físico                            | Respaldo en arquitectura lógica                             |
+| -------------------------------------------- | ----------------------------------------------------------- |
+| `pg_cron` Job 4 (backfill)                   | `inferencias.valor_real` + mecanismo SQL documentado        |
+| Realtime en 3 tablas                         | Sección "Suscripciones Realtime" con canales y filtros      |
+| `alertas_ml.tipo_origen`                     | Campo nuevo que distingue regla vs modelo                   |
+| `alertas_ml.tipo = 'prediccion'`             | Enum extendido (alineado con mock del frontend)             |
+| Storage naming convention                    | `models/{version}/{hash}.pkl` — documentado en `modelos_ml` |
+| UNIQUE INDEX parcial `production`            | Documentado como constraint explícito                       |
+| Umbrales diferenciados (0.2/1.25 vs 0.3/1.5) | Tabla de umbrales en la sección de jobs pg_cron             |
+| `precios` tabla                              | Listada en tablas transaccionales                           |
+| `ubigeos` tabla                              | Listada como seed estático                                  |
+| `devolucion` en ETL                          | Documentado en filtros del ETL Pipeline                     |
