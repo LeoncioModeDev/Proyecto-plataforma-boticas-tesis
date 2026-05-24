@@ -5,7 +5,7 @@ import { z } from 'zod'
  * Alineado con Arquitectura Lógica v4 — tablas transferencias y transferencias_items.
  */
 export const transferenciaEsquema = z.object({
-  boticaId: z.string().min(1, 'Debe seleccionar una botica destino'),
+  destinoId: z.string().min(1, 'Debe seleccionar una botica destino'),
   estado: z.enum(['creada', 'en_transito', 'recibida']).default('creada'),
   observaciones: z.string().optional(),
   items: z.array(z.object({

@@ -18,10 +18,10 @@ El frontend está **completamente construido y funcional**. No hay conexión rea
 
 - Pantalla de login con selector de rol para modo desarrollo
 - Tres roles con portales y permisos completamente distintos:
-  - **Admin Central** (`ADMIN_CENTRAL`) — acceso total a los 3 portales (Central, Operaciones, Botica) y Panel ML completo
-  - **Operador Logístico Central** (`OPERADOR_DROGUERIA`) — acceso al Portal Operaciones (dashboard, inventario, distribución, proveedores, boticas) y Panel ML (predicciones, alertas, recomendaciones). Sin restricción RLS.
-  - **Visor Local de Botica** (`VISOR_BOTICA`) — acceso solo al Portal Botica con datos filtrados por RLS a su botica asignada
-- Protección de rutas por rol con `RutaProtegia` (4 grupos: Portal Operaciones, Admin Central, Portal Botica, Panel ML)
+  - **Admin Central** (`ADMIN_CENTRAL`) — acceso total a los 3 portales (Central, Operaciones, Botica) y Panel ML completo. Sin restricción RLS.
+  - **Operador Logístico Central** (`OPERADOR_DROGUERIA`) — acceso al Portal Operaciones (dashboard, inventario, distribución, proveedores, órdenes de compra) y al Portal Botica. Sin restricción RLS. Sin acceso al Portal Central ni al Panel ML.
+  - **Visor de Botica** (`VISOR_BOTICA`) — acceso solo al Portal Botica con datos filtrados por RLS a su botica asignada.
+- Protección de rutas por rol con `RutaProtegida` (4 grupos: Portal Central, Portal Operaciones, Portal Botica, Panel ML)
 - Redirección automática desde `/` según el rol activo
 - Sidebar con branding dinámico ("Portal Central", "Portal Operaciones", "Portal Botica") según el rol
 - Breadcrumbs contextuales por portal en `MigaDePan.jsx`
@@ -42,15 +42,16 @@ El frontend está **completamente construido y funcional**. No hay conexión rea
   - **Ajustes** — ajustes positivos/negativos y mermas
     - Formulario de ajuste de inventario
   - **Reportes** — Kardex, Stock Crítico, Resumen de Movimientos
-- **Módulo de Distribución** completo:
-  - **Transferencias** — crear, enviar, recibir, estados: creada/en_transito/recibida
-  - **Despachos** — programación de envíos
-  - **Recepciones** — seguimiento de transferencias en tránsito
+- **Módulo de Distribución** — gestión unificada de transferencias (Despachos y Recepciones eliminados como módulos independientes):
+  - **Transferencias** — tabla integral con ID, Tipo (Transferencia/Redistribución), Origen, Destino, Productos, Lotes FEFO (modal ordenado por vencimiento con alerta ≤30 días), Cant. Total, Creación, Envío, Recepción, Estado, Creador, Acciones (Crear/Enviar/Cancelar según estado). Scroll horizontal con `min-w-max`.
+  - **Nueva Transferencia** — formulario con Origen predeterminado (Droguería Central), selector de Botica Destino, productos a transferir (selector + cantidad), observaciones. Validación con Zod.
+  - **Redistribución** — `PanelRedistribucion.jsx` con análisis ML completo: stock actual/mínimo, alertas ML, predicciones ML, sobrestock, riesgo de quiebre, proximidad de vencimiento, lotes FEFO. Propuestas con origen, destino, productos, lotes sugeridos, cantidades, criterio FEFO, motivo y prioridad. Botones Aceptar (crea transferencia mock) y Rechazar.
   - **Historial** — historial filtrable por año y búsqueda
 - **Módulo de Proveedores**:
   - Listado con identificación polimórfica (RUC/NIT/Tax ID/VAT por país)
   - Formulario con tipo de identificación, país de origen, lead time
   - Activar/desactivar proveedor con confirmación
+  - **Órdenes de Compra** — registro, aprobación/rechazo (solo Admin), historial con filtros por proveedor/estado/fecha/producto
 - **Módulo de Administración** (solo Admin Central):
   - **Usuarios** — CRUD completo: tabla con búsqueda y filtros, modal crear/editar, toggle activo/inactivo
   - **Boticas** — CRUD completo: gestión de ubicaciones tipo droguería/botica, modal crear/editar, toggle activa/inactiva
@@ -58,28 +59,36 @@ El frontend está **completamente construido y funcional**. No hay conexión rea
   - **Auditoría** — tabla de logs con búsqueda, filtros por nivel/acción y modal de detalle
   - **Configuración Avanzada** — API endpoints, ML service, base de datos, cache, rate limiting, feature flags
 
-### Portal Operaciones (Admin Central + Operador Logístico)
+### Portal Operaciones (solo Operador Logístico Central; Admin Central también accede)
 
-- Dashboard, Inventario, Distribución, Proveedores y Boticas (lectura global sin RLS)
-- Panel ML con Predicciones, Alertas ML y Recomendaciones
+- **Dashboard** — métricas operativas centrales
+- **Módulo de Inventario** — Catálogo, Stock Global, Lotes, Movimientos, Ajustes, Reportes
+- **Módulo de Distribución** — Transferencias (crear, enviar, cancelar), Redistribución (propuestas automáticas entre boticas con `PanelRedistribucion`)
+- **Módulo de Proveedores** — Listar Proveedores y Órdenes de Compra
+- **Alertas** — alertas operativas
+- **Machine Learning** — Predicciones de demanda con selector de producto, gráfica con intervalos de confianza, insignia MAPE y tabla detallada con límites inferior/superior; Alertas de Demanda
 
-### Portal Botica (Visor Local + Admin Central + Operador Logístico)
+### Portal Botica (Visor de Botica + Admin Central + Operador Logístico Central)
 
 - **Dashboard** — métricas y resumen de la botica
-- **Stock** — filtrado por botica asignada
-- **Lotes** — activos con orden FEFO, filtrados por botica
-- **Movimientos** — historial de la botica
-- **Transferencias** — entrantes y salientes de la botica
-- **Alertas** — alertas activas de la botica
-- **Pronóstico ML** — predicciones filtradas por botica
-- **Recomendaciones** — sugerencias de compra filtradas por botica
+- **Stock** — filtrado por botica asignada (RLS)
+- **Lotes** — activos con orden FEFO, filtrados por botica (RLS)
+- **Movimientos** — historial de la botica (RLS)
+- **Transferencias** — tabla con columna Tipo, detalle expandible con lotes FEFO (nº lote, vencimiento, alerta ≤30 días), fechas de envío/recepción. Solo puede Confirmar Recepción (estado En Tránsito); no puede crear/enviar/cancelar. Filtrado RLS por botica.
+- **Alertas** — alertas activas de la botica (RLS)
+- **Pronóstico ML** — predicciones filtradas por botica (RLS)
+- **Recomendaciones** — sugerencias de compra filtradas por botica (RLS)
 
-### Panel ML (segmentado por privilegio)
+### Panel ML (solo Admin Central)
 
-- **Predicciones** — serie histórica + pronóstico a 3 meses con intervalos de confianza (Admin + Operador)
-- **Alertas** — diferenciadas: regla (quiebre/vencimiento/sobrestock) vs predictiva (modelo) (Admin + Operador)
-- **Recomendaciones** — cantidad sugerida y justificación (Admin + Operador)
-- **Monitoreo ML** — monitoreo técnico del modelo, solo Admin Central
+El Panel ML en `/ml/*` es de acceso exclusivo para **Admin Central**:
+
+- **Predicciones** — serie histórica + pronóstico a 3 meses con intervalos de confianza
+- **Alertas** — diferenciadas: regla (quiebre/vencimiento/sobrestock) vs predictiva (modelo)
+- **Recomendaciones Operativas** — sugerencias inteligentes de transferencia central o redistribución basadas en análisis ML completo (stock actual/mínimo, alertas, predicciones, sobrestock, quiebre, vencimiento, FEFO). Incluye botones Aceptar/Rechazar. Al aceptar, crea automáticamente la transferencia o redistribución mock correspondiente.
+- **Monitoreo ML** — monitoreo técnico del modelo (solo Admin Central)
+
+> El Operador Logístico Central tiene funcionalidades ML reducidas dentro del Portal Operaciones en `/operaciones/ml/*` (Predicciones de demanda y Alertas de Demanda), sin acceso al panel central.
 
 ### Diseño
 
@@ -88,7 +97,7 @@ El frontend está **completamente construido y funcional**. No hay conexión rea
 - Soporte nativo para **Modo Oscuro** (Dark Mode) y temas personalizados a través de variables CSS globales (`--color-fondo`, `--color-texto`).
 - Sistema de diseño "Theme-aware" en Tailwind CSS (ej: `bg-fondo`, `text-principal`).
 - Soporte para vista de pantalla completa (Fullscreen).
-- Sidebar colapsable con highlight verde en módulo y sub-items activos, branding dinámico por portal
+- Sidebar colapsable con highlight verde en módulo y sub-items activos, detección de hermanos con ruta prefijada para evitar selección múltiple, branding dinámico por portal
 - Header fijo con breadcrumbs dinámicos, icono de portal contextual y contador de alertas
 
 ---
@@ -198,19 +207,19 @@ botica-demand-ml/
 │   │   └── tiposMovimiento.js
 │   │
 │   ├── mock-data/
-│   │   ├── alertas.js
+│   │   ├── alertas.js            # 9 alertas
 │   │   ├── auditoria.js          # Logs de auditoría (nuevo)
-│   │   ├── boticas.js            # ubigeo, distrito
+│   │   ├── boticas.js            # Droguería Central + 4 boticas, ubigeo, distrito
 │   │   ├── lotes.js
 │   │   ├── metricasKPI.js
 │   │   ├── movimientos.js
 │   │   ├── organizaciones.js
-│   │   ├── predicciones.js
+│   │   ├── predicciones.js      # 5 predicciones
 │   │   ├── precios.js
-│   │   ├── productos.js
+│   │   ├── productos.js         # 12 productos
 │   │   ├── proveedores.js
 │   │   ├── stock.js
-│   │   ├── transferencias.js
+│   │   ├── transferencias.js     # 6 transferencias enriquecidas
 │   │   ├── ubigeos.js
 │   │   └── usuarios.js           # 8 usuarios con datos expandidos
 │   │
@@ -232,12 +241,8 @@ botica-demand-ml/
 │   │   │   ├── distribution-module/
 │   │   │   │   ├── FormularioTransferencia.jsx
 │   │   │   │   ├── PaginaTransferencias.jsx
-│   │   │   │   ├── despachos/
-│   │   │   │   │   └── PaginaDespachos.jsx
 │   │   │   │   ├── historial/
 │   │   │   │   │   └── PaginaHistorialDistribucion.jsx
-│   │   │   │   └── recepciones/
-│   │   │   │       └── PaginaRecepciones.jsx
 │   │   │   │
 │   │   │   ├── inventory-module/
 │   │   │   │   ├── adjustments/
@@ -354,6 +359,8 @@ botica-demand-ml/
 └── vite.config.js
 ```
 
+> **Tabla.jsx** soporta filas expandibles vía `renderFilaExpandida` con flatMap + colSpan, y scroll horizontal configurable con `min-w-max`.
+
 ---
 
 ## Mock Data — Alineado con Arquitectura Lógica v4
@@ -367,12 +374,14 @@ botica-demand-ml/
 | `stock.js` | `ubicacionTipo` (drogueria/botica), `cantidadDisponible` |
 | `lotes.js` | `ubicacionTipo`, `fechaVencimiento` |
 | `movimientos.js` | `ubicacionTipo`, `transferenciaId`, `tipo` (entrada/salida/ajuste/merma/devolucion) |
-| `transferencias.js` | `boticaId`, `estado` (creada/en_transito/recibida), `items[]` |
+| `transferencias.js` | `tipoTransferencia`, `origenTipo`, `origenId`, `destinoTipo`, `destinoId`, `estado` (creada/en_transito/recibida/cancelada), `items[]`, `fechaDespacho`, `fechaRecepcion`, `creadoPor`, `createdAt` |
 | `precios.js` | `precioVenta`, `precioCosto` |
 | `alertas.js` | `tipoOrigen` (regla/modelo), `tipo` (+prediccion), `resuelta` |
 | `ubigeos.js` | Seed INEI con `codigo`, `distrito`, `provincia`, `departamento` |
 | `usuarios.js` | `rol` (admin_central/operador_drogueria/visor_botica), `boticaId` |
 | `auditoria.js` | `nivel` (info/advertencia/error), `accion`, `entidad`, `detalle` |
+
+> El esquema de validación de transferencias (`transferenciaEsquema.js`) usa Zod con campos `destinoId`, `items` (productoId + cantidad) y `observaciones`.
 
 ---
 
@@ -390,7 +399,7 @@ botica-demand-ml/
 
 ## Rutas del Sistema
 
-### Portal Operaciones (Admin Central + Operador Logístico)
+### Portal Central (solo Admin Central)
 
 | Ruta | Página |
 |---|---|
@@ -411,12 +420,35 @@ botica-demand-ml/
 | `/central/inventario/reportes/movimientos` | Resumen Movimientos |
 | `/central/distribucion/transferencias` | Transferencias |
 | `/central/distribucion/transferencias/nueva` | Nueva Transferencia |
-| `/central/distribucion/despachos` | Despachos |
-| `/central/distribucion/recepciones` | Recepciones |
+| `/central/distribucion/redistribucion` | Redistribución |
 | `/central/distribucion/historial` | Historial |
 | `/central/proveedores` | Proveedores |
 | `/central/proveedores/nuevo` | Nuevo Proveedor |
 | `/central/proveedores/:id` | Editar Proveedor |
+| `/central/proveedores/ordenes` | Órdenes de Compra |
+| `/central/proveedores/ordenes/nueva` | Nueva Orden de Compra |
+| `/central/proveedores/ordenes/historial` | Historial de Órdenes |
+
+### Portal Operaciones (Operador Logístico Central + Admin Central)
+
+| Ruta | Página |
+|---|---|
+| `/operaciones/dashboard` | Dashboard Operaciones |
+| `/operaciones/inventario/catalogo` | Catálogo |
+| `/operaciones/inventario/stock` | Stock Global |
+| `/operaciones/inventario/lotes` | Lotes |
+| `/operaciones/inventario/movimientos` | Movimientos |
+| `/operaciones/inventario/ajustes` | Ajustes |
+| `/operaciones/inventario/reportes` | Reportes |
+| `/operaciones/distribucion/transferencias` | Transferencias |
+| `/operaciones/distribucion/transferencias/nueva` | Nueva Transferencia |
+| `/operaciones/distribucion/redistribucion` | Redistribución |
+| `/operaciones/proveedores` | Proveedores |
+| `/operaciones/ordenes-compra` | Órdenes de Compra |
+| `/operaciones/ordenes-compra/nueva` | Nueva Orden de Compra |
+| `/operaciones/alertas` | Alertas |
+| `/operaciones/ml/predicciones` | Predicciones Demanda |
+| `/operaciones/ml/alertas-demanda` | Alertas de Demanda |
 
 ### Admin Central (solo Admin Central)
 
@@ -428,7 +460,7 @@ botica-demand-ml/
 | `/central/administracion/auditoria` | Logs y Auditoría |
 | `/central/administracion/configuracion-avanzada` | Configuración Avanzada |
 
-### Portal Botica (Visor Local + Admin Central + Operador Logístico)
+### Portal Botica (Visor de Botica + Admin Central + Operador Logístico Central)
 
 | Ruta | Página |
 |---|---|
@@ -441,7 +473,7 @@ botica-demand-ml/
 | `/botica/ml` | Pronóstico ML Botica |
 | `/botica/recomendaciones` | Recomendaciones Botica |
 
-### Panel ML (Admin Central + Operador Logístico; Monitoreo solo Admin)
+### Panel ML (solo Admin Central)
 
 | Ruta | Página |
 |---|---|
@@ -471,9 +503,12 @@ Archivo `src/utilities/permisos.js` — lógica centralizada de Row-Level Securi
 | `obtenerFiltroBotica(usuario)` | Retorna el `boticaId` del usuario o null |
 | `filtrarPorBotica(usuario, datos, campo)` | Filtra un array por ubicación |
 | `puedeEditar(usuario)` | Admin Central u Operador Logístico |
+| `puedeGestionarProveedores(usuario)` | Admin Central u Operador Logístico |
+| `puedeGestionarOrdenesCompra(usuario)` | Admin Central u Operador Logístico |
+| `puedeVerMLOperativo(usuario)` | Admin Central u Operador Logístico (predicciones y alertas de demanda en Portal Operaciones) |
 | `puedeConfigurar(usuario)` | Solo Admin Central |
-| `puedeVerMLTecnico(usuario)` | Solo Admin Central |
-| `puedeVerMLCompleto(usuario)` | Admin Central u Operador Logístico |
+| `puedeVerMLTecnico(usuario)` | Solo Admin Central (monitoreo) |
+| `puedeVerMLCompleto(usuario)` | Solo Admin Central (Panel ML completo) |
 | `obtenerPortal(usuario)` | `central` / `operaciones` / `botica` según rol |
 
 Las 8 páginas del Portal Botica usan `filtrarPorBotica()` en lugar de acceder directamente a `usuario.boticaId`.

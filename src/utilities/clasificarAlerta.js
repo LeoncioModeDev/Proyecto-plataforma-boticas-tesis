@@ -3,21 +3,12 @@
  * Retorna: "normal", "bajo", "sin_stock", "sobrestock"
  */
 export function clasificarAlerta(registro) {
-  const { stockDisponible, stockMinimo } = registro
+  const disponible = registro.cantidadDisponible ?? registro.stockDisponible ?? 0
+  const minimo = registro.stockMinimo ?? 0
 
-  if (stockDisponible === 0) {
-    return 'sin_stock'
-  }
-
-  if (stockDisponible < stockMinimo) {
-    return 'bajo'
-  }
-
-  // Sobrestock si excede 3 veces el mínimo
-  if (stockMinimo > 0 && stockDisponible > stockMinimo * 3) {
-    return 'sobrestock'
-  }
-
+  if (disponible === 0) return 'sin_stock'
+  if (disponible < minimo) return 'bajo'
+  if (minimo > 0 && disponible > minimo * 3) return 'sobrestock'
   return 'normal'
 }
 

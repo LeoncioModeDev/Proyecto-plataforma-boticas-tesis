@@ -29,13 +29,15 @@ import ReporteKardex from '@/pages/central-portal/inventory-module/reports/Repor
 import ReporteStockCritico from '@/pages/central-portal/inventory-module/reports/ReporteStockCritico'
 import ReporteMovimientos from '@/pages/central-portal/inventory-module/reports/ReporteMovimientos'
 import PaginaTransferencias from '@/pages/central-portal/distribution-module/PaginaTransferencias'
+import PaginaRedistribucionCentral from '@/pages/central-portal/distribution-module/PaginaRedistribucion'
 import FormularioTransferencia from '@/pages/central-portal/distribution-module/FormularioTransferencia'
-import PaginaDespachos from '@/pages/central-portal/distribution-module/despachos/PaginaDespachos'
-import PaginaRecepciones from '@/pages/central-portal/distribution-module/recepciones/PaginaRecepciones'
 import PaginaHistorialDistribucion from '@/pages/central-portal/distribution-module/historial/PaginaHistorialDistribucion'
 import PaginaProveedores from '@/pages/central-portal/suppliers-module/PaginaProveedores'
 import PaginaNuevoProveedor from '@/pages/central-portal/suppliers-module/new/PaginaNuevoProveedor'
 import PaginaEditarProveedor from '@/pages/central-portal/suppliers-module/edit/PaginaEditarProveedor'
+import PaginaOrdenesCompraCentral from '@/pages/central-portal/suppliers-module/PaginaOrdenesCompra'
+import PaginaNuevaOrdenCompraCentral from '@/pages/central-portal/suppliers-module/new/PaginaNuevaOrdenCompra'
+import PaginaHistorialOrdenesCentral from '@/pages/central-portal/suppliers-module/PaginaHistorialOrdenes'
 import PaginaUsuarios from '@/pages/central-portal/administration-module/PaginaUsuarios'
 import PaginaBoticas from '@/pages/central-portal/administration-module/PaginaBoticas'
 import PaginaConfiguracionGeneral from '@/pages/central-portal/administration-module/PaginaConfiguracionGeneral'
@@ -62,12 +64,25 @@ import PaginaMovimientosOperaciones from '@/pages/operations-portal/inventory-mo
 import PaginaAjustesOperaciones from '@/pages/operations-portal/inventory-module/PaginaAjustes'
 import PaginaReportesOperaciones from '@/pages/operations-portal/inventory-module/PaginaReportes'
 import PaginaTransferenciasOperaciones from '@/pages/operations-portal/distribution-module/PaginaTransferencias'
+import FormularioTransferenciaOperaciones from '@/pages/operations-portal/distribution-module/FormularioTransferencia'
 import PaginaRedistribucionOperaciones from '@/pages/operations-portal/distribution-module/PaginaRedistribucion'
 import PaginaProveedoresOperaciones from '@/pages/operations-portal/suppliers-module/PaginaProveedores'
 import PaginaOrdenesCompraOperaciones from '@/pages/operations-portal/suppliers-module/PaginaOrdenesCompra'
+import PaginaNuevaOrdenCompraOperaciones from '@/pages/operations-portal/suppliers-module/PaginaNuevaOrdenCompra'
 import PaginaAlertasOperaciones from '@/pages/operations-portal/PaginaAlertas'
 import PaginaPrediccionesOperaciones from '@/pages/operations-portal/ml-module/PaginaPredicciones'
 import PaginaAlertasDemandaOperaciones from '@/pages/operations-portal/ml-module/PaginaAlertasDemanda'
+// Reused from Central Portal for Operations
+import FormularioProductoOperaciones from '@/pages/central-portal/inventory-module/catalog/FormularioProducto'
+import DetalleProductoOperaciones from '@/pages/central-portal/inventory-module/catalog/DetalleProducto'
+import FormularioLoteOperaciones from '@/pages/central-portal/inventory-module/lots/FormularioLote'
+import FormularioMovimientoOperaciones from '@/pages/central-portal/inventory-module/movements/FormularioMovimiento'
+import FormularioAjusteOperaciones from '@/pages/central-portal/inventory-module/adjustments/FormularioAjuste'
+import ReporteKardexOperaciones from '@/pages/central-portal/inventory-module/reports/ReporteKardex'
+import ReporteStockCriticoOperaciones from '@/pages/central-portal/inventory-module/reports/ReporteStockCritico'
+import ReporteMovimientosOperaciones from '@/pages/central-portal/inventory-module/reports/ReporteMovimientos'
+import PaginaNuevoProveedorOperaciones from '@/pages/central-portal/suppliers-module/new/PaginaNuevoProveedor'
+import PaginaEditarProveedorOperaciones from '@/pages/central-portal/suppliers-module/edit/PaginaEditarProveedor'
 
 // Panel ML
 import PaginaPredicciones from '@/pages/ml-panel/PaginaPredicciones'
@@ -145,12 +160,14 @@ export default function Rutas() {
         <Route path="/central/inventario/reportes/movimientos" element={<ReporteMovimientos />} />
         <Route path="/central/distribucion/transferencias" element={<PaginaTransferencias />} />
         <Route path="/central/distribucion/transferencias/nueva" element={<FormularioTransferencia />} />
-        <Route path="/central/distribucion/despachos" element={<PaginaDespachos />} />
-        <Route path="/central/distribucion/recepciones" element={<PaginaRecepciones />} />
+        <Route path="/central/distribucion/redistribucion" element={<PaginaRedistribucionCentral />} />
         <Route path="/central/distribucion/historial" element={<PaginaHistorialDistribucion />} />
         <Route path="/central/proveedores" element={<PaginaProveedores />} />
         <Route path="/central/proveedores/nuevo" element={<PaginaNuevoProveedor />} />
         <Route path="/central/proveedores/:id" element={<PaginaEditarProveedor />} />
+        <Route path="/central/proveedores/ordenes" element={<PaginaOrdenesCompraCentral />} />
+        <Route path="/central/proveedores/ordenes/nueva" element={<PaginaNuevaOrdenCompraCentral />} />
+        <Route path="/central/proveedores/ordenes/historial" element={<PaginaHistorialOrdenesCentral />} />
         <Route path="/central/administracion/usuarios" element={<PaginaUsuarios />} />
         <Route path="/central/administracion/boticas" element={<PaginaBoticas />} />
         <Route path="/central/administracion/boticas/nueva" element={<PaginaNuevaBotica />} />
@@ -183,15 +200,28 @@ export default function Rutas() {
       }>
         <Route path="/operaciones/dashboard" element={<PaginaDashboardOperaciones />} />
         <Route path="/operaciones/inventario/catalogo" element={<PaginaCatalogoOperaciones />} />
+        <Route path="/operaciones/inventario/catalogo/nuevo" element={<FormularioProductoOperaciones />} />
+        <Route path="/operaciones/inventario/catalogo/:id" element={<DetalleProductoOperaciones />} />
+        <Route path="/operaciones/inventario/catalogo/:id/editar" element={<FormularioProductoOperaciones />} />
         <Route path="/operaciones/inventario/stock" element={<PaginaStockOperaciones />} />
         <Route path="/operaciones/inventario/lotes" element={<PaginaLotesOperaciones />} />
+        <Route path="/operaciones/inventario/lotes/nuevo" element={<FormularioLoteOperaciones />} />
         <Route path="/operaciones/inventario/movimientos" element={<PaginaMovimientosOperaciones />} />
+        <Route path="/operaciones/inventario/movimientos/nuevo" element={<FormularioMovimientoOperaciones />} />
         <Route path="/operaciones/inventario/ajustes" element={<PaginaAjustesOperaciones />} />
+        <Route path="/operaciones/inventario/ajustes/nuevo" element={<FormularioAjusteOperaciones />} />
         <Route path="/operaciones/inventario/reportes" element={<PaginaReportesOperaciones />} />
+        <Route path="/operaciones/inventario/reportes/kardex" element={<ReporteKardexOperaciones />} />
+        <Route path="/operaciones/inventario/reportes/stock-critico" element={<ReporteStockCriticoOperaciones />} />
+        <Route path="/operaciones/inventario/reportes/movimientos" element={<ReporteMovimientosOperaciones />} />
         <Route path="/operaciones/distribucion/transferencias" element={<PaginaTransferenciasOperaciones />} />
+        <Route path="/operaciones/distribucion/transferencias/nueva" element={<FormularioTransferenciaOperaciones />} />
         <Route path="/operaciones/distribucion/redistribucion" element={<PaginaRedistribucionOperaciones />} />
         <Route path="/operaciones/proveedores" element={<PaginaProveedoresOperaciones />} />
+        <Route path="/operaciones/proveedores/nuevo" element={<PaginaNuevoProveedorOperaciones />} />
+        <Route path="/operaciones/proveedores/:id" element={<PaginaEditarProveedorOperaciones />} />
         <Route path="/operaciones/ordenes-compra" element={<PaginaOrdenesCompraOperaciones />} />
+        <Route path="/operaciones/ordenes-compra/nueva" element={<PaginaNuevaOrdenCompraOperaciones />} />
         <Route path="/operaciones/alertas" element={<PaginaAlertasOperaciones />} />
         <Route path="/operaciones/ml/predicciones" element={<PaginaPrediccionesOperaciones />} />
         <Route path="/operaciones/ml/alertas-demanda" element={<PaginaAlertasDemandaOperaciones />} />

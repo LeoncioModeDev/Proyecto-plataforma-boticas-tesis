@@ -51,9 +51,10 @@ Implementar una plataforma web basada en Arquitectura Serverless y Machine Learn
 ### Lo que NO modela esta arquitectura
 
 | Exclusión | Motivo (fuente ACP) |
-|---|---|
+|---|---|---|
 | Módulo de ventas / POS | Fuera del alcance — la plataforma consume movimientos de salida, no registra ventas directas al cliente |
-| Órdenes de compra automáticas a proveedores | Excluido del alcance funcional |
+| Órdenes de compra automatizadas a proveedores | Excluidas del alcance funcional — las órdenes de compra existen como soporte documental manual, no como abastecimiento inteligente automatizado |
+| Autenticación biométrica u OAuth corporativo | Solo Supabase Auth (JWT + RLS nativo) |
 | Autenticación biométrica u OAuth corporativo | Solo Supabase Auth (JWT + RLS nativo) |
 | Integración con sistemas externos (POS, ERP, WMS) | Solo datos históricos en formato digital |
 | Despliegue en infraestructura productiva de alta disponibilidad | Entornos gratuitos y contenedores de bajo costo |
@@ -153,6 +154,10 @@ Reentrenamientos Evitados = (Semanas evaluadas − Semanas con retraining dispar
 | `drift_metricas` | Tabla nueva | Historial de métricas de drift semanales |
 | `precios` | Tabla nueva | `precio_venta` y `precio_costo` requeridos para ML |
 | `ubigeos` | Tabla de referencia auxiliar (padrón INEI) | FK desde `boticas.ubigeo` |
+| `transferencias` | Reemplazado `botica_id` por `origen_tipo`, `origen_id`, `destino_tipo`, `destino_id`; agregado `tipo_transferencia` y estado `cancelada` | Soportar redistribución botica→botica y flujo completo de estados |
+| `ordenes_compra` | Tabla nueva para soporte documental de reabastecimiento | HU-029, HU-030, HU-031, HU-016 |
+| `ordenes_compra_items` | Tabla nueva con detalle de productos por orden | HU-029 |
+| `recomendaciones_ml` | Tabla nueva para recomendaciones operativas de transferencia/redistribución | Alineación ML con distribución |
 
 ---
 
@@ -328,16 +333,25 @@ Proveedores nacionales e internacionales.
 
 ### `transferencias`
 
-Despachos desde droguería central hacia boticas. Solo la central crea transferencias.
+Despachos desde droguería central hacia boticas (transferencia_central) o entre boticas (redistribucion). La central y el operador logístico crean transferencias; el visor de botica solo confirma recepción.
 
 | Columna | Tipo | Restricción | Descripción |
 |---|---|---|---|
 | `id` | `uuid` | PK | Identificador único |
-| `botica_id` | `uuid` | FK → boticas.id, NOT NULL | Botica destino |
-| `estado` | `enum('creada','en_transito','recibida')` | NOT NULL, default `'creada'` | Estado |
-| `creado_por` | `uuid` | FK → auth.users, NOT NULL | Usuario central que creó la transferencia |
-| `fecha_despacho` | `timestamptz` | nullable | Cuándo salió de droguería |
-| `fecha_recepcion` | `timestamptz` | nullable | Cuándo fue recibida en botica |
+| `tipo_transferencia` | `enum('transferencia_central','redistribucion')` | NOT NULL | Distingue envío desde droguería vs redistribución entre boticas |
+| `origen_tipo` | `enum('drogueria','botica')` | NOT NULL | Tipo de ubicación origen |
+| `origen_id` | `uuid` | FK → boticas.id, nullable | ID de botica origen; NULL si origen_tipo = 'drogueria' |
+| `destino_tipo` | `enum('drogueria','botica')` | NOT NULL, default 'botica' | Tipo de ubicación destino |
+| `destino_id` | `uuid` | FK → boticas.id, NOT NULL | Botica destino |
+| `estado` | `enum('creada','en_transito','recibida','cancelada')` | NOT NULL, default `'creada'` | Estado del flujo de distribución |
+| `creado_por` | `uuid` | FK → auth.users, NOT NULL | Usuario que creó la transferencia |
+| `fecha_despacho` | `timestamptz` | nullable | Cuándo salió de origen |
+| `fecha_recepcion` | `timestamptz` | nullable | Cuándo fue recibida en destino |
+
+**Reglas de estado:**
+- `creada` → solo se puede enviar (→ `en_transito`) o cancelar (→ `cancelada`)
+- `en_transito` → solo se puede confirmar recepción (→ `recibida`)
+- `recibida` / `cancelada` → solo lectura, no se permiten más cambios
 
 ---
 
@@ -355,7 +369,71 @@ Detalle de productos y lotes por transferencia.
 
 ---
 
+### `ordenes_compra`
+
+Órdenes de compra a proveedores. Soporte documental y operativo para planificación de reabastecimiento — no es un ERP ni compras automatizadas.
+
+| Columna | Tipo | Restricción | Descripción |
+|---|---|---|---|
+| `id` | `uuid` | PK | Identificador único |
+| `proveedor_id` | `uuid` | FK → proveedores.id, NOT NULL | Proveedor al que se ordena |
+| `creado_por` | `uuid` | FK → auth.users, NOT NULL | Usuario que registró la orden (Operador) |
+| `estado` | `enum('pendiente','aprobada','rechazada','completada')` | NOT NULL, default `'pendiente'` | Estado de la orden |
+| `fecha_estimada_entrega` | `date` | nullable | Fecha estimada de recepción |
+| `observaciones` | `text` | nullable | Notas adicionales |
+| `aprobado_por` | `uuid` | FK → auth.users, nullable | Admin que aprobó o rechazó |
+| `fecha_aprobacion` | `timestamptz` | nullable | Cuándo se aprobó/rechazó |
+| `created_at` | `timestamptz` | NOT NULL, default `now()` | Fecha de creación |
+
+**Reglas de flujo:**
+- Operador crea → estado `pendiente`
+- Admin aprueba → `aprobada` o rechaza → `rechazada`
+- Solo el operador puede marcar como `completada` cuando llega la mercadería
+
+---
+
+### `ordenes_compra_items`
+
+Detalle de productos por orden de compra.
+
+| Columna | Tipo | Restricción | Descripción |
+|---|---|---|---|
+| `id` | `uuid` | PK | Identificador único |
+| `orden_compra_id` | `uuid` | FK → ordenes_compra.id, NOT NULL | Orden de compra |
+| `producto_id` | `uuid` | FK → productos.id, NOT NULL | Producto solicitado |
+| `cantidad` | `int` | NOT NULL | Unidades solicitadas |
+| `precio_unitario` | `numeric(10,2)` | NOT NULL | Precio unitario acordado |
+
+---
+
 ## Dominio 5 — Machine Learning
+
+### `recomendaciones_ml`
+
+Recomendaciones operativas generadas por el modelo ML para transferencias y redistribuciones. El usuario puede confirmar o rechazar; al confirmar, se crea automáticamente un registro en `transferencias`.
+
+| Columna | Tipo | Restricción | Descripción |
+|---|---|---|---|
+| `id` | `uuid` | PK | Identificador único |
+| `producto_id` | `uuid` | FK → productos.id, NOT NULL | Producto sobre el que se recomienda |
+| `botica_destino_id` | `uuid` | FK → boticas.id, NOT NULL | Botica con riesgo de desabastecimiento |
+| `botica_origen_id` | `uuid` | FK → boticas.id, nullable | Botica con excedente (NULL si origen es droguería central) |
+| `tipo_recomendacion` | `enum('transferencia','redistribucion')` | NOT NULL | Tipo de acción sugerida |
+| `cantidad_sugerida` | `int` | NOT NULL | Unidades sugeridas |
+| `motivo` | `text` | NOT NULL | Descripción del análisis ML |
+| `confianza_modelo` | `float` | NOT NULL | Nivel de confianza del modelo (0–100) |
+| `estado` | `enum('pendiente','confirmada','rechazada','ejecutada')` | NOT NULL, default `'pendiente'` | Estado de la recomendación |
+| `transferencia_id` | `uuid` | FK → transferencias.id, nullable | Transferencia creada al confirmar |
+| `confirmado_por` | `uuid` | FK → auth.users, nullable | Usuario que confirmó/rechazó |
+| `confirmado_en` | `timestamptz` | nullable | Cuándo se confirmó/rechazó |
+| `generado_en` | `timestamptz` | NOT NULL, default `now()` | Cuándo se generó la recomendación |
+
+**Flujo:**
+1. ML detecta riesgo de quiebre o sobrestock → genera recomendación (`pendiente`)
+2. Usuario revisa → confirma (`confirmada`) o rechaza (`rechazada`)
+3. Al confirmar → sistema crea transferencia/redistribución y vincula (`ejecutada`, `transferencia_id`)
+
+---
 
 ### `predicciones_ml`
 
@@ -633,16 +711,23 @@ boticas ──< precias
 boticas ──< predicciones_ml
 boticas ──< inferencias
 boticas ──< alertas_ml
-boticas ──< transferencias
+boticas ──< transferencias          (como destino)
+boticas ──< transferencias          (como origen, en redistribucion)
 
 proveedores ──< lotes
+proveedores ──< ordenes_compra
 
 transferencias ──< transferencias_items
 transferencias_items >── lotes
 
+ordenes_compra ──< ordenes_compra_items
+
 modelos_ml ──< predicciones_ml         (auditoría: predicción → versión)
 modelos_ml ──< inferencias              (auditoría: inferencia → versión)
 modelos_ml ──< drift_metricas           (monitoreo: drift por versión activa)
+modelos_ml ──< recomendaciones_ml       (recomendaciones generadas por el modelo activo)
+
+recomendaciones_ml >── transferencias   (opcional: creada al confirmar recomendación)
 
 inferencias ──> drift_metricas          (mape_rolling calculado desde inferencias.error_absoluto)
 movimientos_inventario ──> inferencias  (backfill de valor_real vía pg_cron Job 4)

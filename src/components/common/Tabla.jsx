@@ -17,6 +17,7 @@ export default function Tabla({
   busqueda = true,
   tamanoPagina = 10,
   alClickFila,
+  renderFilaExpandida,
 }) {
   const [filtroGlobal, setFiltroGlobal] = useState('')
   const [ordenamiento, setOrdenamiento] = useState([])
@@ -61,7 +62,7 @@ export default function Tabla({
 
       <div className="border border-estilo rounded-lg overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[600px]">
+          <table className="w-full min-w-max">
             <thead>
               {tabla.getHeaderGroups().map(grupo => (
                 <tr key={grupo.id} className="bg-fondo border-b border-estilo">
@@ -89,20 +90,33 @@ export default function Tabla({
                   </td>
                 </tr>
               ) : (
-                tabla.getRowModel().rows.map(fila => (
-                  <tr
-                    key={fila.id}
-                    onClick={() => alClickFila && alClickFila(fila.original)}
-                    className={`border-b border-estilo last:border-b-0 hover:bg-marca-claro dark:hover:bg-marca-claro transition-colors ${alClickFila ? 'cursor-pointer' : ''}`}
-                    style={{ minHeight: '44px' }}
-                  >
-                    {fila.getVisibleCells().map(celda => (
-                      <td key={celda.id} className="px-3 sm:px-4 py-3 text-xs sm:text-sm text-principal">
-                        {flexRender(celda.column.columnDef.cell, celda.getContext())}
-                      </td>
-                    ))}
-                  </tr>
-                ))
+                tabla.getRowModel().rows.flatMap(fila => {
+                  const filaTr = (
+                    <tr
+                      key={fila.id}
+                      onClick={() => alClickFila && alClickFila(fila.original)}
+                      className={`border-b border-estilo last:border-b-0 hover:bg-marca-claro dark:hover:bg-marca-claro transition-colors ${alClickFila ? 'cursor-pointer' : ''}`}
+                      style={{ minHeight: '44px' }}
+                    >
+                      {fila.getVisibleCells().map(celda => (
+                        <td key={celda.id} className="px-3 sm:px-4 py-3 text-xs sm:text-sm text-principal">
+                          {flexRender(celda.column.columnDef.cell, celda.getContext())}
+                        </td>
+                      ))}
+                    </tr>
+                  )
+                  const expandida = renderFilaExpandida?.(fila.original)
+                  if (expandida) {
+                    return [filaTr, (
+                      <tr key={`exp-${fila.id}`} className="border-b border-estilo">
+                        <td colSpan={columnas.length} className="p-0">
+                          {expandida}
+                        </td>
+                      </tr>
+                    )]
+                  }
+                  return [filaTr]
+                })
               )}
             </tbody>
           </table>

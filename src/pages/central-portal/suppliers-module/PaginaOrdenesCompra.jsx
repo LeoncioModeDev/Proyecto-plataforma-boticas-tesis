@@ -16,7 +16,7 @@ export default function PaginaOrdenesCompra() {
       ordenes={ordenes}
       setOrdenes={setOrdenes}
       esAdmin={esAdmin}
-      onNueva={() => navegar('/operaciones/ordenes-compra/nueva')}
+      onNueva={() => navegar('/central/proveedores/ordenes/nueva')}
     />
   )
 }

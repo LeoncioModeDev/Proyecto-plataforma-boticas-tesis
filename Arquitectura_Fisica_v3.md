@@ -52,13 +52,16 @@ El diferenciador es la orquestación in-database: `pg_cron` + `pg_net` + Supabas
 | Iconos        | Lucide React          | —              | Iconografía                                                    |
 | CSS utils     | clsx + tailwind-merge | —              | Composición de clases                                          |
 
+> **Tabla.jsx** (TanStack Table v8) con soporte para filas expandibles vía `renderFilaExpandida` (implementado con flatMap + colSpan), ordenamiento por columnas, filtro global, paginación configurable y scroll horizontal con `min-w-max`.
+
 ### Portales y roles
 
 | Portal         | Rol                             | Rutas principales                                                                              |
 | -------------- | ------------------------------- | ---------------------------------------------------------------------------------------------- |
-| Portal Central | Admin Central                   | `/central/dashboard`, `/central/inventario/*`, `/central/distribucion`, `/central/proveedores` |
-| Portal Boticas | Operador de Droguería           | `/botica/stock`, `/botica/lotes`, `/botica/movimientos`                                        |
-| Panel ML       | Visor de Botica / Admin Central | `/ml/predicciones`, `/ml/alertas`, `/ml/recomendaciones`                                       |
+| Portal Central | Admin Central                   | `/central/dashboard`, `/central/inventario/*`, `/central/distribucion/transferencias`, `/central/distribucion/redistribucion`, `/central/distribucion/historial`, `/central/proveedores/*`, `/central/administracion/*`, `/ml/*` |
+| Portal Operaciones | Operador Droguería / Admin Central | `/operaciones/dashboard`, `/operaciones/inventario/*`, `/operaciones/distribucion/transferencias`, `/operaciones/distribucion/redistribucion`, `/operaciones/proveedores`, `/operaciones/ordenes-compra/*`, `/operaciones/alertas`, `/operaciones/ml/*` |
+| Portal Botica   | Visor de Botica / Admin Central / Operador Droguería | `/botica/dashboard`, `/botica/stock`, `/botica/lotes`, `/botica/movimientos`, `/botica/transferencias`, `/botica/alertas`, `/botica/ml`, `/botica/recomendaciones` |
+| Panel ML        | Admin Central                   | `/ml/predicciones`, `/ml/alertas`, `/ml/recomendaciones`, `/ml/monitoreo` |
 
 ### Control de acceso (frontend)
 
@@ -116,8 +119,10 @@ Supabase provee todos los servicios de backend sin servidor dedicado. Esta es la
 | `lotes`                  | Lotes activos con fecha de vencimiento   | FEFO: `fecha_vencimiento` es feature ML                            |
 | `movimientos_inventario` | Log inmutable de auditoría               | `tipo_movimiento` enum: entrada/salida/ajuste/merma/devolucion     |
 | `transferencias`         | Despachos droguería → boticas            | Estados: creada/en_transito/recibida                               |
-| `transferencias_items`   | Detalle de lotes por transferencia       | Selección con criterio FEFO                                        |
+| `transferencias_items`   | Detalle de lotes por transferencia       | Selección con criterio FEFO (lotes ordenados por fecha de vencimiento, alerta ≤30 días) |
 | `ubigeos`                | Padrón INEI (referencia estática)        | Seed único; no cambia                                              |
+
+> **Nota:** Los módulos independientes de Despachos y Recepciones fueron eliminados — la funcionalidad se unificó en Transferencias. Una transferencia en estado `en_transito` equivale a un despacho, y al confirmar recepción pasa a `recibida`.
 
 #### Tablas MLOps (diferenciador arquitectónico)
 
@@ -336,14 +341,14 @@ En la Fase 1, todos los datos provienen de archivos mock en `src/mock-data/`. Lo
 | Archivo             | Contenido                                        |
 | ------------------- | ------------------------------------------------ |
 | `productos.js`      | 12 medicamentos (Paracetamol, Amoxicilina, etc.) |
-| `stock.js`          | 16 registros en 3 ubicaciones                    |
+| `stock.js`          | 16 registros en 5 ubicaciones (1 droguería + 4 boticas) |
 | `lotes.js`          | 14 lotes con fechas variadas (FEFO)              |
 | `movimientos.js`    | 21 movimientos de todos los tipos                |
-| `transferencias.js` | 6 transferencias en distintos estados            |
+| `transferencias.js` | 6 transferencias: 2 recibidas, 2 en tránsito, 1 creada, 1 cancelada |
 | `alertas.js`        | 9 alertas activas (regla + predictivas)          |
 | `predicciones.js`   | 5 predicciones con serie histórica de 11 meses   |
-| `boticas.js`        | Droguería Central + 2 boticas Lima               |
-| `usuarios.js`       | 3 usuarios (1 por rol)                           |
+| `boticas.js`        | Droguería Central + 4 boticas (Miraflores, San Borja, Surco, Los Olivos) |
+| `usuarios.js`       | 8 usuarios (3 admin central, 3 operador droguería, 2 visor botica) |
 
 Los servicios mock viven en:
 

@@ -25,7 +25,7 @@ export default function PaginaHistorialDistribucion() {
     const term = busqueda.toLowerCase()
     filtrado = filtrado.filter(t => 
       t.id.toLowerCase().includes(term) ||
-      obtenerNombreUbicacion(t.boticaId).toLowerCase().includes(term)
+      obtenerNombreUbicacion(t.destinoId).toLowerCase().includes(term)
     )
   }
 
@@ -39,7 +39,7 @@ export default function PaginaHistorialDistribucion() {
 
   const columnas = [
     { campo: 'id', encabezado: 'ID', render: (r) => <span className="font-mono text-cuerpo">{r.id.toUpperCase()}</span> },
-    { campo: 'boticaId', encabezado: 'Destino', render: (r) => <span className="text-principal">{obtenerNombreUbicacion(r.boticaId)}</span> },
+    { campo: 'destinoId', encabezado: 'Destino', render: (r) => <span className="text-principal">{obtenerNombreUbicacion(r.destinoId)}</span> },
     { campo: 'items', encabezado: 'Productos', render: (r) => <span>{r.items.reduce((a, i) => a + i.cantidad, 0)}</span> },
     { campo: 'estado', encabezado: 'Estado', render: (r) => {
       const estadoInfo = ESTADOS[r.estado] || ESTADOS.creada

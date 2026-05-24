@@ -64,7 +64,7 @@ export default function FormularioTransferencia() {
     itemCounter += datos.items.length
     transferencias.push(nuevaTransferencia)
     setExito(true)
-    setTimeout(() => navegar('/central/distribucion/transferencias'), 1500)
+    setTimeout(() => navegar('/operaciones/distribucion/transferencias'), 1500)
   }
 
   return (

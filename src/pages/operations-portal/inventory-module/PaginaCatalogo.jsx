@@ -35,7 +35,7 @@ export default function PaginaCatalogo() {
           <h1 className="text-h1 text-principal">Catálogo de Productos</h1>
           <p className="text-secundario mt-1">Gestión global del catálogo de la red</p>
         </div>
-        <Boton variante="primario" icono={Plus}>Nuevo producto</Boton>
+        <Boton variante="primario" icono={Plus} onClick={() => navegar('/operaciones/inventario/catalogo/nuevo')}>Nuevo producto</Boton>
       </div>
       <Tabla columnas={columnas} datos={productos} />
     </div>

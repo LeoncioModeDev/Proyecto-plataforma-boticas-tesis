@@ -16,8 +16,6 @@ const NOMBRES_RUTA = {
   kardex: 'Kardex',
   distribucion: 'Distribución',
   transferencias: 'Transferencias',
-  despachos: 'Despachos',
-  recepciones: 'Recepciones',
   historial: 'Historial',
   proveedores: 'Proveedores',
   administracion: 'Administración',
