@@ -1,11 +1,22 @@
 import { createHash } from 'crypto'
+import { readFileSync } from 'fs'
 
-const SUPABASE_URL = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL || 'https://TU_SUPABASE_URL.supabase.co'
-const SERVICE_ROLE = process.env.VITE_SUPABASE_SERVICE_ROLE || process.env.SUPABASE_SERVICE_ROLE || 'TU_SERVICE_ROLE_KEY'
+const vars = {}
+try {
+  for (const line of readFileSync('.env', 'utf8').split(/\r?\n/)) {
+    const m = line.match(/^\s*([A-Z_][A-Z0-9_]+)=(.*)$/)
+    if (m) vars[m[1]] = m[2].replace(/^["']|["']$/g, '')
+  }
+} catch (e) { /* .env not found */ }
+for (const k of ['VITE_SUPABASE_URL', 'VITE_SUPABASE_SERVICE_ROLE', 'SUPABASE_URL', 'SUPABASE_SERVICE_ROLE']) {
+  if (process.env[k]) vars[k] = process.env[k]
+}
 
-if (SUPABASE_URL.includes('TU_SUPABASE_URL') || SERVICE_ROLE.includes('TU_SERVICE_ROLE')) {
+const SUPABASE_URL = vars.VITE_SUPABASE_URL || vars.SUPABASE_URL
+const SERVICE_ROLE = vars.VITE_SUPABASE_SERVICE_ROLE || vars.SUPABASE_SERVICE_ROLE
+
+if (!SUPABASE_URL || !SERVICE_ROLE || SUPABASE_URL.includes('TU_') || SERVICE_ROLE.includes('TU_')) {
   console.error('ERROR: Debes configurar VITE_SUPABASE_URL y VITE_SUPABASE_SERVICE_ROLE en .env')
-  console.error('  O exportar las variables de entorno directamente.')
   process.exit(1)
 }
 
@@ -40,6 +51,16 @@ const USRS = [
   { id: 'aa99fd73-a72b-4e37-87a3-92cdd6bf6b59', email: 'luis@boticaml.pe',        nombre: 'Luis Garcia',    rol: 'visor_botica',       botica_id: BOTICA_SB },
 ]
 
+async function buscarUsuario(email) {
+  const resp = await fetch(`${SUPABASE_AUTH}/admin/users?email=${encodeURIComponent(email)}`, {
+    headers: AUTH_HEADERS,
+  })
+  if (!resp.ok) return null
+  const datos = await resp.json()
+  if (datos.users?.length > 0) return datos.users[0]
+  return null
+}
+
 async function crearUsuario(email, password, userMetadata, appMetadata) {
   const resp = await fetch(`${SUPABASE_AUTH}/admin/users`, {
     method: 'POST',
@@ -47,11 +68,12 @@ async function crearUsuario(email, password, userMetadata, appMetadata) {
     body: JSON.stringify({ email, password, email_confirm: true, user_metadata: userMetadata, app_metadata: appMetadata }),
   })
   const body = await resp.json()
-  if (!resp.ok) {
-    if (resp.status === 409) {
-      console.log(`  ~ ${email} ya existe (actualizando metadata)`)
-      const { id } = body
-      const upd = await fetch(`${SUPABASE_AUTH}/admin/users/${id}`, {
+
+  if (resp.status === 409) {
+    const existente = await buscarUsuario(email)
+    if (existente) {
+      console.log(`  ~ ${email} ya existe (ID: ${existente.id})`)
+      const upd = await fetch(`${SUPABASE_AUTH}/admin/users/${existente.id}`, {
         method: 'PUT',
         headers: AUTH_HEADERS,
         body: JSON.stringify({ email, password, email_confirm: true, user_metadata: userMetadata, app_metadata: appMetadata }),
@@ -60,23 +82,30 @@ async function crearUsuario(email, password, userMetadata, appMetadata) {
         const txt = await upd.text()
         throw new Error(`Error actualizando ${email}: ${upd.status} ${txt.slice(0, 200)}`)
       }
-      return id
+      console.log(`  ~ ${email} metadata actualizada`)
+      return existente.id
     }
+    throw new Error(`Error: ${email} existe pero no se pudo obtener su ID`)
+  }
+
+  if (!resp.ok) {
     throw new Error(`Error creando ${email}: ${resp.status} ${JSON.stringify(body).slice(0, 200)}`)
   }
+
   console.log(`  ✓ ${email}`)
   return body.id
 }
 
-async function upsertPerfil(user) {
-  const resp = await fetch(`${SUPABASE_REST}/usuarios?id=eq.${user.id}`, {
+async function upsertPerfil(uid, user) {
+  const payload = { id: uid, org_id: ORG_001, email: user.email, nombre: user.nombre, rol: user.rol, botica_id: user.botica_id }
+
+  const resp = await fetch(`${SUPABASE_REST}/usuarios?id=eq.${uid}`, {
     headers: { 'Content-Type': 'application/json', 'apikey': SERVICE_ROLE, 'Authorization': `Bearer ${SERVICE_ROLE}` },
   })
   const existing = await resp.json()
-  const payload = { id: user.id, org_id: ORG_001, email: user.email, nombre: user.nombre, rol: user.rol, botica_id: user.botica_id }
 
   if (existing.length > 0) {
-    await fetch(`${SUPABASE_REST}/usuarios?id=eq.${user.id}`, {
+    await fetch(`${SUPABASE_REST}/usuarios?id=eq.${uid}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json', 'apikey': SERVICE_ROLE, 'Authorization': `Bearer ${SERVICE_ROLE}`, 'Prefer': 'resolution=merge-duplicates' },
       body: JSON.stringify(payload),
@@ -88,7 +117,7 @@ async function upsertPerfil(user) {
       body: JSON.stringify(payload),
     })
   }
-  console.log(`  ✓ perfil ${user.email}`)
+  console.log(`  ✓ perfil ${user.email} (ID: ${uid})`)
 }
 
 async function main() {
@@ -101,17 +130,15 @@ async function main() {
       { org_id: ORG_001, nombre: u.nombre, rol: u.rol, botica_id: u.botica_id },
       { rol: u.rol, org_id: ORG_001, botica_id: u.botica_id },
     )
-    if (userId !== u.id) {
-      console.log(`  ! ${u.email} ID ${userId} (esperado ${u.id}) — se usa el ID real`)
-    }
+    u.id = userId
   }
 
   console.log('\n=== Sincronizando perfiles en public.usuarios ===\n')
   for (const u of USRS) {
-    await upsertPerfil(u)
+    await upsertPerfil(u.id, u)
   }
 
-  console.log('\n✓ Usuarios listos. Ahora ejecuta semilla.sql en el SQL Editor.')
+  console.log('\n✓ Seed completo. Puedes iniciar sesión con cualquiera de los usuarios.')
 }
 
 main().catch(err => { console.error(err); process.exit(1) })
