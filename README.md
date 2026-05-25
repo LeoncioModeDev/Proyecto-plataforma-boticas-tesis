@@ -16,7 +16,8 @@ El frontend está **completamente construido y funcional**. No hay conexión rea
 
 ### Sistema de autenticación y roles
 
-- Pantalla de login con selector de rol para modo desarrollo
+- Login real con Supabase Auth (email + contraseña); sin selector mock
+- Página 403 (`/no-autorizado`) cuando el rol no tiene permiso para una ruta
 - Tres roles con portales y permisos completamente distintos:
   - **Admin Central** (`ADMIN_CENTRAL`) — acceso total a los 3 portales (Central, Operaciones, Botica) y Panel ML completo. Sin restricción RLS.
   - **Operador Logístico Central** (`OPERADOR_DROGUERIA`) — acceso al Portal Operaciones (dashboard, inventario, distribución, proveedores, órdenes de compra) y al Portal Botica. Sin restricción RLS. Sin acceso al Portal Central ni al Panel ML.
@@ -25,6 +26,9 @@ El frontend está **completamente construido y funcional**. No hay conexión rea
 - Redirección automática desde `/` según el rol activo
 - Sidebar con branding dinámico ("Portal Central", "Portal Operaciones", "Portal Botica") según el rol
 - Breadcrumbs contextuales por portal en `MigaDePan.jsx`
+- `RutaSegunRol` — componente que renderiza children según el rol del usuario (vía props o objeto `roles`), con fallback a 403 si no hay match
+- `RutaProtegida` redirige a `/no-autorizado` en vez de `/iniciar-sesion` cuando el rol no corresponde
+- El store `useAutenticacion.js` expone `usuario.boticaId` para filtrado RLS en frontend
 - Sistema de permisos RLS centralizado en `src/utilities/permisos.js`
 
 ### Portal Central (Admin Central)
@@ -226,6 +230,7 @@ botica-demand-ml/
 │   ├── pages/
 │   │   ├── auth/
 │   │   │   ├── InicioSesion.jsx
+│   │   │   ├── PaginaNoAutorizado.jsx
 │   │   │   └── RestablecerContrasena.jsx
 │   │   │
 │   │   ├── central-portal/
@@ -293,6 +298,7 @@ botica-demand-ml/
 │   │
 │   ├── routing/
 │   │   ├── RutaProtegida.jsx
+│   │   ├── RutaSegunRol.jsx
 │   │   └── Rutas.jsx
 │   │
 │   ├── schemas/
@@ -489,6 +495,7 @@ botica-demand-ml/
 | `/` | Redirección por rol | — |
 | `/iniciar-sesion` | Login | Público |
 | `/restablecer-contrasena` | Restablecer Contraseña | Público |
+| `/no-autorizado` | 403 Acceso no autorizado | Autenticado |
 | `*` | Redirección a `/` | — |
 
 ---
@@ -541,7 +548,7 @@ Las 8 páginas del Portal Botica usan `filtrarPorBotica()` en lugar de acceder d
 
 | Fase | Descripción | Estado |
 |---|---|---|
-| **Fase 1** | Frontend con mock alineado a Arquitectura | ✅ Completado |
+| **Fase 1** | Frontend completo + Auth real con Supabase + seed PostgreSQL + pg_net + RLS Phase 2 | ✅ Completado |
 | Fase 2 | Supabase: auth real, PostgreSQL, RLS, Realtime, seed INEI | Pendiente |
 | Fase 3 | FastAPI + Docker: SARIMA + XGBoost | Pendiente |
 | Fase 4 | Integración frontend ↔ Supabase ↔ ML | Pendiente |

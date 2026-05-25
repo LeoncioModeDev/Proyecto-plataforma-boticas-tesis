@@ -144,7 +144,7 @@ Reentrenamientos Evitados = (Semanas evaluadas − Semanas con retraining dispar
 | `modelos_ml` | Documentado el UNIQUE INDEX parcial como constraint explícito | Garantía operativa del champion-challenger |
 | Storage de modelos | Documentado naming convention del bucket | Trazabilidad de rollback |
 | `organizaciones` | Reemplazado `ruc` por `tipo_identificacion + numero_identificacion + pais_origen` | Laboratorios extranjeros (India, China, Europa) |
-| `boticas` | `activa` corregido a `boolean`; agregados `distrito` y `ubigeo char(6)` | Corrección del docente + feature ML geográfico |
+| `boticas` | `activa` corregido a `boolean`; agregado `ubigeo char(6)`; eliminado `distrito` (redundante con `ubigeos.distrito`) | Corrección del docente + feature ML geográfico |
 | `productos` | Agregados `codigo_interno`, `categoria_terapeutica`, `requiere_receta` | Cobertura del dataset del contacto |
 | `movimientos_inventario` | Agregado `devolucion` al enum | Distinción de demanda neta para ML |
 | `proveedores` | Reemplazado `ruc` por esquema polimórfico; agregado `lead_time_dias` | Columna "oro" para punto de pedido |
@@ -154,10 +154,15 @@ Reentrenamientos Evitados = (Semanas evaluadas − Semanas con retraining dispar
 | `drift_metricas` | Tabla nueva | Historial de métricas de drift semanales |
 | `precios` | Tabla nueva | `precio_venta` y `precio_costo` requeridos para ML |
 | `ubigeos` | Tabla de referencia auxiliar (padrón INEI) | FK desde `boticas.ubigeo` |
+| `paises` | Tabla de referencia auxiliar (ISO 3166-1 alpha-2) | 20 países seed; FK referencial desde `organizaciones.pais_origen` y `proveedores.pais_origen` |
+| `usuarios` | Tabla nueva para perfiles de usuario | FK → `auth.users(id)` + `organizaciones(id)`, sincronizada por trigger `on_auth_user_created` |
+| `rol_usuario` | Nuevo enum para tipar roles | `admin_central`, `operador_drogueria`, `visor_botica` |
 | `transferencias` | Reemplazado `botica_id` por `origen_tipo`, `origen_id`, `destino_tipo`, `destino_id`; agregado `tipo_transferencia` y estado `cancelada` | Soportar redistribución botica→botica y flujo completo de estados |
 | `ordenes_compra` | Tabla nueva para soporte documental de reabastecimiento | HU-029, HU-030, HU-031, HU-016 |
 | `ordenes_compra_items` | Tabla nueva con detalle de productos por orden | HU-029 |
 | `recomendaciones_ml` | Tabla nueva para recomendaciones operativas de transferencia/redistribución | Alineación ML con distribución |
+| `stock_ubicaciones` | UNIQUE inline → UNIQUE INDEX | Reemplazada constraint `UNIQUE (COALESCE(...))` por `CREATE UNIQUE INDEX` |
+| `lotes` | UNIQUE inline → UNIQUE INDEX | Reemplazada constraint `UNIQUE (COALESCE(...))` por `CREATE UNIQUE INDEX` |
 
 ---
 
@@ -180,6 +185,36 @@ Representa la empresa propietaria de la red (ej. D&R Farma). Diseñada para sopo
 
 ---
 
+### `usuarios`
+
+Perfiles de usuario vinculados a Supabase Auth. Cada usuario pertenece a una organización. El registro se crea automáticamente mediante el trigger `on_auth_user_after_insert` al crear un usuario en `auth.users` (vía Auth Admin API).
+
+| Columna | Tipo | Restricción | Descripción |
+|---|---|---|---|
+| `id` | `uuid` | PK, FK → auth.users(id) ON DELETE CASCADE | Mismo UUID que auth.users |
+| `org_id` | `uuid` | FK → organizaciones.id, NOT NULL | Organización a la que pertenece |
+| `botica_id` | `uuid` | nullable, sin FK explícita | Botica asignada (solo visor_botica); relación lógica |
+| `nombre` | `text` | NOT NULL | Nombre completo del usuario |
+| `email` | `text` | NOT NULL, UNIQUE | Correo electrónico (de auth.users) |
+| `rol` | `enum('admin_central','operador_drogueria','visor_botica')` | NOT NULL, default `'visor_botica'` | Rol de acceso al sistema |
+| `avatar` | `text` | nullable | URL del avatar |
+| `telefono` | `text` | nullable | Teléfono de contacto |
+| `activo` | `boolean` | NOT NULL, default `true` | Estado de la cuenta |
+| `ultimo_acceso` | `timestamptz` | nullable | Último inicio de sesión |
+| `created_at` | `timestamptz` | NOT NULL, default `now()` | Fecha de registro |
+
+**Trigger dividido (BEFORE + AFTER):**
+- `on_auth_user_before_insert` (BEFORE INSERT ON auth.users): inyecta `rol`, `org_id` y `botica_id` en `raw_app_meta_data` del JWT desde los metadatos del usuario. Esto garantiza que el JWT tenga los claims correctos desde el primer login.
+- `on_auth_user_after_insert` (AFTER INSERT ON auth.users): inserta el registro en `public.usuarios` respetando la FK a `auth.users`.
+
+**Flujo de creación de usuarios (seed):**
+1. `semilla.sql` llama a la Auth Admin API via `net.http_post` (pg_net en schema `net`) para cada usuario
+2. El trigger BEFORE inyecta `rol`, `org_id` y `botica_id` en `raw_app_meta_data`
+3. El trigger AFTER inserta el perfil en `public.usuarios`
+4. El frontend lee `public.usuarios` post-login, con fallback a `user_metadata` si no existe registro
+
+---
+
 ### `boticas`
 
 Cada local físico perteneciente a una organización. Solo la central crea y gestiona boticas.
@@ -189,8 +224,7 @@ Cada local físico perteneciente a una organización. Solo la central crea y ges
 | `id` | `uuid` | PK | Identificador único |
 | `org_id` | `uuid` | FK → organizaciones.id, NOT NULL | Organización propietaria |
 | `nombre` | `text` | NOT NULL | Nombre del local |
-| `ubigeo` | `char(6)` | NOT NULL, FK → ubigeos.codigo | Código INEI (2 dpto + 2 prov + 2 dist) |
-| `distrito` | `text` | NOT NULL | Nombre del distrito — variable geográfica ML |
+| `ubigeo` | `char(6)` | NOT NULL, FK → ubigeos.codigo | Código INEI (2 dpto + 2 prov + 2 dist); distrito se obtiene vía JOIN |
 | `activa` | `boolean` | NOT NULL, default `true` | Estado operativo del local |
 
 ---
@@ -286,7 +320,7 @@ Log inmutable de auditoría. Nunca se modifica ni elimina. Es la tabla central p
 | `tipo_movimiento` | `enum('entrada','salida','ajuste','merma','devolucion')` | NOT NULL | Naturaleza del movimiento — crítico para ML |
 | `cantidad` | `int` | NOT NULL | Unidades (positivo = entrada, negativo = salida/merma) |
 | `motivo` | `text` | NOT NULL | Descripción obligatoria del motivo |
-| `usuario_id` | `uuid` | FK → auth.users, NOT NULL | Quién registró |
+| `usuario_id` | `uuid` | NOT NULL | Quién registró (referencia a usuarios.id) |
 | `transferencia_id` | `uuid` | FK → transferencias.id, nullable | Vincula a transferencia si aplica |
 | `created_at` | `timestamptz` | NOT NULL, default `now()` | Fecha y hora exacta — `fecha_venta` para ML |
 
@@ -344,7 +378,7 @@ Despachos desde droguería central hacia boticas (transferencia_central) o entre
 | `destino_tipo` | `enum('drogueria','botica')` | NOT NULL, default 'botica' | Tipo de ubicación destino |
 | `destino_id` | `uuid` | FK → boticas.id, NOT NULL | Botica destino |
 | `estado` | `enum('creada','en_transito','recibida','cancelada')` | NOT NULL, default `'creada'` | Estado del flujo de distribución |
-| `creado_por` | `uuid` | FK → auth.users, NOT NULL | Usuario que creó la transferencia |
+| `creado_por` | `uuid` | NOT NULL | Usuario que creó la transferencia (referencia a usuarios.id) |
 | `fecha_despacho` | `timestamptz` | nullable | Cuándo salió de origen |
 | `fecha_recepcion` | `timestamptz` | nullable | Cuándo fue recibida en destino |
 
@@ -377,11 +411,11 @@ Detalle de productos y lotes por transferencia.
 |---|---|---|---|
 | `id` | `uuid` | PK | Identificador único |
 | `proveedor_id` | `uuid` | FK → proveedores.id, NOT NULL | Proveedor al que se ordena |
-| `creado_por` | `uuid` | FK → auth.users, NOT NULL | Usuario que registró la orden (Operador) |
+| `creado_por` | `uuid` | NOT NULL | Usuario que registró la orden (Operador, referencia a usuarios.id) |
 | `estado` | `enum('pendiente','aprobada','rechazada','completada')` | NOT NULL, default `'pendiente'` | Estado de la orden |
 | `fecha_estimada_entrega` | `date` | nullable | Fecha estimada de recepción |
 | `observaciones` | `text` | nullable | Notas adicionales |
-| `aprobado_por` | `uuid` | FK → auth.users, nullable | Admin que aprobó o rechazó |
+| `aprobado_por` | `uuid` | nullable | Admin que aprobó o rechazó (referencia a usuarios.id) |
 | `fecha_aprobacion` | `timestamptz` | nullable | Cuándo se aprobó/rechazó |
 | `created_at` | `timestamptz` | NOT NULL, default `now()` | Fecha de creación |
 
@@ -424,7 +458,7 @@ Recomendaciones operativas generadas por el modelo ML para transferencias y redi
 | `confianza_modelo` | `float` | NOT NULL | Nivel de confianza del modelo (0–100) |
 | `estado` | `enum('pendiente','confirmada','rechazada','ejecutada')` | NOT NULL, default `'pendiente'` | Estado de la recomendación |
 | `transferencia_id` | `uuid` | FK → transferencias.id, nullable | Transferencia creada al confirmar |
-| `confirmado_por` | `uuid` | FK → auth.users, nullable | Usuario que confirmó/rechazó |
+| `confirmado_por` | `uuid` | nullable | Usuario que confirmó/rechazó (referencia a usuarios.id) |
 | `confirmado_en` | `timestamptz` | nullable | Cuándo se confirmó/rechazó |
 | `generado_en` | `timestamptz` | NOT NULL, default `now()` | Cuándo se generó la recomendación |
 
@@ -627,6 +661,17 @@ Alertas generadas automáticamente. Alimenta el dashboard central y el Panel ML.
 
 ## Tabla de referencia auxiliar
 
+### `paises`
+
+Países según ISO 3166-1 alpha-2. Tabla de referencia estática para normalizar `organizaciones.pais_origen` y `proveedores.pais_origen`.
+
+| Columna | Tipo | Restricción | Descripción |
+|---|---|---|---|
+| `codigo` | `char(2)` | PK | Código ISO 3166-1 alpha-2 (PE, US, DE, etc.) |
+| `nombre` | `text` | NOT NULL | Nombre del país en español |
+
+---
+
 ### `ubigeos`
 
 Padrón INEI. Se carga una sola vez como seed y no cambia.
@@ -634,7 +679,7 @@ Padrón INEI. Se carga una sola vez como seed y no cambia.
 | Columna | Tipo | Restricción | Descripción |
 |---|---|---|---|
 | `codigo` | `char(6)` | PK | Código INEI |
-| `distrito` | `text` | NOT NULL | Nombre del distrito |
+| `distrito` | `text` | nullable | Nombre del distrito (nullable para ubigeos con distrito desconocido) |
 | `provincia` | `text` | NOT NULL | Nombre de la provincia |
 | `departamento` | `text` | NOT NULL | Nombre del departamento |
 
@@ -692,8 +737,14 @@ supabase
 organizaciones ──< boticas
 organizaciones ──< productos
 organizaciones ──< proveedores
+organizaciones ──< usuarios           (org_id → organizaciones.id)
+
+auth.users ──< usuarios                (id → auth.users.id, con trigger de sincronización)
 
 ubigeos ──< boticas
+
+paises ──< organizaciones             (pais_origen, referencial)
+paises ──< proveedores                (pais_origen, referencial)
 
 productos ──< stock_ubicaciones
 productos ──< lotes
@@ -731,6 +782,10 @@ recomendaciones_ml >── transferencias   (opcional: creada al confirmar recom
 
 inferencias ──> drift_metricas          (mape_rolling calculado desde inferencias.error_absoluto)
 movimientos_inventario ──> inferencias  (backfill de valor_real vía pg_cron Job 4)
+
+usuarios ──< movimientos_inventario   (usuario_id, referencial)
+usuarios ──< transferencias            (creado_por, referencial)
+usuarios ──< ordenes_compra            (creado_por, aprobado_por, referencial)
 ```
 
 ---
@@ -785,7 +840,7 @@ movimientos_inventario ──> inferencias  (backfill de valor_real vía pg_cron
 
 | Feature | Tabla | Columna |
 |---|---|---|
-| Distrito de la botica | `boticas` | `distrito` |
+| Distrito de la botica | `ubigeos` | `distrito` (vía JOIN boticas.ubigeo → ubigeos.codigo) |
 | Lead time del proveedor | `proveedores` | `lead_time_dias` |
 
 ---
@@ -809,7 +864,7 @@ movimientos_inventario ──> inferencias  (backfill de valor_real vía pg_cron
 | `concentracion` | `productos.concentracion` | ✅ |
 | `stock_minimo` | `stock_ubicaciones.stock_minimo` | ✅ |
 | `fecha_vencimiento` | `lotes.fecha_vencimiento` | ✅ |
-| `distrito` | `boticas.distrito` | ✅ |
+| `distrito` | `ubigeos.distrito` (vía boticas.ubigeo) | ✅ |
 | `lead_time_proveedor` | `proveedores.lead_time_dias` | ✅ |
 | `proveedor` | `proveedores.razon_social` | ✅ |
 | `lote` | `lotes.numero_lote` | ✅ |

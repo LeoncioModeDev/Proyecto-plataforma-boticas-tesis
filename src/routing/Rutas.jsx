@@ -11,6 +11,7 @@ import BarraSuperior from '@/components/navigation/BarraSuperior'
 // Autenticación
 import InicioSesion from '@/pages/auth/InicioSesion'
 import RestablecerContrasena from '@/pages/auth/RestablecerContrasena'
+import PaginaNoAutorizado from '@/pages/auth/PaginaNoAutorizado'
 
 // Portal Central
 import PaginaDashboardCentral from '@/pages/central-portal/PaginaDashboardCentral'
@@ -238,6 +239,9 @@ export default function Rutas() {
         <Route path="/ml/recomendaciones" element={<PaginaRecomendaciones />} />
         <Route path="/ml/monitoreo" element={<PaginaMonitoreoML />} />
       </Route>
+
+      {/* No autorizado */}
+      <Route path="/no-autorizado" element={<PaginaNoAutorizado />} />
 
       {/* Ruta no encontrada */}
       <Route path="*" element={<Navigate to="/" replace />} />

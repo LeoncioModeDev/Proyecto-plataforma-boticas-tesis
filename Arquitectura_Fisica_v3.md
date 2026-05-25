@@ -65,10 +65,14 @@ El diferenciador es la orquestación in-database: `pg_cron` + `pg_net` + Supabas
 
 ### Control de acceso (frontend)
 
-- Tres roles: `ADMIN_CENTRAL`, `OPERADOR_DROGUERIA`, `VISOR_BOTICA`
-- `RutaProtegida` (HOC) bloquea el acceso según rol activo
+- Tres roles: `admin_central`, `operador_drogueria`, `visor_botica` (definidos como `rol_usuario` enum en PostgreSQL)
+- `RutaProtegida` (HOC) bloquea el acceso según rol activo; redirige a `/no-autorizado` si el rol no coincide
+- `RutaSegunRol` — renderiza children según rol del usuario (vía props `adminCentral`/`operadorDrogueria`/`visorBotica` o un objeto `roles`), útil para componentes que varían por rol
+- `PaginaNoAutorizado` — página 403 con botón de volver al inicio según el rol del usuario
 - Redirección automática desde `/` según el rol del usuario autenticado
-- En Fase 1: selector de rol en login para modo desarrollo
+- Login real con Supabase Auth (email + contraseña); sin selector mock de desarrollo
+- El perfil del usuario se obtiene de `public.usuarios` (vinculado por FK a `auth.users`), con fallback a `user_metadata` si no existe registro
+- El store `useAutenticacion.js` expone `usuario.boticaId` (desde `perfil.botica_id` o `user_metadata.botica_id`) para filtrado RLS en frontend
 
 ### Protocolo de comunicación
 
@@ -111,7 +115,9 @@ Supabase provee todos los servicios de backend sin servidor dedicado. Esta es la
 | Tabla                    | Propósito                                | Notas                                                              |
 | ------------------------ | ---------------------------------------- | ------------------------------------------------------------------ |
 | `organizaciones`         | Empresa propietaria de la red            | Identificación polimórfica (RUC / NIT / Tax ID / VAT)              |
-| `boticas`                | Locales físicos                          | `ubigeo char(6)` FK → `ubigeos`, `distrito` para ML                |
+| `usuarios`               | Perfiles de usuario vinculados a Auth    | FK → `auth.users(id)` + `organizaciones(id)`, sincronizado por trigger |
+| `paises`                 | Referencia ISO 3166-1 alpha-2            | `codigo char(2)` PK, seed único                                    |
+| `boticas`                | Locales físicos                          | `ubigeo char(6)` FK → `ubigeos`; distrito se obtiene vía JOIN con `ubigeos.distrito` |
 | `productos`              | Catálogo maestro de medicamentos         | `codigo_interno` (SKU), `categoria_terapeutica`, `requiere_receta` |
 | `precios`                | Historial de precios (venta + costo)     | Feature ML de elasticidad precio-demanda                           |
 | `proveedores`            | Proveedores nacionales e internacionales | `lead_time_dias` — feature "oro" para punto de pedido              |
@@ -134,28 +140,35 @@ Supabase provee todos los servicios de backend sin servidor dedicado. Esta es la
 | `drift_metricas`  | Historial semanal de drift          | `psi_max`, `ratio_mape`, `requiere_retraining`, `reentrenamiento_disparado`               |
 | `alertas_ml`      | Alertas automáticas                 | `tipo_origen` (regla/modelo), `tipo` (quiebre/sobrestock/vencimiento_proximo/prediccion)  |
 
-**Constraint crítico:** `CREATE UNIQUE INDEX idx_modelos_ml_production ON modelos_ml (status) WHERE status = 'production'` — garantiza que solo un modelo esté en producción simultáneamente.
+**Constraints críticos:**
+- `CREATE UNIQUE INDEX idx_modelos_ml_production ON modelos_ml (status) WHERE status = 'production'` — garantiza que solo un modelo esté en producción simultáneamente
+- `CREATE UNIQUE INDEX idx_stock_ubicaciones_unique ON stock_ubicaciones (producto_id, ubicacion_tipo, COALESCE(ubicacion_id, ...))` — única combinación producto/ubicación
+- `CREATE UNIQUE INDEX idx_lotes_unique ON lotes (producto_id, numero_lote, ubicacion_tipo, COALESCE(ubicacion_id, ...))` — único lote por producto/ubicación
 
 #### Extensiones PostgreSQL habilitadas
 
 | Extensión      | Propósito                                     |
 | -------------- | --------------------------------------------- |
 | `pg_cron`      | Scheduler nativo — 4 jobs automatizados       |
-| `pg_net`       | HTTP async desde SQL — invoca Cloud Run       |
+| `pg_net`       | HTTP async desde SQL — invoca Cloud Run (schema `net`) |
 | `pg_trgm`      | Búsqueda de texto (catálogo de productos)     |
 | Supabase Vault | Almacén cifrado de secretos (token Cloud Run) |
 
 #### Seguridad — RLS
 
-Row-Level Security habilitada en todas las tablas con `botica_id`. El JWT del usuario autenticado contiene el `botica_id` asignado. Las políticas garantizan que un Operador de Droguería solo vea los datos de su botica.
+Row-Level Security habilitada en todas las tablas con `botica_id`. El JWT del usuario autenticado contiene `rol`, `org_id` y `botica_id` en `raw_app_meta_data` (inyectados por trigger `on_auth_user_before_insert`).
 
-```sql
--- Ejemplo de política RLS en stock_ubicaciones
-CREATE POLICY "Operador ve solo su botica"
-ON stock_ubicaciones
-FOR SELECT
-USING (ubicacion_id = (SELECT botica_id FROM auth.users WHERE id = auth.uid()));
-```
+**Helpers RLS (evitan subconsultas repetitivas):**
+- `obtener_rol_usuario()` — lee `rol` del JWT con fallback a `public.usuarios`
+- `obtener_org_usuario()` — lee `org_id` del JWT con fallback a `public.usuarios`
+- `obtener_botica_usuario()` — lee `botica_id` del JWT con fallback a `public.usuarios`
+
+**Políticas por rol (Phase 2):**
+| Rol | Scope |
+|---|---|
+| `admin_central` | CRUD global — sin restricción |
+| `operador_drogueria` | CRUD scoped a su `org_id` |
+| `visor_botica` | SELECT scoped a su `botica_id` |
 
 #### Feature layer SQL (vistas materializadas)
 
@@ -179,7 +192,7 @@ SELECT
   l.fecha_vencimiento,
   pr.precio_venta,
   pr.precio_costo,
-  b.distrito,
+  u.distrito,
   pv.lead_time_dias
 FROM movimientos_inventario m
 JOIN productos p ON p.id = m.producto_id
@@ -187,6 +200,7 @@ JOIN stock_ubicaciones s ON s.producto_id = m.producto_id AND s.ubicacion_id = m
 JOIN lotes l ON l.id = m.lote_id
 LEFT JOIN precios pr ON pr.producto_id = m.producto_id AND pr.botica_id = m.ubicacion_id AND pr.vigente_hasta IS NULL
 JOIN boticas b ON b.id = m.ubicacion_id
+JOIN ubigeos u ON u.codigo = b.ubigeo
 LEFT JOIN proveedores pv ON pv.id = l.proveedor_id
 WHERE m.tipo_movimiento = 'salida'
   AND p.estado = 'activo';
@@ -336,24 +350,25 @@ def calcular_psi(baseline_bins, baseline_freq, actual_data, bins):
 
 ## Capa 4 — Mock Fase 1 (activa)
 
-En la Fase 1, todos los datos provienen de archivos mock en `src/mock-data/`. Los servicios de Supabase y ML existen como funciones simuladas con `setTimeout`, reemplazables sin cambios en la arquitectura del frontend.
+En la Fase 1, la mayoría de datos provienen de archivos mock en `src/mock-data/`. La autenticación ya está conectada a Supabase Auth (real). Los servicios de ML existen como funciones simuladas con `setTimeout`.
 
-| Archivo             | Contenido                                        |
-| ------------------- | ------------------------------------------------ |
-| `productos.js`      | 12 medicamentos (Paracetamol, Amoxicilina, etc.) |
-| `stock.js`          | 16 registros en 5 ubicaciones (1 droguería + 4 boticas) |
-| `lotes.js`          | 14 lotes con fechas variadas (FEFO)              |
-| `movimientos.js`    | 21 movimientos de todos los tipos                |
-| `transferencias.js` | 6 transferencias: 2 recibidas, 2 en tránsito, 1 creada, 1 cancelada |
-| `alertas.js`        | 9 alertas activas (regla + predictivas)          |
-| `predicciones.js`   | 5 predicciones con serie histórica de 11 meses   |
-| `boticas.js`        | Droguería Central + 4 boticas (Miraflores, San Borja, Surco, Los Olivos) |
-| `usuarios.js`       | 8 usuarios (3 admin central, 3 operador droguería, 2 visor botica) |
+| Archivo               | Contenido                                        |
+| --------------------- | ------------------------------------------------ |
+| `productos.js`        | 12 medicamentos (Paracetamol, Amoxicilina, etc.) |
+| `stock.js`            | 16 registros en 5 ubicaciones (1 droguería + 4 boticas) |
+| `lotes.js`            | 14 lotes con fechas variadas (FEFO)              |
+| `movimientos.js`      | 21 movimientos de todos los tipos                |
+| `transferencias.js`   | 6 transferencias: 2 recibidas, 2 en tránsito, 1 creada, 1 cancelada |
+| `alertas.js`          | 9 alertas activas (regla + predictivas)          |
+| `predicciones.js`     | 5 predicciones con serie histórica de 11 meses   |
+| `boticas.js`          | Droguería Central + 4 boticas                    |
+| `usuarios.js`         | 8 usuarios de prueba (solo UI, no para auth)     |
+| `paises.js`           | 20 países ISO 3166-1 alpha-2                     |
 
-Los servicios mock viven en:
-
-- `src/services/supabase/` — funciones que simulan PostgREST con `setTimeout`
+Servicios mock restantes:
 - `src/services/ml-model/` — funciones que simulan la FastAPI con datos de `predicciones.js`
+
+> **Auth ya no es mock:** `src/services/supabase/autenticacion.js` usa `supabase.auth.signInWithPassword()` real. El store `useAutenticacion.js` consulta `public.usuarios` para obtener el perfil completo del usuario autenticado. El trigger `on_auth_user_before_insert` inyecta `rol`, `org_id` y `botica_id` en `raw_app_meta_data` del JWT.
 
 ---
 
@@ -442,11 +457,11 @@ pg_cron Job 4 (diario 02:30 UTC)
 
 | Fase       | Estado        | Descripción                                                                      |
 | ---------- | ------------- | -------------------------------------------------------------------------------- |
-| **Fase 1** | ✅ Completada | Frontend completo con datos mock. Sin conexión real a Supabase ni ML.            |
-| **Fase 2** | Pendiente     | Conexión a Supabase: Auth real, PostgreSQL, RLS, Realtime. Seed de ubigeos INEI. |
-| **Fase 3** | Pendiente     | Implementación de FastAPI con SARIMA + XGBoost. Docker. ETL Pipeline.            |
-| **Fase 4** | Pendiente     | Integración completa frontend ↔ Supabase ↔ modelo ML. pg_cron jobs activos.      |
-| **Fase 5** | Pendiente     | Despliegue en producción: Vercel + Google Cloud Run. Piloto en boticas Lima.     |
+| **Fase 1** | ✅ Completada | Frontend completo con datos mock. Auth real con Supabase (email+password).             |
+| **Fase 2** | Pendiente     | Conexión completa a Supabase: PostgreSQL (datos reales), RLS, Realtime. Seed completo. |
+| **Fase 3** | Pendiente     | Implementación de FastAPI con SARIMA + XGBoost. Docker. ETL Pipeline.                  |
+| **Fase 4** | Pendiente     | Integración completa frontend ↔ Supabase ↔ modelo ML. pg_cron jobs activos.            |
+| **Fase 5** | Pendiente     | Despliegue en producción: Vercel + Google Cloud Run. Piloto en boticas Lima.           |
 
 ---
 

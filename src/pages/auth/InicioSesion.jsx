@@ -3,35 +3,46 @@ import { useNavigate } from 'react-router-dom'
 import { LogIn, Sun, Moon } from 'lucide-react'
 
 import useAutenticacion from '@/state/useAutenticacion'
-import { ROLES, ETIQUETAS_ROLES } from '@/constants/roles'
 import Boton from '@/components/common/Boton'
 import useTema from '@/state/useTema'
+
+const RUTA_POR_ROL = {
+  admin_central: '/central/dashboard',
+  operador_drogueria: '/operaciones/dashboard',
+  visor_botica: '/botica/dashboard',
+}
 
 export default function InicioSesion() {
   const [email, setEmail] = useState('')
   const [contrasena, setContrasena] = useState('')
-  const [rolSeleccionado, setRolSeleccionado] = useState(ROLES.ADMIN_CENTRAL)
+  const [enviando, setEnviando] = useState(false)
+  const [error, setError] = useState(null)
   const { iniciarSesion } = useAutenticacion()
   const navegar = useNavigate()
   const { tema, cambiarTema } = useTema()
 
-  const manejarSubmit = (e) => {
+  const manejarSubmit = async (e) => {
     e.preventDefault()
-    iniciarSesion(rolSeleccionado)
-
-    switch (rolSeleccionado) {
-      case ROLES.ADMIN_CENTRAL:
-        navegar('/central/dashboard')
-        break
-      case ROLES.OPERADOR_DROGUERIA:
-        navegar('/operaciones/dashboard')
-        break
-      case ROLES.VISOR_BOTICA:
-        navegar('/botica/dashboard')
-        break
-      default:
-        navegar('/')
+    if (!email || !contrasena) {
+      setError('Ingresa tu correo y contraseña')
+      return
     }
+    setEnviando(true)
+    setError(null)
+
+    const { error: errorAuth } = await iniciarSesion(email, contrasena)
+    if (errorAuth) {
+      setError(errorAuth.message === 'Invalid login credentials'
+        ? 'Correo o contraseña incorrectos'
+        : errorAuth.message
+      )
+      setEnviando(false)
+      return
+    }
+
+    const estado = useAutenticacion.getState()
+    const ruta = RUTA_POR_ROL[estado.usuario?.rol] || '/'
+    navegar(ruta)
   }
 
   return (
@@ -91,27 +102,12 @@ export default function InicioSesion() {
               />
             </div>
 
-            <div className="flex flex-col gap-1.5">
-              <label htmlFor="rol" className="text-sm font-medium text-principal">
-                Acceder como <span className="text-secundario font-normal">(modo desarrollo)</span>
-              </label>
-              <select
-                id="rol"
-                value={rolSeleccionado}
-                onChange={(e) => setRolSeleccionado(e.target.value)}
-                className="px-3 py-2.5 text-sm bg-marca-claro dark:bg-marca-claro border border-marca-principal rounded-md
-                           text-marca-principal font-medium
-                           focus:outline-none focus:ring-2 focus:ring-marca-principal focus:ring-offset-2
-                           transition-colors"
-              >
-                <option value={ROLES.ADMIN_CENTRAL}>{ETIQUETAS_ROLES[ROLES.ADMIN_CENTRAL]}</option>
-                <option value={ROLES.OPERADOR_DROGUERIA}>{ETIQUETAS_ROLES[ROLES.OPERADOR_DROGUERIA]}</option>
-                <option value={ROLES.VISOR_BOTICA}>{ETIQUETAS_ROLES[ROLES.VISOR_BOTICA]}</option>
-              </select>
-            </div>
+            {error && (
+              <p className="text-sm text-red-500 dark:text-red-400 text-center">{error}</p>
+            )}
 
-            <Boton tipo="submit" variante="primario" tamano="grande" icono={LogIn} className="w-full">
-              Iniciar sesión
+            <Boton tipo="submit" variante="primario" tamano="grande" icono={LogIn} className="w-full" deshabilitado={enviando}>
+              {enviando ? 'Ingresando…' : 'Iniciar sesión'}
             </Boton>
           </form>
 
