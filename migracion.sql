@@ -159,27 +159,98 @@ ALTER TABLE boticas DROP COLUMN IF EXISTS distrito;
 CREATE INDEX IF NOT EXISTS idx_boticas_org ON boticas(org_id);
 
 -- ============================================================
--- Tabla: productos
+-- Tabla: principios_activos
+-- ============================================================
+CREATE TABLE IF NOT EXISTS principios_activos (
+  id          uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  nombre      text NOT NULL UNIQUE,
+  codigo_atc  text
+);
+CREATE INDEX idx_principios_activos_nombre ON principios_activos(nombre);
+
+-- ============================================================
+-- Tabla: unidades_medida
+-- ============================================================
+CREATE TABLE IF NOT EXISTS unidades_medida (
+  id      uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  nombre  text NOT NULL UNIQUE,
+  simbolo text NOT NULL
+);
+
+-- ============================================================
+-- Tabla: formas_farmaceuticas
+-- ============================================================
+CREATE TABLE IF NOT EXISTS formas_farmaceuticas (
+  id     uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  nombre text NOT NULL UNIQUE
+);
+
+-- ============================================================
+-- Tabla: presentaciones
+-- ============================================================
+CREATE TABLE IF NOT EXISTS presentaciones (
+  id            uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  tipo_empaque  text NOT NULL,
+  cantidad      integer NOT NULL,
+  unidad        text NOT NULL,
+  UNIQUE (tipo_empaque, cantidad, unidad)
+);
+
+-- ============================================================
+-- Tabla: monedas
+-- ============================================================
+CREATE TABLE IF NOT EXISTS monedas (
+  id       uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  codigo   char(3) NOT NULL UNIQUE,
+  nombre   text NOT NULL,
+  simbolo  char(1) NOT NULL
+);
+
+-- ============================================================
+-- Tabla: productos (modificada)
 -- ============================================================
 CREATE TABLE IF NOT EXISTS productos (
   id                    uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   org_id                uuid NOT NULL REFERENCES organizaciones(id),
   codigo_interno        text NOT NULL UNIQUE,
   nombre_comercial      text NOT NULL,
-  principio_activo      text NOT NULL,
-  forma_farmaceutica    text NOT NULL,
-  concentracion         text NOT NULL,
-  laboratorio           text NOT NULL,
+  forma_farmaceutica_id uuid REFERENCES formas_farmaceuticas(id),
+  presentacion_id       uuid REFERENCES presentaciones(id),
   codigo_barras         text UNIQUE,
-  categoria_terapeutica text NOT NULL,
   clasificacion         clasificacion_producto NOT NULL,
-  requiere_receta       boolean NOT NULL,
   estado                estado_producto NOT NULL DEFAULT 'activo',
-  created_at            timestamptz NOT NULL DEFAULT now()
+  created_at            timestamptz NOT NULL DEFAULT now(),
+  modified_at           timestamptz,
+  modified_by           uuid REFERENCES usuarios(id)
 );
 CREATE INDEX idx_productos_org ON productos(org_id);
-CREATE INDEX idx_productos_categoria ON productos(categoria_terapeutica);
 CREATE INDEX idx_productos_buscador ON productos USING gin (nombre_comercial gin_trgm_ops);
+
+-- DO: migrar formas_farmaceuticas desde productos legacy si existen
+DO $$
+BEGIN
+  INSERT INTO formas_farmaceuticas (id, nombre)
+  SELECT DISTINCT ON (lower(trim(forma_farmaceutica)))
+    gen_random_uuid(),
+    lower(trim(forma_farmaceutica))
+  FROM productos
+  WHERE forma_farmaceutica IS NOT NULL
+  ON CONFLICT (nombre) DO NOTHING;
+END $$;
+
+-- ============================================================
+-- Tabla: producto_principio_activo
+-- ============================================================
+CREATE TABLE IF NOT EXISTS producto_principio_activo (
+  id                  uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  producto_id         uuid NOT NULL REFERENCES productos(id),
+  principio_activo_id uuid NOT NULL REFERENCES principios_activos(id),
+  concentracion       numeric(10,2) NOT NULL,
+  unidad_medida_id    uuid REFERENCES unidades_medida(id),
+  UNIQUE (producto_id, principio_activo_id)
+);
+CREATE INDEX idx_producto_pa_producto ON producto_principio_activo(producto_id);
+CREATE INDEX idx_producto_pa_pa ON producto_principio_activo(principio_activo_id);
 
 -- ============================================================
 -- Tabla: precios
@@ -205,13 +276,71 @@ CREATE TABLE IF NOT EXISTS proveedores (
   tipo_identificacion tipo_identificacion NOT NULL,
   numero_identificacion text NOT NULL,
   pais_origen         char(2) NOT NULL DEFAULT 'PE',
-  lead_time_dias      int NOT NULL,
-  contacto            text,
   activo              boolean NOT NULL DEFAULT true,
   created_at          timestamptz NOT NULL DEFAULT now(),
   UNIQUE (tipo_identificacion, numero_identificacion)
 );
 CREATE INDEX idx_proveedores_org ON proveedores(org_id);
+
+-- Migrar columnas legacy de proveedores si existen (para compatibilidad)
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'proveedores' AND column_name = 'contacto') THEN
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'proveedores' AND column_name = 'contacto') THEN
+    INSERT INTO contactos_proveedor (id, proveedor_id, nombre, principal)
+    SELECT gen_random_uuid(), id, COALESCE(contacto, razon_social), true
+    FROM proveedores
+    WHERE contacto IS NOT NULL
+    ON CONFLICT DO NOTHING;
+  END IF;
+END $$;
+
+ALTER TABLE proveedores DROP COLUMN IF EXISTS contacto;
+ALTER TABLE proveedores DROP COLUMN IF EXISTS lead_time_dias;
+
+-- ============================================================
+-- Tabla: contactos_proveedor
+-- ============================================================
+CREATE TABLE IF NOT EXISTS contactos_proveedor (
+  id            uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  proveedor_id  uuid NOT NULL REFERENCES proveedores(id),
+  nombre        text NOT NULL,
+  telefono      text,
+  correo        text,
+  direccion     text,
+  ubigeo        char(6) REFERENCES ubigeos(codigo),
+  principal     boolean NOT NULL DEFAULT false
+);
+CREATE INDEX idx_contactos_proveedor ON contactos_proveedor(proveedor_id);
+
+-- ============================================================
+-- Tabla: condiciones_comerciales
+-- ============================================================
+CREATE TABLE IF NOT EXISTS condiciones_comerciales (
+  id                  uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  proveedor_id        uuid NOT NULL REFERENCES proveedores(id),
+  moneda_id           uuid NOT NULL REFERENCES monedas(id),
+  plazo_pago          text NOT NULL,
+  lead_time_promedio  int NOT NULL,
+  observaciones       text
+);
+CREATE INDEX idx_condiciones_comerciales_proveedor ON condiciones_comerciales(proveedor_id);
+
+-- ============================================================
+-- Tabla: proveedor_producto
+-- ============================================================
+CREATE TABLE IF NOT EXISTS proveedor_producto (
+  id                    uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  proveedor_id          uuid NOT NULL REFERENCES proveedores(id),
+  producto_id           uuid NOT NULL REFERENCES productos(id),
+  lead_time_especifico  int NOT NULL,
+  precio_compra         numeric(10,2) NOT NULL,
+  UNIQUE (proveedor_id, producto_id)
+);
+CREATE INDEX idx_proveedor_producto_proveedor ON proveedor_producto(proveedor_id);
+CREATE INDEX idx_proveedor_producto_producto ON proveedor_producto(producto_id);
 
 -- ============================================================
 -- Tabla: stock_ubicaciones

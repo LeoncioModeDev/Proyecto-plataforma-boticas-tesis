@@ -13,6 +13,7 @@ export default function PaginaAjustes() {
   const ajustesYMermas = movimientos.filter(m => m.tipo === 'ajuste' || m.tipo === 'merma').sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
 
   const columnas = [
+    { campo: 'id', encabezado: 'ID', render: (r) => <span className="font-mono text-xs">{r.id}</span> },
     { campo: 'createdAt', encabezado: 'Fecha', render: (r) => formatearFechaHora(r.createdAt) },
     { campo: 'tipo', encabezado: 'Tipo', render: (r) => <Insignia color={COLORES_MOVIMIENTO[r.tipo]}>{ETIQUETAS_MOVIMIENTO[r.tipo]}</Insignia> },
     { campo: 'productoId', encabezado: 'Producto', render: (r) => productos.find(p => p.id === r.productoId)?.nombreComercial || r.productoId },

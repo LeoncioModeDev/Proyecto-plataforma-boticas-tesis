@@ -70,9 +70,8 @@ El diferenciador es la orquestación in-database: `pg_cron` + `pg_net` + Supabas
 - `RutaSegunRol` — renderiza children según rol del usuario (vía props `adminCentral`/`operadorDrogueria`/`visorBotica` o un objeto `roles`), útil para componentes que varían por rol
 - `PaginaNoAutorizado` — página 403 con botón de volver al inicio según el rol del usuario
 - Redirección automática desde `/` según el rol del usuario autenticado
-- Login real con Supabase Auth (email + contraseña); sin selector mock de desarrollo
-- El perfil del usuario se obtiene de `public.usuarios` (vinculado por FK a `auth.users`), con fallback a `user_metadata` si no existe registro
-- El store `useAutenticacion.js` expone `usuario.boticaId` (desde `perfil.botica_id` o `user_metadata.botica_id`) para filtrado RLS en frontend
+- Login mock con validación local contra `mock-data/usuarios.js` y sesión persistida en `localStorage` (contraseña única: `test123`). Sin latencia de red ni dependencia de Supabase Auth.
+- El store `useAutenticacion.js` expone `usuario.boticaId` para filtrado RLS en frontend (mock)
 
 ### Protocolo de comunicación
 
@@ -350,7 +349,7 @@ def calcular_psi(baseline_bins, baseline_freq, actual_data, bins):
 
 ## Capa 4 — Mock Fase 1 (activa)
 
-En la Fase 1, la mayoría de datos provienen de archivos mock en `src/mock-data/`. La autenticación ya está conectada a Supabase Auth (real). Los servicios de ML existen como funciones simuladas con `setTimeout`.
+En la Fase 1, todos los datos provienen de archivos mock en `src/mock-data/`, incluyendo la autenticación. Los servicios de ML existen como funciones simuladas con `setTimeout`.
 
 | Archivo               | Contenido                                        |
 | --------------------- | ------------------------------------------------ |
@@ -362,13 +361,14 @@ En la Fase 1, la mayoría de datos provienen de archivos mock en `src/mock-data/
 | `alertas.js`          | 9 alertas activas (regla + predictivas)          |
 | `predicciones.js`     | 5 predicciones con serie histórica de 11 meses   |
 | `boticas.js`          | Droguería Central + 4 boticas                    |
-| `usuarios.js`         | 8 usuarios de prueba (solo UI, no para auth)     |
+| `usuarios.js`         | 8 usuarios de prueba (también usados para auth mock) |
 | `paises.js`           | 20 países ISO 3166-1 alpha-2                     |
 
 Servicios mock restantes:
 - `src/services/ml-model/` — funciones que simulan la FastAPI con datos de `predicciones.js`
+- `src/state/useAutenticacion.js` — auth mock: valida credenciales contra `usuarios.js` (contraseña: `test123`), persiste sesión en `localStorage`. Sin llamadas a Supabase Auth.
 
-> **Auth ya no es mock:** `src/services/supabase/autenticacion.js` usa `supabase.auth.signInWithPassword()` real. El store `useAutenticacion.js` consulta `public.usuarios` para obtener el perfil completo del usuario autenticado. El trigger `on_auth_user_before_insert` inyecta `rol`, `org_id` y `botica_id` en `raw_app_meta_data` del JWT.
+> **Auth es mock en Fase 1:** `useAutenticacion.js` no usa Supabase Auth. La validación es local contra `mock-data/usuarios.js`. La sesión se guarda en `localStorage` con clave `botica_session`. Esto elimina la latencia de red y la dependencia de un proyecto Supabase activo para desarrollo.
 
 ---
 
@@ -457,7 +457,7 @@ pg_cron Job 4 (diario 02:30 UTC)
 
 | Fase       | Estado        | Descripción                                                                      |
 | ---------- | ------------- | -------------------------------------------------------------------------------- |
-| **Fase 1** | ✅ Completada | Frontend completo con datos mock. Auth real con Supabase (email+password).             |
+| **Fase 1** | ✅ Completada | Frontend completo con datos mock. Auth mock local (validación contra `mock-data/usuarios.js` + `localStorage`). Sin dependencia de Supabase Auth. |
 | **Fase 2** | Pendiente     | Conexión completa a Supabase: PostgreSQL (datos reales), RLS, Realtime. Seed completo. |
 | **Fase 3** | Pendiente     | Implementación de FastAPI con SARIMA + XGBoost. Docker. ETL Pipeline.                  |
 | **Fase 4** | Pendiente     | Integración completa frontend ↔ Supabase ↔ modelo ML. pg_cron jobs activos.            |

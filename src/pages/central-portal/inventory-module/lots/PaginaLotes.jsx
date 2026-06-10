@@ -16,6 +16,7 @@ export default function PaginaLotes() {
   const obtenerNombreUbicacion = (id) => boticas.find(b => b.id === id)?.nombre || id
 
   const columnas = [
+    { campo: 'id', encabezado: 'ID', render: (r) => <span className="font-mono text-xs">{r.id}</span> },
     { campo: 'productoId', encabezado: 'Producto', render: (r) => obtenerNombreProducto(r.productoId) },
     { campo: 'numeroLote', encabezado: 'Nº Lote' },
     { campo: 'ubicacionId', encabezado: 'Ubicación', render: (r) => obtenerNombreUbicacion(r.ubicacionId) },

@@ -1,7 +1,7 @@
 {
   "version": "v1.0.0",
   "algoritmo": "SARIMA+XGBoost",
-  "fecha_entrenamiento": "2026-05-11T02:04:31.754238+00:00",
+  "fecha_entrenamiento": "2026-05-27T06:32:47.705564+00:00",
   "datos_desde": "2024-01-01",
   "datos_hasta": "2026-03-16",
   "mae": 9.406,
@@ -76,8 +76,8 @@
       ]
     }
   },
-  "hash": "801bf862005eb6a5242d0b1780c50c93e91ae33ff9d3cca636211e414bef5241",
-  "modelo_version_id": "b17f05c2-955a-47f5-8695-83d205b29779",
-  "tiempo_entrenamiento_s": 10.103404521942139,
-  "tiempo_inferencia_por_sku_s": 0.06735603014628093
+  "hash": "7a193f66b99b859ed08c8cae4ca876a210f597a7a8a1a9c3dad6c3848b650017",
+  "modelo_version_id": "c312f570-88f7-4f9e-85f3-994ce9782bde",
+  "tiempo_entrenamiento_s": 10.013908624649048,
+  "tiempo_inferencia_por_sku_s": 0.06675939083099365
 }

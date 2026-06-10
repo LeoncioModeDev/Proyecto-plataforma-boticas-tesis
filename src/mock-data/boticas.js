@@ -1,6 +1,7 @@
 export const boticas = [
   {
     id: 'ub-001',
+    codigoInterno: 'BOT-000001',
     nombre: 'Droguería Central',
     tipo: 'drogueria',
     ubigeo: '150101',
@@ -14,6 +15,7 @@ export const boticas = [
   },
   {
     id: 'ub-002',
+    codigoInterno: 'BOT-000002',
     nombre: 'Botica Miraflores',
     tipo: 'botica',
     ubigeo: '150104',
@@ -27,6 +29,7 @@ export const boticas = [
   },
   {
     id: 'ub-003',
+    codigoInterno: 'BOT-000003',
     nombre: 'Botica San Borja',
     tipo: 'botica',
     ubigeo: '150143',
@@ -40,6 +43,7 @@ export const boticas = [
   },
   {
     id: 'ub-004',
+    codigoInterno: 'BOT-000004',
     nombre: 'Botica Surco',
     tipo: 'botica',
     ubigeo: '150114',
@@ -53,6 +57,7 @@ export const boticas = [
   },
   {
     id: 'ub-005',
+    codigoInterno: 'BOT-000005',
     nombre: 'Botica Los Olivos',
     tipo: 'botica',
     ubigeo: '150116',

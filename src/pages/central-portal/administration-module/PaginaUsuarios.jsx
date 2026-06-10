@@ -130,6 +130,7 @@ export default function PaginaUsuarios() {
   }
 
   const columnas = [
+    { campo: 'id', encabezado: 'ID', render: (r) => <span className="font-mono text-xs">{r.id}</span> },
     {
       campo: 'nombre',
       encabezado: 'Usuario',

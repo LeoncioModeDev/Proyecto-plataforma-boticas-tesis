@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Plus, Edit, ToggleLeft, ToggleRight, Package, Mail, Phone, Clock, Building } from 'lucide-react'
+import { Plus, Edit, ToggleLeft, ToggleRight, Package, Mail, Phone, Clock, Building, Star } from 'lucide-react'
 import Boton from '@/components/common/Boton'
 import Tabla from '@/components/common/Tabla'
 import Insignia from '@/components/common/Insignia'
@@ -8,27 +8,44 @@ import Alerta from '@/components/common/Alerta'
 import Modal from '@/components/common/Modal'
 import TarjetaMetrica from '@/components/charts/TarjetaMetrica'
 import { proveedores as proveedoresMock } from '@/mock-data/proveedores'
+import { contactosProveedor as contactosMock } from '@/mock-data/contactos-proveedor'
+import { condicionesComerciales as condicionesMock } from '@/mock-data/condiciones-comerciales'
+import { monedas as monedasMock } from '@/mock-data/monedas'
 
 const ESTADOS_PROVEEDOR = {
   activo: { etiqueta: 'Activo', color: 'verde' },
   inactivo: { etiqueta: 'Inactivo', color: 'gris' },
 }
 
+function obtenerContactoPrincipal(proveedorId) {
+  return contactosMock.find(c => c.proveedorId === proveedorId && c.principal)
+    || contactosMock.find(c => c.proveedorId === proveedorId)
+}
+
+function obtenerCondiciones(proveedorId) {
+  return condicionesMock.filter(c => c.proveedorId === proveedorId)
+}
+
 const ColumnasProveedor = ({ onEditar, onToggleActivo }) => [
+  { campo: 'id', encabezado: 'ID', render: (r) => <span className="font-mono text-xs">{r.id}</span> },
+  { campo: 'codigoInterno', encabezado: 'Código Interno', render: (r) => <span className="font-mono text-xs">{r.codigoInterno}</span> },
   {
     campo: 'razonSocial',
     encabezado: 'Razón Social',
-    render: (r) => (
-      <div className="flex items-center gap-2">
-        <div className="p-1.5 bg-marca-claro rounded">
-          <Building className="h-4 w-4 text-marca-principal" />
+    render: (r) => {
+      const contacto = obtenerContactoPrincipal(r.id)
+      return (
+        <div className="flex items-center gap-2">
+          <div className="p-1.5 bg-marca-claro rounded">
+            <Building className="h-4 w-4 text-marca-principal" />
+          </div>
+          <div>
+            <p className="font-medium text-principal">{r.razonSocial}</p>
+            {contacto && <p className="text-xs text-secundario">{contacto.nombre}</p>}
+          </div>
         </div>
-        <div>
-          <p className="font-medium text-principal">{r.razonSocial}</p>
-          <p className="text-xs text-secundario">{r.nombreComercial}</p>
-        </div>
-      </div>
-    ),
+      )
+    },
   },
   {
     campo: 'numeroIdentificacion',
@@ -43,36 +60,63 @@ const ColumnasProveedor = ({ onEditar, onToggleActivo }) => [
   {
     campo: 'contacto',
     encabezado: 'Contacto',
-    render: (r) => (
-      <div className="space-y-1">
-        <p className="text-principal">{r.contacto}</p>
-        <div className="flex items-center gap-1 text-xs text-secundario">
-          <Phone className="h-3 w-3" />{r.telefono}
+    render: (r) => {
+      const contacto = obtenerContactoPrincipal(r.id)
+      if (!contacto) return <span className="text-secundario">—</span>
+      return (
+        <div className="space-y-1">
+          <p className="text-principal flex items-center gap-1">
+            {contacto.nombre}
+            {contacto.principal && <Star className="h-3 w-3 text-estado-exito" />}
+          </p>
+          {contacto.telefono && (
+            <div className="flex items-center gap-1 text-xs text-secundario">
+              <Phone className="h-3 w-3" />{contacto.telefono}
+            </div>
+          )}
+          {contacto.correo && (
+            <div className="flex items-center gap-1 text-xs text-secundario">
+              <Mail className="h-3 w-3" />
+              <span className="truncate max-w-[150px]">{contacto.correo}</span>
+            </div>
+          )}
         </div>
-      </div>
-    ),
+      )
+    },
   },
   {
-    campo: 'correo',
-    encabezado: 'Correo',
-    render: (r) => (
-      <div className="flex items-center gap-1 text-xs text-secundario">
-        <Mail className="h-3 w-3" />
-        <span className="truncate max-w-[150px]">{r.correo}</span>
-      </div>
-    ),
-  },
-  {
-    campo: 'leadTimeDias',
+    campo: 'leadTime',
     encabezado: 'Lead Time',
-    render: (r) => (
-      <div className="flex items-center gap-1">
-        <Clock className="h-4 w-4 text-secundario" />
-        <span className="text-principal">{r.leadTimeDias} días</span>
-      </div>
-    ),
+    render: (r) => {
+      const conds = obtenerCondiciones(r.id)
+      const minLt = conds.length > 0 ? Math.min(...conds.map(c => c.leadTimePromedio)) : null
+      return (
+        <div className="flex items-center gap-1">
+          <Clock className="h-4 w-4 text-secundario" />
+          <span className="text-principal">{minLt ? `${minLt} días` : '—'}</span>
+        </div>
+      )
+    },
   },
-  { campo: 'condicionesPago', encabezado: 'Pago', render: (r) => <span className="text-sm text-secundario">{r.condicionesPago}</span> },
+  {
+    campo: 'condicionesPago',
+    encabezado: 'Pago',
+    render: (r) => {
+      const conds = obtenerCondiciones(r.id)
+      return (
+        <div className="space-y-1">
+          {conds.length > 0 ? conds.map(c => {
+            const moneda = monedasMock.find(m => m.id === c.monedaId)
+            return (
+              <span key={c.id} className="text-sm text-secundario block">
+                {c.plazoPago} {moneda ? `(${moneda.simbolo}${moneda.codigo})` : ''}
+              </span>
+            )
+          }) : <span className="text-secundario">—</span>}
+        </div>
+      )
+    },
+  },
   {
     campo: 'activo',
     encabezado: 'Estado',
@@ -108,8 +152,7 @@ export default function PaginaProveedores() {
     const matchEstado = filtroEstado ? (filtroEstado === 'activo' ? p.activo : !p.activo) : true
     const matchBusqueda = busqueda
       ? p.razonSocial.toLowerCase().includes(busqueda.toLowerCase()) ||
-        p.numeroIdentificacion.includes(busqueda) ||
-        p.contacto.toLowerCase().includes(busqueda.toLowerCase())
+        p.numeroIdentificacion.includes(busqueda)
       : true
     return matchEstado && matchBusqueda
   })
@@ -167,7 +210,7 @@ export default function PaginaProveedores() {
       <div className="flex flex-col sm:flex-row gap-4">
         <input
           type="text"
-          placeholder="Buscar por razón social, RUC o contacto..."
+          placeholder="Buscar por razón social o RUC..."
           value={busqueda}
           onChange={e => setBusqueda(e.target.value)}
           className="flex-1 px-4 py-2 border border-estilo rounded-tarjeta text-cuerpo bg-fondo-secundario focus:outline-none focus:ring-2 focus:ring-marca-principal"

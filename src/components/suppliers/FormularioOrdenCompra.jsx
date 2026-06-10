@@ -6,6 +6,7 @@ import Tarjeta from '@/components/common/Tarjeta'
 import Alerta from '@/components/common/Alerta'
 import { proveedores } from '@/mock-data/proveedores'
 import { productos } from '@/mock-data/productos'
+import { proveedorProducto } from '@/mock-data/proveedor-producto'
 import { generarIdOC, calcularTotal } from '@/mock-data/ordenesCompra'
 
 export default function FormularioOrdenCompra({ onGuardar, redirectPath }) {
@@ -32,7 +33,10 @@ export default function FormularioOrdenCompra({ onGuardar, redirectPath }) {
     const nuevos = [...items]
     nuevos[index][campo] = campo === 'cantidad' || campo === 'precioUnitario' ? Number(valor) : valor
     if (campo === 'productoId') {
-      nuevos[index].precioUnitario = 0
+      const relacion = proveedorProducto.find(
+        r => r.proveedorId === proveedorId && r.productoId === valor
+      )
+      nuevos[index].precioUnitario = relacion?.precioReferencial || 0
     }
     setItems(nuevos)
   }

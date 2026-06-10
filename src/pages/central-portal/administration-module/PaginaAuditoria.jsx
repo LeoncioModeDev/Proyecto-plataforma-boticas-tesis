@@ -45,6 +45,7 @@ export default function PaginaAuditoria() {
   })
 
   const columnas = [
+    { campo: 'id', encabezado: 'ID', render: (r) => <span className="font-mono text-xs">{r.id}</span> },
     {
       campo: 'fecha',
       encabezado: 'Fecha y Hora',

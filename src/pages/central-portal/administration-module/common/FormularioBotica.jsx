@@ -3,7 +3,7 @@ import { Save, ArrowLeft } from 'lucide-react'
 import Boton from '@/components/common/Boton'
 import Tarjeta from '@/components/common/Tarjeta'
 import Alerta from '@/components/common/Alerta'
-import { OPCIONES_TIPO_BOTICA } from '@/mock-data/boticas'
+import { OPCIONES_TIPO_BOTICA, boticas as boticasMock } from '@/mock-data/boticas'
 import { useState } from 'react'
 
 let idTemporal = 100
@@ -17,6 +17,7 @@ export default function FormularioBotica({ boticaEditar, alGuardar }) {
   const esEdicion = !!boticaEditar
 
   const [formulario, setFormulario] = useState({
+    codigoInterno: boticaEditar?.codigoInterno || '',
     nombre: boticaEditar?.nombre || '',
     tipo: boticaEditar?.tipo || 'botica',
     ubigeo: boticaEditar?.ubigeo || '',
@@ -40,9 +41,15 @@ export default function FormularioBotica({ boticaEditar, alGuardar }) {
     e.preventDefault()
     const errorVal = validar()
     if (errorVal) { setError(errorVal); return }
+    const maxCodigo = boticasMock.reduce((max, b) => {
+      const match = b.codigoInterno?.match(/BOT-(\d+)/)
+      return match ? Math.max(max, parseInt(match[1])) : max
+    }, 0)
+
     const botica = {
       id: boticaEditar?.id || generarIdTemporal(),
       ...formulario,
+      codigoInterno: boticaEditar?.codigoInterno || `BOT-${String(maxCodigo + 1).padStart(6, '0')}`,
       organizacionId: boticaEditar?.organizacionId || 'org-001',
       createdAt: boticaEditar?.createdAt || new Date().toISOString(),
     }
@@ -64,6 +71,17 @@ export default function FormularioBotica({ boticaEditar, alGuardar }) {
 
       <Tarjeta>
         <form onSubmit={alEnviar} className="space-y-5">
+          {esEdicion && (
+            <div className="flex flex-col gap-1.5">
+              <label className="text-sm font-medium text-principal">Código Interno</label>
+              <input
+                type="text"
+                value={formulario.codigoInterno}
+                readOnly
+                className="px-3 py-2 text-sm bg-gray-100 border border-estilo rounded-md text-principal cursor-not-allowed"
+              />
+            </div>
+          )}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div className="flex flex-col gap-1.5">
               <label className="text-sm font-medium text-principal">Nombre <span className="text-estado-critico">*</span></label>

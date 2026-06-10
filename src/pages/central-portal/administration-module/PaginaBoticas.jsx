@@ -70,6 +70,8 @@ export default function PaginaBoticas() {
   }
 
   const columnas = [
+    { campo: 'id', encabezado: 'ID', render: (r) => <span className="font-mono text-xs">{r.id}</span> },
+    { campo: 'codigoInterno', encabezado: 'Código Interno', render: (r) => <span className="font-mono text-xs">{r.codigoInterno}</span> },
     {
       campo: 'nombre',
       encabezado: 'Nombre',

@@ -8,7 +8,7 @@ Empresa: **D&R Farma**
 
 ## Estado actual — Fase 1 (Frontend con datos mock)
 
-El frontend está **completamente construido y funcional**. No hay conexión real a Supabase ni al servicio de Machine Learning. Todos los datos provienen de archivos mock en `src/mock-data/` alineados con la **Arquitectura Física v3** y **Arquitectura Lógica v4**.
+El frontend está **completamente construido y funcional**. No hay conexión real a Supabase ni al servicio de Machine Learning. Todos los datos provienen de archivos mock en `src/mock-data/`, incluyendo la autenticación (mock local con `localStorage`, sin llamadas a Supabase Auth).
 
 ---
 
@@ -16,7 +16,8 @@ El frontend está **completamente construido y funcional**. No hay conexión rea
 
 ### Sistema de autenticación y roles
 
-- Login real con Supabase Auth (email + contraseña); sin selector mock
+- Login mock con validación local contra `mock-data/usuarios.js` y sesión en `localStorage` — contraseña única: `test123`
+- Sin dependencia de Supabase Auth ni latencia de red
 - Página 403 (`/no-autorizado`) cuando el rol no tiene permiso para una ruta
 - Tres roles con portales y permisos completamente distintos:
   - **Admin Central** (`ADMIN_CENTRAL`) — acceso total a los 3 portales (Central, Operaciones, Botica) y Panel ML completo. Sin restricción RLS.
@@ -28,7 +29,7 @@ El frontend está **completamente construido y funcional**. No hay conexión rea
 - Breadcrumbs contextuales por portal en `MigaDePan.jsx`
 - `RutaSegunRol` — componente que renderiza children según el rol del usuario (vía props o objeto `roles`), con fallback a 403 si no hay match
 - `RutaProtegida` redirige a `/no-autorizado` en vez de `/iniciar-sesion` cuando el rol no corresponde
-- El store `useAutenticacion.js` expone `usuario.boticaId` para filtrado RLS en frontend
+- El store `useAutenticacion.js` expone `usuario.boticaId` para filtrado RLS en frontend (mock)
 - Sistema de permisos RLS centralizado en `src/utilities/permisos.js`
 
 ### Portal Central (Admin Central)
@@ -193,6 +194,7 @@ botica-demand-ml/
 │   │   │   ├── CampoFecha.jsx
 │   │   │   ├── CampoNumero.jsx
 │   │   │   ├── CampoSeleccion.jsx
+│   │   │   ├── CampoSeleccionMultiple.jsx
 │   │   │   ├── CampoTexto.jsx
 │   │   │   └── CampoTextoArea.jsx
 │   │   │
@@ -214,17 +216,26 @@ botica-demand-ml/
 │   │   ├── alertas.js            # 9 alertas
 │   │   ├── auditoria.js          # Logs de auditoría (nuevo)
 │   │   ├── boticas.js            # Droguería Central + 4 boticas, ubigeo, distrito
+│   │   ├── condiciones-comerciales.js
+│   │   ├── contactos-proveedor.js
+│   │   ├── formas-farmaceuticas.js
 │   │   ├── lotes.js
 │   │   ├── metricasKPI.js
+│   │   ├── monedas.js
 │   │   ├── movimientos.js
+│   │   ├── presentaciones.js
 │   │   ├── organizaciones.js
 │   │   ├── predicciones.js      # 5 predicciones
 │   │   ├── precios.js
+│   │   ├── principios-activos.js
+│   │   ├── producto-principio-activo.js
 │   │   ├── productos.js         # 12 productos
+│   │   ├── proveedor-producto.js
 │   │   ├── proveedores.js
 │   │   ├── stock.js
 │   │   ├── transferencias.js     # 6 transferencias enriquecidas
 │   │   ├── ubigeos.js
+│   │   ├── unidades-medida.js
 │   │   └── usuarios.js           # 8 usuarios con datos expandidos
 │   │
 │   ├── pages/
@@ -386,6 +397,15 @@ botica-demand-ml/
 | `ubigeos.js` | Seed INEI con `codigo`, `distrito`, `provincia`, `departamento` |
 | `usuarios.js` | `rol` (admin_central/operador_drogueria/visor_botica), `boticaId` |
 | `auditoria.js` | `nivel` (info/advertencia/error), `accion`, `entidad`, `detalle` |
+| `formas-farmaceuticas.js` | `id`, `nombre` |
+| `presentaciones.js` | `id`, `tipoEmpaque`, `cantidad`, `unidad` |
+| `principios-activos.js` | `id`, `nombre`, `codigoAtc` |
+| `unidades-medida.js` | `id`, `nombre`, `simbolo` |
+| `monedas.js` | `id`, `codigo`, `nombre`, `simbolo` |
+| `condiciones-comerciales.js` | `proveedorId`, `monedaId`, `plazoPago`, `leadTimePromedio` |
+| `contactos-proveedor.js` | `proveedorId`, `nombre`, `telefono`, `correo`, `principal` |
+| `proveedor-producto.js` | `proveedorId`, `productoId`, `leadTimeEspecifico`, `precioCompra` |
+| `producto-principio-activo.js` | `productoId`, `principioActivoId`, `concentracion`, `unidadMedidaId` |
 
 > El esquema de validación de transferencias (`transferenciaEsquema.js`) usa Zod con campos `destinoId`, `items` (productoId + cantidad) y `observaciones`.
 
@@ -548,7 +568,7 @@ Las 8 páginas del Portal Botica usan `filtrarPorBotica()` en lugar de acceder d
 
 | Fase | Descripción | Estado |
 |---|---|---|
-| **Fase 1** | Frontend completo + Auth real con Supabase + seed PostgreSQL + pg_net + RLS Phase 2 | ✅ Completado |
+| **Fase 1** | Frontend completo + Auth mock con `localStorage` + seed PostgreSQL + pg_net + RLS Phase 2 | ✅ Completado |
 | Fase 2 | Supabase: auth real, PostgreSQL, RLS, Realtime, seed INEI | Pendiente |
 | Fase 3 | FastAPI + Docker: SARIMA + XGBoost | Pendiente |
 | Fase 4 | Integración frontend ↔ Supabase ↔ ML | Pendiente |
