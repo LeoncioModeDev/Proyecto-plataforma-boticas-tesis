@@ -39,8 +39,17 @@ DROP TABLE IF EXISTS movimientos_inventario CASCADE;
 DROP TABLE IF EXISTS lotes CASCADE;
 DROP TABLE IF EXISTS stock_ubicaciones CASCADE;
 DROP TABLE IF EXISTS precios CASCADE;
+DROP TABLE IF EXISTS proveedor_producto CASCADE;
+DROP TABLE IF EXISTS producto_principio_activo CASCADE;
 DROP TABLE IF EXISTS productos CASCADE;
+DROP TABLE IF EXISTS presentaciones CASCADE;
+DROP TABLE IF EXISTS formas_farmaceuticas CASCADE;
+DROP TABLE IF EXISTS principios_activos CASCADE;
+DROP TABLE IF EXISTS unidades_medida CASCADE;
+DROP TABLE IF EXISTS condiciones_comerciales CASCADE;
+DROP TABLE IF EXISTS contactos_proveedor CASCADE;
 DROP TABLE IF EXISTS proveedores CASCADE;
+DROP TABLE IF EXISTS monedas CASCADE;
 DROP TABLE IF EXISTS boticas CASCADE;
 DROP TABLE IF EXISTS usuarios CASCADE;
 DROP TABLE IF EXISTS paises CASCADE;
@@ -75,17 +84,7 @@ COMMIT;
 --     con permisos):
 -- ============================================================
 -- DELETE FROM auth.users WHERE email IN (
---   'carlos@boticaml.pe',
---   'ana@boticaml.pe',
---   'luis@boticaml.pe'
+--   'admin@jhodaal.pe',
+--   'operador@jhodaal.pe',
+--   'visor@jhodaal.pe'
 -- );
-
--- ============================================================
--- 6. Extensiones (NO se eliminan por defecto; otras tablas del
---    proyecto podrían depender de ellas). Descomentar si se
---    requiere una limpieza total:
--- ============================================================
--- DROP EXTENSION IF EXISTS pg_cron;
--- DROP EXTENSION IF EXISTS pg_net;
--- DROP EXTENSION IF EXISTS pg_trgm;
--- DROP EXTENSION IF EXISTS "uuid-ossp";

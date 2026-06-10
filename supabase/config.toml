@@ -1,0 +1,2 @@
+[functions]
+crear-cliente.verify_jwt = true

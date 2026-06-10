@@ -21,6 +21,7 @@ import {
   Settings,
   Building2,
   Activity,
+  UserPlus,
 } from "lucide-react";
 import { cn } from "@/utilities/cn";
 import useAutenticacion from "@/state/useAutenticacion";
@@ -28,8 +29,7 @@ import useBarraLateral from "@/state/useBarraLateral";
 import { ROLES, ETIQUETAS_ROLES } from "@/constants/roles";
 import { obtenerPortal } from "@/utilities/permisos";
 
-const itemsNavegacion = {
-  [ROLES.ADMIN_CENTRAL]: [
+const itemsAdminCentral = [
     {
       etiqueta: "Dashboard",
       ruta: "/central/dashboard",
@@ -161,6 +161,25 @@ const itemsNavegacion = {
           icono: Lightbulb,
         },
         { etiqueta: "Monitoreo", ruta: "/ml/monitoreo", icono: Activity },
+      ],
+    },
+]
+
+const itemsNavegacion = {
+  [ROLES.ADMIN_CENTRAL]: itemsAdminCentral,
+  [ROLES.SUPER_ADMIN]: [
+    { etiqueta: "Dashboard", ruta: "/admin-saas/dashboard", icono: LayoutDashboard },
+    {
+      tipo: "modulo",
+      etiqueta: "Organizaciones",
+      icono: Building2,
+      ruta: "/admin-saas/organizaciones",
+      subItems: [
+        {
+          etiqueta: "Crear Organización",
+          ruta: "/admin-saas/organizaciones/crear",
+          icono: UserPlus,
+        },
       ],
     },
   ],
@@ -382,7 +401,7 @@ export default function BarraLateral() {
     operaciones: "Portal Operaciones",
     botica: "Portal Botica",
   };
-  const nombrePortal = NOMBRES_PORTAL[portal] || "Botica ML";
+  const nombrePortal = usuario.rol === ROLES.SUPER_ADMIN ? "Admin SaaS" : (NOMBRES_PORTAL[portal] || "Botica ML");
 
   const manejarCerrarSesion = () => {
     cerrarSesion();

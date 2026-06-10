@@ -7,6 +7,7 @@ import Boton from '@/components/common/Boton'
 import useTema from '@/state/useTema'
 
 const RUTA_POR_ROL = {
+  super_admin: '/admin-saas/dashboard',
   admin_central: '/central/dashboard',
   operador_drogueria: '/operaciones/dashboard',
   visor_botica: '/botica/dashboard',

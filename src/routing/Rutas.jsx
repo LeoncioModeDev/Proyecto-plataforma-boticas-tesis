@@ -45,6 +45,8 @@ import PaginaConfiguracionGeneral from '@/pages/central-portal/administration-mo
 import PaginaAuditoria from '@/pages/central-portal/administration-module/PaginaAuditoria'
 import PaginaNuevaBotica from '@/pages/central-portal/administration-module/new/PaginaNuevaBotica'
 import PaginaEditarBotica from '@/pages/central-portal/administration-module/edit/PaginaEditarBotica'
+import CrearOrganizacion from '@/pages/admin/CrearOrganizacion'
+import PaginaDashboardSaaS from '@/pages/admin-saas/PaginaDashboardSaaS'
 
 // Portal Boticas
 import PaginaStockBotica from '@/pages/pharmacy-portal/PaginaStockBotica'
@@ -113,6 +115,8 @@ function RedirectPorRol() {
   if (!autenticado) return <Navigate to="/iniciar-sesion" replace />
 
   switch (usuario?.rol) {
+    case ROLES.SUPER_ADMIN:
+      return <Navigate to="/admin-saas/dashboard" replace />
     case ROLES.ADMIN_CENTRAL:
       return <Navigate to="/central/dashboard" replace />
     case ROLES.OPERADOR_DROGUERIA:
@@ -238,6 +242,17 @@ export default function Rutas() {
         <Route path="/ml/alertas" element={<PaginaAlertas />} />
         <Route path="/ml/recomendaciones" element={<PaginaRecomendaciones />} />
         <Route path="/ml/monitoreo" element={<PaginaMonitoreoML />} />
+      </Route>
+
+      {/* Portal SaaS (solo SUPER_ADMIN) */}
+      <Route element={
+        <RutaProtegida rolesPermitidos={[ROLES.SUPER_ADMIN]}>
+          <LayoutPrincipal />
+        </RutaProtegida>
+      }>
+        <Route path="/admin-saas/dashboard" element={<PaginaDashboardSaaS />} />
+        <Route path="/admin-saas/organizaciones" element={<PaginaDashboardSaaS />} />
+        <Route path="/admin-saas/organizaciones/crear" element={<CrearOrganizacion />} />
       </Route>
 
       {/* No autorizado */}

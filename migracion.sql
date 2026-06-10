@@ -9,9 +9,6 @@ BEGIN;
 -- Extensiones
 -- ============================================================
 CREATE EXTENSION IF NOT EXISTS pg_cron WITH SCHEMA extensions;
--- pg_net: aseguramos que esté en schema net. Si existe fuera, la
--- recreamos. Si no existe, la creamos. Limpiamos schema net por
--- si hay objetos húerfanos de migraciones previas.
 DO $$
 BEGIN
   IF EXISTS (SELECT 1 FROM pg_extension WHERE extname = 'pg_net') THEN
@@ -45,19 +42,14 @@ CREATE TYPE estado_modelo AS ENUM ('staging', 'production', 'archived');
 CREATE TYPE estado_recomendacion AS ENUM ('pendiente', 'confirmada', 'rechazada', 'ejecutada');
 CREATE TYPE estado_orden_compra AS ENUM ('pendiente', 'aprobada', 'rechazada', 'completada');
 CREATE TYPE tendencia_drift AS ENUM ('estable', 'degradando', 'mejorando');
-CREATE TYPE rol_usuario AS ENUM ('admin_central', 'operador_drogueria', 'visor_botica');
+CREATE TYPE rol_usuario AS ENUM ('super_admin', 'admin_central', 'operador_drogueria', 'visor_botica');
 
 -- ============================================================
--- Tabla: organizaciones
+-- Tabla: paises
 -- ============================================================
-CREATE TABLE IF NOT EXISTS organizaciones (
-  id              uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  nombre          text NOT NULL,
-  tipo_identificacion tipo_identificacion NOT NULL,
-  numero_identificacion text NOT NULL,
-  pais_origen     char(2) NOT NULL DEFAULT 'PE',
-  created_at      timestamptz NOT NULL DEFAULT now(),
-  UNIQUE (tipo_identificacion, numero_identificacion)
+CREATE TABLE IF NOT EXISTS paises (
+  codigo char(2) PRIMARY KEY,
+  nombre text NOT NULL
 );
 
 -- ============================================================
@@ -69,94 +61,38 @@ CREATE TABLE IF NOT EXISTS ubigeos (
   provincia    text NOT NULL,
   departamento text NOT NULL
 );
-ALTER TABLE ubigeos ALTER COLUMN distrito DROP NOT NULL;
 
 -- ============================================================
--- Tabla: paises
+-- Tabla: organizaciones
 -- ============================================================
-CREATE TABLE IF NOT EXISTS paises (
-  codigo char(2) PRIMARY KEY,
-  nombre text NOT NULL
+CREATE TABLE IF NOT EXISTS organizaciones (
+  id              uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  nombre          text NOT NULL,
+  tipo_identificacion tipo_identificacion NOT NULL,
+  numero_identificacion text NOT NULL,
+  pais_origen     char(2) NOT NULL DEFAULT 'PE' REFERENCES paises(codigo),
+  created_at      timestamptz NOT NULL DEFAULT now(),
+  UNIQUE (tipo_identificacion, numero_identificacion)
 );
 
 -- ============================================================
--- Tabla: usuarios
+-- Tabla: monedas
 -- ============================================================
-CREATE TABLE IF NOT EXISTS usuarios (
-  id            uuid PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
-  org_id        uuid NOT NULL REFERENCES organizaciones(id),
-  nombre        text NOT NULL,
-  email         text NOT NULL UNIQUE,
-  rol           rol_usuario NOT NULL DEFAULT 'visor_botica',
-  botica_id     uuid,
-  avatar        text,
-  telefono      text,
-  activo        boolean NOT NULL DEFAULT true,
-  ultimo_acceso timestamptz,
-  created_at    timestamptz NOT NULL DEFAULT now()
-);
-
--- Trigger BEFORE: setea raw_app_meta_data con el rol antes de insertar el auth.user
-CREATE OR REPLACE FUNCTION public.setear_app_metadata()
-RETURNS trigger AS $$
-BEGIN
-  NEW.raw_app_meta_data = jsonb_build_object(
-    'rol',       COALESCE(NEW.raw_user_meta_data->>'rol', 'visor_botica'),
-    'org_id',    NEW.raw_user_meta_data->>'org_id',
-    'botica_id', NEW.raw_user_meta_data->>'botica_id'
-  );
-  RETURN NEW;
-END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
-
-CREATE TRIGGER on_auth_user_before_insert
-  BEFORE INSERT ON auth.users
-  FOR EACH ROW EXECUTE FUNCTION public.setear_app_metadata();
-
--- Trigger AFTER: sincroniza auth.users → public.usuarios (la FK ya existe)
-CREATE OR REPLACE FUNCTION public.sincronizar_usuario()
-RETURNS trigger AS $$
-BEGIN
-  INSERT INTO public.usuarios (id, org_id, nombre, email, rol, botica_id, avatar, telefono, activo, created_at)
-  VALUES (
-    NEW.id,
-    (NEW.raw_user_meta_data->>'org_id')::uuid,
-    COALESCE(NEW.raw_user_meta_data->>'nombre', split_part(NEW.email, '@', 1)),
-    NEW.email,
-    COALESCE(NEW.raw_user_meta_data->>'rol', 'visor_botica')::rol_usuario,
-    (NEW.raw_user_meta_data->>'botica_id')::uuid,
-    NEW.raw_user_meta_data->>'avatar',
-    NEW.raw_user_meta_data->>'telefono',
-    true,
-    NEW.created_at
-  );
-  RETURN NEW;
-END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
-
-CREATE TRIGGER on_auth_user_after_insert
-  AFTER INSERT ON auth.users
-  FOR EACH ROW EXECUTE FUNCTION public.sincronizar_usuario();
-
--- Asegurar columna botica_id (idempotente: si la tabla ya existía)
-ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS botica_id uuid;
-
--- ============================================================
--- Tabla: boticas
--- ============================================================
-CREATE TABLE IF NOT EXISTS boticas (
+CREATE TABLE IF NOT EXISTS monedas (
   id       uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  org_id   uuid NOT NULL REFERENCES organizaciones(id),
+  codigo   char(3) NOT NULL UNIQUE,
   nombre   text NOT NULL,
-  tipo     tipo_ubicacion NOT NULL,
-  ubigeo   char(6) NOT NULL REFERENCES ubigeos(codigo),
-  direccion text,
-  telefono text,
-  activa   boolean NOT NULL DEFAULT true,
-  created_at timestamptz NOT NULL DEFAULT now()
+  simbolo  char(1) NOT NULL
 );
-ALTER TABLE boticas DROP COLUMN IF EXISTS distrito;
-CREATE INDEX IF NOT EXISTS idx_boticas_org ON boticas(org_id);
+
+-- ============================================================
+-- Tabla: unidades_medida
+-- ============================================================
+CREATE TABLE IF NOT EXISTS unidades_medida (
+  id      uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  nombre  text NOT NULL UNIQUE,
+  simbolo text NOT NULL
+);
 
 -- ============================================================
 -- Tabla: principios_activos
@@ -167,15 +103,6 @@ CREATE TABLE IF NOT EXISTS principios_activos (
   codigo_atc  text
 );
 CREATE INDEX idx_principios_activos_nombre ON principios_activos(nombre);
-
--- ============================================================
--- Tabla: unidades_medida
--- ============================================================
-CREATE TABLE IF NOT EXISTS unidades_medida (
-  id      uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  nombre  text NOT NULL UNIQUE,
-  simbolo text NOT NULL
-);
 
 -- ============================================================
 -- Tabla: formas_farmaceuticas
@@ -197,17 +124,74 @@ CREATE TABLE IF NOT EXISTS presentaciones (
 );
 
 -- ============================================================
--- Tabla: monedas
+-- Tabla: usuarios
 -- ============================================================
-CREATE TABLE IF NOT EXISTS monedas (
-  id       uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  codigo   char(3) NOT NULL UNIQUE,
-  nombre   text NOT NULL,
-  simbolo  char(1) NOT NULL
+CREATE TABLE IF NOT EXISTS usuarios (
+  id            uuid PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+  org_id        uuid NOT NULL REFERENCES organizaciones(id),
+  nombre        text NOT NULL,
+  email         text NOT NULL UNIQUE,
+  rol           rol_usuario NOT NULL DEFAULT 'visor_botica',
+  botica_id     uuid,
+  avatar        text,
+  telefono      text,
+  activo        boolean NOT NULL DEFAULT true,
+  ultimo_acceso timestamptz,
+  created_at    timestamptz NOT NULL DEFAULT now()
 );
 
+-- NOTA: El trigger BEFORE insert se eliminó porque es redundante:
+--       admin.createUser() ya envía app_metadata explícitamente,
+--       y para registros públicos no se usa (solo creación vía API admin).
+
+CREATE OR REPLACE FUNCTION public.sincronizar_usuario()
+RETURNS trigger AS $$
+BEGIN
+  INSERT INTO public.usuarios (id, org_id, nombre, email, rol, botica_id, avatar, telefono, activo, created_at)
+  VALUES (
+    NEW.id,
+    NULLIF(NEW.raw_user_meta_data->>'org_id', '')::uuid,
+    COALESCE(NULLIF(NEW.raw_user_meta_data->>'nombre', ''), split_part(NEW.email, '@', 1)),
+    NEW.email,
+    COALESCE(NULLIF(NEW.raw_user_meta_data->>'rol', ''), 'visor_botica')::rol_usuario,
+    NULLIF(NEW.raw_user_meta_data->>'botica_id', '')::uuid,
+    NULLIF(NEW.raw_user_meta_data->>'avatar', ''),
+    NULLIF(NEW.raw_user_meta_data->>'telefono', ''),
+    true,
+    NEW.created_at
+  )
+  ON CONFLICT (id) DO UPDATE SET
+    org_id    = EXCLUDED.org_id,
+    nombre    = EXCLUDED.nombre,
+    email     = EXCLUDED.email,
+    rol       = EXCLUDED.rol,
+    botica_id = EXCLUDED.botica_id;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+CREATE TRIGGER on_auth_user_after_insert
+  AFTER INSERT ON auth.users
+  FOR EACH ROW EXECUTE FUNCTION public.sincronizar_usuario();
+
 -- ============================================================
--- Tabla: productos (modificada)
+-- Tabla: boticas
+-- ============================================================
+CREATE TABLE IF NOT EXISTS boticas (
+  id       uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  org_id   uuid NOT NULL REFERENCES organizaciones(id),
+  nombre   text NOT NULL,
+  tipo     tipo_ubicacion NOT NULL,
+  ubigeo   char(6) NOT NULL REFERENCES ubigeos(codigo),
+  direccion text,
+  telefono text,
+  activa   boolean NOT NULL DEFAULT true,
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_boticas_org ON boticas(org_id);
+
+-- ============================================================
+-- Tabla: productos
 -- ============================================================
 CREATE TABLE IF NOT EXISTS productos (
   id                    uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -226,18 +210,6 @@ CREATE TABLE IF NOT EXISTS productos (
 CREATE INDEX idx_productos_org ON productos(org_id);
 CREATE INDEX idx_productos_buscador ON productos USING gin (nombre_comercial gin_trgm_ops);
 
--- DO: migrar formas_farmaceuticas desde productos legacy si existen
-DO $$
-BEGIN
-  INSERT INTO formas_farmaceuticas (id, nombre)
-  SELECT DISTINCT ON (lower(trim(forma_farmaceutica)))
-    gen_random_uuid(),
-    lower(trim(forma_farmaceutica))
-  FROM productos
-  WHERE forma_farmaceutica IS NOT NULL
-  ON CONFLICT (nombre) DO NOTHING;
-END $$;
-
 -- ============================================================
 -- Tabla: producto_principio_activo
 -- ============================================================
@@ -253,20 +225,6 @@ CREATE INDEX idx_producto_pa_producto ON producto_principio_activo(producto_id);
 CREATE INDEX idx_producto_pa_pa ON producto_principio_activo(principio_activo_id);
 
 -- ============================================================
--- Tabla: precios
--- ============================================================
-CREATE TABLE IF NOT EXISTS precios (
-  id            uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  producto_id   uuid NOT NULL REFERENCES productos(id),
-  botica_id     uuid REFERENCES boticas(id),
-  precio_venta  numeric(10,2) NOT NULL,
-  precio_costo  numeric(10,2) NOT NULL,
-  vigente_desde timestamptz NOT NULL,
-  vigente_hasta timestamptz
-);
-CREATE INDEX idx_precios_producto ON precios(producto_id);
-
--- ============================================================
 -- Tabla: proveedores
 -- ============================================================
 CREATE TABLE IF NOT EXISTS proveedores (
@@ -275,30 +233,12 @@ CREATE TABLE IF NOT EXISTS proveedores (
   razon_social        text NOT NULL,
   tipo_identificacion tipo_identificacion NOT NULL,
   numero_identificacion text NOT NULL,
-  pais_origen         char(2) NOT NULL DEFAULT 'PE',
+  pais_origen         char(2) NOT NULL DEFAULT 'PE' REFERENCES paises(codigo),
   activo              boolean NOT NULL DEFAULT true,
   created_at          timestamptz NOT NULL DEFAULT now(),
   UNIQUE (tipo_identificacion, numero_identificacion)
 );
 CREATE INDEX idx_proveedores_org ON proveedores(org_id);
-
--- Migrar columnas legacy de proveedores si existen (para compatibilidad)
-DO $$
-BEGIN
-  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'proveedores' AND column_name = 'contacto') THEN
-DO $$
-BEGIN
-  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'proveedores' AND column_name = 'contacto') THEN
-    INSERT INTO contactos_proveedor (id, proveedor_id, nombre, principal)
-    SELECT gen_random_uuid(), id, COALESCE(contacto, razon_social), true
-    FROM proveedores
-    WHERE contacto IS NOT NULL
-    ON CONFLICT DO NOTHING;
-  END IF;
-END $$;
-
-ALTER TABLE proveedores DROP COLUMN IF EXISTS contacto;
-ALTER TABLE proveedores DROP COLUMN IF EXISTS lead_time_dias;
 
 -- ============================================================
 -- Tabla: contactos_proveedor
@@ -341,6 +281,20 @@ CREATE TABLE IF NOT EXISTS proveedor_producto (
 );
 CREATE INDEX idx_proveedor_producto_proveedor ON proveedor_producto(proveedor_id);
 CREATE INDEX idx_proveedor_producto_producto ON proveedor_producto(producto_id);
+
+-- ============================================================
+-- Tabla: precios
+-- ============================================================
+CREATE TABLE IF NOT EXISTS precios (
+  id            uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  producto_id   uuid NOT NULL REFERENCES productos(id),
+  botica_id     uuid REFERENCES boticas(id),
+  precio_venta  numeric(10,2) NOT NULL,
+  precio_costo  numeric(10,2) NOT NULL,
+  vigente_desde timestamptz NOT NULL,
+  vigente_hasta timestamptz
+);
+CREATE INDEX idx_precios_producto ON precios(producto_id);
 
 -- ============================================================
 -- Tabla: stock_ubicaciones
@@ -393,7 +347,6 @@ CREATE TABLE IF NOT EXISTS movimientos_inventario (
   transferencia_id uuid,
   created_at       timestamptz NOT NULL DEFAULT now()
 );
-ALTER TABLE movimientos_inventario ALTER COLUMN lote_id DROP NOT NULL;
 CREATE INDEX idx_movimientos_producto ON movimientos_inventario(producto_id);
 CREATE INDEX idx_movimientos_fecha ON movimientos_inventario(created_at);
 CREATE INDEX idx_movimientos_tipo ON movimientos_inventario(tipo_movimiento);
@@ -459,7 +412,7 @@ CREATE TABLE IF NOT EXISTS ordenes_compra_items (
 CREATE INDEX idx_oc_items_orden ON ordenes_compra_items(orden_compra_id);
 
 -- ============================================================
--- Tabla: modelos_ml
+-- Tablas ML
 -- ============================================================
 CREATE TABLE IF NOT EXISTS modelos_ml (
   id                  uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -479,9 +432,6 @@ CREATE TABLE IF NOT EXISTS modelos_ml (
 );
 CREATE UNIQUE INDEX idx_modelos_ml_production ON modelos_ml (status) WHERE status = 'production';
 
--- ============================================================
--- Tabla: predicciones_ml
--- ============================================================
 CREATE TABLE IF NOT EXISTS predicciones_ml (
   id                uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   producto_id       uuid NOT NULL REFERENCES productos(id),
@@ -498,9 +448,6 @@ CREATE TABLE IF NOT EXISTS predicciones_ml (
 ALTER TABLE predicciones_ml REPLICA IDENTITY FULL;
 CREATE INDEX idx_predicciones_producto_botica ON predicciones_ml(producto_id, botica_id);
 
--- ============================================================
--- Tabla: inferencias
--- ============================================================
 CREATE TABLE IF NOT EXISTS inferencias (
   id                uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   producto_id       uuid NOT NULL REFERENCES productos(id),
@@ -517,9 +464,6 @@ CREATE TABLE IF NOT EXISTS inferencias (
 CREATE INDEX idx_inferencias_modelo_fecha ON inferencias(modelo_version_id, fecha_pred);
 CREATE INDEX idx_inferencias_producto_botica ON inferencias(producto_id, botica_id, fecha_pred);
 
--- ============================================================
--- Tabla: drift_metricas
--- ============================================================
 CREATE TABLE IF NOT EXISTS drift_metricas (
   id                        uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   modelo_version_id         uuid NOT NULL REFERENCES modelos_ml(id),
@@ -537,9 +481,6 @@ CREATE TABLE IF NOT EXISTS drift_metricas (
 ALTER TABLE drift_metricas REPLICA IDENTITY FULL;
 CREATE INDEX idx_drift_modelo_fecha ON drift_metricas(modelo_version_id, fecha_calculo);
 
--- ============================================================
--- Tabla: alertas_ml
--- ============================================================
 CREATE TABLE IF NOT EXISTS alertas_ml (
   id          uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   tipo        tipo_alerta NOT NULL,
@@ -554,9 +495,6 @@ ALTER TABLE alertas_ml REPLICA IDENTITY FULL;
 CREATE INDEX idx_alertas_botica ON alertas_ml(botica_id);
 CREATE INDEX idx_alertas_resuelta ON alertas_ml(resuelta);
 
--- ============================================================
--- Tabla: recomendaciones_ml
--- ============================================================
 CREATE TABLE IF NOT EXISTS recomendaciones_ml (
   id                 uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   producto_id        uuid NOT NULL REFERENCES productos(id),

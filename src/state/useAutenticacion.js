@@ -1,5 +1,5 @@
 ﻿import { create } from 'zustand'
-import { usuarios } from '@/mock-data/usuarios'
+import { iniciarSesion as authLogin, cerrarSesion as authLogout, obtenerSesion } from '@/services/supabase/autenticacion'
 
 const SESION_KEY = 'botica_session'
 
@@ -26,44 +26,33 @@ const useAutenticacion = create((set) => ({
   cargando: false,
 
   iniciarSesion: async (email, password) => {
-    // Simular latencia mínima de red
-    await new Promise((r) => setTimeout(r, 400))
-
-    const usuario = usuarios.find(
-      (u) => u.email === email && password === 'test123'
-    )
-
-    if (!usuario) {
-      return { error: { message: 'Invalid login credentials' } }
+    set({ cargando: true })
+    const { usuario, error } = await authLogin(email, password)
+    if (error) {
+      set({ cargando: false })
+      return { error }
     }
-    if (!usuario.activo) {
-      return { error: { message: 'Usuario desactivado' } }
-    }
-
-    const datos = {
-      id: usuario.id,
-      email: usuario.email,
-      nombre: usuario.nombre,
-      rol: usuario.rol,
-      avatar: usuario.avatar || null,
-      telefono: usuario.telefono || null,
-      orgId: null,
-      boticaId: usuario.boticaId || null,
-    }
-
-    guardarSesion(datos)
-    set({ usuario: datos, autenticado: true })
+    guardarSesion(usuario)
+    set({ usuario, autenticado: true, cargando: false })
     return { error: null }
   },
 
   cerrarSesion: async () => {
+    await authLogout()
     limpiarSesion()
     set({ usuario: null, autenticado: false })
   },
 
-  inicializar: () => {
-    const usuario = sesionGuardada()
-    set({ usuario, autenticado: !!usuario, cargando: false })
+  inicializar: async () => {
+    set({ cargando: true })
+    const { sesion, error } = await obtenerSesion()
+    if (!error && sesion?.usuario) {
+      guardarSesion(sesion.usuario)
+      set({ usuario: sesion.usuario, autenticado: true, cargando: false })
+    } else {
+      limpiarSesion()
+      set({ usuario: null, autenticado: false, cargando: false })
+    }
   },
 }))
 

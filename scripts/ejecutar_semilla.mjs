@@ -1,9 +1,13 @@
 import { createHash } from 'crypto'
 import { readFileSync } from 'fs'
+import { fileURLToPath } from 'node:url'
+import { dirname, resolve } from 'node:path'
+
+const __dirname = dirname(fileURLToPath(import.meta.url))
 
 const vars = {}
 try {
-  for (const line of readFileSync('.env', 'utf8').split(/\r?\n/)) {
+  for (const line of readFileSync(resolve(__dirname, '../.env'), 'utf8').split(/\r?\n/)) {
     const m = line.match(/^\s*([A-Z_][A-Z0-9_]+)=(.*)$/)
     if (m) vars[m[1]] = m[2].replace(/^["']|["']$/g, '')
   }
