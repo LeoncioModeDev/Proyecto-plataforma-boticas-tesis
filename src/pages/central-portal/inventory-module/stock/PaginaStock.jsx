@@ -9,8 +9,8 @@ import Modal from '@/components/common/Modal'
 import { stock } from '@/mock-data/stock'
 import { productos } from '@/mock-data/productos'
 import { boticas, OPCIONES_UBICACION } from '@/mock-data/boticas'
-import { proveedores as provMock } from '@/mock-data/proveedores'
-import { proveedorProducto as ppMock } from '@/mock-data/proveedor-producto'
+import { listarProveedores } from '@/services/supabase/proveedores'
+import { listarPorProducto, guardarRelacion, eliminarRelacion } from '@/services/supabase/proveedorProducto'
 import { clasificarAlerta, COLORES_ESTADO_STOCK, ETIQUETAS_ESTADO_STOCK } from '@/utilities/clasificarAlerta'
 import { formatearFechaRelativa } from '@/utilities/formatearFecha'
 import { formatearNumero } from '@/utilities/formatearMoneda'
@@ -21,7 +21,8 @@ export default function PaginaStock() {
   const [filtroEstado, setFiltroEstado] = useState('')
   const [modalProducto, setModalProducto] = useState(null)
   const [proveedoresProducto, setProveedoresProducto] = useState([])
-  const [nuevoProvProd, setNuevoProvProd] = useState({ proveedorId: '', leadTimeEspecifico: '', precioReferencial: '' })
+  const [nuevoProvProd, setNuevoProvProd] = useState({ proveedorId: '', leadTimeEspecifico: '', precioCompra: '' })
+  const [error, setError] = useState(null)
 
   const datosEnriquecidos = stock.map(s => {
     const producto = productos.find(p => p.id === s.productoId)
@@ -39,34 +40,49 @@ export default function PaginaStock() {
   const sinStock = filtrados.filter(s => s.estadoAlerta === 'sin_stock').length
   const sobrestock = filtrados.filter(s => s.estadoAlerta === 'sobrestock').length
 
-  const abrirLeadTimes = (productoId, nombreProducto) => {
-    const existentes = ppMock.filter(r => r.productoId === productoId)
-    setProveedoresProducto(existentes)
-    setModalProducto({ id: productoId, nombre: nombreProducto })
-  }
+  const [proveedoresDisponibles, setProveedoresDisponibles] = useState([])
 
-  const agregarProveedorProducto = () => {
-    if (!nuevoProvProd.proveedorId || !nuevoProvProd.leadTimeEspecifico || !nuevoProvProd.precioReferencial) return
-    const nuevo = {
-      id: crypto.randomUUID(),
-      proveedorId: nuevoProvProd.proveedorId,
-      productoId: modalProducto.id,
-      leadTimeEspecifico: Number(nuevoProvProd.leadTimeEspecifico),
-      precioReferencial: Number(nuevoProvProd.precioReferencial),
+  const abrirLeadTimes = async (productoId, nombreProducto) => {
+    try {
+      const existentes = await listarPorProducto(productoId)
+      setProveedoresProducto(existentes)
+      const provs = await listarProveedores({ activos: true })
+      setProveedoresDisponibles(provs)
+      setModalProducto({ id: productoId, nombre: nombreProducto })
+    } catch (err) {
+      setError(err.message)
     }
-    setProveedoresProducto([...proveedoresProducto, nuevo])
-    setNuevoProvProd({ proveedorId: '', leadTimeEspecifico: '', precioReferencial: '' })
   }
 
-  const eliminarProveedorProducto = (id) => {
-    setProveedoresProducto(proveedoresProducto.filter(r => r.id !== id))
+  const agregarProveedorProducto = async () => {
+    if (!nuevoProvProd.proveedorId || !nuevoProvProd.leadTimeEspecifico || !nuevoProvProd.precioCompra) return
+    try {
+      await guardarRelacion({
+        proveedorId: nuevoProvProd.proveedorId,
+        productoId: modalProducto.id,
+        leadTimeEspecifico: Number(nuevoProvProd.leadTimeEspecifico),
+        precioCompra: Number(nuevoProvProd.precioCompra),
+      })
+      const actualizados = await listarPorProducto(modalProducto.id)
+      setProveedoresProducto(actualizados)
+      setNuevoProvProd({ proveedorId: '', leadTimeEspecifico: '', precioCompra: '' })
+    } catch (err) {
+      setError(err.message)
+    }
+  }
+
+  const eliminarProveedorProducto = async (id) => {
+    try {
+      await eliminarRelacion(id)
+      setProveedoresProducto(proveedoresProducto.filter(r => r.id !== id))
+    } catch (err) {
+      setError(err.message)
+    }
   }
 
   const guardarLeadTimes = () => {
     setModalProducto(null)
   }
-
-  const proveedoresDisponibles = provMock.filter(p => p.activo)
 
   const columnas = [
     { campo: 'id', encabezado: 'ID', render: (r) => <span className="font-mono text-xs">{r.id}</span> },
@@ -116,22 +132,20 @@ export default function PaginaStock() {
 
       <Modal abierto={!!modalProducto} alCerrar={() => setModalProducto(null)} titulo={`Configurar Lead Times — ${modalProducto?.nombre || ''}`}>
         <div className="space-y-4">
+          {error && <p className="text-estado-critico text-sm">{error}</p>}
           {proveedoresProducto.length === 0 ? (
             <p className="text-secundario">Sin proveedores asociados</p>
           ) : (
             <div className="divide-y divide-estilo max-h-60 overflow-y-auto">
-              {proveedoresProducto.map(r => {
-                const prov = provMock.find(p => p.id === r.proveedorId)
-                return (
-                  <div key={r.id} className="flex items-center justify-between py-2">
-                    <div>
-                      <p className="text-sm font-medium">{prov?.razonSocial || r.proveedorId}</p>
-                      <p className="text-xs text-secundario">Lead time: {r.leadTimeEspecifico} días | S/ {r.precioReferencial}</p>
-                    </div>
-                    <Boton variante="texto" onClick={() => eliminarProveedorProducto(r.id)} className="text-estado-critico text-sm">Eliminar</Boton>
+              {proveedoresProducto.map(r => (
+                <div key={r.id} className="flex items-center justify-between py-2">
+                  <div>
+                    <p className="text-sm font-medium">{r.proveedorNombre || r.proveedorId}</p>
+                    <p className="text-xs text-secundario">Lead time: {r.leadTimeEspecifico} días | S/ {r.precioCompra}</p>
                   </div>
-                )
-              })}
+                  <Boton variante="texto" onClick={() => eliminarProveedorProducto(r.id)} className="text-estado-critico text-sm">Eliminar</Boton>
+                </div>
+              ))}
             </div>
           )}
           <div className="border-t border-estilo pt-4 space-y-3">
@@ -152,8 +166,8 @@ export default function PaginaStock() {
                 <input type="number" value={nuevoProvProd.leadTimeEspecifico} onChange={e => setNuevoProvProd({ ...nuevoProvProd, leadTimeEspecifico: e.target.value })} className="w-full px-3 py-2 text-sm bg-fondo border border-estilo rounded-md" />
               </div>
               <div>
-                <label className="text-xs text-secundario">Precio referencial (S/)</label>
-                <input type="number" step="0.01" value={nuevoProvProd.precioReferencial} onChange={e => setNuevoProvProd({ ...nuevoProvProd, precioReferencial: e.target.value })} className="w-full px-3 py-2 text-sm bg-fondo border border-estilo rounded-md" />
+                <label className="text-xs text-secundario">Precio compra (S/)</label>
+                <input type="number" step="0.01" value={nuevoProvProd.precioCompra} onChange={e => setNuevoProvProd({ ...nuevoProvProd, precioCompra: e.target.value })} className="w-full px-3 py-2 text-sm bg-fondo border border-estilo rounded-md" />
               </div>
             </div>
             <Boton variante="secundario" onClick={agregarProveedorProducto} className="w-full">Agregar</Boton>

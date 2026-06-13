@@ -7,7 +7,6 @@ const concentracionSchema = z.object({
 })
 
 export const productoEsquema = z.object({
-  codigoInterno: z.string().optional(),
   nombreComercial: z.string().min(1, 'El nombre comercial es obligatorio').max(200),
   formaFarmaceuticaId: z.string().min(1, 'Seleccione una forma farmacéutica'),
   presentacion: z.string().optional(),

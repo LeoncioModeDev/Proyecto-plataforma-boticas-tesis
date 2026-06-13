@@ -1,2 +1,5 @@
 [functions]
 crear-cliente.verify_jwt = true
+proveedores.verify_jwt = true
+productos.verify_jwt = true
+proveedor-producto.verify_jwt = true

@@ -21,7 +21,6 @@ export default function PaginaProveedores() {
 
   const columnas = [
     { campo: 'id', encabezado: 'ID', render: (r) => <span className="font-mono text-xs">{r.id}</span> },
-    { campo: 'codigoInterno', encabezado: 'Código Interno', render: (r) => <span className="font-mono text-xs">{r.codigoInterno}</span> },
     {
       campo: 'razonSocial', encabezado: 'Razón Social',
       render: (r) => {
@@ -65,7 +64,7 @@ export default function PaginaProveedores() {
     { campo: 'activo', encabezado: 'Estado', render: (r) => <Insignia color={r.activo ? 'verde' : 'gris'}>{r.activo ? 'Activo' : 'Inactivo'}</Insignia> },
     {
       campo: 'acciones', encabezado: 'Acciones',
-      render: () => <Boton variante="icono" icono={Edit} title="Editar" />,
+      render: (r) => <Boton variante="icono" icono={Edit} title="Editar" onClick={(e) => { e.stopPropagation(); navegar(`/operaciones/proveedores/${r.id}/editar`) }} />,
     },
   ]
 
@@ -82,7 +81,7 @@ export default function PaginaProveedores() {
         <TarjetaMetrica etiqueta="Total Proveedores" valor={proveedores.length} icono={Building} />
         <TarjetaMetrica etiqueta="Activos" valor={activos} icono={Building} />
       </div>
-      <Tabla columnas={columnas} datos={proveedores} />
+      <Tabla columnas={columnas} datos={proveedores} alClickFila={(p) => navegar(`/operaciones/proveedores/${p.id}`)} />
     </div>
   )
 }

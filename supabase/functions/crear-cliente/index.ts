@@ -1,114 +1,165 @@
-import { serve } from 'https://deno.land/std@0.177.0/http/server.ts'
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
-const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
+const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+
+const CORS_HEADERS = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type",
+};
 
 serve(async (req) => {
-  const authHeader = req.headers.get('Authorization') || ''
-  const jwt = authHeader.replace('Bearer ', '')
-
-  if (!jwt) {
-    return json({ error: 'Token de autenticación requerido' }, 401)
+  if (req.method === "OPTIONS") {
+    return new Response("ok", { headers: CORS_HEADERS });
   }
 
-  const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
+  const authHeader = req.headers.get("Authorization") || "";
+  const jwt = authHeader.replace("Bearer ", "");
 
-  const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(jwt)
+  if (!jwt) {
+    return json({ error: "Token de autenticación requerido" }, 401);
+  }
+
+  const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+
+  const {
+    data: { user },
+    error: authError,
+  } = await supabaseAdmin.auth.getUser(jwt);
   if (authError || !user) {
-    return json({ error: 'Token inválido o expirado' }, 401)
+    return json({ error: "Token inválido o expirado" }, 401);
   }
 
   const { data: profile, error: profileError } = await supabaseAdmin
-    .from('usuarios')
-    .select('rol')
-    .eq('id', user.id)
-    .single()
+    .from("usuarios")
+    .select("rol")
+    .eq("id", user.id)
+    .single();
 
   if (profileError || !profile) {
-    return json({ error: 'Perfil de usuario no encontrado' }, 403)
+    return json({ error: "Perfil de usuario no encontrado" }, 403);
   }
 
-  if (profile.rol !== 'super_admin') {
-    return json({ error: 'Se requiere rol super_admin' }, 403)
+  if (profile.rol !== "super_admin") {
+    return json({ error: "Se requiere rol super_admin" }, 403);
   }
 
-  let body
+  let body;
   try {
-    body = await req.json()
+    body = await req.json();
   } catch {
-    return json({ error: 'Cuerpo de solicitud inválido' }, 400)
+    return json({ error: "Cuerpo de solicitud inválido" }, 400);
   }
 
-  const { org, admin } = body
+  const { org, admin } = body;
 
-  if (!org?.nombre || !org?.tipo_identificacion || !org?.numero_identificacion) {
-    return json({ error: 'Faltan datos de la organización (nombre, tipo_identificacion, numero_identificacion)' }, 400)
+  if (
+    !org?.nombre ||
+    !org?.tipo_identificacion ||
+    !org?.numero_identificacion
+  ) {
+    return json(
+      {
+        error:
+          "Faltan datos de la organización (nombre, tipo_identificacion, numero_identificacion)",
+      },
+      400,
+    );
   }
 
   if (!admin?.nombre || !admin?.email || !admin?.password) {
-    return json({ error: 'Faltan datos del administrador (nombre, email, password)' }, 400)
+    return json(
+      { error: "Faltan datos del administrador (nombre, email, password)" },
+      400,
+    );
   }
 
   const { data: orgData, error: orgError } = await supabaseAdmin
-    .from('organizaciones')
+    .from("organizaciones")
     .insert({
       nombre: org.nombre,
       tipo_identificacion: org.tipo_identificacion,
       numero_identificacion: org.numero_identificacion,
-      pais_origen: org.pais_origen || 'PE',
+      pais_origen: org.pais_origen || "PE",
     })
-    .select('id, nombre')
-    .single()
+    .select("id, nombre")
+    .single();
 
   if (orgError) {
-    if (orgError.code === '23505') {
-      return json({ error: 'Ya existe una organización con ese tipo y número de identificación' }, 409)
+    if (orgError.code === "23505") {
+      return json(
+        {
+          error:
+            "Ya existe una organización con ese tipo y número de identificación",
+        },
+        409,
+      );
     }
-    return json({ error: orgError.message }, 400)
+    return json({ error: orgError.message }, 400);
   }
 
-  let drogueriaId = null
+  let drogueriaId = null;
   if (org?.drogueria) {
     const { data: boticaData, error: boticaError } = await supabaseAdmin
-      .from('boticas')
+      .from("boticas")
       .insert({
         org_id: orgData.id,
         nombre: org.drogueria.nombre || `Droguería Central - ${org.nombre}`,
-        tipo: 'drogueria',
-        ubigeo: org.drogueria.ubigeo || '150101',
+        tipo: "drogueria",
+        ubigeo: org.drogueria.ubigeo || "150101",
         direccion: org.drogueria.direccion || null,
         telefono: org.drogueria.telefono || null,
       })
-      .select('id')
-      .single()
+      .select("id")
+      .single();
 
     if (boticaError) {
-      return json({ error: boticaError.message }, 400)
+      return json({ error: boticaError.message }, 400);
     }
-    drogueriaId = boticaData.id
+    drogueriaId = boticaData.id;
   }
 
-  const { data: userData, error: userError } = await supabaseAdmin.auth.admin.createUser({
-    email: admin.email,
-    password: admin.password,
-    email_confirm: true,
-    user_metadata: {
-      org_id: orgData.id,
-      org_nombre: orgData.nombre,
-      nombre: admin.nombre,
-      rol: 'admin_central',
-      botica_id: drogueriaId,
-    },
-    app_metadata: {
-      rol: 'admin_central',
-      org_id: orgData.id,
-      botica_id: drogueriaId,
-    },
-  })
+  const { data: userData, error: userError } =
+    await supabaseAdmin.auth.admin.createUser({
+      email: admin.email,
+      password: admin.password,
+      email_confirm: true,
+      user_metadata: {
+        org_id: orgData.id,
+        org_nombre: orgData.nombre,
+        nombre: admin.nombre,
+        rol: "admin_central",
+        botica_id: drogueriaId,
+      },
+      app_metadata: {
+        rol: "admin_central",
+        org_id: orgData.id,
+        botica_id: drogueriaId,
+      },
+    });
 
   if (userError) {
-    return json({ error: userError.message }, 400)
+    return json({ error: userError.message }, 400);
+  }
+
+  const { error: upsertError } = await supabaseAdmin.from("usuarios").upsert(
+    {
+      id: userData.user.id,
+      org_id: orgData.id,
+      email: admin.email,
+      nombre: admin.nombre,
+      rol: "admin_central",
+      botica_id: drogueriaId,
+      activo: true,
+    },
+    { onConflict: "id" },
+  );
+
+  if (upsertError) {
+    console.error("Error al sincronizar perfil:", upsertError.message);
   }
 
   return json({
@@ -123,12 +174,12 @@ serve(async (req) => {
       email: admin.email,
       nombre: admin.nombre,
     },
-  })
-})
+  });
+});
 
 function json(data: unknown, status = 200) {
   return new Response(JSON.stringify(data), {
     status,
-    headers: { 'Content-Type': 'application/json' },
-  })
+    headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
+  });
 }

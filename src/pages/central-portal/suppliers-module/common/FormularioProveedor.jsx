@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { useForm } from 'react-hook-form'
+import { useEffect, useState } from 'react'
+import { useForm, useFieldArray } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useNavigate } from 'react-router-dom'
 import { Save, ArrowLeft, Plus, X } from 'lucide-react'
@@ -7,73 +7,53 @@ import Boton from '@/components/common/Boton'
 import Tarjeta from '@/components/common/Tarjeta'
 import CampoTexto from '@/components/forms/CampoTexto'
 import CampoSeleccion from '@/components/forms/CampoSeleccion'
+import CampoSeleccionUbigeo from '@/components/forms/CampoSeleccionUbigeo'
 import { proveedorEsquema } from '@/schemas/proveedorEsquema'
-import { OPCIONES_IDENTIFICACION } from '@/mock-data/organizaciones'
-import { proveedores as provMock } from '@/mock-data/proveedores'
+import { obtenerOpcionesPaises, obtenerOpcionesUbigeos } from '@/services/supabase/catalogo'
 
-const OPCIONES_PAIS = [
-  { valor: 'PE', etiqueta: 'Perú' },
-  { valor: 'US', etiqueta: 'Estados Unidos' },
-  { valor: 'DE', etiqueta: 'Alemania' },
-  { valor: 'ES', etiqueta: 'España' },
-  { valor: 'MX', etiqueta: 'México' },
-  { valor: 'CO', etiqueta: 'Colombia' },
-  { valor: 'CL', etiqueta: 'Chile' },
-  { valor: 'AR', etiqueta: 'Argentina' },
-  { valor: 'BR', etiqueta: 'Brasil' },
-  { valor: 'JP', etiqueta: 'Japón' },
-  { valor: 'CN', etiqueta: 'China' },
-  { valor: 'IN', etiqueta: 'India' },
+const OPCIONES_IDENTIFICACION = [
+  { valor: 'ruc', etiqueta: 'RUC' },
+  { valor: 'dni', etiqueta: 'DNI' },
+  { valor: 'carnet-extranjeria', etiqueta: 'Carnet de Extranjería' },
+  { valor: 'pasaporte', etiqueta: 'Pasaporte' },
 ]
-
-let idTemporal = 1000
-
-function generarIdTemporal() {
-  return `prov-${++idTemporal}`
-}
-
-function contactoVacio() {
-  return { id: `c-${Date.now()}`, nombre: '', telefono: '', correo: '', direccion: '', ubigeo: '', principal: false }
-}
 
 export default function FormularioProveedor({ proveedorEditar, alGuardar }) {
   const navegar = useNavigate()
   const esEdicion = !!proveedorEditar
+  const [opcionesPaises, setOpcionesPaises] = useState([])
+  const [opcionesUbigeo, setOpcionesUbigeo] = useState([])
 
-  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm({
+  useEffect(() => {
+    Promise.all([obtenerOpcionesPaises(), obtenerOpcionesUbigeos()])
+      .then(([paises, ubigeos]) => {
+        setOpcionesPaises(paises)
+        setOpcionesUbigeo(ubigeos)
+      })
+      .catch(console.error)
+  }, [])
+
+  const defaultContacto = { nombre: '', telefono: '', correo: '', direccion: '', ubigeo: '', principal: false }
+
+  const { register, handleSubmit, control, watch, setValue, formState: { errors, isSubmitting } } = useForm({
     resolver: zodResolver(proveedorEsquema),
-    defaultValues: proveedorEditar || { activo: true, tipoIdentificacion: 'ruc', paisOrigen: 'PE' },
+    defaultValues: proveedorEditar || {
+      activo: true,
+      tipoIdentificacion: 'ruc',
+      paisOrigen: 'PE',
+      contactos: [defaultContacto],
+    },
   })
 
-  const [contactos, setContactos] = useState([contactoVacio()])
-
-  const actualizarContacto = (id, campo, valor) => {
-    setContactos(prev => prev.map(c => c.id === id ? { ...c, [campo]: valor } : c))
-  }
-
-  const eliminarContacto = (id) => {
-    setContactos(prev => prev.filter(c => c.id !== id))
-  }
-
-  const agregarContacto = () => {
-    setContactos(prev => [...prev, contactoVacio()])
-  }
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: 'contactos',
+  })
 
   const alEnviar = (datos) => {
-    const contactosValidos = contactos.filter(c => c.nombre.trim().length >= 3)
-
-    const maxCodigo = provMock.reduce((max, p) => {
-      const match = p.codigoInterno?.match(/PRV-(\d+)/)
-      return match ? Math.max(max, parseInt(match[1])) : max
-    }, 0)
-
     const proveedor = {
-      id: proveedorEditar?.id || generarIdTemporal(),
       ...datos,
-      codigoInterno: proveedorEditar?.codigoInterno || `PRV-${String(maxCodigo + 1).padStart(6, '0')}`,
-      contactos: contactosValidos,
-      condicionesComerciales: [],
-      createdAt: proveedorEditar?.createdAt || new Date().toISOString(),
+      condicionesComerciales: proveedorEditar?.condicionesComerciales || [],
     }
     alGuardar(proveedor)
   }
@@ -89,54 +69,63 @@ export default function FormularioProveedor({ proveedorEditar, alGuardar }) {
           <div className="border-b border-neutro-gris-borde pb-4 mb-4">
             <h2 className="text-cuerpo font-semibold text-principal mb-4">Información del Proveedor</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              {esEdicion && (
-                <CampoTexto nombre="codigoInterno" etiqueta="Código Interno" register={register} readonly className="bg-gray-100 cursor-not-allowed" />
-              )}
               <CampoTexto nombre="razonSocial" etiqueta="Razón Social" requerido register={register} error={errors.razonSocial?.message} />
               <CampoSeleccion nombre="tipoIdentificacion" etiqueta="Tipo de Identificación" opciones={OPCIONES_IDENTIFICACION} requerido register={register} error={errors.tipoIdentificacion?.message} />
               <CampoTexto nombre="numeroIdentificacion" etiqueta="Número de Identificación" requerido register={register} error={errors.numeroIdentificacion?.message} placeholder="Según tipo seleccionado" />
-              <CampoSeleccion nombre="paisOrigen" etiqueta="País de Origen" opciones={OPCIONES_PAIS} requerido register={register} error={errors.paisOrigen?.message} />
+              <CampoSeleccion nombre="paisOrigen" etiqueta="País de Origen" opciones={opcionesPaises} requerido register={register} error={errors.paisOrigen?.message} />
             </div>
           </div>
 
           <div className="border-b border-neutro-gris-borde pb-4 mb-4">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-cuerpo font-semibold text-principal">Contactos</h2>
-              <Boton variante="texto" icono={Plus} onClick={agregarContacto} type="button" className="text-marca-principal text-sm">
+              <Boton variante="texto" icono={Plus} onClick={() => append(defaultContacto)} type="button" className="text-marca-principal text-sm">
                 Agregar contacto
               </Boton>
             </div>
-            {contactos.map((contacto) => (
-              <div key={contacto.id} className="border border-estilo rounded-md p-4 mb-3 relative">
-                {contactos.length > 1 && (
-                  <button type="button" onClick={() => eliminarContacto(contacto.id)} className="absolute top-2 right-2 text-estado-critico hover:bg-rojo-claro rounded p-1">
+            {errors.contactos && !Array.isArray(errors.contactos) && (
+              <p className="text-sm text-estado-critico mb-2">{errors.contactos.message}</p>
+            )}
+            {errors.contactos?.root && (
+              <p className="text-sm text-estado-critico mb-2">{errors.contactos.root.message}</p>
+            )}
+            {fields.map((field, index) => (
+              <div key={field.id} className="border border-estilo rounded-md p-4 mb-3 relative">
+                {fields.length > 1 && (
+                  <button type="button" onClick={() => remove(index)} className="absolute top-2 right-2 text-estado-critico hover:bg-rojo-claro rounded p-1">
                     <X className="size-4" />
                   </button>
                 )}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="flex flex-col gap-1.5">
                     <label className="text-sm font-medium text-principal">Nombre del Contacto *</label>
-                    <input value={contacto.nombre} onChange={e => actualizarContacto(contacto.id, 'nombre', e.target.value)} className="px-3 py-2 text-sm bg-fondo border border-estilo rounded-md focus:outline-none focus:border-marca-principal" placeholder="Nombre completo" />
+                    <input {...register(`contactos.${index}.nombre`)} className="px-3 py-2 text-sm bg-fondo border border-estilo rounded-md focus:outline-none focus:border-marca-principal" placeholder="Nombre completo" />
+                    {errors.contactos?.[index]?.nombre && (
+                      <p className="text-xs text-estado-critico">{errors.contactos[index].nombre.message}</p>
+                    )}
                   </div>
                   <div className="flex flex-col gap-1.5">
                     <label className="text-sm font-medium text-principal">Teléfono</label>
-                    <input value={contacto.telefono} onChange={e => actualizarContacto(contacto.id, 'telefono', e.target.value)} className="px-3 py-2 text-sm bg-fondo border border-estilo rounded-md focus:outline-none focus:border-marca-principal" placeholder="Teléfono" />
+                    <input {...register(`contactos.${index}.telefono`)} className="px-3 py-2 text-sm bg-fondo border border-estilo rounded-md focus:outline-none focus:border-marca-principal" placeholder="Teléfono" />
                   </div>
                   <div className="flex flex-col gap-1.5">
                     <label className="text-sm font-medium text-principal">Correo</label>
-                    <input value={contacto.correo} onChange={e => actualizarContacto(contacto.id, 'correo', e.target.value)} className="px-3 py-2 text-sm bg-fondo border border-estilo rounded-md focus:outline-none focus:border-marca-principal" placeholder="correo@ejemplo.com" />
+                    <input {...register(`contactos.${index}.correo`)} className="px-3 py-2 text-sm bg-fondo border border-estilo rounded-md focus:outline-none focus:border-marca-principal" placeholder="correo@ejemplo.com" />
                   </div>
-                  <div className="flex flex-col gap-1.5">
-                    <label className="text-sm font-medium text-principal">Ubigeo (opcional)</label>
-                    <input value={contacto.ubigeo} onChange={e => actualizarContacto(contacto.id, 'ubigeo', e.target.value)} className="px-3 py-2 text-sm bg-fondo border border-estilo rounded-md focus:outline-none focus:border-marca-principal" placeholder="6 dígitos" maxLength={6} />
-                  </div>
+                  <CampoSeleccionUbigeo
+                    etiqueta="Ubigeo"
+                    opciones={opcionesUbigeo}
+                    valor={watch(`contactos.${index}.ubigeo`)}
+                    alCambiar={(v) => setValue(`contactos.${index}.ubigeo`, v)}
+                    error={errors.contactos?.[index]?.ubigeo?.message}
+                  />
                   <div className="md:col-span-2 flex flex-col gap-1.5">
                     <label className="text-sm font-medium text-principal">Dirección</label>
-                    <input value={contacto.direccion} onChange={e => actualizarContacto(contacto.id, 'direccion', e.target.value)} className="px-3 py-2 text-sm bg-fondo border border-estilo rounded-md focus:outline-none focus:border-marca-principal" placeholder="Dirección completa" />
+                    <input {...register(`contactos.${index}.direccion`)} className="px-3 py-2 text-sm bg-fondo border border-estilo rounded-md focus:outline-none focus:border-marca-principal" placeholder="Dirección completa" />
                   </div>
                   <div className="flex items-center gap-2">
-                    <input type="checkbox" checked={contacto.principal} onChange={e => actualizarContacto(contacto.id, 'principal', e.target.checked)} className="rounded border-estilo text-marca-principal" id={`principal-${contacto.id}`} />
-                    <label htmlFor={`principal-${contacto.id}`} className="text-sm text-principal cursor-pointer">Contacto principal</label>
+                    <input type="checkbox" {...register(`contactos.${index}.principal`)} className="rounded border-estilo text-marca-principal" id={`principal-${index}`} />
+                    <label htmlFor={`principal-${index}`} className="text-sm text-principal cursor-pointer">Contacto principal</label>
                   </div>
                 </div>
               </div>

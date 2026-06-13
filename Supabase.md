@@ -577,7 +577,7 @@ const useAutenticacion = create((set) => ({
 
 ## 6. Row-Level Security (RLS)
 
-Ejecuta el archivo [`rls.sql`](./rls.sql) completo en el SQL Editor de Supabase.
+Ejecuta el archivo [`rls.sql`](./supabase/migrations/00000000000001_rls.sql) completo en el SQL Editor de Supabase.
 
 Este archivo:
 

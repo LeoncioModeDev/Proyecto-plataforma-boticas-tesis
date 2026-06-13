@@ -34,6 +34,7 @@ import PaginaRedistribucionCentral from '@/pages/central-portal/distribution-mod
 import FormularioTransferencia from '@/pages/central-portal/distribution-module/FormularioTransferencia'
 import PaginaHistorialDistribucion from '@/pages/central-portal/distribution-module/historial/PaginaHistorialDistribucion'
 import PaginaProveedores from '@/pages/central-portal/suppliers-module/PaginaProveedores'
+import PaginaVerProveedor from '@/pages/central-portal/suppliers-module/ver/PaginaVerProveedor'
 import PaginaNuevoProveedor from '@/pages/central-portal/suppliers-module/new/PaginaNuevoProveedor'
 import PaginaEditarProveedor from '@/pages/central-portal/suppliers-module/edit/PaginaEditarProveedor'
 import PaginaOrdenesCompraCentral from '@/pages/central-portal/suppliers-module/PaginaOrdenesCompra'
@@ -70,6 +71,7 @@ import PaginaTransferenciasOperaciones from '@/pages/operations-portal/distribut
 import FormularioTransferenciaOperaciones from '@/pages/operations-portal/distribution-module/FormularioTransferencia'
 import PaginaRedistribucionOperaciones from '@/pages/operations-portal/distribution-module/PaginaRedistribucion'
 import PaginaProveedoresOperaciones from '@/pages/operations-portal/suppliers-module/PaginaProveedores'
+import PaginaVerProveedorOperaciones from '@/pages/central-portal/suppliers-module/ver/PaginaVerProveedor'
 import PaginaOrdenesCompraOperaciones from '@/pages/operations-portal/suppliers-module/PaginaOrdenesCompra'
 import PaginaNuevaOrdenCompraOperaciones from '@/pages/operations-portal/suppliers-module/PaginaNuevaOrdenCompra'
 import PaginaAlertasOperaciones from '@/pages/operations-portal/PaginaAlertas'
@@ -169,7 +171,8 @@ export default function Rutas() {
         <Route path="/central/distribucion/historial" element={<PaginaHistorialDistribucion />} />
         <Route path="/central/proveedores" element={<PaginaProveedores />} />
         <Route path="/central/proveedores/nuevo" element={<PaginaNuevoProveedor />} />
-        <Route path="/central/proveedores/:id" element={<PaginaEditarProveedor />} />
+        <Route path="/central/proveedores/:id" element={<PaginaVerProveedor />} />
+        <Route path="/central/proveedores/:id/editar" element={<PaginaEditarProveedor />} />
         <Route path="/central/proveedores/ordenes" element={<PaginaOrdenesCompraCentral />} />
         <Route path="/central/proveedores/ordenes/nueva" element={<PaginaNuevaOrdenCompraCentral />} />
         <Route path="/central/proveedores/ordenes/historial" element={<PaginaHistorialOrdenesCentral />} />
@@ -224,7 +227,8 @@ export default function Rutas() {
         <Route path="/operaciones/distribucion/redistribucion" element={<PaginaRedistribucionOperaciones />} />
         <Route path="/operaciones/proveedores" element={<PaginaProveedoresOperaciones />} />
         <Route path="/operaciones/proveedores/nuevo" element={<PaginaNuevoProveedorOperaciones />} />
-        <Route path="/operaciones/proveedores/:id" element={<PaginaEditarProveedorOperaciones />} />
+        <Route path="/operaciones/proveedores/:id" element={<PaginaVerProveedorOperaciones />} />
+        <Route path="/operaciones/proveedores/:id/editar" element={<PaginaEditarProveedorOperaciones />} />
         <Route path="/operaciones/ordenes-compra" element={<PaginaOrdenesCompraOperaciones />} />
         <Route path="/operaciones/ordenes-compra/nueva" element={<PaginaNuevaOrdenCompraOperaciones />} />
         <Route path="/operaciones/alertas" element={<PaginaAlertasOperaciones />} />

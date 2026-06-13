@@ -1,7 +1,11 @@
 -- ============================================================
--- semilla_minima.sql — Solo datos de catálogo necesarios
--- para probar registro de productos y flujo básico.
+-- seed.sql — Datos de catálogo mínimos
+-- Ejecutado automáticamente por `supabase db reset`
 -- ============================================================
+-- NOTA: El usuario super_admin se crea por separado:
+--   node supabase/seed/crear-super-admin.mjs
+-- ============================================================
+
 BEGIN;
 
 -- ============================================================

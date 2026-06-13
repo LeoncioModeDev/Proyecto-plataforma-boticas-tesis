@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from 'react-router-dom'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { ArrowLeft, Edit, Truck } from 'lucide-react'
 import Boton from '@/components/common/Boton'
 import Tarjeta from '@/components/common/Tarjeta'
@@ -7,67 +7,80 @@ import Insignia from '@/components/common/Insignia'
 import SinDatos from '@/components/common/SinDatos'
 import Alerta from '@/components/common/Alerta'
 import Modal from '@/components/common/Modal'
-import { productos } from '@/mock-data/productos'
-import { productoPrincipioActivo as ppaMock } from '@/mock-data/producto-principio-activo'
-import { principiosActivos as paMock } from '@/mock-data/principios-activos'
-import { unidadesMedida as umMock } from '@/mock-data/unidades-medida'
-import { formasFarmaceuticas as ffMock } from '@/mock-data/formas-farmaceuticas'
-import { stock } from '@/mock-data/stock'
-import { lotes } from '@/mock-data/lotes'
-import { boticas } from '@/mock-data/boticas'
+import { obtenerProductoPorId } from '@/services/supabase/productos'
+import { listarProveedores } from '@/services/supabase/proveedores'
+import { listarPorProducto, guardarRelacion, eliminarRelacion } from '@/services/supabase/proveedorProducto'
 import { ETIQUETAS_CLASIFICACION, COLORES_CLASIFICACION } from '@/constants/clasificacionProducto'
 import { ETIQUETAS_ESTADO, COLORES_ESTADO } from '@/constants/estadoProducto'
-import { formatearFechaCorta, diasRestantes } from '@/utilities/formatearFecha'
-import { proveedores as provMock } from '@/mock-data/proveedores'
-import { proveedorProducto as ppMock } from '@/mock-data/proveedor-producto'
 
 export default function DetalleProducto() {
   const { id } = useParams()
   const navegar = useNavigate()
-  const producto = productos.find(p => p.id === id)
+  const [producto, setProducto] = useState(null)
+  const [cargando, setCargando] = useState(true)
+  const [error, setError] = useState(null)
 
   const [modalProveedores, setModalProveedores] = useState(null)
   const [proveedoresProducto, setProveedoresProducto] = useState([])
-  const [nuevoProvProd, setNuevoProvProd] = useState({ proveedorId: '', leadTimeEspecifico: '', precioReferencial: '' })
+  const [proveedoresDisponibles, setProveedoresDisponibles] = useState([])
+  const [nuevoProvProd, setNuevoProvProd] = useState({ proveedorId: '', leadTimeEspecifico: '', precioCompra: '' })
   const [exito, setExito] = useState(null)
 
-  if (!producto) return <SinDatos titulo="Producto no encontrado" descripcion="El producto solicitado no existe." textoAccion="Volver al catálogo" alAccionar={() => navegar('/central/inventario/catalogo')} />
-
-  const relacionesPa = ppaMock.filter(r => r.productoId === id)
-  const infoPrincipios = relacionesPa.map(r => {
-    const pa = paMock.find(a => a.id === r.principioActivoId)
-    const um = umMock.find(u => u.id === r.unidadMedidaId)
-    return {
-      nombre: pa?.nombre || 'Desconocido',
-      concentracion: r.concentracion,
-      unidad: um?.simbolo || '',
+  useEffect(() => {
+    async function cargar() {
+      try {
+        setCargando(true)
+        setError(null)
+        const datos = await obtenerProductoPorId(id)
+        if (!datos) throw new Error('Producto no encontrado')
+        setProducto(datos)
+      } catch (err) {
+        setError(err.message)
+      } finally {
+        setCargando(false)
+      }
     }
-  })
+    cargar()
+  }, [id])
 
-  const forma = ffMock.find(f => f.id === producto.formaFarmaceuticaId)
-  const formaDisplay = forma ? forma.nombre.charAt(0).toUpperCase() + forma.nombre.slice(1) : producto.formaFarmaceuticaId
+  const abrirConfigurarProveedores = async () => {
+    try {
+      const existentes = await listarPorProducto(producto.id)
+      setProveedoresProducto(existentes)
 
-  const abrirConfigurarProveedores = () => {
-    const existentes = ppMock.filter(r => r.productoId === producto.id)
-    setProveedoresProducto(existentes)
-    setModalProveedores(producto)
+      const provs = await listarProveedores({ activos: true })
+      setProveedoresDisponibles(provs)
+
+      setModalProveedores(producto)
+    } catch (err) {
+      setError(err.message)
+    }
   }
 
-  const agregarProveedorProducto = () => {
-    if (!nuevoProvProd.proveedorId || !nuevoProvProd.leadTimeEspecifico || !nuevoProvProd.precioReferencial) return
-    const nuevo = {
-      id: crypto.randomUUID(),
-      proveedorId: nuevoProvProd.proveedorId,
-      productoId: producto.id,
-      leadTimeEspecifico: Number(nuevoProvProd.leadTimeEspecifico),
-      precioReferencial: Number(nuevoProvProd.precioReferencial),
+  const agregarProveedorProducto = async () => {
+    if (!nuevoProvProd.proveedorId || !nuevoProvProd.leadTimeEspecifico || !nuevoProvProd.precioCompra) return
+    try {
+      await guardarRelacion({
+        proveedorId: nuevoProvProd.proveedorId,
+        productoId: producto.id,
+        leadTimeEspecifico: Number(nuevoProvProd.leadTimeEspecifico),
+        precioCompra: Number(nuevoProvProd.precioCompra),
+      })
+      const actualizados = await listarPorProducto(producto.id)
+      setProveedoresProducto(actualizados)
+      setNuevoProvProd({ proveedorId: '', leadTimeEspecifico: '', precioCompra: '' })
+    } catch (err) {
+      setError(err.message)
     }
-    setProveedoresProducto([...proveedoresProducto, nuevo])
-    setNuevoProvProd({ proveedorId: '', leadTimeEspecifico: '', precioReferencial: '' })
   }
 
-  const eliminarProveedorProducto = (id) => {
-    setProveedoresProducto(proveedoresProducto.filter(r => r.id !== id))
+  const eliminarProveedorProducto = async (id) => {
+    try {
+      await eliminarRelacion(id)
+      setProveedoresProducto(proveedoresProducto.filter(r => r.id !== id))
+    } catch (err) {
+      setError(err.message)
+    }
   }
 
   const guardarConfigProveedores = () => {
@@ -76,14 +89,27 @@ export default function DetalleProducto() {
     setTimeout(() => setExito(null), 2000)
   }
 
-  const proveedoresDisponibles = provMock.filter(p => p.activo)
+  if (cargando) {
+    return <div className="flex justify-center py-12"><p className="text-secundario">Cargando producto...</p></div>
+  }
 
-  const stockProducto = stock.filter(s => s.productoId === id)
-  const lotesProducto = lotes.filter(l => l.productoId === id)
-  const obtenerNombreUbicacion = (ubId) => boticas.find(b => b.id === ubId)?.nombre || ubId
+  if (error || !producto) {
+    return <SinDatos titulo="Producto no encontrado" descripcion={error || 'El producto solicitado no existe.'} textoAccion="Volver al catálogo" alAccionar={() => navegar('/central/inventario/catalogo')} />
+  }
+
+  const infoPrincipios = (producto.principiosActivos || []).map(pa => ({
+    nombre: pa.principioActivoNombre || 'Desconocido',
+    concentracion: pa.concentracion,
+    unidad: pa.unidadMedidaSimbolo || '',
+  }))
+
+  const formaDisplay = producto.formaFarmaceuticaNombre
+    ? producto.formaFarmaceuticaNombre.charAt(0).toUpperCase() + producto.formaFarmaceuticaNombre.slice(1)
+    : producto.formaFarmaceuticaId || '—'
 
   return (
     <div className="space-y-6 max-w-4xl">
+      {error && <Alerta tipo="error" titulo={error} className="mb-4" />}
       {exito && <Alerta tipo="exito" titulo={exito} className="mb-4" />}
       <div className="flex items-center gap-4">
         <Boton variante="texto" icono={ArrowLeft} onClick={() => navegar('/central/inventario/catalogo')}>Volver</Boton>
@@ -97,13 +123,12 @@ export default function DetalleProducto() {
       <Tarjeta titulo="Información del Producto">
         <div className="grid grid-cols-2 md:grid-cols-3 gap-y-4 gap-x-8">
           {[
-            ['Código Interno', producto.codigoInterno],
-            ['Principios Activos', infoPrincipios.map((p, i) => (
+            ['Principios Activos', infoPrincipios.length > 0 ? infoPrincipios.map((p, i) => (
               <div key={i} className="mb-1">
                 <span className="font-medium">{p.nombre}</span>
                 <span className="text-secundario ml-1">({p.concentracion} {p.unidad})</span>
               </div>
-            ))],
+            )) : '—'],
             ['Forma Farmacéutica', formaDisplay],
             ['Presentación', producto.presentacion || '—'],
             ['Clasificación', <Insignia key="c" color={COLORES_CLASIFICACION[producto.clasificacion]}>{ETIQUETAS_CLASIFICACION[producto.clasificacion]}</Insignia>],
@@ -115,46 +140,6 @@ export default function DetalleProducto() {
           ))}
         </div>
       </Tarjeta>
-      <Tarjeta titulo="Stock por Ubicación">
-        {stockProducto.length === 0 ? <p className="text-secundario">Sin registros de stock</p> : (
-          <div className="divide-y divide-estilo">
-            {stockProducto.map(s => (
-              <div key={s.id} className="flex items-center justify-between py-3">
-                <span className="text-cuerpo">{obtenerNombreUbicacion(s.ubicacionId)}</span>
-                <div className="flex items-center gap-4">
-                  <span className="text-cuerpo font-semibold">{s.cantidadDisponible} uds</span>
-                  <span className="text-etiqueta text-secundario">Mín: {s.stockMinimo}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </Tarjeta>
-      <Tarjeta titulo="Lotes Activos">
-        {lotesProducto.length === 0 ? <p className="text-secundario">Sin lotes registrados</p> : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-cuerpo">
-              <thead><tr className="text-left text-etiqueta text-secundario border-b border-estilo">
-                <th className="pb-2">Lote</th><th className="pb-2">Ubicación</th><th className="pb-2">Cantidad</th><th className="pb-2">Vencimiento</th><th className="pb-2">Días Rest.</th>
-              </tr></thead>
-              <tbody>
-                {lotesProducto.map(l => {
-                  const dias = diasRestantes(l.fechaVencimiento)
-                  return (
-                    <tr key={l.id} className="border-b border-estilo last:border-0">
-                      <td className="py-2">{l.numeroLote}</td>
-                      <td className="py-2">{obtenerNombreUbicacion(l.ubicacionId)}</td>
-                      <td className="py-2">{l.cantidad}</td>
-                      <td className="py-2">{formatearFechaCorta(l.fechaVencimiento)}</td>
-                      <td className="py-2"><Insignia color={dias < 30 ? 'rojo' : dias < 90 ? 'amarillo' : 'verde'}>{dias} días</Insignia></td>
-                    </tr>
-                  )
-                })}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </Tarjeta>
 
       <Modal abierto={!!modalProveedores} alCerrar={() => setModalProveedores(null)} titulo={`Configurar Lead Times — ${producto.nombreComercial}`}>
         <div className="space-y-4">
@@ -162,18 +147,15 @@ export default function DetalleProducto() {
             <p className="text-secundario">Sin proveedores asociados</p>
           ) : (
             <div className="divide-y divide-estilo max-h-60 overflow-y-auto">
-              {proveedoresProducto.map(r => {
-                const prov = provMock.find(p => p.id === r.proveedorId)
-                return (
-                  <div key={r.id} className="flex items-center justify-between py-2">
-                    <div>
-                      <p className="text-sm font-medium">{prov?.razonSocial || r.proveedorId}</p>
-                      <p className="text-xs text-secundario">Lead time: {r.leadTimeEspecifico} días | S/ {r.precioReferencial}</p>
-                    </div>
-                    <Boton variante="texto" onClick={() => eliminarProveedorProducto(r.id)} className="text-estado-critico text-sm">Eliminar</Boton>
+              {proveedoresProducto.map(r => (
+                <div key={r.id} className="flex items-center justify-between py-2">
+                  <div>
+                    <p className="text-sm font-medium">{r.proveedorNombre || r.proveedorId}</p>
+                    <p className="text-xs text-secundario">Lead time: {r.leadTimeEspecifico} días | S/ {r.precioCompra}</p>
                   </div>
-                )
-              })}
+                  <Boton variante="texto" onClick={() => eliminarProveedorProducto(r.id)} className="text-estado-critico text-sm">Eliminar</Boton>
+                </div>
+              ))}
             </div>
           )}
           <div className="border-t border-estilo pt-4 space-y-3">
@@ -194,8 +176,8 @@ export default function DetalleProducto() {
                 <input type="number" value={nuevoProvProd.leadTimeEspecifico} onChange={e => setNuevoProvProd({ ...nuevoProvProd, leadTimeEspecifico: e.target.value })} className="w-full px-3 py-2 text-sm bg-fondo border border-estilo rounded-md" />
               </div>
               <div>
-                <label className="text-xs text-secundario">Precio referencial (S/)</label>
-                <input type="number" step="0.01" value={nuevoProvProd.precioReferencial} onChange={e => setNuevoProvProd({ ...nuevoProvProd, precioReferencial: e.target.value })} className="w-full px-3 py-2 text-sm bg-fondo border border-estilo rounded-md" />
+                <label className="text-xs text-secundario">Precio compra (S/)</label>
+                <input type="number" step="0.01" value={nuevoProvProd.precioCompra} onChange={e => setNuevoProvProd({ ...nuevoProvProd, precioCompra: e.target.value })} className="w-full px-3 py-2 text-sm bg-fondo border border-estilo rounded-md" />
               </div>
             </div>
             <Boton variante="secundario" onClick={agregarProveedorProducto} className="w-full">Agregar</Boton>
