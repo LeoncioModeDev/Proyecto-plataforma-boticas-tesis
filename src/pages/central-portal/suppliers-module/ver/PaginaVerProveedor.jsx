@@ -77,6 +77,10 @@ export default function PaginaVerProveedor() {
             <p className="text-etiqueta text-secundario">País de Origen</p>
             <p className="text-cuerpo text-principal mt-0.5">{proveedor.paisOrigen}</p>
           </div>
+          <div>
+            <p className="text-etiqueta text-secundario">Moneda</p>
+            <p className="text-cuerpo text-principal mt-0.5">{proveedor.moneda ? `${proveedor.moneda.simbolo} ${proveedor.moneda.codigo}` : '—'}</p>
+          </div>
         </div>
       </Tarjeta>
 
@@ -111,32 +115,6 @@ export default function PaginaVerProveedor() {
         </Tarjeta>
       )}
 
-      {proveedor.condicionesComerciales?.length > 0 && (
-        <Tarjeta titulo="Condiciones Comerciales">
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-estilo">
-                  <th className="text-left py-2 px-3 text-secundario font-medium">Moneda</th>
-                  <th className="text-left py-2 px-3 text-secundario font-medium">Plazo de Pago</th>
-                  <th className="text-left py-2 px-3 text-secundario font-medium">Lead Time</th>
-                  <th className="text-left py-2 px-3 text-secundario font-medium">Observaciones</th>
-                </tr>
-              </thead>
-              <tbody>
-                {proveedor.condicionesComerciales.map(c => (
-                  <tr key={c.id} className="border-b border-estilo last:border-0">
-                    <td className="py-2 px-3 text-principal">{c.moneda ? `${c.moneda.simbolo} ${c.moneda.codigo}` : '—'}</td>
-                    <td className="py-2 px-3 text-principal">{c.plazoPago}</td>
-                    <td className="py-2 px-3 text-principal">{c.leadTimePromedio} días</td>
-                    <td className="py-2 px-3 text-secundario">{c.observaciones || '—'}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </Tarjeta>
-      )}
     </div>
   )
 }

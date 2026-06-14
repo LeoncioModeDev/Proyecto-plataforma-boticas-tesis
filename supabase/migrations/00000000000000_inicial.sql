@@ -224,6 +224,7 @@ CREATE TABLE IF NOT EXISTS proveedores (
   tipo_identificacion tipo_identificacion NOT NULL,
   numero_identificacion text NOT NULL,
   pais_origen         char(2) NOT NULL DEFAULT 'PE' REFERENCES paises(codigo),
+  moneda_id           uuid REFERENCES monedas(id),
   activo              boolean NOT NULL DEFAULT true,
   created_at          timestamptz NOT NULL DEFAULT now(),
   UNIQUE (tipo_identificacion, numero_identificacion)
@@ -244,19 +245,6 @@ CREATE TABLE IF NOT EXISTS contactos_proveedor (
   principal     boolean NOT NULL DEFAULT false
 );
 CREATE INDEX IF NOT EXISTS idx_contactos_proveedor ON contactos_proveedor(proveedor_id);
-
--- ============================================================
--- Tabla: condiciones_comerciales
--- ============================================================
-CREATE TABLE IF NOT EXISTS condiciones_comerciales (
-  id                  uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  proveedor_id        uuid NOT NULL REFERENCES proveedores(id),
-  moneda_id           uuid NOT NULL REFERENCES monedas(id),
-  plazo_pago          text NOT NULL,
-  lead_time_promedio  int NOT NULL,
-  observaciones       text
-);
-CREATE INDEX IF NOT EXISTS idx_condiciones_comerciales_proveedor ON condiciones_comerciales(proveedor_id);
 
 -- ============================================================
 -- Tabla: proveedor_producto
@@ -604,7 +592,6 @@ ALTER TABLE productos ENABLE ROW LEVEL SECURITY;
 ALTER TABLE producto_principio_activo ENABLE ROW LEVEL SECURITY;
 ALTER TABLE proveedores ENABLE ROW LEVEL SECURITY;
 ALTER TABLE contactos_proveedor ENABLE ROW LEVEL SECURITY;
-ALTER TABLE condiciones_comerciales ENABLE ROW LEVEL SECURITY;
 ALTER TABLE proveedor_producto ENABLE ROW LEVEL SECURITY;
 ALTER TABLE precios ENABLE ROW LEVEL SECURITY;
 ALTER TABLE stock_ubicaciones ENABLE ROW LEVEL SECURITY;
@@ -750,21 +737,6 @@ CREATE POLICY "operador_contactos_prov" ON contactos_proveedor FOR ALL
   USING (obtener_rol_usuario() = 'operador_drogueria'
     AND EXISTS (SELECT 1 FROM proveedores WHERE id = proveedor_id AND org_id = obtener_org_usuario()));
 CREATE POLICY "visor_select_contactos_prov" ON contactos_proveedor FOR SELECT
-  USING (obtener_rol_usuario() = 'visor_botica'
-    AND EXISTS (SELECT 1 FROM proveedores WHERE id = proveedor_id AND org_id = obtener_org_usuario()));
-
--- ============================================================
--- condiciones_comerciales
--- ============================================================
-DROP POLICY IF EXISTS "admin_full_access" ON condiciones_comerciales;
-DROP POLICY IF EXISTS "operador_condiciones" ON condiciones_comerciales;
-DROP POLICY IF EXISTS "visor_select_condiciones" ON condiciones_comerciales;
-CREATE POLICY "admin_full_access" ON condiciones_comerciales FOR ALL
-  USING (obtener_rol_usuario() IN ('super_admin', 'admin_central'));
-CREATE POLICY "operador_condiciones" ON condiciones_comerciales FOR ALL
-  USING (obtener_rol_usuario() = 'operador_drogueria'
-    AND EXISTS (SELECT 1 FROM proveedores WHERE id = proveedor_id AND org_id = obtener_org_usuario()));
-CREATE POLICY "visor_select_condiciones" ON condiciones_comerciales FOR SELECT
   USING (obtener_rol_usuario() = 'visor_botica'
     AND EXISTS (SELECT 1 FROM proveedores WHERE id = proveedor_id AND org_id = obtener_org_usuario()));
 

@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Plus, Edit, ToggleLeft, ToggleRight, Package, Mail, Phone, Clock, Building, Star } from 'lucide-react'
+import { Plus, Edit, ToggleLeft, ToggleRight, Package, Mail, Phone, Building, Star, Coins } from 'lucide-react'
 import Boton from '@/components/common/Boton'
 import Tabla from '@/components/common/Tabla'
 import Insignia from '@/components/common/Insignia'
@@ -16,11 +16,6 @@ const ESTADOS_PROVEEDOR = {
 
 function obtenerContactoPrincipal(proveedor) {
   return proveedor.contactos?.find(c => c.principal) || proveedor.contactos?.[0]
-}
-
-function obtenerLeadTimeMinimo(proveedor) {
-  const conds = proveedor.condicionesComerciales || []
-  return conds.length > 0 ? Math.min(...conds.map(c => c.leadTimePromedio)) : null
 }
 
 const ColumnasProveedor = ({ onEditar, onToggleActivo }) => [
@@ -53,9 +48,21 @@ const ColumnasProveedor = ({ onEditar, onToggleActivo }) => [
       </div>
     ),
   },
-  {
-    campo: 'contacto',
-    encabezado: 'Contacto',
+    {
+      campo: 'moneda',
+      encabezado: 'Moneda',
+      render: (r) => (
+        <div className="flex items-center gap-1.5">
+          <Coins className="h-4 w-4 text-secundario" />
+          {r.moneda
+            ? <span>{r.moneda.simbolo} {r.moneda.codigo}</span>
+            : <span className="text-secundario">—</span>}
+        </div>
+      ),
+    },
+    {
+      campo: 'contacto',
+      encabezado: 'Contacto',
     render: (r) => {
       const contacto = obtenerContactoPrincipal(r)
       if (!contacto) return <span className="text-secundario">—</span>
@@ -76,35 +83,6 @@ const ColumnasProveedor = ({ onEditar, onToggleActivo }) => [
               <span className="truncate max-w-[150px]">{contacto.correo}</span>
             </div>
           )}
-        </div>
-      )
-    },
-  },
-  {
-    campo: 'leadTime',
-    encabezado: 'Lead Time',
-    render: (r) => {
-      const minLt = obtenerLeadTimeMinimo(r)
-      return (
-        <div className="flex items-center gap-1">
-          <Clock className="h-4 w-4 text-secundario" />
-          <span className="text-principal">{minLt ? `${minLt} días` : '—'}</span>
-        </div>
-      )
-    },
-  },
-  {
-    campo: 'condicionesPago',
-    encabezado: 'Pago',
-    render: (r) => {
-      const conds = r.condicionesComerciales || []
-      return (
-        <div className="space-y-1">
-          {conds.length > 0 ? conds.map(c => (
-            <span key={c.id} className="text-sm text-secundario block">
-              {c.plazoPago} {c.moneda ? `(${c.moneda.simbolo}${c.moneda.codigo})` : ''}
-            </span>
-          )) : <span className="text-secundario">—</span>}
         </div>
       )
     },
@@ -173,7 +151,7 @@ export default function PaginaProveedores() {
   }
 
   const manejarEditar = (proveedor) => {
-    navegar(`/central/proveedores/${proveedor.id}`)
+    navegar(`/central/proveedores/${proveedor.id}/editar`)
   }
 
   const manejarToggleActivo = async (id) => {
@@ -216,7 +194,7 @@ export default function PaginaProveedores() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-h1 text-principal">Proveedores</h1>
-          <p className="text-cuerpo text-secundario mt-1">Gestión de proveedores y condiciones comerciales</p>
+          <p className="text-cuerpo text-secundario mt-1">Gestión de proveedores</p>
         </div>
         <Boton variante="primario" icono={Plus} onClick={() => navegar('/central/proveedores/nuevo')}>
           Nuevo Proveedor

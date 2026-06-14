@@ -66,3 +66,16 @@ export async function obtenerOpcionesUbigeos() {
     etiqueta: `${u.distrito}, ${u.provincia}, ${u.departamento}`,
   }))
 }
+
+export async function obtenerOpcionesMonedas() {
+  const { data, error } = await supabase
+    .from('monedas')
+    .select('id, codigo, simbolo')
+    .order('codigo')
+
+  if (error) throw new Error('Error al cargar monedas: ' + error.message)
+  return (data || []).map(m => ({
+    valor: m.id,
+    etiqueta: `${m.simbolo} ${m.codigo}`,
+  }))
+}

@@ -73,7 +73,11 @@ async function listarProveedores(supabase: any, perfil: PerfilUsuario, url: URL)
 
   let query = supabase
     .from("proveedores")
-    .select("*")
+    .select(`
+      *,
+      monedas(*),
+      contactos_proveedor(*)
+    `)
     .eq("org_id", perfil.org_id)
     .order("created_at", { ascending: false });
 
@@ -91,8 +95,8 @@ async function obtenerProveedor(supabase: any, perfil: PerfilUsuario, id: string
     .from("proveedores")
     .select(`
       *,
-      contactos_proveedor(*),
-      condiciones_comerciales(*, monedas(*))
+      monedas(*),
+      contactos_proveedor(*)
     `)
     .eq("id", id)
     .eq("org_id", perfil.org_id)
@@ -103,7 +107,7 @@ async function obtenerProveedor(supabase: any, perfil: PerfilUsuario, id: string
 }
 
 async function crearProveedor(supabase: any, perfil: PerfilUsuario, body: any) {
-  const { razon_social, tipo_identificacion, numero_identificacion, pais_origen, contactos, condiciones_comerciales } = body;
+  const { razon_social, tipo_identificacion, numero_identificacion, pais_origen, moneda_id, contactos } = body;
 
   if (!razon_social || !tipo_identificacion || !numero_identificacion) {
     return json({ error: "Faltan datos obligatorios (razon_social, tipo_identificacion, numero_identificacion)" }, 400);
@@ -117,6 +121,7 @@ async function crearProveedor(supabase: any, perfil: PerfilUsuario, body: any) {
       tipo_identificacion,
       numero_identificacion,
       pais_origen: pais_origen || "PE",
+      moneda_id: moneda_id || null,
       activo: true,
     })
     .select("id")
@@ -149,27 +154,11 @@ async function crearProveedor(supabase: any, perfil: PerfilUsuario, body: any) {
     if (errCont) console.error("Error al insertar contactos:", errCont.message);
   }
 
-  if (condiciones_comerciales?.length > 0) {
-    const condicionesConId = condiciones_comerciales.map((c: any) => ({
-      proveedor_id: proveedorId,
-      moneda_id: c.moneda_id,
-      plazo_pago: c.plazo_pago,
-      lead_time_promedio: c.lead_time_promedio,
-      observaciones: c.observaciones || null,
-    }));
-
-    const { error: errCond } = await supabase
-      .from("condiciones_comerciales")
-      .insert(condicionesConId);
-
-    if (errCond) console.error("Error al insertar condiciones:", errCond.message);
-  }
-
   return json({ exito: true, id: proveedorId });
 }
 
 async function actualizarProveedor(supabase: any, perfil: PerfilUsuario, id: string, body: any) {
-  const { razon_social, tipo_identificacion, numero_identificacion, pais_origen, activo, contactos, condiciones_comerciales } = body;
+  const { razon_social, tipo_identificacion, numero_identificacion, pais_origen, moneda_id, activo, contactos } = body;
 
   const { error: errProv } = await supabase
     .from("proveedores")
@@ -178,6 +167,7 @@ async function actualizarProveedor(supabase: any, perfil: PerfilUsuario, id: str
       ...(tipo_identificacion !== undefined && { tipo_identificacion }),
       ...(numero_identificacion !== undefined && { numero_identificacion }),
       ...(pais_origen !== undefined && { pais_origen }),
+      ...(moneda_id !== undefined && { moneda_id }),
       ...(activo !== undefined && { activo }),
     })
     .eq("id", id)
@@ -209,26 +199,6 @@ async function actualizarProveedor(supabase: any, perfil: PerfilUsuario, id: str
         .insert(contactosConId);
 
       if (errCont) console.error("Error al re-insertar contactos:", errCont.message);
-    }
-  }
-
-  if (condiciones_comerciales !== undefined) {
-    await supabase.from("condiciones_comerciales").delete().eq("proveedor_id", id);
-
-    if (condiciones_comerciales.length > 0) {
-      const condicionesConId = condiciones_comerciales.map((c: any) => ({
-        proveedor_id: id,
-        moneda_id: c.moneda_id,
-        plazo_pago: c.plazo_pago,
-        lead_time_promedio: c.lead_time_promedio,
-        observaciones: c.observaciones || null,
-      }));
-
-      const { error: errCond } = await supabase
-        .from("condiciones_comerciales")
-        .insert(condicionesConId);
-
-      if (errCond) console.error("Error al re-insertar condiciones:", errCond.message);
     }
   }
 

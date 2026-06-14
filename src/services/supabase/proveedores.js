@@ -31,8 +31,10 @@ function mapearProveedor(p) {
     tipoIdentificacion: p.tipo_identificacion,
     numeroIdentificacion: p.numero_identificacion,
     paisOrigen: p.pais_origen,
+    monedaId: p.moneda_id,
     activo: p.activo,
     createdAt: p.created_at,
+    ...(p.monedas && { moneda: { id: p.monedas.id, codigo: p.monedas.codigo, nombre: p.monedas.nombre, simbolo: p.monedas.simbolo } }),
     contactos: (p.contactos_proveedor || []).map(c => ({
       id: c.id,
       proveedorId: c.proveedor_id,
@@ -42,15 +44,6 @@ function mapearProveedor(p) {
       direccion: c.direccion,
       ubigeo: c.ubigeo,
       principal: c.principal,
-    })),
-    condicionesComerciales: (p.condiciones_comerciales || []).map(c => ({
-      id: c.id,
-      proveedorId: c.proveedor_id,
-      monedaId: c.moneda_id,
-      plazoPago: c.plazo_pago,
-      leadTimePromedio: c.lead_time_promedio,
-      observaciones: c.observaciones,
-      ...(c.monedas && { moneda: { id: c.monedas.id, codigo: c.monedas.codigo, nombre: c.monedas.nombre, simbolo: c.monedas.simbolo } }),
     })),
   }
 }
@@ -74,6 +67,7 @@ export async function crearProveedor(datos) {
     tipo_identificacion: datos.tipoIdentificacion,
     numero_identificacion: datos.numeroIdentificacion,
     pais_origen: datos.paisOrigen || 'PE',
+    moneda_id: datos.monedaId || null,
     contactos: (datos.contactos || []).map(c => ({
       nombre: c.nombre,
       telefono: c.telefono,
@@ -81,12 +75,6 @@ export async function crearProveedor(datos) {
       direccion: c.direccion,
       ubigeo: c.ubigeo,
       principal: c.principal,
-    })),
-    condiciones_comerciales: (datos.condicionesComerciales || []).map(c => ({
-      moneda_id: c.monedaId,
-      plazo_pago: c.plazoPago,
-      lead_time_promedio: c.leadTimePromedio,
-      observaciones: c.observaciones,
     })),
   }
   return llamarEdgeFunction('POST', '', body)
@@ -98,6 +86,7 @@ export async function actualizarProveedor(id, datos) {
     tipo_identificacion: datos.tipoIdentificacion,
     numero_identificacion: datos.numeroIdentificacion,
     pais_origen: datos.paisOrigen,
+    moneda_id: datos.monedaId || null,
     activo: datos.activo,
     contactos: (datos.contactos || []).map(c => ({
       nombre: c.nombre,
@@ -106,12 +95,6 @@ export async function actualizarProveedor(id, datos) {
       direccion: c.direccion,
       ubigeo: c.ubigeo,
       principal: c.principal,
-    })),
-    condiciones_comerciales: (datos.condicionesComerciales || []).map(c => ({
-      moneda_id: c.monedaId,
-      plazo_pago: c.plazoPago,
-      lead_time_promedio: c.leadTimePromedio,
-      observaciones: c.observaciones,
     })),
   }
   return llamarEdgeFunction('PATCH', `/${id}`, body)

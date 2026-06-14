@@ -9,7 +9,7 @@ import CampoTexto from '@/components/forms/CampoTexto'
 import CampoSeleccion from '@/components/forms/CampoSeleccion'
 import CampoSeleccionUbigeo from '@/components/forms/CampoSeleccionUbigeo'
 import { proveedorEsquema } from '@/schemas/proveedorEsquema'
-import { obtenerOpcionesPaises, obtenerOpcionesUbigeos } from '@/services/supabase/catalogo'
+import { obtenerOpcionesPaises, obtenerOpcionesUbigeos, obtenerOpcionesMonedas } from '@/services/supabase/catalogo'
 
 const OPCIONES_IDENTIFICACION = [
   { valor: 'ruc', etiqueta: 'RUC' },
@@ -23,12 +23,14 @@ export default function FormularioProveedor({ proveedorEditar, alGuardar }) {
   const esEdicion = !!proveedorEditar
   const [opcionesPaises, setOpcionesPaises] = useState([])
   const [opcionesUbigeo, setOpcionesUbigeo] = useState([])
+  const [opcionesMonedas, setOpcionesMonedas] = useState([])
 
   useEffect(() => {
-    Promise.all([obtenerOpcionesPaises(), obtenerOpcionesUbigeos()])
-      .then(([paises, ubigeos]) => {
+    Promise.all([obtenerOpcionesPaises(), obtenerOpcionesUbigeos(), obtenerOpcionesMonedas()])
+      .then(([paises, ubigeos, monedas]) => {
         setOpcionesPaises(paises)
         setOpcionesUbigeo(ubigeos)
+        setOpcionesMonedas(monedas)
       })
       .catch(console.error)
   }, [])
@@ -41,6 +43,7 @@ export default function FormularioProveedor({ proveedorEditar, alGuardar }) {
       activo: true,
       tipoIdentificacion: 'ruc',
       paisOrigen: 'PE',
+      monedaId: null,
       contactos: [defaultContacto],
     },
   })
@@ -51,11 +54,7 @@ export default function FormularioProveedor({ proveedorEditar, alGuardar }) {
   })
 
   const alEnviar = (datos) => {
-    const proveedor = {
-      ...datos,
-      condicionesComerciales: proveedorEditar?.condicionesComerciales || [],
-    }
-    alGuardar(proveedor)
+    alGuardar(datos)
   }
 
   return (
@@ -73,6 +72,7 @@ export default function FormularioProveedor({ proveedorEditar, alGuardar }) {
               <CampoSeleccion nombre="tipoIdentificacion" etiqueta="Tipo de Identificación" opciones={OPCIONES_IDENTIFICACION} requerido register={register} error={errors.tipoIdentificacion?.message} />
               <CampoTexto nombre="numeroIdentificacion" etiqueta="Número de Identificación" requerido register={register} error={errors.numeroIdentificacion?.message} placeholder="Según tipo seleccionado" />
               <CampoSeleccion nombre="paisOrigen" etiqueta="País de Origen" opciones={opcionesPaises} requerido register={register} error={errors.paisOrigen?.message} />
+              <CampoSeleccion nombre="monedaId" etiqueta="Moneda" opciones={opcionesMonedas} register={register} error={errors.monedaId?.message} placeholder="Seleccionar moneda..." />
             </div>
           </div>
 
