@@ -100,6 +100,8 @@ async function listarTransferencias(supabase, perfil, url) {
 
   if (esVisor) {
     query = query.eq("destino_id", perfil.botica_id);
+  } else {
+    query = query.eq("org_id", perfil.org_id);
   }
 
   if (estado) {
@@ -134,6 +136,8 @@ async function obtenerTransferencia(supabase, perfil, id) {
 
   if (esVisor) {
     query = query.eq("destino_id", perfil.botica_id);
+  } else {
+    query = query.eq("org_id", perfil.org_id);
   }
 
   const { data, error } = await query.single();
@@ -374,7 +378,9 @@ async function recibirTransferencia(supabase, perfil, id) {
     .select("id, estado")
     .eq("id", id);
 
-  if (esVisor) {
+  if (esAdmin) {
+    query = query.eq("org_id", perfil.org_id);
+  } else if (esVisor) {
     query = query.eq("destino_id", perfil.botica_id);
   }
 
@@ -416,7 +422,9 @@ async function rechazarTransferencia(supabase, perfil, id, body) {
     .select("id, estado")
     .eq("id", id);
 
-  if (esVisor) {
+  if (esAdmin) {
+    query = query.eq("org_id", perfil.org_id);
+  } else if (esVisor) {
     query = query.eq("destino_id", perfil.botica_id);
   }
 
