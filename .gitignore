@@ -5,9 +5,9 @@ node_modules/
 dist/
 
 # Variables de entorno
-.env
-.env.local
-.env.*.local
+#.env
+#.env.local
+#.env.*.local
 
 # IDE
 .vscode/

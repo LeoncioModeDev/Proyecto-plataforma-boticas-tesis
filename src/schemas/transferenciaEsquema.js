@@ -1,16 +1,12 @@
 import { z } from 'zod'
 
-/**
- * Esquema de validación para transferencias.
- * Alineado con Arquitectura Lógica v4 — tablas transferencias y transferencias_items.
- */
 export const transferenciaEsquema = z.object({
   destinoId: z.string().min(1, 'Debe seleccionar una botica destino'),
-  estado: z.enum(['creada', 'en_transito', 'recibida']).default('creada'),
+  estado: z.enum(['creada', 'en_transito', 'recibida', 'rechazada', 'cancelada']).default('creada'),
   observaciones: z.string().optional(),
   items: z.array(z.object({
     productoId: z.string().min(1, 'Debe seleccionar un producto'),
-    loteId: z.string().optional(),
+    loteId: z.string().min(1, 'Debe seleccionar un lote'),
     cantidad: z.coerce.number().int().positive('La cantidad debe ser mayor a 0'),
   })).min(1, 'Debe agregar al menos un producto a la transferencia'),
 })

@@ -23,7 +23,7 @@ export default function DetalleProducto() {
   const [modalProveedores, setModalProveedores] = useState(null)
   const [proveedoresProducto, setProveedoresProducto] = useState([])
   const [proveedoresDisponibles, setProveedoresDisponibles] = useState([])
-  const [nuevoProvProd, setNuevoProvProd] = useState({ proveedorId: '', leadTimeEspecifico: '', precioCompra: '' })
+  const [nuevoProvProd, setNuevoProvProd] = useState({ proveedorId: '', leadTimeEspecifico: '', precioCompraReferencial: '' })
   const [exito, setExito] = useState(null)
 
   useEffect(() => {
@@ -58,17 +58,17 @@ export default function DetalleProducto() {
   }
 
   const agregarProveedorProducto = async () => {
-    if (!nuevoProvProd.proveedorId || !nuevoProvProd.leadTimeEspecifico || !nuevoProvProd.precioCompra) return
+    if (!nuevoProvProd.proveedorId || !nuevoProvProd.leadTimeEspecifico || !nuevoProvProd.precioCompraReferencial) return
     try {
       await guardarRelacion({
         proveedorId: nuevoProvProd.proveedorId,
         productoId: producto.id,
         leadTimeEspecifico: Number(nuevoProvProd.leadTimeEspecifico),
-        precioCompra: Number(nuevoProvProd.precioCompra),
+        precioCompraReferencial: Number(nuevoProvProd.precioCompraReferencial),
       })
       const actualizados = await listarPorProducto(producto.id)
       setProveedoresProducto(actualizados)
-      setNuevoProvProd({ proveedorId: '', leadTimeEspecifico: '', precioCompra: '' })
+      setNuevoProvProd({ proveedorId: '', leadTimeEspecifico: '', precioCompraReferencial: '' })
     } catch (err) {
       setError(err.message)
     }
@@ -151,7 +151,7 @@ export default function DetalleProducto() {
                 <div key={r.id} className="flex items-center justify-between py-2">
                   <div>
                     <p className="text-sm font-medium">{r.proveedorNombre || r.proveedorId}</p>
-                    <p className="text-xs text-secundario">Lead time: {r.leadTimeEspecifico} días | S/ {r.precioCompra}</p>
+                    <p className="text-xs text-secundario">Lead time: {r.leadTimeEspecifico} días | S/ {r.precioCompraReferencial}</p>
                   </div>
                   <Boton variante="texto" onClick={() => eliminarProveedorProducto(r.id)} className="text-estado-critico text-sm">Eliminar</Boton>
                 </div>
@@ -177,7 +177,7 @@ export default function DetalleProducto() {
               </div>
               <div>
                 <label className="text-xs text-secundario">Precio compra (S/)</label>
-                <input type="number" step="0.01" value={nuevoProvProd.precioCompra} onChange={e => setNuevoProvProd({ ...nuevoProvProd, precioCompra: e.target.value })} className="w-full px-3 py-2 text-sm bg-fondo border border-estilo rounded-md" />
+                <input type="number" step="0.01" value={nuevoProvProd.precioCompraReferencial} onChange={e => setNuevoProvProd({ ...nuevoProvProd, precioCompraReferencial: e.target.value })} className="w-full px-3 py-2 text-sm bg-fondo border border-estilo rounded-md" />
               </div>
             </div>
             <Boton variante="secundario" onClick={agregarProveedorProducto} className="w-full">Agregar</Boton>

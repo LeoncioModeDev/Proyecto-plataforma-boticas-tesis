@@ -32,12 +32,16 @@ serve(async (req) => {
 
   const { data: perfil, error: perfilError } = await supabase
     .from("usuarios")
-    .select("id, org_id, rol")
+    .select("id, org_id, rol, activo")
     .eq("id", user.id)
     .single();
 
   if (perfilError || !perfil) {
     return json({ error: "Perfil de usuario no encontrado" }, 403);
+  }
+
+  if (!perfil.activo) {
+    return json({ error: "Usuario desactivado. Contacta al administrador." }, 403);
   }
 
   const url = new URL(req.url);
@@ -66,46 +70,74 @@ serve(async (req) => {
 
 async function listarPorProducto(supabase: any, perfil: PerfilUsuario, url: URL) {
   const productoId = url.searchParams.get("producto_id");
+  const proveedorId = url.searchParams.get("proveedor_id");
+  const soloActivos = url.searchParams.get("solo_activos") === "true";
 
-  if (!productoId) {
-    return json({ error: "Se requiere producto_id como query param" }, 400);
+  if (!productoId && !proveedorId) {
+    return json({ error: "Se requiere producto_id o proveedor_id como query param" }, 400);
   }
 
-  const { data, error } = await supabase
+  let query = supabase
     .from("proveedor_producto")
     .select(`
       *,
-      proveedores!inner(id, razon_social, org_id, activo)
+      proveedores!inner(id, razon_social, org_id, activo),
+      productos(id, nombre_comercial, presentacion, clasificacion, estado)
     `)
-    .eq("producto_id", productoId)
     .order("created_at", { ascending: false });
+
+  if (productoId) query = query.eq("producto_id", productoId);
+  if (proveedorId) query = query.eq("proveedor_id", proveedorId);
+
+  const { data, error } = await query;
 
   if (error) return json({ error: error.message }, 400);
 
-  const datosFiltrados = data.filter((r: any) => r.proveedores?.org_id === perfil.org_id);
+  let datosFiltrados = data.filter((r: any) => r.proveedores?.org_id === perfil.org_id);
+
+  if (soloActivos) {
+    datosFiltrados = datosFiltrados.filter((r: any) =>
+      r.productos?.estado === "activo"
+    );
+  }
+
   return json({ datos: datosFiltrados });
 }
 
 async function guardarRelacion(supabase: any, perfil: PerfilUsuario, body: any) {
-  const { proveedor_id, producto_id, lead_time_especifico, precio_compra } = body;
+  const { proveedor_id, producto_id, lead_time_especifico, precio_compra_referencial } = body;
 
-  if (!proveedor_id || !producto_id || lead_time_especifico === undefined || precio_compra === undefined) {
-    return json({ error: "Faltan datos (proveedor_id, producto_id, lead_time_especifico, precio_compra)" }, 400);
+  if (!proveedor_id || !producto_id || lead_time_especifico === undefined || precio_compra_referencial === undefined) {
+    return json({ error: "Faltan datos (proveedor_id, producto_id, lead_time_especifico, precio_compra_referencial)" }, 400);
+  }
+
+  const { data: producto } = await supabase
+    .from("productos")
+    .select("estado")
+    .eq("id", producto_id)
+    .single();
+
+  if (!producto) return json({ error: "Producto no encontrado" }, 404);
+  if (producto.estado !== "activo") {
+    return json({ error: "No se puede configurar lead time para un producto inactivo o descontinuado" }, 400);
   }
 
   const { data: existente } = await supabase
     .from("proveedor_producto")
-    .select("id")
+    .select("id, activo")
     .eq("proveedor_id", proveedor_id)
     .eq("producto_id", producto_id)
     .maybeSingle();
 
   if (existente) {
+    if (!existente.activo) {
+      return json({ error: "La relación proveedor-producto está desactivada. Actívala para modificarla." }, 400);
+    }
     const { error: errUpd } = await supabase
       .from("proveedor_producto")
       .update({
         lead_time_especifico,
-        precio_compra,
+        precio_compra_referencial,
       })
       .eq("id", existente.id);
 
@@ -119,7 +151,8 @@ async function guardarRelacion(supabase: any, perfil: PerfilUsuario, body: any) 
       proveedor_id,
       producto_id,
       lead_time_especifico,
-      precio_compra,
+      precio_compra_referencial,
+      activo: true,
     })
     .select("id")
     .single();
@@ -131,11 +164,11 @@ async function guardarRelacion(supabase: any, perfil: PerfilUsuario, body: any) 
 async function eliminarRelacion(supabase: any, perfil: PerfilUsuario, id: string) {
   const { error } = await supabase
     .from("proveedor_producto")
-    .delete()
+    .update({ activo: false })
     .eq("id", id);
 
   if (error) return json({ error: error.message }, 400);
-  return json({ exito: true });
+  return json({ exito: true, activo: false });
 }
 
 function json(data: unknown, status = 200) {

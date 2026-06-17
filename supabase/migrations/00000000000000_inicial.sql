@@ -28,21 +28,21 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp" WITH SCHEMA extensions;
 -- ============================================================
 -- Enums
 -- ============================================================
-CREATE TYPE tipo_ubicacion AS ENUM ('drogueria', 'botica');
-CREATE TYPE tipo_movimiento AS ENUM ('entrada', 'salida', 'ajuste', 'merma', 'devolucion');
-CREATE TYPE tipo_transferencia AS ENUM ('transferencia_central', 'redistribucion');
-CREATE TYPE estado_transferencia AS ENUM ('creada', 'en_transito', 'recibida', 'cancelada');
-CREATE TYPE tipo_identificacion AS ENUM ('ruc', 'nit', 'tax_id', 'vat', 'otro');
-CREATE TYPE clasificacion_producto AS ENUM ('OTC', 'receta', 'generico');
-CREATE TYPE estado_producto AS ENUM ('activo', 'inactivo', 'descontinuado');
-CREATE TYPE tipo_alerta AS ENUM ('quiebre', 'sobrestock', 'vencimiento_proximo', 'prediccion');
-CREATE TYPE tipo_origen_alerta AS ENUM ('regla', 'modelo');
-CREATE TYPE urgencia_alerta AS ENUM ('alta', 'media', 'baja');
-CREATE TYPE estado_modelo AS ENUM ('staging', 'production', 'archived');
-CREATE TYPE estado_recomendacion AS ENUM ('pendiente', 'confirmada', 'rechazada', 'ejecutada');
-CREATE TYPE estado_orden_compra AS ENUM ('pendiente', 'aprobada', 'rechazada', 'completada');
-CREATE TYPE tendencia_drift AS ENUM ('estable', 'degradando', 'mejorando');
-CREATE TYPE rol_usuario AS ENUM ('super_admin', 'admin_central', 'operador_drogueria', 'visor_botica');
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'tipo_ubicacion') THEN CREATE TYPE tipo_ubicacion AS ENUM ('drogueria', 'botica'); END IF; END $$;
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'tipo_movimiento') THEN CREATE TYPE tipo_movimiento AS ENUM ('entrada', 'salida', 'ajuste', 'merma', 'devolucion'); END IF; END $$;
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'tipo_transferencia') THEN CREATE TYPE tipo_transferencia AS ENUM ('transferencia_central', 'redistribucion'); END IF; END $$;
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'estado_transferencia') THEN CREATE TYPE estado_transferencia AS ENUM ('creada', 'en_transito', 'recibida', 'cancelada'); END IF; END $$;
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'tipo_identificacion') THEN CREATE TYPE tipo_identificacion AS ENUM ('ruc', 'nit', 'tax_id', 'vat', 'otro'); END IF; END $$;
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'clasificacion_producto') THEN CREATE TYPE clasificacion_producto AS ENUM ('OTC', 'receta', 'generico'); END IF; END $$;
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'estado_producto') THEN CREATE TYPE estado_producto AS ENUM ('activo', 'inactivo', 'descontinuado'); END IF; END $$;
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'tipo_alerta') THEN CREATE TYPE tipo_alerta AS ENUM ('quiebre', 'sobrestock', 'vencimiento_proximo', 'prediccion'); END IF; END $$;
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'tipo_origen_alerta') THEN CREATE TYPE tipo_origen_alerta AS ENUM ('regla', 'modelo'); END IF; END $$;
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'urgencia_alerta') THEN CREATE TYPE urgencia_alerta AS ENUM ('alta', 'media', 'baja'); END IF; END $$;
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'estado_modelo') THEN CREATE TYPE estado_modelo AS ENUM ('staging', 'production', 'archived'); END IF; END $$;
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'estado_recomendacion') THEN CREATE TYPE estado_recomendacion AS ENUM ('pendiente', 'confirmada', 'rechazada', 'ejecutada'); END IF; END $$;
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'estado_orden_compra') THEN CREATE TYPE estado_orden_compra AS ENUM ('pendiente', 'aprobada', 'rechazada', 'completada'); END IF; END $$;
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'tendencia_drift') THEN CREATE TYPE tendencia_drift AS ENUM ('estable', 'degradando', 'mejorando'); END IF; END $$;
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'rol_usuario') THEN CREATE TYPE rol_usuario AS ENUM ('super_admin', 'admin_central', 'operador_drogueria', 'visor_botica'); END IF; END $$;
 
 -- ============================================================
 -- Tabla: paises
@@ -160,6 +160,7 @@ EXCEPTION WHEN OTHERS THEN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
+DROP TRIGGER IF EXISTS on_auth_user_after_insert ON auth.users;
 CREATE TRIGGER on_auth_user_after_insert
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE FUNCTION public.sincronizar_usuario();
@@ -517,6 +518,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
+DROP TRIGGER IF EXISTS trg_actualizar_stock ON movimientos_inventario;
 CREATE TRIGGER trg_actualizar_stock
 AFTER INSERT ON movimientos_inventario
 FOR EACH ROW EXECUTE FUNCTION actualizar_stock();
@@ -612,31 +614,43 @@ ALTER TABLE recomendaciones_ml ENABLE ROW LEVEL SECURITY;
 -- Políticas — Tablas globales de referencia (catálogos)
 -- ============================================================
 
+DROP POLICY IF EXISTS "admin_full_access" ON paises;
+DROP POLICY IF EXISTS "lectura_autenticados" ON paises;
 CREATE POLICY "admin_full_access" ON paises FOR ALL
   USING (obtener_rol_usuario() IN ('super_admin', 'admin_central'));
 CREATE POLICY "lectura_autenticados" ON paises FOR SELECT
   USING (auth.role() = 'authenticated');
 
+DROP POLICY IF EXISTS "admin_full_access" ON ubigeos;
+DROP POLICY IF EXISTS "lectura_autenticados" ON ubigeos;
 CREATE POLICY "admin_full_access" ON ubigeos FOR ALL
   USING (obtener_rol_usuario() IN ('super_admin', 'admin_central'));
 CREATE POLICY "lectura_autenticados" ON ubigeos FOR SELECT
   USING (auth.role() = 'authenticated');
 
+DROP POLICY IF EXISTS "admin_full_access" ON monedas;
+DROP POLICY IF EXISTS "lectura_autenticados" ON monedas;
 CREATE POLICY "admin_full_access" ON monedas FOR ALL
   USING (obtener_rol_usuario() IN ('super_admin', 'admin_central'));
 CREATE POLICY "lectura_autenticados" ON monedas FOR SELECT
   USING (auth.role() = 'authenticated');
 
+DROP POLICY IF EXISTS "admin_full_access" ON unidades_medida;
+DROP POLICY IF EXISTS "lectura_autenticados" ON unidades_medida;
 CREATE POLICY "admin_full_access" ON unidades_medida FOR ALL
   USING (obtener_rol_usuario() IN ('super_admin', 'admin_central'));
 CREATE POLICY "lectura_autenticados" ON unidades_medida FOR SELECT
   USING (auth.role() = 'authenticated');
 
+DROP POLICY IF EXISTS "admin_full_access" ON principios_activos;
+DROP POLICY IF EXISTS "lectura_autenticados" ON principios_activos;
 CREATE POLICY "admin_full_access" ON principios_activos FOR ALL
   USING (obtener_rol_usuario() IN ('super_admin', 'admin_central'));
 CREATE POLICY "lectura_autenticados" ON principios_activos FOR SELECT
   USING (auth.role() = 'authenticated');
 
+DROP POLICY IF EXISTS "admin_full_access" ON formas_farmaceuticas;
+DROP POLICY IF EXISTS "lectura_autenticados" ON formas_farmaceuticas;
 CREATE POLICY "admin_full_access" ON formas_farmaceuticas FOR ALL
   USING (obtener_rol_usuario() IN ('super_admin', 'admin_central'));
 CREATE POLICY "lectura_autenticados" ON formas_farmaceuticas FOR SELECT

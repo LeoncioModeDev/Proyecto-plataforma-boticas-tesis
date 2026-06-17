@@ -1,11 +1,9 @@
 import FormularioOrdenCompra from '@/components/suppliers/FormularioOrdenCompra'
-import { ordenesCompra as ordenesMock } from '@/mock-data/ordenesCompra'
-
-let ordenesGlobal = [...ordenesMock]
+import { crearOrden } from '@/services/supabase/ordenesCompra'
 
 export default function PaginaNuevaOrdenCompra() {
-  const handleGuardar = (nuevaOC) => {
-    ordenesGlobal.push(nuevaOC)
+  const handleGuardar = async (orden) => {
+    return crearOrden(orden)
   }
 
   return (

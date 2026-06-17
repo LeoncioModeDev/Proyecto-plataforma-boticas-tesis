@@ -31,18 +31,36 @@ export async function listarPorProducto(productoId) {
     proveedorId: r.proveedor_id,
     productoId: r.producto_id,
     leadTimeEspecifico: r.lead_time_especifico,
-    precioCompra: r.precio_compra,
+    precioCompraReferencial: r.precio_compra_referencial,
     proveedorNombre: r.proveedores?.razon_social,
     proveedorActivo: r.proveedores?.activo,
+    activo: r.activo,
   })) : []
 }
 
-export async function guardarRelacion({ proveedorId, productoId, leadTimeEspecifico, precioCompra }) {
+export async function listarPorProveedor(proveedorId, soloActivos = false) {
+  const params = `?proveedor_id=${proveedorId}${soloActivos ? '&solo_activos=true' : ''}`
+  const { datos } = await llamarEdgeFunction('GET', params)
+  return Array.isArray(datos) ? datos.map(r => ({
+    id: r.id,
+    proveedorId: r.proveedor_id,
+    productoId: r.producto_id,
+    leadTimeEspecifico: r.lead_time_especifico,
+    precioCompraReferencial: r.precio_compra_referencial,
+    productoNombre: r.productos?.nombre_comercial,
+    presentacion: r.productos?.presentacion,
+    clasificacion: r.productos?.clasificacion,
+    productoEstado: r.productos?.estado,
+    activo: r.activo,
+  })) : []
+}
+
+export async function guardarRelacion({ proveedorId, productoId, leadTimeEspecifico, precioCompraReferencial }) {
   return llamarEdgeFunction('POST', '', {
     proveedor_id: proveedorId,
     producto_id: productoId,
     lead_time_especifico: leadTimeEspecifico,
-    precio_compra: precioCompra,
+    precio_compra_referencial: precioCompraReferencial,
   })
 }
 

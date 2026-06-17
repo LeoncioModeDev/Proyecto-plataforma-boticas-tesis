@@ -1,12 +1,12 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Plus, ToggleLeft, ToggleRight, Truck } from 'lucide-react'
+import { Plus, Truck } from 'lucide-react'
 import Boton from '@/components/common/Boton'
 import Tabla from '@/components/common/Tabla'
 import Insignia from '@/components/common/Insignia'
 import Alerta from '@/components/common/Alerta'
 import Modal from '@/components/common/Modal'
-import { obtenerProductos, toggleProducto } from '@/services/supabase/productos'
+import { obtenerProductos } from '@/services/supabase/productos'
 import { listarProveedores } from '@/services/supabase/proveedores'
 import { listarPorProducto, guardarRelacion, eliminarRelacion } from '@/services/supabase/proveedorProducto'
 import { ETIQUETAS_CLASIFICACION, COLORES_CLASIFICACION, OPCIONES_CLASIFICACION } from '@/constants/clasificacionProducto'
@@ -30,12 +30,10 @@ export default function PaginaCatalogo() {
   const [filtroClasificacion, setFiltroClasificacion] = useState('')
   const [filtroEstado, setFiltroEstado] = useState('')
   const [exito, setExito] = useState(null)
-  const [confirmarDesactivar, setConfirmarDesactivar] = useState(null)
-
   const [modalProveedores, setModalProveedores] = useState(null)
   const [proveedoresProducto, setProveedoresProducto] = useState([])
   const [proveedoresDisponibles, setProveedoresDisponibles] = useState([])
-  const [nuevoProvProd, setNuevoProvProd] = useState({ proveedorId: '', leadTimeEspecifico: '', precioCompra: '' })
+  const [nuevoProvProd, setNuevoProvProd] = useState({ proveedorId: '', leadTimeEspecifico: '', precioCompraReferencial: '' })
 
   const cargarDatos = useCallback(async () => {
     try {
@@ -58,35 +56,6 @@ export default function PaginaCatalogo() {
     return matchClasificacion && matchEstado
   })
 
-  const manejarToggleActivo = async (id) => {
-    const producto = productos.find(p => p.id === id)
-    if (producto.estado === 'activo') {
-      setConfirmarDesactivar(id)
-    } else {
-      try {
-        const { estado } = await toggleProducto(id)
-        setProductos(productos.map(p => p.id === id ? { ...p, estado } : p))
-        setExito('Producto activado correctamente')
-        setTimeout(() => setExito(null), 2000)
-      } catch (err) {
-        setError(err.message)
-      }
-    }
-  }
-
-  const confirmarDesactivacion = async () => {
-    try {
-      const { estado } = await toggleProducto(confirmarDesactivar)
-      setProductos(productos.map(p => p.id === confirmarDesactivar ? { ...p, estado } : p))
-      setExito('Producto desactivado correctamente')
-      setConfirmarDesactivar(null)
-      setTimeout(() => setExito(null), 2000)
-    } catch (err) {
-      setError(err.message)
-      setConfirmarDesactivar(null)
-    }
-  }
-
   const abrirConfigurarProveedores = async (producto) => {
     try {
       const existentes = await listarPorProducto(producto.id)
@@ -102,17 +71,17 @@ export default function PaginaCatalogo() {
   }
 
   const agregarProveedorProducto = async () => {
-    if (!nuevoProvProd.proveedorId || !nuevoProvProd.leadTimeEspecifico || !nuevoProvProd.precioCompra) return
+    if (!nuevoProvProd.proveedorId || !nuevoProvProd.leadTimeEspecifico || !nuevoProvProd.precioCompraReferencial) return
     try {
       const result = await guardarRelacion({
         proveedorId: nuevoProvProd.proveedorId,
         productoId: modalProveedores.id,
         leadTimeEspecifico: Number(nuevoProvProd.leadTimeEspecifico),
-        precioCompra: Number(nuevoProvProd.precioCompra),
+        precioCompraReferencial: Number(nuevoProvProd.precioCompraReferencial),
       })
       const actualizados = await listarPorProducto(modalProveedores.id)
       setProveedoresProducto(actualizados)
-      setNuevoProvProd({ proveedorId: '', leadTimeEspecifico: '', precioCompra: '' })
+      setNuevoProvProd({ proveedorId: '', leadTimeEspecifico: '', precioCompraReferencial: '' })
     } catch (err) {
       setError(err.message)
     }
@@ -148,13 +117,6 @@ export default function PaginaCatalogo() {
       render: (r) => (
         <div className="flex gap-1">
           <Boton variante="icono" icono={Truck} onClick={() => abrirConfigurarProveedores(r)} title="Configurar Lead Times" className="text-marca-principal hover:bg-marca-claro" />
-          <Boton
-            variante="icono"
-            icono={r.estado === 'activo' ? ToggleRight : ToggleLeft}
-            onClick={() => manejarToggleActivo(r.id)}
-            title={r.estado === 'activo' ? 'Desactivar' : 'Activar'}
-            className={r.estado === 'activo' ? 'text-estado-critico hover:bg-rojo-claro' : 'text-marca-principal hover:bg-marca-claro'}
-          />
         </div>
       ),
     },
@@ -191,16 +153,6 @@ export default function PaginaCatalogo() {
       </div>
       <Tabla columnas={columnas} datos={datosFiltrados} alClickFila={(p) => navegar(`/central/inventario/catalogo/${p.id}`)} />
 
-      <Modal abierto={!!confirmarDesactivar} alCerrar={() => setConfirmarDesactivar(null)} titulo="Confirmar Desactivación">
-        <div className="space-y-4">
-          <p className="text-cuerpo text-secundario">¿Está seguro de que desea desactivar este producto? El producto no se eliminará, pero quedará inactivo en el catálogo.</p>
-          <div className="flex justify-end gap-3 pt-4 border-t border-estilo">
-            <Boton variante="secundario" onClick={() => setConfirmarDesactivar(null)}>Cancelar</Boton>
-            <Boton variante="peligro" onClick={confirmarDesactivacion}>Desactivar</Boton>
-          </div>
-        </div>
-      </Modal>
-
       <Modal abierto={!!modalProveedores} alCerrar={() => setModalProveedores(null)} titulo={`Configurar Lead Times — ${modalProveedores?.nombreComercial || ''}`}>
         <div className="space-y-4">
           {proveedoresProducto.length === 0 ? (
@@ -211,7 +163,7 @@ export default function PaginaCatalogo() {
                 <div key={r.id} className="flex items-center justify-between py-2">
                   <div>
                     <p className="text-sm font-medium">{r.proveedorNombre || r.proveedorId}</p>
-                    <p className="text-xs text-secundario">Lead time: {r.leadTimeEspecifico} días | S/ {r.precioCompra}</p>
+                    <p className="text-xs text-secundario">Lead time: {r.leadTimeEspecifico} días | S/ {r.precioCompraReferencial}</p>
                   </div>
                   <Boton variante="texto" onClick={() => eliminarProveedorProducto(r.id)} className="text-estado-critico text-sm">Eliminar</Boton>
                 </div>
@@ -237,7 +189,7 @@ export default function PaginaCatalogo() {
               </div>
               <div>
                 <label className="text-xs text-secundario">Precio compra (S/)</label>
-                <input type="number" step="0.01" value={nuevoProvProd.precioCompra} onChange={e => setNuevoProvProd({ ...nuevoProvProd, precioCompra: e.target.value })} className="w-full px-3 py-2 text-sm bg-fondo border border-estilo rounded-md" />
+                <input type="number" step="0.01" value={nuevoProvProd.precioCompraReferencial} onChange={e => setNuevoProvProd({ ...nuevoProvProd, precioCompraReferencial: e.target.value })} className="w-full px-3 py-2 text-sm bg-fondo border border-estilo rounded-md" />
               </div>
             </div>
             <Boton variante="secundario" onClick={agregarProveedorProducto} className="w-full">Agregar</Boton>

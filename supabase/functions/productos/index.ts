@@ -32,12 +32,16 @@ serve(async (req) => {
 
   const { data: perfil, error: perfilError } = await supabase
     .from("usuarios")
-    .select("id, org_id, rol")
+    .select("id, org_id, rol, activo")
     .eq("id", user.id)
     .single();
 
   if (perfilError || !perfil) {
     return json({ error: "Perfil de usuario no encontrado" }, 403);
+  }
+
+  if (!perfil.activo) {
+    return json({ error: "Usuario desactivado. Contacta al administrador." }, 403);
   }
 
   const url = new URL(req.url);
@@ -56,6 +60,7 @@ serve(async (req) => {
 
       case "PATCH":
         if (accion === "toggle" && id) return toggleProducto(supabase, perfil, id);
+        if (accion === "stock-config" && id) return actualizarStockConfig(supabase, perfil, id, await req.json());
         if (id) return actualizarProducto(supabase, perfil, id, await req.json());
         return json({ error: "ID de producto requerido" }, 400);
 
@@ -82,7 +87,7 @@ async function listarProductos(supabase: any, perfil: PerfilUsuario, url: URL) {
         unidades_medida!inner(id, nombre, simbolo)
       ),
       proveedor_producto(
-        id, lead_time_especifico, precio_compra,
+        id, lead_time_especifico, precio_compra_referencial,
         proveedores!inner(id, razon_social)
       )
     `)
@@ -110,7 +115,7 @@ async function obtenerProducto(supabase: any, perfil: PerfilUsuario, id: string)
         unidades_medida(id, nombre, simbolo)
       ),
       proveedor_producto(
-        id, lead_time_especifico, precio_compra,
+        id, lead_time_especifico, precio_compra_referencial,
         proveedores(id, razon_social)
       )
     `)
@@ -225,6 +230,10 @@ async function toggleProducto(supabase: any, perfil: PerfilUsuario, id: string) 
 
   if (errGet || !actual) return json({ error: "Producto no encontrado" }, 404);
 
+  if (actual.estado === "descontinuado") {
+    return json({ error: "No se puede cambiar el estado de un producto descontinuado. Use el formulario de edición." }, 400);
+  }
+
   const nuevoEstado = actual.estado === "activo" ? "inactivo" : "activo";
 
   const { error: errUpd } = await supabase
@@ -236,6 +245,78 @@ async function toggleProducto(supabase: any, perfil: PerfilUsuario, id: string) 
   if (errUpd) return json({ error: errUpd.message }, 400);
 
   return json({ exito: true, estado: nuevoEstado });
+}
+
+async function actualizarStockConfig(supabase: any, perfil: PerfilUsuario, productoId: string, body: any) {
+  if (perfil.rol !== "admin_central") {
+    return json({ error: "Solo el admin central puede modificar la configuración de stock" }, 403);
+  }
+
+  const { ubicacion_tipo, ubicacion_id, stock_minimo, stock_maximo } = body;
+
+  if (!ubicacion_tipo) {
+    return json({ error: "ubicacion_tipo es requerido" }, 400);
+  }
+
+  if (stock_minimo !== undefined && (typeof stock_minimo !== "number" || stock_minimo < 0)) {
+    return json({ error: "stock_minimo debe ser un número mayor o igual a 0" }, 400);
+  }
+
+  if (stock_maximo !== undefined && (typeof stock_maximo !== "number" || stock_maximo < 0)) {
+    return json({ error: "stock_maximo debe ser un número mayor o igual a 0" }, 400);
+  }
+
+  let query = supabase
+    .from("stock_ubicaciones")
+    .select("id")
+    .eq("producto_id", productoId)
+    .eq("ubicacion_tipo", ubicacion_tipo)
+
+  if (ubicacion_id != null) {
+    query = query.eq("ubicacion_id", ubicacion_id)
+  } else {
+    query = query.is("ubicacion_id", null)
+  }
+
+  const { data: existente } = await query.maybeSingle()
+
+  if (existente) {
+    const updates: Record<string, unknown> = {};
+    if (stock_minimo !== undefined) updates.stock_minimo = stock_minimo;
+    if (stock_maximo !== undefined) updates.stock_maximo = stock_maximo;
+    updates.updated_at = new Date().toISOString();
+
+    const { error } = await supabase
+      .from("stock_ubicaciones")
+      .update(updates)
+      .eq("id", existente.id);
+
+    if (error) return json({ error: error.message }, 400);
+    return json({ exito: true, id: existente.id });
+  }
+
+  if (stock_minimo === undefined || stock_maximo === undefined) {
+    return json({ error: "No existe registro de stock para esta ubicación. Debe enviar stock_minimo y stock_maximo." }, 400);
+  }
+
+  const { data: nuevo, error } = await supabase
+    .from("stock_ubicaciones")
+    .insert({
+      producto_id: productoId,
+      ubicacion_tipo,
+      ubicacion_id: ubicacion_id || null,
+      cantidad_disponible: 0,
+      stock_por_recibir: 0,
+      stock_en_transito: 0,
+      stock_minimo,
+      stock_maximo,
+      org_id: perfil.org_id,
+    })
+    .select("id")
+    .single();
+
+  if (error) return json({ error: error.message }, 400);
+  return json({ exito: true, id: nuevo.id });
 }
 
 function json(data: unknown, status = 200) {

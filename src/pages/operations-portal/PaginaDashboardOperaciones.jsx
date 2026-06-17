@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react'
 import { Package, AlertTriangle, Boxes, Truck, CalendarClock } from 'lucide-react'
 import Tarjeta from '@/components/common/Tarjeta'
 import TarjetaMetrica from '@/components/charts/TarjetaMetrica'
@@ -5,17 +6,36 @@ import Insignia from '@/components/common/Insignia'
 import { stock } from '@/mock-data/stock'
 import { productos } from '@/mock-data/productos'
 import { alertas } from '@/mock-data/alertas'
-import { transferencias } from '@/mock-data/transferencias'
 import { boticas } from '@/mock-data/boticas'
+import { obtenerTransferencias } from '@/services/supabase/transferencias'
 import { formatearFechaRelativa } from '@/utilities/formatearFecha'
 import { formatearNumero } from '@/utilities/formatearMoneda'
 import { clasificarAlerta } from '@/utilities/clasificarAlerta'
+import { ESTADOS_TRANSFERENCIA, ETIQUETAS_TRANSFERENCIA, COLORES_TRANSFERENCIA } from '@/constants/transferencias'
+
+const MAPEO_COLORES = {
+  amarillo: 'amarillo',
+  azul: 'azul',
+  verde: 'verde',
+  rojo: 'rojo',
+  naranja: 'naranja',
+}
 
 export default function PaginaDashboardOperaciones() {
+  const [transferencias, setTransferencias] = useState([])
+  const [cargandoTrans, setCargandoTrans] = useState(true)
+
+  useEffect(() => {
+    obtenerTransferencias()
+      .then(setTransferencias)
+      .catch(() => {})
+      .finally(() => setCargandoTrans(false))
+  }, [])
+
   const stockTotal = stock.reduce((acc, s) => acc + s.cantidadDisponible, 0)
   const productosActivos = productos.filter(p => p.estado === 'activo').length
   const alertasCriticas = alertas.filter(a => !a.leida && a.urgencia === 'alta').length
-  const transferenciasPendientes = transferencias.filter(t => t.estado !== 'recibida').length
+  const transferenciasPendientes = cargandoTrans ? '-' : transferencias.filter(t => t.estado !== ESTADOS_TRANSFERENCIA.RECIBIDA).length
   const totalBoticas = boticas.length
 
   const stockPorBotica = boticas.map(b => {
@@ -86,14 +106,16 @@ export default function PaginaDashboardOperaciones() {
               </tr>
             </thead>
             <tbody>
-              {transferencias.slice(0, 5).map(t => (
+              {cargandoTrans ? (
+                <tr><td colSpan={4} className="py-4 text-center text-secundario">Cargando...</td></tr>
+              ) : transferencias.slice(0, 5).map(t => (
                 <tr key={t.id} className="border-b border-estilo last:border-0">
-                  <td className="py-2.5">{boticas.find(b => b.id === t.origenId)?.nombre || t.origenId}</td>
-                  <td className="py-2.5">{boticas.find(b => b.id === t.destinoId)?.nombre || t.destinoId}</td>
+                  <td className="py-2.5">{t.origen?.nombre || (t.origenTipo === 'drogueria' ? 'Droguería Central' : t.origenId)}</td>
+                  <td className="py-2.5">{t.destino?.nombre || t.destinoId}</td>
                   <td className="py-2.5 text-right">{t.items.length}</td>
                   <td className="py-2.5 text-right">
-                    <Insignia color={t.estado === 'recibida' ? 'verde' : t.estado === 'en_transito' ? 'azul' : 'amarillo'}>
-                      {t.estado}
+                    <Insignia color={MAPEO_COLORES[COLORES_TRANSFERENCIA[t.estado]] || 'gris'}>
+                      {ETIQUETAS_TRANSFERENCIA[t.estado] || t.estado}
                     </Insignia>
                   </td>
                 </tr>

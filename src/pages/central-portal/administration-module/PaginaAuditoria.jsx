@@ -1,16 +1,13 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Info, AlertTriangle, XCircle, Search } from 'lucide-react'
 import Tabla from '@/components/common/Tabla'
 import Insignia from '@/components/common/Insignia'
 import Modal from '@/components/common/Modal'
 import Tarjeta from '@/components/common/Tarjeta'
 import Boton from '@/components/common/Boton'
-import {
-  registrosAuditoria as auditoriaMock,
-  OPCIONES_ACCION_AUDITORIA,
-  ETIQUETAS_NIVEL_AUDITORIA,
-  COLORES_NIVEL_AUDITORIA,
-} from '@/mock-data/auditoria'
+
+import Alerta from '@/components/common/Alerta'
+import { listarAuditoria } from '@/services/supabase/auditoria'
 import { formatearFechaHora } from '@/utilities/formatearFecha'
 
 const ICONOS_NIVEL = {
@@ -25,27 +22,72 @@ const OPCIONES_NIVEL = [
   { valor: 'error', etiqueta: 'Error' },
 ]
 
+const ACCIONES_AUDITORIA = [
+  'CREAR_BOTICA',
+  'EDITAR_BOTICA',
+  'ACTIVAR_BOTICA',
+  'DESACTIVAR_BOTICA',
+  'CREAR_USUARIO',
+  'EDITAR_USUARIO',
+  'ACTIVAR_USUARIO',
+  'DESACTIVAR_USUARIO',
+]
+
+const ETIQUETAS_NIVEL_AUDITORIA = {
+  info: 'Info',
+  advertencia: 'Advertencia',
+  error: 'Error',
+}
+
+const COLORES_NIVEL_AUDITORIA = {
+  info: 'azul',
+  advertencia: 'amarillo',
+  error: 'rojo',
+}
+
 export default function PaginaAuditoria() {
-  const [registros] = useState(auditoriaMock)
+  const [registros, setRegistros] = useState([])
+  const [cargando, setCargando] = useState(true)
+  const [error, setError] = useState(null)
   const [filtroNivel, setFiltroNivel] = useState('')
   const [filtroAccion, setFiltroAccion] = useState('')
   const [busqueda, setBusqueda] = useState('')
   const [detalleAbierto, setDetalleAbierto] = useState(null)
+  const [pagina, setPagina] = useState(1)
+  const [totalPaginas, setTotalPaginas] = useState(1)
+  const [total, setTotal] = useState(0)
 
-  const filtrados = registros.filter(r => {
-    const matchNivel = filtroNivel ? r.nivel === filtroNivel : true
-    const matchAccion = filtroAccion ? r.accion === filtroAccion : true
-    const matchBusqueda = busqueda
-      ? r.usuario.toLowerCase().includes(busqueda.toLowerCase()) ||
-        r.accion.toLowerCase().includes(busqueda.toLowerCase()) ||
-        (r.detalle && r.detalle.toLowerCase().includes(busqueda.toLowerCase())) ||
-        (r.entidad && r.entidad.toLowerCase().includes(busqueda.toLowerCase()))
-      : true
-    return matchNivel && matchAccion && matchBusqueda
-  })
+  const cargarRegistros = async (paginaActual = 1) => {
+    setCargando(true)
+    setError(null)
+    try {
+      const filtros = { pagina: paginaActual, limite: 50 }
+      if (filtroNivel) filtros.nivel = filtroNivel
+      if (filtroAccion) filtros.accion = filtroAccion
+      if (busqueda) filtros.busqueda = busqueda
+
+      const resultado = await listarAuditoria(filtros)
+      setRegistros(resultado.datos)
+      setTotal(resultado.total)
+      setTotalPaginas(resultado.totalPaginas)
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setCargando(false)
+    }
+  }
+
+  useEffect(() => {
+    setPagina(1)
+    cargarRegistros(1)
+  }, [filtroNivel, filtroAccion, busqueda])
+
+  useEffect(() => {
+    cargarRegistros(pagina)
+  }, [pagina])
 
   const columnas = [
-    { campo: 'id', encabezado: 'ID', render: (r) => <span className="font-mono text-xs">{r.id}</span> },
+    { campo: 'id', encabezado: 'ID', render: (r) => <span className="font-mono text-xs">{r.id?.slice(0, 8)}</span> },
     {
       campo: 'fecha',
       encabezado: 'Fecha y Hora',
@@ -73,7 +115,7 @@ export default function PaginaAuditoria() {
       render: (r) => r.entidad ? (
         <div className="text-sm">
           <span className="text-principal">{r.entidad}</span>
-          {r.entidadId && <span className="text-secundario ml-1">({r.entidadId})</span>}
+          {r.entidadId && <span className="text-secundario ml-1">({r.entidadId?.slice(0, 8)})</span>}
         </div>
       ) : <span className="text-secundario text-sm">—</span>,
     },
@@ -108,12 +150,16 @@ export default function PaginaAuditoria() {
     },
   ]
 
+  if (cargando) return <div className="flex items-center justify-center py-20"><p className="text-secundario">Cargando auditoría...</p></div>
+
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-h1 text-principal">Logs y Auditoría</h1>
         <p className="text-cuerpo text-secundario mt-1">Historial de actividades, cambios y eventos del sistema</p>
       </div>
+
+      {error && <Alerta tipo="error" titulo={error} className="mb-4" />}
 
       <div className="flex flex-col sm:flex-row gap-4">
         <input
@@ -139,15 +185,40 @@ export default function PaginaAuditoria() {
           className="px-4 py-2 border border-estilo rounded-md text-cuerpo bg-fondo-secundario"
         >
           <option value="">Todas las acciones</option>
-          {OPCIONES_ACCION_AUDITORIA.map(op => (
-            <option key={op.valor} value={op.valor}>{op.etiqueta}</option>
+          {ACCIONES_AUDITORIA.map(a => (
+            <option key={a} value={a}>{a}</option>
           ))}
         </select>
       </div>
 
       <Tarjeta>
-        <Tabla columnas={columnas} datos={filtrados} busqueda={false} />
+        <Tabla columnas={columnas} datos={registros} busqueda={false} />
       </Tarjeta>
+
+      {totalPaginas > 1 && (
+        <div className="flex items-center justify-between">
+          <p className="text-sm text-secundario">{total} registros en total</p>
+          <div className="flex gap-2">
+            <Boton
+              variante="secundario"
+              deshabilitado={pagina <= 1}
+              onClick={() => setPagina(p => p - 1)}
+            >
+              Anterior
+            </Boton>
+            <span className="flex items-center text-sm text-secundario px-2">
+              {pagina} / {totalPaginas}
+            </span>
+            <Boton
+              variante="secundario"
+              deshabilitado={pagina >= totalPaginas}
+              onClick={() => setPagina(p => p + 1)}
+            >
+              Siguiente
+            </Boton>
+          </div>
+        </div>
+      )}
 
       <Modal abierto={!!detalleAbierto} alCerrar={() => setDetalleAbierto(null)} titulo="Detalle del Registro" tamano="md">
         {detalleAbierto && (

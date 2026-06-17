@@ -1,101 +1,83 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Boxes, AlertTriangle, XCircle, TrendingUp, Edit, Truck } from 'lucide-react'
+import { Boxes, AlertTriangle, XCircle, TrendingUp, ClipboardList, Truck, Edit, List, Package, Settings } from 'lucide-react'
 import TarjetaMetrica from '@/components/charts/TarjetaMetrica'
 import Tabla from '@/components/common/Tabla'
+
 import Insignia from '@/components/common/Insignia'
 import Boton from '@/components/common/Boton'
-import Modal from '@/components/common/Modal'
-import { stock } from '@/mock-data/stock'
-import { productos } from '@/mock-data/productos'
-import { boticas, OPCIONES_UBICACION } from '@/mock-data/boticas'
-import { listarProveedores } from '@/services/supabase/proveedores'
-import { listarPorProducto, guardarRelacion, eliminarRelacion } from '@/services/supabase/proveedorProducto'
+import ModalConfigurarStock from './ModalConfigurarStock'
+import { obtenerStockPorUbicacion } from '@/services/supabase/stock'
 import { clasificarAlerta, COLORES_ESTADO_STOCK, ETIQUETAS_ESTADO_STOCK } from '@/utilities/clasificarAlerta'
 import { formatearFechaRelativa } from '@/utilities/formatearFecha'
 import { formatearNumero } from '@/utilities/formatearMoneda'
+import useAutenticacion from '@/state/useAutenticacion'
+import { ROLES } from '@/constants/roles'
 
 export default function PaginaStock() {
   const navegar = useNavigate()
+  const { usuario } = useAutenticacion()
+  const [datos, setDatos] = useState([])
+  const [cargando, setCargando] = useState(true)
+  const [error, setError] = useState(null)
   const [filtroUbicacion, setFiltroUbicacion] = useState('')
   const [filtroEstado, setFiltroEstado] = useState('')
-  const [modalProducto, setModalProducto] = useState(null)
-  const [proveedoresProducto, setProveedoresProducto] = useState([])
-  const [nuevoProvProd, setNuevoProvProd] = useState({ proveedorId: '', leadTimeEspecifico: '', precioCompra: '' })
-  const [error, setError] = useState(null)
+  const [configurarStock, setConfigurarStock] = useState(null)
+  const esAdminCentral = usuario?.rol === ROLES.ADMIN_CENTRAL
 
-  const datosEnriquecidos = stock.map(s => {
-    const producto = productos.find(p => p.id === s.productoId)
-    const ubicacion = boticas.find(b => b.id === s.ubicacionId)
-    const estadoAlerta = clasificarAlerta(s)
-    return { ...s, stockDisponible: s.cantidadDisponible, ultimaActualizacion: s.updatedAt, nombreProducto: producto?.nombreComercial || s.productoId, productoId: s.productoId, nombreUbicacion: ubicacion?.nombre || s.ubicacionId, estadoAlerta }
-  })
+  useEffect(() => {
+    setCargando(true)
+    obtenerStockPorUbicacion()
+      .then(data => {
+        setDatos(data.map(s => ({ ...s, estadoAlerta: clasificarAlerta(s) })))
+        setCargando(false)
+      })
+      .catch(err => {
+        setError(err.message)
+        setCargando(false)
+      })
+  }, [])
 
-  let filtrados = [...datosEnriquecidos]
+  const ubicacionesUnicas = [...new Map(datos.map(s => [s.ubicacionId, { id: s.ubicacionId, nombre: s.nombreUbicacion }])).values()]
+
+  let filtrados = [...datos]
   if (filtroUbicacion) filtrados = filtrados.filter(s => s.ubicacionId === filtroUbicacion)
   if (filtroEstado) filtrados = filtrados.filter(s => s.estadoAlerta === filtroEstado)
 
   const totalStock = filtrados.reduce((a, s) => a + s.stockDisponible, 0)
+  const totalPorRecibir = filtrados.reduce((a, s) => a + (s.stockPorRecibir || 0), 0)
+  const totalEnTransito = filtrados.reduce((a, s) => a + (s.stockEnTransito || 0), 0)
   const bajoStock = filtrados.filter(s => s.estadoAlerta === 'bajo').length
   const sinStock = filtrados.filter(s => s.estadoAlerta === 'sin_stock').length
   const sobrestock = filtrados.filter(s => s.estadoAlerta === 'sobrestock').length
 
-  const [proveedoresDisponibles, setProveedoresDisponibles] = useState([])
-
-  const abrirLeadTimes = async (productoId, nombreProducto) => {
-    try {
-      const existentes = await listarPorProducto(productoId)
-      setProveedoresProducto(existentes)
-      const provs = await listarProveedores({ activos: true })
-      setProveedoresDisponibles(provs)
-      setModalProducto({ id: productoId, nombre: nombreProducto })
-    } catch (err) {
-      setError(err.message)
-    }
-  }
-
-  const agregarProveedorProducto = async () => {
-    if (!nuevoProvProd.proveedorId || !nuevoProvProd.leadTimeEspecifico || !nuevoProvProd.precioCompra) return
-    try {
-      await guardarRelacion({
-        proveedorId: nuevoProvProd.proveedorId,
-        productoId: modalProducto.id,
-        leadTimeEspecifico: Number(nuevoProvProd.leadTimeEspecifico),
-        precioCompra: Number(nuevoProvProd.precioCompra),
-      })
-      const actualizados = await listarPorProducto(modalProducto.id)
-      setProveedoresProducto(actualizados)
-      setNuevoProvProd({ proveedorId: '', leadTimeEspecifico: '', precioCompra: '' })
-    } catch (err) {
-      setError(err.message)
-    }
-  }
-
-  const eliminarProveedorProducto = async (id) => {
-    try {
-      await eliminarRelacion(id)
-      setProveedoresProducto(proveedoresProducto.filter(r => r.id !== id))
-    } catch (err) {
-      setError(err.message)
-    }
-  }
-
-  const guardarLeadTimes = () => {
-    setModalProducto(null)
+  const manejarActualizarStock = (id, stockMinimo, stockMaximo) => {
+    setDatos(prev => prev.map(d =>
+      d.id === id
+        ? { ...d, stockMinimo, stockMaximo, estadoAlerta: clasificarAlerta({ ...d, stockMinimo, stockMaximo }) }
+        : d
+    ))
   }
 
   const columnas = [
     { campo: 'id', encabezado: 'ID', render: (r) => <span className="font-mono text-xs">{r.id}</span> },
     { campo: 'nombreProducto', encabezado: 'Producto' },
     { campo: 'nombreUbicacion', encabezado: 'Ubicación' },
-    { campo: 'stockDisponible', encabezado: 'Stock Disponible', render: (r) => (
+    { campo: 'stockDisponible', encabezado: 'Stock Disp.', render: (r) => (
       <span className="flex items-center gap-2">
         <span className={r.stockDisponible === 0 ? 'text-estado-critico font-semibold' : r.stockDisponible < r.stockMinimo ? 'text-estado-advertencia font-semibold' : ''}>{r.stockDisponible}</span>
         {r.stockDisponible === 0 && <XCircle className="h-4 w-4 text-estado-critico" />}
         {r.stockDisponible > 0 && r.stockDisponible < r.stockMinimo && <AlertTriangle className="h-4 w-4 text-estado-advertencia" />}
       </span>
     )},
-    { campo: 'stockMinimo', encabezado: 'Stock Mínimo' },
+    { campo: 'stockPorRecibir', encabezado: 'Stock Por Recibir', render: (r) => (
+      <span className={r.stockPorRecibir > 0 ? 'text-marca-principal font-medium' : 'text-secundario'}>{r.stockPorRecibir ?? 0}</span>
+    )},
+    { campo: 'stockEnTransito', encabezado: 'Stock En Tránsito', render: (r) => (
+      <span className={r.stockEnTransito > 0 ? 'text-marca-principal font-medium' : 'text-secundario'}>{r.stockEnTransito ?? 0}</span>
+    )},
+    { campo: 'stockMinimo', encabezado: 'Stock Mín.', render: (r) => <span>{r.stockMinimo}</span> },
+    { campo: 'stockMaximo', encabezado: 'Stock Máx.', render: (r) => <span>{r.stockMaximo ?? '-'}</span> },
     { campo: 'estadoAlerta', encabezado: 'Estado', render: (r) => <Insignia color={COLORES_ESTADO_STOCK[r.estadoAlerta]}>{ETIQUETAS_ESTADO_STOCK[r.estadoAlerta]}</Insignia> },
     { campo: 'ultimaActualizacion', encabezado: 'Últ. Actualización', render: (r) => <span className="text-etiqueta text-secundario">{formatearFechaRelativa(r.ultimaActualizacion)}</span> },
     {
@@ -103,17 +85,26 @@ export default function PaginaStock() {
       render: (r) => (
         <div className="flex gap-1">
           <Boton variante="icono" icono={Edit} onClick={() => navegar(`/central/inventario/catalogo/${r.productoId}`)} title="Ver detalle" className="text-marca-principal hover:bg-marca-claro" />
-          <Boton variante="icono" icono={Truck} onClick={() => abrirLeadTimes(r.productoId, r.nombreProducto)} title="Configurar Lead Times" className="text-marca-principal hover:bg-marca-claro" />
+          <Boton variante="icono" icono={List} onClick={() => navegar('/central/inventario/movimientos')} title="Ver movimientos" className="text-marca-principal hover:bg-marca-claro" />
+          <Boton variante="icono" icono={Package} onClick={() => navegar('/central/inventario/lotes')} title="Ver lotes" className="text-marca-principal hover:bg-marca-claro" />
+          {esAdminCentral && (
+            <Boton variante="icono" icono={Settings} onClick={() => setConfigurarStock(r)} title="Configurar stock" className="text-marca-principal hover:bg-marca-claro" />
+          )}
         </div>
       ),
     },
   ]
 
+  if (cargando) return <div className="flex items-center justify-center py-20"><p className="text-secundario">Cargando stock...</p></div>
+  if (error) return <div className="flex items-center justify-center h-64"><p className="text-estado-critico">Error: {error}</p></div>
+
   return (
     <div className="space-y-6">
       <h1 className="text-h1 text-principal">Stock y Existencias</h1>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <TarjetaMetrica etiqueta="Stock Total" valor={formatearNumero(totalStock)} icono={Boxes} />
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+        <TarjetaMetrica etiqueta="Stock Disponible" valor={formatearNumero(totalStock)} icono={Boxes} />
+        <TarjetaMetrica etiqueta="Por Recibir" valor={formatearNumero(totalPorRecibir)} icono={ClipboardList} />
+        <TarjetaMetrica etiqueta="En Tránsito" valor={formatearNumero(totalEnTransito)} icono={Truck} />
         <TarjetaMetrica etiqueta="Bajo Stock" valor={bajoStock} icono={AlertTriangle} />
         <TarjetaMetrica etiqueta="Sin Stock" valor={sinStock} icono={XCircle} />
         <TarjetaMetrica etiqueta="Sobrestock" valor={sobrestock} icono={TrendingUp} />
@@ -121,7 +112,7 @@ export default function PaginaStock() {
       <div className="flex gap-4">
         <select value={filtroUbicacion} onChange={e => setFiltroUbicacion(e.target.value)} className="px-3 py-2 text-cuerpo bg-fondo border border-estilo rounded-md">
           <option value="">Todas las ubicaciones</option>
-          {OPCIONES_UBICACION.map(o => <option key={o.valor} value={o.valor}>{o.etiqueta}</option>)}
+          {ubicacionesUnicas.map(o => <option key={o.id} value={o.id}>{o.nombre}</option>)}
         </select>
         <select value={filtroEstado} onChange={e => setFiltroEstado(e.target.value)} className="px-3 py-2 text-cuerpo bg-fondo border border-estilo rounded-md">
           <option value="">Todos los estados</option>
@@ -129,55 +120,13 @@ export default function PaginaStock() {
         </select>
       </div>
       <Tabla columnas={columnas} datos={filtrados} />
-
-      <Modal abierto={!!modalProducto} alCerrar={() => setModalProducto(null)} titulo={`Configurar Lead Times — ${modalProducto?.nombre || ''}`}>
-        <div className="space-y-4">
-          {error && <p className="text-estado-critico text-sm">{error}</p>}
-          {proveedoresProducto.length === 0 ? (
-            <p className="text-secundario">Sin proveedores asociados</p>
-          ) : (
-            <div className="divide-y divide-estilo max-h-60 overflow-y-auto">
-              {proveedoresProducto.map(r => (
-                <div key={r.id} className="flex items-center justify-between py-2">
-                  <div>
-                    <p className="text-sm font-medium">{r.proveedorNombre || r.proveedorId}</p>
-                    <p className="text-xs text-secundario">Lead time: {r.leadTimeEspecifico} días | S/ {r.precioCompra}</p>
-                  </div>
-                  <Boton variante="texto" onClick={() => eliminarProveedorProducto(r.id)} className="text-estado-critico text-sm">Eliminar</Boton>
-                </div>
-              ))}
-            </div>
-          )}
-          <div className="border-t border-estilo pt-4 space-y-3">
-            <p className="text-sm font-medium">Agregar proveedor</p>
-            <select
-              value={nuevoProvProd.proveedorId}
-              onChange={e => setNuevoProvProd({ ...nuevoProvProd, proveedorId: e.target.value })}
-              className="w-full px-3 py-2 text-sm bg-fondo border border-estilo rounded-md"
-            >
-              <option value="">Seleccionar proveedor...</option>
-              {proveedoresDisponibles.map(p => (
-                <option key={p.id} value={p.id}>{p.razonSocial}</option>
-              ))}
-            </select>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="text-xs text-secundario">Lead time (días)</label>
-                <input type="number" value={nuevoProvProd.leadTimeEspecifico} onChange={e => setNuevoProvProd({ ...nuevoProvProd, leadTimeEspecifico: e.target.value })} className="w-full px-3 py-2 text-sm bg-fondo border border-estilo rounded-md" />
-              </div>
-              <div>
-                <label className="text-xs text-secundario">Precio compra (S/)</label>
-                <input type="number" step="0.01" value={nuevoProvProd.precioCompra} onChange={e => setNuevoProvProd({ ...nuevoProvProd, precioCompra: e.target.value })} className="w-full px-3 py-2 text-sm bg-fondo border border-estilo rounded-md" />
-              </div>
-            </div>
-            <Boton variante="secundario" onClick={agregarProveedorProducto} className="w-full">Agregar</Boton>
-          </div>
-          <div className="flex justify-end gap-3 pt-4 border-t border-estilo">
-            <Boton variante="secundario" onClick={() => setModalProducto(null)}>Cancelar</Boton>
-            <Boton variante="primario" onClick={guardarLeadTimes}>Guardar configuración</Boton>
-          </div>
-        </div>
-      </Modal>
+      <ModalConfigurarStock
+        key={configurarStock?.id ?? 'cerrado'}
+        abierto={!!configurarStock}
+        alCerrar={() => setConfigurarStock(null)}
+        producto={configurarStock}
+        onActualizarStock={manejarActualizarStock}
+      />
     </div>
   )
 }

@@ -1,24 +1,66 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Save, ArrowLeft, Plus, Trash2 } from 'lucide-react'
 import Boton from '@/components/common/Boton'
 import Tarjeta from '@/components/common/Tarjeta'
 import Alerta from '@/components/common/Alerta'
-import { proveedores } from '@/mock-data/proveedores'
-import { productos } from '@/mock-data/productos'
-import { proveedorProducto } from '@/mock-data/proveedor-producto'
-import { generarIdOC, calcularTotal } from '@/mock-data/ordenesCompra'
+import { listarPorProveedor } from '@/services/supabase/proveedorProducto'
+import { supabase } from '@/services/supabase/cliente'
+import useAutenticacion from '@/state/useAutenticacion'
 
-export default function FormularioOrdenCompra({ onGuardar, redirectPath }) {
+export default function FormularioOrdenCompra({ onGuardar, redirectPath, ordenExistente }) {
   const navegar = useNavigate()
+  const { usuario } = useAutenticacion()
   const [exito, setExito] = useState(false)
-  const [proveedorId, setProveedorId] = useState('')
-  const [fechaEntrega, setFechaEntrega] = useState('')
-  const [observaciones, setObservaciones] = useState('')
-  const [items, setItems] = useState([{ productoId: '', cantidad: 1, precioUnitario: 0 }])
+  const [proveedorId, setProveedorId] = useState(ordenExistente?.proveedorId || '')
+  const [fechaEstimadaEntrega, setFechaEstimadaEntrega] = useState(ordenExistente?.fechaEstimadaEntrega || '')
+  const [observaciones, setObservaciones] = useState(ordenExistente?.observaciones || '')
+  const [items, setItems] = useState(
+    ordenExistente?.items?.map(i => ({
+      productoId: i.productoId,
+      cantidad: i.cantidad,
+      precioUnitario: i.precioUnitario,
+    })) || [{ productoId: '', cantidad: 1, precioUnitario: 0 }]
+  )
+  const [proveedores, setProveedores] = useState([])
+  const [productosProveedor, setProductosProveedor] = useState([])
+  const [cargando, setCargando] = useState(true)
 
-  const proveedoresActivos = proveedores.filter(p => p.activo)
-  const productosActivos = productos.filter(p => p.estado === 'activo')
+  const cargarProveedores = async () => {
+    try {
+      const query = supabase
+        .from('proveedores')
+        .select('id, razon_social, numero_identificacion, activo')
+        .eq('activo', true)
+
+      if (usuario?.orgId) query.eq('org_id', usuario.orgId)
+
+      const { data, error } = await query.order('razon_social')
+
+      if (error) throw error
+      setProveedores(data || [])
+    } catch (e) {
+      console.error('Error cargando proveedores:', e)
+    } finally {
+      setCargando(false)
+    }
+  }
+
+  const cargarProductosProveedor = async (provId) => {
+    try {
+      const data = await listarPorProveedor(provId, true)
+      setProductosProveedor(data)
+    } catch (e) {
+      console.error('Error cargando productos del proveedor:', e)
+      setProductosProveedor([])
+    }
+  }
+
+  useEffect(() => { cargarProveedores() }, [])
+  useEffect(() => {
+    if (proveedorId) cargarProductosProveedor(proveedorId)
+    else setProductosProveedor([])
+  }, [proveedorId])
 
   const agregarItem = () => {
     setItems([...items, { productoId: '', cantidad: 1, precioUnitario: 0 }])
@@ -33,65 +75,70 @@ export default function FormularioOrdenCompra({ onGuardar, redirectPath }) {
     const nuevos = [...items]
     nuevos[index][campo] = campo === 'cantidad' || campo === 'precioUnitario' ? Number(valor) : valor
     if (campo === 'productoId') {
-      const relacion = proveedorProducto.find(
-        r => r.proveedorId === proveedorId && r.productoId === valor
-      )
-      nuevos[index].precioUnitario = relacion?.precioReferencial || 0
+      const relacion = productosProveedor.find(r => r.productoId === valor)
+      nuevos[index].precioUnitario = relacion?.precioCompraReferencial || 0
     }
     setItems(nuevos)
   }
 
-  const esValido = proveedorId && items.some(i => i.productoId && i.cantidad > 0 && i.precioUnitario > 0)
+  const esValido = proveedorId && fechaEstimadaEntrega && items.some(i => i.productoId && i.cantidad > 0)
 
-  const alEnviar = (e) => {
+  const alEnviar = async (e) => {
     e.preventDefault()
-    const nuevaOC = {
-      id: generarIdOC(),
+    const itemsValidos = items.filter(i => i.productoId && i.cantidad > 0)
+    const orden = {
       proveedorId,
-      proveedorNombre: proveedoresActivos.find(p => p.id === proveedorId)?.razonSocial || proveedorId,
-      estado: 'pendiente',
-      creadoPor: 'usr-002',
-      creadoPorNombre: 'Ana Torres',
-      fechaEstimadaEntrega: fechaEntrega || null,
+      fechaEstimadaEntrega,
       observaciones,
-      aprobadoPor: null,
-      fechaAprobacion: null,
-      items: items.filter(i => i.productoId && i.cantidad > 0).map(i => {
-        const prod = productosActivos.find(p => p.id === i.productoId)
-        return {
-          productoId: i.productoId,
-          productoNombre: prod?.nombreComercial || i.productoId,
-          cantidad: i.cantidad,
-          precioUnitario: i.precioUnitario,
-        }
-      }),
-      createdAt: new Date().toISOString(),
+      items: itemsValidos.map(i => ({
+        productoId: i.productoId,
+        cantidad: i.cantidad,
+        precioUnitario: i.precioUnitario,
+      })),
     }
-    onGuardar(nuevaOC)
+    await onGuardar(orden)
     setExito(true)
     setTimeout(() => navegar(redirectPath), 1500)
+  }
+
+  if (cargando) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <p className="text-secundario">Cargando...</p>
+      </div>
+    )
   }
 
   return (
     <div className="space-y-6 max-w-3xl">
       <div className="flex items-center gap-4">
         <Boton variante="texto" icono={ArrowLeft} onClick={() => navegar(-1)}>Volver</Boton>
-        <h1 className="text-h1 text-principal">Nueva Orden de Compra</h1>
+        <h1 className="text-h1 text-principal">
+          {ordenExistente ? 'Editar Orden de Compra' : 'Nueva Orden de Compra'}
+        </h1>
       </div>
-      {exito && <Alerta tipo="exito" titulo="¡Orden creada exitosamente!" mensaje="La orden de compra ha sido registrada y está pendiente de aprobación." />}
+
+      {exito && (
+        <Alerta tipo="exito" titulo="¡Orden creada exitosamente!" mensaje="La orden de compra ha sido registrada y está pendiente de aprobación." />
+      )}
+
       <Tarjeta>
         <form onSubmit={alEnviar} className="space-y-5">
           <div className="flex flex-col gap-1.5">
             <label className="text-sm font-medium text-principal">Proveedor *</label>
             <select
               value={proveedorId}
-              onChange={e => setProveedorId(e.target.value)}
+              onChange={e => {
+                setProveedorId(e.target.value)
+                setItems([{ productoId: '', cantidad: 1, precioUnitario: 0 }])
+              }}
               className="px-3 py-2 text-cuerpo bg-fondo border border-estilo rounded-md"
               required
+              disabled={!!ordenExistente}
             >
               <option value="">Seleccionar proveedor</option>
-              {proveedoresActivos.map(p => (
-                <option key={p.id} value={p.id}>{p.razonSocial} ({p.numeroIdentificacion})</option>
+              {proveedores.map(p => (
+                <option key={p.id} value={p.id}>{p.razon_social} ({p.numero_identificacion})</option>
               ))}
             </select>
           </div>
@@ -101,6 +148,15 @@ export default function FormularioOrdenCompra({ onGuardar, redirectPath }) {
               <p className="text-sm font-medium text-principal">Productos</p>
               <Boton variante="texto" icono={Plus} onClick={agregarItem} tamaňo="sm">Agregar producto</Boton>
             </div>
+
+            {!proveedorId && (
+              <p className="text-sm text-secundario py-4 text-center">Selecciona un proveedor para ver sus productos</p>
+            )}
+
+            {proveedorId && productosProveedor.length === 0 && (
+              <p className="text-sm text-secundario py-4 text-center">Este proveedor no tiene productos asignados</p>
+            )}
+
             <div className="space-y-3">
               {items.map((item, index) => (
                 <div key={index} className="flex gap-3 items-start">
@@ -111,8 +167,10 @@ export default function FormularioOrdenCompra({ onGuardar, redirectPath }) {
                       className="w-full px-3 py-2 text-cuerpo bg-fondo border border-estilo rounded-md"
                     >
                       <option value="">Seleccionar producto</option>
-                      {productosActivos.map(p => (
-                        <option key={p.id} value={p.id}>{p.nombreComercial}</option>
+                      {productosProveedor.map(r => (
+                        <option key={r.productoId} value={r.productoId}>
+                          {r.productoNombre} {r.presentacion ? `(${r.presentacion})` : ''}
+                        </option>
                       ))}
                     </select>
                   </div>
@@ -147,15 +205,19 @@ export default function FormularioOrdenCompra({ onGuardar, redirectPath }) {
           </div>
 
           <div className="text-right text-sm font-medium text-principal">
-            Total estimado: <span className="text-marca-principal text-lg">S/ {calcularTotal(items).toFixed(2)}</span>
+            Total estimado:{' '}
+            <span className="text-marca-principal text-lg">
+              S/ {items.reduce((sum, i) => sum + i.cantidad * i.precioUnitario, 0).toFixed(2)}
+            </span>
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className="text-sm font-medium text-principal">Fecha estimada de entrega</label>
+            <label className="text-sm font-medium text-principal">Fecha estimada de entrega *</label>
             <input
               type="date"
-              value={fechaEntrega}
-              onChange={e => setFechaEntrega(e.target.value)}
+              value={fechaEstimadaEntrega}
+              onChange={e => setFechaEstimadaEntrega(e.target.value)}
+              required
               className="px-3 py-2 text-cuerpo bg-fondo border border-estilo rounded-md w-56"
             />
           </div>
@@ -173,7 +235,9 @@ export default function FormularioOrdenCompra({ onGuardar, redirectPath }) {
 
           <div className="flex justify-end gap-3 pt-4 border-t border-estilo">
             <Boton variante="secundario" onClick={() => navegar(-1)}>Cancelar</Boton>
-            <Boton type="submit" variante="primario" icono={Save} disabled={!esValido}>Crear Orden de Compra</Boton>
+            <Boton type="submit" variante="primario" icono={Save} disabled={!esValido}>
+              {ordenExistente ? 'Guardar Cambios' : 'Crear Orden de Compra'}
+            </Boton>
           </div>
         </form>
       </Tarjeta>

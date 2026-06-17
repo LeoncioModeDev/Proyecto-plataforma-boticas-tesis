@@ -11,6 +11,7 @@ import CampoSeleccionMultiple from '@/components/forms/CampoSeleccionMultiple'
 import Alerta from '@/components/common/Alerta'
 import { productoEsquema } from '@/schemas/productoEsquema'
 import { OPCIONES_CLASIFICACION } from '@/constants/clasificacionProducto'
+import { OPCIONES_ESTADO } from '@/constants/estadoProducto'
 import { crearProducto, actualizarProducto, obtenerProductoPorId } from '@/services/supabase/productos'
 import { obtenerOpcionesFormasFarmaceuticas, obtenerOpcionesPrincipiosActivos, obtenerOpcionesUnidadesMedida } from '@/services/supabase/catalogo'
 
@@ -207,6 +208,7 @@ export default function FormularioProducto({ productoEditar }) {
             <CampoSeleccion nombre="formaFarmaceuticaId" etiqueta="Forma Farmacéutica" opciones={opcionesFormas} requerido register={register} error={errors.formaFarmaceuticaId?.message} placeholder="Seleccione la forma" />
             <CampoTexto nombre="presentacion" etiqueta="Presentación" register={register} error={errors.presentacion?.message} placeholder="Ej: Caja x 30 Tabletas, Frasco x 60 mL" />
             <CampoSeleccion nombre="clasificacion" etiqueta="Clasificación" opciones={OPCIONES_CLASIFICACION} requerido register={register} error={errors.clasificacion?.message} placeholder="Seleccione la clasificación" />
+            <CampoSeleccion nombre="estado" etiqueta="Estado" opciones={OPCIONES_ESTADO} requerido register={register} error={errors.estado?.message} placeholder="Seleccione el estado" />
           </div>
 
           <div className="flex gap-3 pt-4 border-t border-estilo">

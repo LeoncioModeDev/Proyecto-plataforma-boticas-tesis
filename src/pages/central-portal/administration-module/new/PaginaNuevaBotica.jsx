@@ -4,8 +4,7 @@ import FormularioBotica from '../common/FormularioBotica'
 export default function PaginaNuevaBotica() {
   const navegar = useNavigate()
 
-  const alGuardar = (datos) => {
-    console.log('[Mock] Botica creada:', datos)
+  const alGuardar = () => {
     navegar('/central/administracion/boticas')
   }
 

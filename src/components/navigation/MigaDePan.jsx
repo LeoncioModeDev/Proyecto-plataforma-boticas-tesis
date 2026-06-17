@@ -66,6 +66,9 @@ export default function MigaDePan() {
           .join(' ')
 
         let nombre = NOMBRES_RUTA[segmento] || nombrePorDefecto
+        if (segmento === 'historial' && i > 0 && segmentos[i - 1] === 'distribucion') {
+          nombre = 'Historial de Distribución'
+        }
         if (esPrimero && NOMBRES_PORTAL[segmento]) {
           nombre = NOMBRES_PORTAL[segmento]
         }

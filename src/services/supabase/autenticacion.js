@@ -10,6 +10,7 @@ function mapearUsuario(user, perfil) {
       avatar: perfil.avatar,
       telefono: perfil.telefono,
       orgId: perfil.org_id,
+      boticaId: perfil.botica_id,
     }
   }
   return {
@@ -20,6 +21,7 @@ function mapearUsuario(user, perfil) {
     avatar: user.user_metadata?.avatar || null,
     telefono: user.user_metadata?.telefono || null,
     orgId: user.user_metadata?.org_id || null,
+    boticaId: user.user_metadata?.botica_id || null,
   }
 }
 
@@ -38,6 +40,18 @@ export async function iniciarSesion(email, password) {
   if (error) return { usuario: null, error }
 
   const perfil = await obtenerPerfil(data.user)
+  if (perfil && !perfil.activo) {
+    await supabase.auth.signOut()
+    return { usuario: null, error: { message: 'Usuario desactivado. Contacta al administrador.' } }
+  }
+
+  supabase
+    .from('usuarios')
+    .update({ ultimo_acceso: new Date().toISOString() })
+    .eq('id', data.user.id)
+    .then()
+    .catch(() => {})
+
   return { usuario: mapearUsuario(data.user, perfil), error: null }
 }
 
@@ -51,5 +65,9 @@ export async function obtenerSesion() {
   if (error || !data.session) return { sesion: null, error }
 
   const perfil = await obtenerPerfil(data.session.user)
+  if (perfil && !perfil.activo) {
+    await supabase.auth.signOut()
+    return { sesion: null, error: { message: 'Usuario desactivado.' } }
+  }
   return { sesion: { usuario: mapearUsuario(data.session.user, perfil) }, error: null }
 }

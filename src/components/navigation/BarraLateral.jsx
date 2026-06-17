@@ -86,7 +86,7 @@ const itemsAdminCentral = [
           icono: Truck,
         },
         {
-          etiqueta: "Historial",
+          etiqueta: "Historial de Distribución",
           ruta: "/central/distribucion/historial",
           icono: FileBarChart,
         },
@@ -99,7 +99,7 @@ const itemsAdminCentral = [
       ruta: "/central/proveedores",
       subItems: [
         {
-          etiqueta: "Listar Proveedores",
+          etiqueta: "Proveedores",
           ruta: "/central/proveedores",
           icono: Users,
         },
@@ -112,6 +112,11 @@ const itemsAdminCentral = [
           etiqueta: "Historial de Órdenes",
           ruta: "/central/proveedores/ordenes/historial",
           icono: FileBarChart,
+        },
+        {
+          etiqueta: "Recepciones",
+          ruta: "/central/proveedores/recepciones",
+          icono: Package,
         },
       ],
     },
@@ -252,7 +257,7 @@ const itemsNavegacion = {
       ruta: "/operaciones/proveedores",
       subItems: [
         {
-          etiqueta: "Listar Proveedores",
+          etiqueta: "Proveedores",
           ruta: "/operaciones/proveedores",
           icono: Users,
         },
@@ -260,6 +265,11 @@ const itemsNavegacion = {
           etiqueta: "Órdenes de Compra",
           ruta: "/operaciones/ordenes-compra",
           icono: ClipboardList,
+        },
+        {
+          etiqueta: "Recepciones",
+          ruta: "/operaciones/recepciones",
+          icono: Package,
         },
       ],
     },

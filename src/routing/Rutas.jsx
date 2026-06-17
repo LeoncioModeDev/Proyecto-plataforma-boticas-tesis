@@ -20,9 +20,7 @@ import FormularioProducto from '@/pages/central-portal/inventory-module/catalog/
 import DetalleProducto from '@/pages/central-portal/inventory-module/catalog/DetalleProducto'
 import PaginaStock from '@/pages/central-portal/inventory-module/stock/PaginaStock'
 import PaginaLotes from '@/pages/central-portal/inventory-module/lots/PaginaLotes'
-import FormularioLote from '@/pages/central-portal/inventory-module/lots/FormularioLote'
 import PaginaMovimientos from '@/pages/central-portal/inventory-module/movements/PaginaMovimientos'
-import FormularioMovimiento from '@/pages/central-portal/inventory-module/movements/FormularioMovimiento'
 import PaginaAjustes from '@/pages/central-portal/inventory-module/adjustments/PaginaAjustes'
 import FormularioAjuste from '@/pages/central-portal/inventory-module/adjustments/FormularioAjuste'
 import PaginaReportes from '@/pages/central-portal/inventory-module/reports/PaginaReportes'
@@ -39,7 +37,10 @@ import PaginaNuevoProveedor from '@/pages/central-portal/suppliers-module/new/Pa
 import PaginaEditarProveedor from '@/pages/central-portal/suppliers-module/edit/PaginaEditarProveedor'
 import PaginaOrdenesCompraCentral from '@/pages/central-portal/suppliers-module/PaginaOrdenesCompra'
 import PaginaNuevaOrdenCompraCentral from '@/pages/central-portal/suppliers-module/new/PaginaNuevaOrdenCompra'
+import PaginaRecepcionOrden from '@/pages/central-portal/suppliers-module/PaginaRecepcionOrden'
 import PaginaHistorialOrdenesCentral from '@/pages/central-portal/suppliers-module/PaginaHistorialOrdenes'
+import PaginaRecepcionesCentral from '@/pages/central-portal/suppliers-module/PaginaRecepciones'
+import DetalleRecepcionCentral from '@/pages/central-portal/suppliers-module/DetalleRecepcion'
 import PaginaUsuarios from '@/pages/central-portal/administration-module/PaginaUsuarios'
 import PaginaBoticas from '@/pages/central-portal/administration-module/PaginaBoticas'
 import PaginaConfiguracionGeneral from '@/pages/central-portal/administration-module/PaginaConfiguracionGeneral'
@@ -80,14 +81,15 @@ import PaginaAlertasDemandaOperaciones from '@/pages/operations-portal/ml-module
 // Reused from Central Portal for Operations
 import FormularioProductoOperaciones from '@/pages/central-portal/inventory-module/catalog/FormularioProducto'
 import DetalleProductoOperaciones from '@/pages/central-portal/inventory-module/catalog/DetalleProducto'
-import FormularioLoteOperaciones from '@/pages/central-portal/inventory-module/lots/FormularioLote'
-import FormularioMovimientoOperaciones from '@/pages/central-portal/inventory-module/movements/FormularioMovimiento'
 import FormularioAjusteOperaciones from '@/pages/central-portal/inventory-module/adjustments/FormularioAjuste'
 import ReporteKardexOperaciones from '@/pages/central-portal/inventory-module/reports/ReporteKardex'
 import ReporteStockCriticoOperaciones from '@/pages/central-portal/inventory-module/reports/ReporteStockCritico'
 import ReporteMovimientosOperaciones from '@/pages/central-portal/inventory-module/reports/ReporteMovimientos'
 import PaginaNuevoProveedorOperaciones from '@/pages/central-portal/suppliers-module/new/PaginaNuevoProveedor'
 import PaginaEditarProveedorOperaciones from '@/pages/central-portal/suppliers-module/edit/PaginaEditarProveedor'
+import PaginaRecepcionOrdenOperaciones from '@/pages/central-portal/suppliers-module/PaginaRecepcionOrden'
+import PaginaRecepcionesOperaciones from '@/pages/central-portal/suppliers-module/PaginaRecepciones'
+import DetalleRecepcionOperaciones from '@/pages/central-portal/suppliers-module/DetalleRecepcion'
 
 // Panel ML
 import PaginaPredicciones from '@/pages/ml-panel/PaginaPredicciones'
@@ -156,9 +158,8 @@ export default function Rutas() {
         <Route path="/central/inventario/catalogo/:id/editar" element={<FormularioProducto />} />
         <Route path="/central/inventario/stock" element={<PaginaStock />} />
         <Route path="/central/inventario/lotes" element={<PaginaLotes />} />
-        <Route path="/central/inventario/lotes/nuevo" element={<FormularioLote />} />
+
         <Route path="/central/inventario/movimientos" element={<PaginaMovimientos />} />
-        <Route path="/central/inventario/movimientos/nuevo" element={<FormularioMovimiento />} />
         <Route path="/central/inventario/ajustes" element={<PaginaAjustes />} />
         <Route path="/central/inventario/ajustes/nuevo" element={<FormularioAjuste />} />
         <Route path="/central/inventario/reportes" element={<PaginaReportes />} />
@@ -175,7 +176,10 @@ export default function Rutas() {
         <Route path="/central/proveedores/:id/editar" element={<PaginaEditarProveedor />} />
         <Route path="/central/proveedores/ordenes" element={<PaginaOrdenesCompraCentral />} />
         <Route path="/central/proveedores/ordenes/nueva" element={<PaginaNuevaOrdenCompraCentral />} />
+        <Route path="/central/proveedores/ordenes/:id/recibir" element={<PaginaRecepcionOrden />} />
         <Route path="/central/proveedores/ordenes/historial" element={<PaginaHistorialOrdenesCentral />} />
+        <Route path="/central/proveedores/recepciones" element={<PaginaRecepcionesCentral />} />
+        <Route path="/central/proveedores/recepciones/:id" element={<DetalleRecepcionCentral />} />
         <Route path="/central/administracion/usuarios" element={<PaginaUsuarios />} />
         <Route path="/central/administracion/boticas" element={<PaginaBoticas />} />
         <Route path="/central/administracion/boticas/nueva" element={<PaginaNuevaBotica />} />
@@ -213,9 +217,8 @@ export default function Rutas() {
         <Route path="/operaciones/inventario/catalogo/:id/editar" element={<FormularioProductoOperaciones />} />
         <Route path="/operaciones/inventario/stock" element={<PaginaStockOperaciones />} />
         <Route path="/operaciones/inventario/lotes" element={<PaginaLotesOperaciones />} />
-        <Route path="/operaciones/inventario/lotes/nuevo" element={<FormularioLoteOperaciones />} />
+
         <Route path="/operaciones/inventario/movimientos" element={<PaginaMovimientosOperaciones />} />
-        <Route path="/operaciones/inventario/movimientos/nuevo" element={<FormularioMovimientoOperaciones />} />
         <Route path="/operaciones/inventario/ajustes" element={<PaginaAjustesOperaciones />} />
         <Route path="/operaciones/inventario/ajustes/nuevo" element={<FormularioAjusteOperaciones />} />
         <Route path="/operaciones/inventario/reportes" element={<PaginaReportesOperaciones />} />
@@ -231,6 +234,9 @@ export default function Rutas() {
         <Route path="/operaciones/proveedores/:id/editar" element={<PaginaEditarProveedorOperaciones />} />
         <Route path="/operaciones/ordenes-compra" element={<PaginaOrdenesCompraOperaciones />} />
         <Route path="/operaciones/ordenes-compra/nueva" element={<PaginaNuevaOrdenCompraOperaciones />} />
+        <Route path="/operaciones/ordenes-compra/:id/recibir" element={<PaginaRecepcionOrdenOperaciones />} />
+        <Route path="/operaciones/recepciones" element={<PaginaRecepcionesOperaciones />} />
+        <Route path="/operaciones/recepciones/:id" element={<DetalleRecepcionOperaciones />} />
         <Route path="/operaciones/alertas" element={<PaginaAlertasOperaciones />} />
         <Route path="/operaciones/ml/predicciones" element={<PaginaPrediccionesOperaciones />} />
         <Route path="/operaciones/ml/alertas-demanda" element={<PaginaAlertasDemandaOperaciones />} />

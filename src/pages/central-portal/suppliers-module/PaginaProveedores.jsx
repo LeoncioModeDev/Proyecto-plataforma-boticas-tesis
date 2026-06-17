@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { Plus, Edit, ToggleLeft, ToggleRight, Package, Mail, Phone, Building, Star, Coins } from 'lucide-react'
 import Boton from '@/components/common/Boton'
 import Tabla from '@/components/common/Tabla'
+
 import Insignia from '@/components/common/Insignia'
 import Alerta from '@/components/common/Alerta'
 import Modal from '@/components/common/Modal'
@@ -185,9 +186,7 @@ export default function PaginaProveedores() {
 
   const columnas = ColumnasProveedor({ onEditar: manejarEditar, onToggleActivo: manejarToggleActivo })
 
-  if (cargando) {
-    return <div className="flex justify-center py-12"><p className="text-secundario">Cargando proveedores...</p></div>
-  }
+  if (cargando) return <div className="flex items-center justify-center py-20"><p className="text-secundario">Cargando proveedores...</p></div>
 
   return (
     <div className="space-y-6">
@@ -201,7 +200,7 @@ export default function PaginaProveedores() {
         </Boton>
       </div>
 
-      {error && <Alerta tipo="error" titulo={error} className="mb-4" />}
+      {error && !cargando && <Alerta tipo="error" titulo={error} className="mb-4" />}
       {exito && <Alerta tipo="exito" titulo={exito} className="mb-4" />}
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">

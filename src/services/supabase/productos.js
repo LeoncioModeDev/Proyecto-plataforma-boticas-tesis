@@ -41,7 +41,7 @@ function mapearProducto(p) {
     proveedorId: pp.proveedores?.id || pp.proveedor_id,
     proveedorNombre: pp.proveedores?.razon_social,
     leadTimeEspecifico: pp.lead_time_especifico,
-    precioCompra: pp.precio_compra,
+    precioCompraReferencial: pp.precio_compra_referencial,
   }))
 
   return {

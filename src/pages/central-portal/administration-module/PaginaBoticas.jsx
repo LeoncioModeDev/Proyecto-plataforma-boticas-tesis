@@ -1,13 +1,13 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Building2, Plus, Edit, ToggleLeft, ToggleRight, MapPin, Phone, User, Package } from 'lucide-react'
+import { Building2, Plus, Edit, ToggleLeft, ToggleRight, MapPin, Phone, Package } from 'lucide-react'
 import Boton from '@/components/common/Boton'
 import Tabla from '@/components/common/Tabla'
 import Insignia from '@/components/common/Insignia'
 import Alerta from '@/components/common/Alerta'
 import Modal from '@/components/common/Modal'
 import TarjetaMetrica from '@/components/charts/TarjetaMetrica'
-import { boticas as boticasMock, OPCIONES_TIPO_BOTICA } from '@/mock-data/boticas'
+import { listarBoticas, toggleBotica } from '@/services/supabase/boticas'
 
 const ESTADOS_BOTICA = {
   activa: { etiqueta: 'Activa', color: 'verde' },
@@ -26,20 +26,37 @@ const ETIQUETAS_TIPO = {
 
 export default function PaginaBoticas() {
   const navegar = useNavigate()
-  const [boticas, setBoticas] = useState(boticasMock)
+  const [boticas, setBoticas] = useState([])
+  const [cargando, setCargando] = useState(true)
+  const [error, setError] = useState(null)
   const [filtroTipo, setFiltroTipo] = useState('')
   const [filtroEstado, setFiltroEstado] = useState('')
   const [busqueda, setBusqueda] = useState('')
   const [exito, setExito] = useState(null)
   const [confirmarDesactivar, setConfirmarDesactivar] = useState(null)
+  const [desactivando, setDesactivando] = useState(false)
+
+  const cargarBoticas = async () => {
+    setCargando(true)
+    setError(null)
+    try {
+      const datos = await listarBoticas()
+      setBoticas(datos)
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setCargando(false)
+    }
+  }
+
+  useEffect(() => { cargarBoticas() }, [])
 
   const filtrados = boticas.filter(b => {
     const matchTipo = filtroTipo ? b.tipo === filtroTipo : true
     const matchEstado = filtroEstado ? (filtroEstado === 'activa' ? b.activa : !b.activa) : true
     const matchBusqueda = busqueda
       ? b.nombre.toLowerCase().includes(busqueda.toLowerCase()) ||
-        b.distrito.toLowerCase().includes(busqueda.toLowerCase()) ||
-        (b.encargado && b.encargado.toLowerCase().includes(busqueda.toLowerCase()))
+        (b.encargadoVisibleNombre && b.encargadoVisibleNombre.toLowerCase().includes(busqueda.toLowerCase()))
       : true
     return matchTipo && matchEstado && matchBusqueda
   })
@@ -56,22 +73,28 @@ export default function PaginaBoticas() {
     if (botica.activa) {
       setConfirmarDesactivar(id)
     } else {
-      setBoticas(boticas.map(b => b.id === id ? { ...b, activa: true } : b))
-      setExito('Botica activada correctamente')
-      setTimeout(() => setExito(null), 2000)
+      ejecutarToggle(id)
     }
   }
 
-  const confirmarDesactivacion = () => {
-    setBoticas(boticas.map(b => b.id === confirmarDesactivar ? { ...b, activa: false } : b))
-    setExito('Botica desactivada correctamente')
-    setConfirmarDesactivar(null)
-    setTimeout(() => setExito(null), 2000)
+  const ejecutarToggle = async (id) => {
+    setDesactivando(true)
+    try {
+      const resultado = await toggleBotica(id)
+      setBoticas(boticas.map(b => b.id === id ? { ...b, activa: resultado.activa } : b))
+      setExito(resultado.activa ? 'Botica activada correctamente' : 'Botica desactivada correctamente')
+      setTimeout(() => setExito(null), 2000)
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setDesactivando(false)
+      setConfirmarDesactivar(null)
+    }
   }
 
   const columnas = [
-    { campo: 'id', encabezado: 'ID', render: (r) => <span className="font-mono text-xs">{r.id}</span> },
-    { campo: 'codigoInterno', encabezado: 'Código Interno', render: (r) => <span className="font-mono text-xs">{r.codigoInterno}</span> },
+    { campo: 'id', encabezado: 'ID', render: (r) => <span className="font-mono text-cuerpo font-medium text-marca-principal">{r.id?.slice(0, 8)}</span> },
+    { campo: 'codigoInterno', encabezado: 'Código', render: (r) => <span className="font-mono text-xs">{r.codigoInterno}</span> },
     {
       campo: 'nombre',
       encabezado: 'Nombre',
@@ -84,7 +107,7 @@ export default function PaginaBoticas() {
             <p className="font-medium text-principal">{r.nombre}</p>
             <div className="flex items-center gap-1 text-xs text-secundario">
               <MapPin className="h-3 w-3" />
-              <span>{r.distrito}</span>
+              <span>{r.direccion}</span>
             </div>
           </div>
         </div>
@@ -96,13 +119,13 @@ export default function PaginaBoticas() {
       render: (r) => <Insignia color={COLORES_TIPO[r.tipo] || 'gris'}>{ETIQUETAS_TIPO[r.tipo]}</Insignia>,
     },
     {
-      campo: 'encargado',
+      campo: 'encargadoVisibleNombre',
       encabezado: 'Encargado',
-      render: (r) => r.encargado ? (
-        <div className="flex items-center gap-1 text-sm">
-          <User className="h-3 w-3 text-secundario" />
-          <span>{r.encargado}</span>
-        </div>
+      render: (r) => r.encargadoVisibleNombre ? (
+        <span className="text-sm">
+          {r.encargadoVisibleNombre}
+          {r.encargadoEsFallback && <span className="text-secundario text-xs ml-1">(por defecto)</span>}
+        </span>
       ) : <span className="text-secundario text-sm">—</span>,
     },
     {
@@ -132,11 +155,16 @@ export default function PaginaBoticas() {
             onClick={() => manejarToggleActivo(r.id)}
             title={r.activa ? 'Desactivar' : 'Activar'}
             className={r.activa ? 'text-estado-critico hover:bg-rojo-claro' : 'text-marca-principal hover:bg-marca-claro'}
+            deshabilitado={desactivando && confirmarDesactivar === r.id}
           />
         </div>
       ),
     },
   ]
+
+  if (cargando) {
+    return <div className="flex items-center justify-center py-20"><p className="text-secundario">Cargando boticas...</p></div>
+  }
 
   return (
     <div className="space-y-6">
@@ -149,6 +177,7 @@ export default function PaginaBoticas() {
       </div>
 
       {exito && <Alerta tipo="exito" titulo={exito} className="mb-4" />}
+      {error && <Alerta tipo="error" titulo={error} className="mb-4" />}
 
       <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
         <TarjetaMetrica etiqueta="Total Ubicaciones" valor={estadisticas.total} icono={Building2} />
@@ -160,25 +189,24 @@ export default function PaginaBoticas() {
       <div className="flex flex-col sm:flex-row gap-4">
         <input
           type="text"
-          placeholder="Buscar por nombre, distrito o encargado..."
+          placeholder="Buscar por nombre o encargado..."
           value={busqueda}
           onChange={e => setBusqueda(e.target.value)}
-          className="flex-1 px-4 py-2 border border-estilo rounded-md text-cuerpo bg-fondo-secundario focus:outline-none focus:ring-2 focus:ring-marca-principal"
+          className="flex-1 px-4 py-2 border border-estilo rounded-tarjeta text-cuerpo bg-fondo-secundario focus:outline-none focus:ring-2 focus:ring-marca-principal"
         />
         <select
           value={filtroTipo}
           onChange={e => setFiltroTipo(e.target.value)}
-          className="px-4 py-2 border border-estilo rounded-md text-cuerpo bg-fondo-secundario"
+          className="px-4 py-2 border border-estilo rounded-tarjeta text-cuerpo bg-fondo-secundario"
         >
           <option value="">Todos los tipos</option>
-          {OPCIONES_TIPO_BOTICA.map(op => (
-            <option key={op.valor} value={op.valor}>{op.etiqueta}</option>
-          ))}
+          <option value="drogueria">Droguería</option>
+          <option value="botica">Botica</option>
         </select>
         <select
           value={filtroEstado}
           onChange={e => setFiltroEstado(e.target.value)}
-          className="px-4 py-2 border border-estilo rounded-md text-cuerpo bg-fondo-secundario"
+          className="px-4 py-2 border border-estilo rounded-tarjeta text-cuerpo bg-fondo-secundario"
         >
           <option value="">Todos los estados</option>
           <option value="activa">Activas</option>
@@ -193,7 +221,9 @@ export default function PaginaBoticas() {
           <p className="text-cuerpo text-secundario">¿Está seguro de que desea desactivar esta ubicación? Los usuarios asociados no podrán operar sobre ella.</p>
           <div className="flex justify-end gap-3 pt-4 border-t border-estilo">
             <Boton variante="secundario" onClick={() => setConfirmarDesactivar(null)}>Cancelar</Boton>
-            <Boton variante="peligro" onClick={confirmarDesactivacion}>Desactivar</Boton>
+            <Boton variante="peligro" onClick={() => ejecutarToggle(confirmarDesactivar)} deshabilitado={desactivando}>
+              {desactivando ? 'Desactivando…' : 'Desactivar'}
+            </Boton>
           </div>
         </div>
       </Modal>

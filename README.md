@@ -6,9 +6,15 @@ Empresa: **D&R Farma**
 
 ---
 
-## Estado actual — Fase 1 (Frontend con datos mock)
+## Estado actual — Fase 2 (Conexión parcial a Supabase)
 
-El frontend está **completamente construido y funcional**. No hay conexión real a Supabase ni al servicio de Machine Learning. Todos los datos provienen de archivos mock en `src/mock-data/`, incluyendo la autenticación (mock local con `localStorage`, sin llamadas a Supabase Auth).
+El frontend está **completamente construido y funcional**. El **Módulo de Administración** (Boticas, Usuarios, Auditoría) ya está conectado a Supabase con datos reales a través de Edge Functions con autenticación JWT, multi-tenant por `org_id` y auditoría automática.
+
+- **Módulo de Administración**: usa datos reales de Supabase (PostgreSQL + Edge Functions).
+- **Resto del frontend**: aún funciona con datos mock en `src/mock-data/`. Pendiente de migrar a Supabase en próximas iteraciones.
+- **Servicio ML**: no conectado (Fase 3+).
+
+> El login sigue siendo mock por ahora. Los usuarios reales se autentican vía Supabase Auth con JWT, pero la UI de login mock permanece activa para desarrollo local.
 
 ---
 
@@ -57,12 +63,12 @@ El frontend está **completamente construido y funcional**. No hay conexión rea
   - Formulario con tipo de identificación, país de origen, lead time
   - Activar/desactivar proveedor con confirmación
   - **Órdenes de Compra** — registro, aprobación/rechazo (solo Admin), historial con filtros por proveedor/estado/fecha/producto
-- **Módulo de Administración** (solo Admin Central):
-  - **Usuarios** — CRUD completo: tabla con búsqueda y filtros, modal crear/editar, toggle activo/inactivo
-  - **Boticas** — CRUD completo: gestión de ubicaciones tipo droguería/botica, modal crear/editar, toggle activa/inactiva
-  - **Configuración General** — nombre del sistema, zona horaria, idioma, formato fecha, alertas, seguridad
-  - **Auditoría** — tabla de logs con búsqueda, filtros por nivel/acción y modal de detalle
-  - **Configuración Avanzada** — API endpoints, ML service, base de datos, cache, rate limiting, feature flags
+- **Módulo de Administración** (solo Admin Central) — **conectado a Supabase con datos reales**:
+  - **Usuarios** — CRUD completo con datos reales vía Edge Function `usuarios`. Tabla con búsqueda y filtros, modal crear/editar con contraseña manual, toggle activo/inactivo. Multi-tenant por `org_id`.
+  - **Boticas** — CRUD completo con datos reales vía Edge Function `boticas`. Ubigeo por autocomplete, selector de encargado (usuarios admin_central/operador_drogueria), `codigo_interno` auto-generado y read-only. Multi-tenant por `org_id`.
+  - **Configuración General** — nombre del sistema, zona horaria, idioma, formato fecha, alertas, seguridad (aún mock)
+  - **Auditoría** — logs de auditoría reales vía Edge Function `auditoria`. Cada creación/edición/activación de botica o usuario se registra automáticamente con `org_id`, actor, acción y detalle. Filtros por nivel/acción/búsqueda de texto, paginación.
+  - **Configuración Avanzada** — API endpoints, ML service, base de datos, cache, rate limiting, feature flags (aún mock)
 
 ### Portal Operaciones (solo Operador Logístico Central; Admin Central también accede)
 
@@ -149,9 +155,14 @@ npm run lint     # Linter ESLint
 | Fechas | date-fns v3 |
 | Iconos | Lucide React |
 
-### Backend (no conectado — Fase 2+)
+### Backend (conexión parcial — Fase 2+)
 
 - **Supabase** — PostgreSQL, Auth JWT, Row-Level Security, Edge Functions, Realtime
+- **Módulo de Administración conectado**:
+  - Edge Function `boticas` — CRUD de boticas con `codigo_interno` auto-generado, ubigeo autocomplete, selector de encargado
+  - Edge Function `usuarios` — CRUD de usuarios con `auth.admin.createUser()`, password manual, toggle activo/inactivo
+  - Edge Function `auditoria` — logs de auditoría con filtros, paginación y búsqueda de texto
+  - Migración `00000000000006_admin_module.sql` — nuevas columnas en boticas, `org_id` en tablas de inventario, tabla `auditoria`, RLS actualizado
 
 ### Servicio ML (no conectado — Fase 3+)
 
@@ -247,12 +258,18 @@ botica-demand-ml/
 │   │   ├── central-portal/
 │   │   │   ├── PaginaDashboardCentral.jsx
 │   │   │   │
-│   │   │   ├── administration-module/    # Nuevo — solo Admin Central
+│   │   │   ├── administration-module/    # Conectado a Supabase — solo Admin Central
 │   │   │   │   ├── PaginaUsuarios.jsx
 │   │   │   │   ├── PaginaBoticas.jsx
 │   │   │   │   ├── PaginaConfiguracionGeneral.jsx
 │   │   │   │   ├── PaginaAuditoria.jsx
-│   │   │   │   └── PaginaConfiguracionAvanzada.jsx
+│   │   │   │   ├── PaginaConfiguracionAvanzada.jsx
+│   │   │   │   ├── common/
+│   │   │   │   │   └── FormularioBotica.jsx
+│   │   │   │   ├── new/
+│   │   │   │   │   └── PaginaNuevaBotica.jsx
+│   │   │   │   └── edit/
+│   │   │   │       └── PaginaEditarBotica.jsx
 │   │   │   │
 │   │   │   ├── distribution-module/
 │   │   │   │   ├── FormularioTransferencia.jsx
@@ -328,13 +345,16 @@ botica-demand-ml/
 │   │   │
 │   │   └── supabase/
 │   │       ├── autenticacion.js
+│   │       ├── auditoria.js      # Edge Function auditoria (conectado)
+│   │       ├── boticas.js        # Edge Function boticas (conectado)
 │   │       ├── cliente.js
 │   │       ├── lotes.js
 │   │       ├── movimientos.js
 │   │       ├── predicciones.js
 │   │       ├── productos.js
 │   │       ├── stock.js
-│   │       └── transferencias.js
+│   │       ├── transferencias.js
+│   │       └── usuarios.js       # Edge Function usuarios (conectado)
 │   │
 │   ├── state/
 │   │   ├── useAlertas.js
@@ -361,6 +381,15 @@ botica-demand-ml/
 ├── public/
 │   └── index.html
 │
+├── supabase/
+│   └── functions/
+│       ├── boticas/                # Edge Function — CRUD boticas (conectado)
+│       ├── usuarios/               # Edge Function — CRUD usuarios (conectado)
+│       ├── auditoria/              # Edge Function — logs de auditoría (conectado)
+│       ├── ordenes-compra/         # Edge Function — en desarrollo
+│       ├── productos/              # Edge Function — en desarrollo
+│       ├── proveedores/            # Edge Function — en desarrollo
+│       └── ...otros
 ├── modelo-ml/                      # Servicio Python (vacío — Fase 3)
 ├── dist/                           # Build de producción
 ├── node_modules/
@@ -569,7 +598,8 @@ Las 8 páginas del Portal Botica usan `filtrarPorBotica()` en lugar de acceder d
 | Fase | Descripción | Estado |
 |---|---|---|
 | **Fase 1** | Frontend completo + Auth mock con `localStorage` + seed PostgreSQL + pg_net + RLS Phase 2 | ✅ Completado |
-| Fase 2 | Supabase: auth real, PostgreSQL, RLS, Realtime, seed INEI | Pendiente |
+| **Fase 2a** | Admin Module (Boticas, Usuarios, Auditoría) en Supabase: Edge Functions, migraciones, RLS multi-tenant, auditoría automática | ✅ Completado |
+| Fase 2b | Resto de módulos (Inventario, Transferencias, Órdenes de Compra, Proveedores) migrar a Supabase + Auth real | Pendiente |
 | Fase 3 | FastAPI + Docker: SARIMA + XGBoost | Pendiente |
 | Fase 4 | Integración frontend ↔ Supabase ↔ ML | Pendiente |
 | Fase 5 | Despliegue: Vercel + Google Cloud Run | Pendiente |

@@ -1,71 +1,114 @@
-import { useState, useMemo } from 'react'
-import { Truck, PackageCheck, Clock, XCircle, ChevronDown, ChevronUp, CheckCircle, AlertTriangle, CalendarDays } from 'lucide-react'
+import { useState, useEffect, useMemo } from 'react'
+import { Truck, PackageCheck, Clock, XCircle, ChevronDown, ChevronUp, CheckCircle, AlertTriangle, CalendarDays, X } from 'lucide-react'
 import Tabla from '@/components/common/Tabla'
 import Insignia from '@/components/common/Insignia'
 import Modal from '@/components/common/Modal'
 import Boton from '@/components/common/Boton'
-import useAutenticacion from '@/state/useAutenticacion'
-import { transferencias as transferenciasMock } from '@/mock-data/transferencias'
-import { lotes as lotesMock } from '@/mock-data/lotes'
-import { productos as productosMock } from '@/mock-data/productos'
-import { boticas } from '@/mock-data/boticas'
+import { ESTADOS_TRANSFERENCIA, ETIQUETAS_TRANSFERENCIA, COLORES_TRANSFERENCIA } from '@/constants/transferencias'
+import { obtenerTransferencias, recibirTransferencia, rechazarTransferencia } from '@/services/supabase/transferencias'
 import { formatearFechaCorta, formatearFechaHora } from '@/utilities/formatearFecha'
-import { filtrarPorBoticaId } from '@/utilities/permisos'
 
-const CONFIG_ESTADOS = {
-  creada: { etiqueta: 'Creada', color: 'amarillo', icono: Clock },
-  en_transito: { etiqueta: 'En Tránsito', color: 'azul', icono: Truck },
-  recibida: { etiqueta: 'Recibida', color: 'verde', icono: CheckCircle },
-  cancelada: { etiqueta: 'Cancelada', color: 'rojo', icono: XCircle },
+const ICONOS_ESTADO = {
+  [ESTADOS_TRANSFERENCIA.CREADA]: Clock,
+  [ESTADOS_TRANSFERENCIA.EN_TRANSITO]: Truck,
+  [ESTADOS_TRANSFERENCIA.RECIBIDA]: CheckCircle,
+  [ESTADOS_TRANSFERENCIA.CANCELADA]: XCircle,
+  [ESTADOS_TRANSFERENCIA.RECHAZADA]: AlertTriangle,
+}
+
+const MAPEO_COLORES = {
+  amarillo: 'amarillo',
+  azul: 'azul',
+  verde: 'verde',
+  rojo: 'rojo',
+  naranja: 'naranja',
 }
 
 export default function PaginaTransferenciasBotica() {
-  const { usuario } = useAutenticacion()
-  const [transferencias, setTransferencias] = useState(transferenciasMock)
+  const [transferencias, setTransferencias] = useState([])
+  const [cargando, setCargando] = useState(true)
+  const [error, setError] = useState(null)
   const [modalConfirmar, setModalConfirmar] = useState(null)
+  const [modalRechazar, setModalRechazar] = useState(null)
+  const [motivoRechazo, setMotivoRechazo] = useState('')
+  const [accionando, setAccionando] = useState(false)
   const [confirmada, setConfirmada] = useState(false)
+  const [rechazada, setRechazada] = useState(false)
   const [expandidas, setExpandidas] = useState({})
 
+  useEffect(() => {
+    cargarTransferencias()
+  }, [])
+
+  async function cargarTransferencias() {
+    try {
+      setCargando(true)
+      const data = await obtenerTransferencias()
+      setTransferencias(data)
+    } catch (e) {
+      setError(e.message)
+    } finally {
+      setCargando(false)
+    }
+  }
+
   const datos = useMemo(() => {
-    return filtrarPorBoticaId(usuario, transferencias, 'destinoId')
+    return transferencias
       .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
       .map(t => ({
         ...t,
-        lotesInfo: t.items.map(item => {
-          const lote = lotesMock.find(l => l.id === item.loteId)
-          return {
-            ...item,
-            productoNombre: productosMock.find(p => p.id === item.productoId)?.nombreComercial || item.productoId,
-            numeroLote: lote?.numeroLote || item.loteId,
-            fechaVencimiento: lote?.fechaVencimiento || null,
-          }
-        }).sort((a, b) => {
+        lotesInfo: t.items.map(item => ({
+          ...item,
+          productoNombre: item.producto?.nombreComercial || item.productoId,
+          numeroLote: item.lote?.numeroLote || item.loteId,
+          fechaVencimiento: item.lote?.fechaVencimiento || null,
+        })).sort((a, b) => {
           if (!a.fechaVencimiento) return 1
           if (!b.fechaVencimiento) return -1
           return new Date(a.fechaVencimiento) - new Date(b.fechaVencimiento)
         }),
       }))
-  }, [usuario, transferencias])
+  }, [transferencias])
 
   const toggleExpandir = (id) => {
     setExpandidas(prev => ({ ...prev, [id]: !prev[id] }))
   }
 
-  const confirmarRecepcion = (transferencia) => {
-    setTransferencias(prev => prev.map(t =>
-      t.id === transferencia.id
-        ? { ...t, estado: 'recibida', fechaRecepcion: new Date().toISOString() }
-        : t
-    ))
-    setConfirmada(true)
-    setTimeout(() => {
-      setModalConfirmar(null)
-      setConfirmada(false)
-    }, 1500)
+  async function handleRecibir(transferencia) {
+    setAccionando(true)
+    try {
+      await recibirTransferencia(transferencia.id)
+      setConfirmada(true)
+      await cargarTransferencias()
+      setTimeout(() => {
+        setModalConfirmar(null)
+        setConfirmada(false)
+      }, 1500)
+    } catch (e) {
+      setError(e.message)
+    } finally {
+      setAccionando(false)
+    }
   }
 
-  const obtenerNombreProducto = (id) => productosMock.find(p => p.id === id)?.nombreComercial || id
-  const obtenerNombreUbicacion = (id) => boticas.find(b => b.id === id)?.nombre || id
+  async function handleRechazar(transferencia) {
+    if (!motivoRechazo.trim()) return
+    setAccionando(true)
+    try {
+      await rechazarTransferencia(transferencia.id, motivoRechazo)
+      setRechazada(true)
+      await cargarTransferencias()
+      setTimeout(() => {
+        setModalRechazar(null)
+        setRechazada(false)
+        setMotivoRechazo('')
+      }, 1500)
+    } catch (e) {
+      setError(e.message)
+    } finally {
+      setAccionando(false)
+    }
+  }
 
   const columnas = [
     {
@@ -89,7 +132,7 @@ export default function PaginaTransferenciasBotica() {
       campo: 'tipoTransferencia',
       encabezado: 'Tipo',
       render: (r) => (
-        <Insignia color={r.tipoTransferencia === 'redistribucion' ? 'azul' : 'gris'} tamaňo="sm">
+        <Insignia color={r.tipoTransferencia === 'redistribucion' ? 'azul' : 'gris'} tamano="sm">
           {r.tipoTransferencia === 'redistribucion' ? 'Redist.' : 'Central'}
         </Insignia>
       ),
@@ -98,7 +141,7 @@ export default function PaginaTransferenciasBotica() {
       campo: 'origenId',
       encabezado: 'Origen',
       render: (r) => (
-        <span className="text-principal">{r.origenTipo === 'drogueria' ? 'Droguería Central' : obtenerNombreUbicacion(r.origenId)}</span>
+        <span className="text-principal">{r.origen?.nombre || (r.origenTipo === 'drogueria' ? 'Droguería Central' : r.origenId)}</span>
       ),
     },
     {
@@ -112,12 +155,12 @@ export default function PaginaTransferenciasBotica() {
       campo: 'estado',
       encabezado: 'Estado',
       render: (r) => {
-        const cfg = CONFIG_ESTADOS[r.estado] || CONFIG_ESTADOS.creada
-        const Icono = cfg.icono
+        const Icono = ICONOS_ESTADO[r.estado] || Clock
+        const color = MAPEO_COLORES[COLORES_TRANSFERENCIA[r.estado]] || 'gris'
         return (
-          <Insignia color={cfg.color}>
+          <Insignia color={color}>
             <Icono className="h-3 w-3 mr-1" />
-            {cfg.etiqueta}
+            {ETIQUETAS_TRANSFERENCIA[r.estado] || r.estado}
           </Insignia>
         )
       },
@@ -131,15 +174,24 @@ export default function PaginaTransferenciasBotica() {
       campo: 'acciones',
       encabezado: '',
       render: (r) => (
-        r.estado === 'en_transito' ? (
-          <Boton variante="primario" tamano="pequeno" icono={PackageCheck} onClick={() => setModalConfirmar(r)}>
-            Confirmar Recepción
-          </Boton>
-        ) : r.estado === 'recibida' ? (
+        r.estado === ESTADOS_TRANSFERENCIA.EN_TRANSITO ? (
+          <div className="flex gap-1">
+            <Boton variante="primario" tamano="pequeno" icono={PackageCheck} onClick={() => setModalConfirmar(r)}>
+              Recibir
+            </Boton>
+            <Boton variante="secundario" tamano="pequeno" icono={X} onClick={() => { setModalRechazar(r); setMotivoRechazo('') }}>
+              Rechazar
+            </Boton>
+          </div>
+        ) : r.estado === ESTADOS_TRANSFERENCIA.RECIBIDA ? (
           <span className="text-xs text-verde flex items-center gap-1">
             <CheckCircle className="h-3.5 w-3.5" /> Recibida
           </span>
-        ) : r.estado === 'cancelada' ? (
+        ) : r.estado === ESTADOS_TRANSFERENCIA.RECHAZADA ? (
+          <span className="text-xs text-naranja flex items-center gap-1">
+            <AlertTriangle className="h-3.5 w-3.5" /> Rechazada
+          </span>
+        ) : r.estado === ESTADOS_TRANSFERENCIA.CANCELADA ? (
           <span className="text-xs text-rojo flex items-center gap-1">
             <XCircle className="h-3.5 w-3.5" /> Cancelada
           </span>
@@ -150,12 +202,18 @@ export default function PaginaTransferenciasBotica() {
     },
   ]
 
+  if (cargando) return <div className="flex items-center justify-center py-20"><p className="text-secundario">Cargando transferencias...</p></div>
+
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-h1 text-principal">Transferencias</h1>
-        <p className="text-secundario mt-1">Transferencias dirigidas a mi botica — solo puedes confirmar recepción</p>
+        <p className="text-secundario mt-1">Transferencias dirigidas a mi botica — puedes confirmar recepción o rechazar</p>
       </div>
+
+      {error && (
+        <div className="p-3 text-sm text-estado-critico bg-rojo-claro rounded-md">{error}</div>
+      )}
 
       <Tabla
         columnas={columnas}
@@ -200,6 +258,11 @@ export default function PaginaTransferenciasBotica() {
                 <div>
                   <span className="block">Fecha de recepción: {r.fechaRecepcion ? formatearFechaHora(r.fechaRecepcion) : 'Pendiente'}</span>
                 </div>
+                {r.motivoRechazo && (
+                  <div className="col-span-2">
+                    <span className="block text-estado-critico">Motivo de rechazo: {r.motivoRechazo}</span>
+                  </div>
+                )}
               </div>
               {r.lotesInfo.some(l => {
                 const d = l.fechaVencimiento ? Math.ceil((new Date(l.fechaVencimiento) - new Date()) / (1000 * 60 * 60 * 24)) : null
@@ -234,7 +297,7 @@ export default function PaginaTransferenciasBotica() {
               <p className="text-sm font-medium text-principal">Productos incluidos:</p>
               {modalConfirmar.items.map((item) => (
                 <div key={item.id} className="flex justify-between text-sm p-2 bg-fondo rounded">
-                  <span className="text-principal">{obtenerNombreProducto(item.productoId)}</span>
+                  <span className="text-principal">{item.producto?.nombreComercial || item.productoId}</span>
                   <span className="font-semibold text-marca-principal">{item.cantidad} uds</span>
                 </div>
               ))}
@@ -242,8 +305,45 @@ export default function PaginaTransferenciasBotica() {
 
             <div className="flex justify-end gap-3 pt-3 border-t border-estilo">
               <Boton variante="secundario" onClick={() => setModalConfirmar(null)}>Cancelar</Boton>
-              <Boton variante="primario" icono={PackageCheck} onClick={() => confirmarRecepcion(modalConfirmar)}>
+              <Boton variante="primario" icono={PackageCheck} onClick={() => handleRecibir(modalConfirmar)} cargando={accionando}>
                 Confirmar Recepción
+              </Boton>
+            </div>
+          </div>
+        )}
+      </Modal>
+
+      <Modal
+        abierto={!!modalRechazar && !rechazada}
+        alCerrar={() => { setModalRechazar(null); setRechazada(false); setMotivoRechazo('') }}
+        titulo="Rechazar Transferencia"
+        tamano="sm"
+      >
+        {modalRechazar && (
+          <div className="space-y-4">
+            <div className="flex items-center gap-3 p-3 bg-rojo-claro rounded-md">
+              <AlertTriangle className="h-5 w-5 text-estado-critico shrink-0" />
+              <p className="text-sm text-principal">
+                Vas a rechazar la transferencia <strong>{modalRechazar.id.toUpperCase()}</strong>.
+                El stock en tránsito se revertirá.
+              </p>
+            </div>
+
+            <div>
+              <label className="text-sm font-medium text-principal block mb-1">Motivo de rechazo *</label>
+              <textarea
+                value={motivoRechazo}
+                onChange={(e) => setMotivoRechazo(e.target.value)}
+                placeholder="Indique el motivo del rechazo..."
+                rows={3}
+                className="w-full px-3 py-2 text-cuerpo bg-fondo border border-estilo rounded-md"
+              />
+            </div>
+
+            <div className="flex justify-end gap-3 pt-3 border-t border-estilo">
+              <Boton variante="secundario" onClick={() => { setModalRechazar(null); setMotivoRechazo('') }}>Volver</Boton>
+              <Boton variante="peligro" icono={X} onClick={() => handleRechazar(modalRechazar)} disabled={!motivoRechazo.trim()} cargando={accionando}>
+                Rechazar Transferencia
               </Boton>
             </div>
           </div>
@@ -260,6 +360,19 @@ export default function PaginaTransferenciasBotica() {
           <CheckCircle className="h-12 w-12 text-marca-principal mb-3" />
           <p className="text-principal font-medium">Transferencia recibida exitosamente</p>
           <p className="text-secundario text-sm mt-1">El stock de tu botica ha sido actualizado.</p>
+        </div>
+      </Modal>
+
+      <Modal
+        abierto={rechazada}
+        alCerrar={() => { setModalRechazar(null); setRechazada(false); setMotivoRechazo('') }}
+        titulo="Transferencia Rechazada"
+        tamano="sm"
+      >
+        <div className="flex flex-col items-center py-4 text-center">
+          <AlertTriangle className="h-12 w-12 text-naranja mb-3" />
+          <p className="text-principal font-medium">Transferencia rechazada</p>
+          <p className="text-secundario text-sm mt-1">El stock en tránsito ha sido revertido.</p>
         </div>
       </Modal>
     </div>

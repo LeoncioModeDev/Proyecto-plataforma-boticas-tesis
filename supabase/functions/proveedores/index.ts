@@ -32,12 +32,16 @@ serve(async (req) => {
 
   const { data: perfil, error: perfilError } = await supabase
     .from("usuarios")
-    .select("id, org_id, rol")
+    .select("id, org_id, rol, activo")
     .eq("id", user.id)
     .single();
 
   if (perfilError || !perfil) {
     return json({ error: "Perfil de usuario no encontrado" }, 403);
+  }
+
+  if (!perfil.activo) {
+    return json({ error: "Usuario desactivado. Contacta al administrador." }, 403);
   }
 
   const url = new URL(req.url);

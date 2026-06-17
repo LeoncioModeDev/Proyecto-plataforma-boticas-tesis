@@ -1,14 +1,17 @@
 /**
  * Clasifica el estado de alerta de un registro de stock según sus niveles.
+ * Se basa únicamente en cantidad_disponible, stock_minimo y stock_maximo.
+ * stock_por_recibir y stock_en_transito no alteran el estado visual.
  * Retorna: "normal", "bajo", "sin_stock", "sobrestock"
  */
 export function clasificarAlerta(registro) {
   const disponible = registro.cantidadDisponible ?? registro.stockDisponible ?? 0
   const minimo = registro.stockMinimo ?? 0
+  const maximo = registro.stockMaximo ?? null
 
   if (disponible === 0) return 'sin_stock'
   if (disponible < minimo) return 'bajo'
-  if (minimo > 0 && disponible > minimo * 3) return 'sobrestock'
+  if (maximo !== null && disponible > maximo) return 'sobrestock'
   return 'normal'
 }
 

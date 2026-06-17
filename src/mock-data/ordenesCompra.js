@@ -44,6 +44,7 @@ export const ordenesCompra = [
     creadoPor: 'usr-002',
     creadoPorNombre: 'Ana Torres',
     fechaEstimadaEntrega: '2026-05-30',
+    fechaRealEntrega: '2026-05-28',
     observaciones: 'Pedido trimestral',
     aprobadoPor: 'usr-001',
     fechaAprobacion: '2026-05-13T11:00:00',
@@ -91,16 +92,27 @@ export const ordenesCompra = [
     id: 'OC-006',
     proveedorId: 'prov-007',
     proveedorNombre: 'Grupo Farmalim',
-    estado: 'recibida',
+    estado: 'recibida_parcial',
     creadoPor: 'usr-005',
     creadoPorNombre: 'José Ramírez',
     fechaEstimadaEntrega: '2026-05-05',
-    observaciones: '',
+    fechaRealEntrega: '2026-05-04',
+    observaciones: 'Recepción parcial del producto A',
     aprobadoPor: 'usr-001',
     fechaAprobacion: '2026-04-28T10:00:00',
     items: [
       { productoId: 'prod-001', productoNombre: 'Paracetamol 500mg', cantidad: 1000, precioUnitario: 4.80 },
       { productoId: 'prod-003', productoNombre: 'Ibuprofeno 400mg', cantidad: 600, precioUnitario: 6.50 },
+    ],
+    recepciones: [
+      {
+        id: 'rec-001',
+        fechaRecepcion: '2026-05-04T14:00:00',
+        observacion: 'Llegaron solo 800 de Paracetamol',
+        items: [
+          { productoId: 'prod-001', productoNombre: 'Paracetamol 500mg', cantidadRecibida: 800, numeroLote: 'LOTE-PCM-001', fechaVencimiento: '2027-05-04' },
+        ],
+      },
     ],
     createdAt: '2026-04-25T09:00:00',
   },
@@ -111,10 +123,13 @@ export function generarIdOC() {
 }
 
 export const ESTADOS_OC = {
-  pendiente: { etiqueta: 'Pendiente', color: 'amarillo' },
-  aprobada: { etiqueta: 'Aprobada', color: 'azul' },
-  rechazada: { etiqueta: 'Rechazada', color: 'rojo' },
-  recibida: { etiqueta: 'Recibida', color: 'verde' },
+  pendiente:              { etiqueta: 'Pendiente', color: 'amarillo' },
+  aprobada:               { etiqueta: 'Aprobada', color: 'azul' },
+  rechazada:              { etiqueta: 'Rechazada', color: 'rojo' },
+  cancelada:              { etiqueta: 'Cancelada', color: 'gris' },
+  recibida:               { etiqueta: 'Recibida', color: 'verde' },
+  recibida_parcial:       { etiqueta: 'Recibida Parcial', color: 'naranja' },
+  recibida_con_observacion: { etiqueta: 'Recibida (Obs.)', color: 'celeste' },
 }
 
 export function calcularTotal(items) {

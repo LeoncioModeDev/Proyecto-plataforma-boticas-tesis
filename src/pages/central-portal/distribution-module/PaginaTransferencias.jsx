@@ -1,75 +1,64 @@
-import { useState, useMemo } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Plus, Truck, CheckCircle, Clock, ArrowRight, X, XCircle, CalendarDays } from 'lucide-react'
+import { Plus, Truck, CheckCircle, Clock, ArrowRight, X, XCircle, AlertTriangle, CalendarDays, AlertCircle } from 'lucide-react'
 import Boton from '@/components/common/Boton'
 import Tabla from '@/components/common/Tabla'
 import Insignia from '@/components/common/Insignia'
 import Modal from '@/components/common/Modal'
 import TarjetaMetrica from '@/components/charts/TarjetaMetrica'
-import { transferencias as transferenciasMock } from '@/mock-data/transferencias'
-import { lotes as lotesMock } from '@/mock-data/lotes'
-import { productos as productosMock } from '@/mock-data/productos'
-import { boticas } from '@/mock-data/boticas'
-import { usuarios } from '@/mock-data/usuarios'
+import { ESTADOS_TRANSFERENCIA, ETIQUETAS_TRANSFERENCIA, COLORES_TRANSFERENCIA } from '@/constants/transferencias'
+import { obtenerTransferencias, enviarTransferencia, cancelarTransferencia } from '@/services/supabase/transferencias'
 import { formatearFechaCorta } from '@/utilities/formatearFecha'
 
-const ESTADOS_TRANSFERENCIA = {
-  creada: { etiqueta: 'Creada', color: 'amarillo', icono: Clock },
-  en_transito: { etiqueta: 'En Tránsito', color: 'azul', icono: Truck },
-  recibida: { etiqueta: 'Recibida', color: 'verde', icono: CheckCircle },
-  cancelada: { etiqueta: 'Cancelada', color: 'rojo', icono: XCircle },
+const ICONOS_ESTADO = {
+  [ESTADOS_TRANSFERENCIA.CREADA]: Clock,
+  [ESTADOS_TRANSFERENCIA.EN_TRANSITO]: Truck,
+  [ESTADOS_TRANSFERENCIA.RECIBIDA]: CheckCircle,
+  [ESTADOS_TRANSFERENCIA.CANCELADA]: XCircle,
+  [ESTADOS_TRANSFERENCIA.RECHAZADA]: AlertTriangle,
+}
+
+const MAPEO_COLORES = {
+  amarillo: 'amarillo',
+  azul: 'azul',
+  verde: 'verde',
+  rojo: 'rojo',
+  naranja: 'naranja',
 }
 
 const OPCIONES_ESTADO = [
   { valor: '', etiqueta: 'Todas' },
-  { valor: 'creada', etiqueta: 'Creada' },
-  { valor: 'en_transito', etiqueta: 'En Tránsito' },
-  { valor: 'recibida', etiqueta: 'Recibida' },
-  { valor: 'cancelada', etiqueta: 'Cancelada' },
+  { valor: ESTADOS_TRANSFERENCIA.CREADA, etiqueta: ETIQUETAS_TRANSFERENCIA[ESTADOS_TRANSFERENCIA.CREADA] },
+  { valor: ESTADOS_TRANSFERENCIA.EN_TRANSITO, etiqueta: ETIQUETAS_TRANSFERENCIA[ESTADOS_TRANSFERENCIA.EN_TRANSITO] },
+  { valor: ESTADOS_TRANSFERENCIA.RECIBIDA, etiqueta: ETIQUETAS_TRANSFERENCIA[ESTADOS_TRANSFERENCIA.RECIBIDA] },
+  { valor: ESTADOS_TRANSFERENCIA.CANCELADA, etiqueta: ETIQUETAS_TRANSFERENCIA[ESTADOS_TRANSFERENCIA.CANCELADA] },
+  { valor: ESTADOS_TRANSFERENCIA.RECHAZADA, etiqueta: ETIQUETAS_TRANSFERENCIA[ESTADOS_TRANSFERENCIA.RECHAZADA] },
 ]
-
-function enriquecerTransferencia(t) {
-  const productosList = t.items.map(item => {
-    const prod = productosMock.find(p => p.id === item.productoId)
-    return { ...item, productoNombre: prod?.nombreComercial || item.productoId }
-  })
-
-  const lotesInfo = t.items.map(item => {
-    const lote = lotesMock.find(l => l.id === item.loteId)
-    return {
-      ...item,
-      productoNombre: productosMock.find(p => p.id === item.productoId)?.nombreComercial || item.productoId,
-      numeroLote: lote?.numeroLote || item.loteId,
-      fechaVencimiento: lote?.fechaVencimiento || null,
-    }
-  }).sort((a, b) => {
-    if (!a.fechaVencimiento) return 1
-    if (!b.fechaVencimiento) return -1
-    return new Date(a.fechaVencimiento) - new Date(b.fechaVencimiento)
-  })
-
-  const cantidadTotal = t.items.reduce((sum, i) => sum + i.cantidad, 0)
-
-  const destino = boticas.find(b => b.id === t.destinoId)
-  const origen = t.origenTipo === 'drogueria'
-    ? 'Droguería Central'
-    : boticas.find(b => b.id === t.origenId)?.nombre || t.origenId
-
-  return {
-    ...t,
-    productosList,
-    lotesInfo,
-    cantidadTotal,
-    origenNombre: origen,
-    destinoNombre: destino?.nombre || t.destinoId,
-  }
-}
 
 export default function PaginaTransferencias() {
   const navegar = useNavigate()
   const [filtroEstado, setFiltroEstado] = useState('')
-  const [transferencias, setTransferencias] = useState(transferenciasMock)
+  const [transferencias, setTransferencias] = useState([])
+  const [cargando, setCargando] = useState(true)
+  const [error, setError] = useState(null)
   const [fefoModal, setFefoModal] = useState(null)
+  const [accionModal, setAccionModal] = useState(null)
+
+  useEffect(() => {
+    cargarTransferencias()
+  }, [])
+
+  async function cargarTransferencias() {
+    try {
+      setCargando(true)
+      const data = await obtenerTransferencias()
+      setTransferencias(data)
+    } catch (e) {
+      setError(e.message)
+    } finally {
+      setCargando(false)
+    }
+  }
 
   const datos = useMemo(() => transferencias.map(enriquecerTransferencia), [transferencias])
 
@@ -77,18 +66,52 @@ export default function PaginaTransferencias() {
     ? datos.filter(t => t.estado === filtroEstado)
     : datos
 
-  const obtenerNombreUsuario = (id) => usuarios.find(u => u.id === id)?.nombre || id
-
-  const cambiarEstado = (id, nuevoEstado) => {
-    setTransferencias(prev => prev.map(t => {
-      if (t.id !== id) return t
-      return {
-        ...t,
-        estado: nuevoEstado,
-        fechaDespacho: nuevoEstado === 'en_transito' ? new Date().toISOString() : t.fechaDespacho,
-        fechaRecepcion: nuevoEstado === 'recibida' ? new Date().toISOString() : t.fechaRecepcion,
-      }
+  function enriquecerTransferencia(t) {
+    const productosList = t.items.map(item => ({
+      ...item,
+      productoNombre: item.producto?.nombreComercial || item.productoId,
     }))
+
+    const lotesInfo = t.items.map(item => ({
+      ...item,
+      productoNombre: item.producto?.nombreComercial || item.productoId,
+      numeroLote: item.lote?.numeroLote || item.loteId,
+      fechaVencimiento: item.lote?.fechaVencimiento || null,
+    })).sort((a, b) => {
+      if (!a.fechaVencimiento) return 1
+      if (!b.fechaVencimiento) return -1
+      return new Date(a.fechaVencimiento) - new Date(b.fechaVencimiento)
+    })
+
+    const cantidadTotal = t.items.reduce((sum, i) => sum + i.cantidad, 0)
+
+    return {
+      ...t,
+      productosList,
+      lotesInfo,
+      cantidadTotal,
+      origenNombre: t.origen?.nombre || (t.origenTipo === 'drogueria' ? 'Droguería Central' : t.origenId),
+      destinoNombre: t.destino?.nombre || t.destinoId,
+    }
+  }
+
+  async function handleEnviar(id) {
+    try {
+      await enviarTransferencia(id)
+      await cargarTransferencias()
+    } catch (e) {
+      setError(e.message)
+    }
+  }
+
+  async function handleCancelar(id) {
+    try {
+      await cancelarTransferencia(id, accionModal?.motivo || '')
+      setAccionModal(null)
+      await cargarTransferencias()
+    } catch (e) {
+      setError(e.message)
+    }
   }
 
   const columnas = [
@@ -164,30 +187,25 @@ export default function PaginaTransferencias() {
       campo: 'estado',
       encabezado: 'Estado',
       render: (r) => {
-        const estado = ESTADOS_TRANSFERENCIA[r.estado] || ESTADOS_TRANSFERENCIA.creada
-        const Icono = estado.icono
+        const Icono = ICONOS_ESTADO[r.estado] || Clock
+        const color = MAPEO_COLORES[COLORES_TRANSFERENCIA[r.estado]] || 'gris'
         return (
-          <Insignia color={estado.color}>
+          <Insignia color={color}>
             <Icono className="h-3 w-3 mr-1" />
-            {estado.etiqueta}
+            {ETIQUETAS_TRANSFERENCIA[r.estado] || r.estado}
           </Insignia>
         )
       },
-    },
-    {
-      campo: 'creadoPor',
-      encabezado: 'Creador',
-      render: (r) => <span className="text-etiqueta text-secundario">{obtenerNombreUsuario(r.creadoPor)}</span>,
     },
     {
       campo: 'acciones',
       encabezado: '',
       render: (r) => (
         <div className="flex gap-1">
-          {r.estado === 'creada' && (
+          {r.estado === ESTADOS_TRANSFERENCIA.CREADA && (
             <>
-              <Boton variante="icono" icono={ArrowRight} className="text-marca-principal hover:bg-marca-claro" onClick={() => cambiarEstado(r.id, 'en_transito')} title="Enviar" />
-              <Boton variante="icono" icono={X} className="text-estado-critico hover:bg-rojo-claro" onClick={() => cambiarEstado(r.id, 'cancelada')} title="Cancelar" />
+              <Boton variante="icono" icono={ArrowRight} className="text-marca-principal hover:bg-marca-claro" onClick={() => handleEnviar(r.id)} title="Enviar" />
+              <Boton variante="icono" icono={X} className="text-estado-critico hover:bg-rojo-claro" onClick={() => setAccionModal({ tipo: 'cancelar', id: r.id })} title="Cancelar" />
             </>
           )}
         </div>
@@ -197,11 +215,14 @@ export default function PaginaTransferencias() {
 
   const estadisticas = {
     total: datos.length,
-    creadas: datos.filter(t => t.estado === 'creada').length,
-    enTransito: datos.filter(t => t.estado === 'en_transito').length,
-    recibidas: datos.filter(t => t.estado === 'recibida').length,
-    canceladas: datos.filter(t => t.estado === 'cancelada').length,
+    creadas: datos.filter(t => t.estado === ESTADOS_TRANSFERENCIA.CREADA).length,
+    enTransito: datos.filter(t => t.estado === ESTADOS_TRANSFERENCIA.EN_TRANSITO).length,
+    recibidas: datos.filter(t => t.estado === ESTADOS_TRANSFERENCIA.RECIBIDA).length,
+    canceladas: datos.filter(t => t.estado === ESTADOS_TRANSFERENCIA.CANCELADA).length,
+    rechazadas: datos.filter(t => t.estado === ESTADOS_TRANSFERENCIA.RECHAZADA).length,
   }
+
+  if (cargando) return <div className="flex items-center justify-center py-20"><p className="text-secundario">Cargando transferencias...</p></div>
 
   return (
     <div className="space-y-6">
@@ -211,13 +232,24 @@ export default function PaginaTransferencias() {
           Nueva Transferencia
         </Boton>
       </div>
-      <p className="text-secundario">Gestión integral de transferencias desde Droguería Central a boticas y redistribuciones entre boticas — incluye trazabilidad FEFO, recepción y estados operativos</p>
+      <p className="text-secundario">Gestión integral de transferencias desde Droguería Central a boticas — incluye trazabilidad FEFO, recepción y estados operativos</p>
 
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+      {error && (
+        <div className="flex items-start gap-3 p-4 text-sm text-estado-critico bg-rojo-claro border border-red-200 rounded-lg shadow-sm">
+          <AlertCircle className="w-5 h-5 mt-0.5 shrink-0" />
+          <div className="flex-1 whitespace-pre-wrap">{error}</div>
+          <button onClick={() => setError(null)} className="shrink-0 text-estado-critico/60 hover:text-estado-critico transition-colors">
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
+
+      <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
         <TarjetaMetrica etiqueta="Total" valor={estadisticas.total} icono={Truck} />
         <TarjetaMetrica etiqueta="Creadas" valor={estadisticas.creadas} icono={Clock} />
         <TarjetaMetrica etiqueta="En Tránsito" valor={estadisticas.enTransito} icono={ArrowRight} />
         <TarjetaMetrica etiqueta="Recibidas" valor={estadisticas.recibidas} icono={CheckCircle} />
+        <TarjetaMetrica etiqueta="Rechazadas" valor={estadisticas.rechazadas} icono={AlertTriangle} />
         <TarjetaMetrica etiqueta="Canceladas" valor={estadisticas.canceladas} icono={XCircle} />
       </div>
 
@@ -237,8 +269,8 @@ export default function PaginaTransferencias() {
                 <p className="text-sm font-medium text-principal">{fefoModal.origenNombre} <ArrowRight className="h-3 w-3 inline mx-1 text-secundario" /> {fefoModal.destinoNombre}</p>
                 <p className="text-xs text-secundario">{fefoModal.tipoTransferencia === 'redistribucion' ? 'Redistribución' : 'Transferencia Central'} — {fefoModal.cantidadTotal} unidades</p>
               </div>
-              <Insignia color={(ESTADOS_TRANSFERENCIA[fefoModal.estado] || ESTADOS_TRANSFERENCIA.creada).color}>
-                {(ESTADOS_TRANSFERENCIA[fefoModal.estado] || ESTADOS_TRANSFERENCIA.creada).etiqueta}
+              <Insignia color={MAPEO_COLORES[COLORES_TRANSFERENCIA[fefoModal.estado]] || 'gris'}>
+                {ETIQUETAS_TRANSFERENCIA[fefoModal.estado] || fefoModal.estado}
               </Insignia>
             </div>
 
@@ -284,6 +316,16 @@ export default function PaginaTransferencias() {
             <p className="text-xs text-secundario">* Los lotes resaltados están próximos a vencer (dentro de 30 días) y se priorizan según criterio FEFO.</p>
           </div>
         )}
+      </Modal>
+
+      <Modal abierto={accionModal?.tipo === 'cancelar'} alCerrar={() => setAccionModal(null)} titulo="Cancelar Transferencia" tamano="sm">
+        <div className="space-y-4">
+          <p className="text-sm text-principal">¿Estás seguro de cancelar esta transferencia? Esta acción no se puede deshacer.</p>
+          <div className="flex justify-end gap-3">
+            <Boton variante="secundario" onClick={() => setAccionModal(null)}>Volver</Boton>
+            <Boton variante="peligro" onClick={() => handleCancelar(accionModal.id)}>Cancelar Transferencia</Boton>
+          </div>
+        </div>
       </Modal>
     </div>
   )

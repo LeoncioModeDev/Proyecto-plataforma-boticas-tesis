@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react'
 import { Package, AlertTriangle, Boxes, Truck, Brain, PackageCheck, AlertOctagon } from 'lucide-react'
 import Tarjeta from '@/components/common/Tarjeta'
 import TarjetaMetrica from '@/components/charts/TarjetaMetrica'
@@ -8,18 +9,28 @@ import Insignia from '@/components/common/Insignia'
 import { productos } from '@/mock-data/productos'
 import { stock } from '@/mock-data/stock'
 import { alertas } from '@/mock-data/alertas'
-import { transferencias } from '@/mock-data/transferencias'
 import { predicciones } from '@/mock-data/predicciones'
 import { metricasKPI, HISTORIAL_KPI } from '@/mock-data/metricasKPI'
+import { obtenerTransferencias } from '@/services/supabase/transferencias'
 import { formatearFechaRelativa } from '@/utilities/formatearFecha'
 import { formatearNumero } from '@/utilities/formatearMoneda'
 import { COLORES_ALERTA, ETIQUETAS_ALERTA } from '@/constants/tiposAlerta'
 
 export default function PaginaDashboardCentral() {
+  const [transferencias, setTransferencias] = useState([])
+  const [cargandoTrans, setCargandoTrans] = useState(true)
+
+  useEffect(() => {
+    obtenerTransferencias()
+      .then(setTransferencias)
+      .catch(() => {})
+      .finally(() => setCargandoTrans(false))
+  }, [])
+
   const stockTotal = stock.reduce((acc, s) => acc + s.cantidadDisponible, 0)
   const productosActivos = productos.filter(p => p.estado === 'activo').length
   const alertasActivas = alertas.filter(a => !a.leida).length
-  const transferenciasEnTransito = transferencias.filter(t => t.estado === 'en_transito').length
+  const transferenciasEnTransito = cargandoTrans ? '-' : transferencias.filter(t => t.estado === 'en_transito').length
 
   const datosTendencia = [
     { mes: 'Oct', stock: 1100 }, { mes: 'Nov', stock: 1250 },

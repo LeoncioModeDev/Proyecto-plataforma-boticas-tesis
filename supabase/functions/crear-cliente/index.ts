@@ -35,12 +35,16 @@ serve(async (req) => {
 
   const { data: profile, error: profileError } = await supabaseAdmin
     .from("usuarios")
-    .select("rol")
+    .select("rol, activo")
     .eq("id", user.id)
     .single();
 
   if (profileError || !profile) {
     return json({ error: "Perfil de usuario no encontrado" }, 403);
+  }
+
+  if (!profile.activo) {
+    return json({ error: "Usuario desactivado. Contacta al administrador." }, 403);
   }
 
   if (profile.rol !== "super_admin") {
