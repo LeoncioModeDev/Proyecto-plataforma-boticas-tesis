@@ -1,12 +1,41 @@
 ﻿import { create } from 'zustand'
-import { alertas as alertasMock } from '@/mock-data/alertas'
+import { obtenerAlertas } from '@/services/supabase/alertas'
 
-/**
- * Store de alertas globales.
- * Mantiene lista de alertas y contador de no leídas.
- */
+function componerMensaje(alerta) {
+  const nombre = alerta.nombreProducto
+  const botica = alerta.nombreBotica
+  switch (alerta.tipo) {
+    case 'quiebre': return `${nombre} sin stock en ${botica}`
+    case 'vencimiento': return `${nombre} próximo a vencer en ${botica}`
+    case 'sobrestock': return `${nombre} con sobrestock en ${botica}`
+    case 'prediccion': return `Predicción: ${nombre} en ${botica}`
+    default: return `Alerta de ${nombre} en ${botica}`
+  }
+}
+
 const useAlertas = create((set, get) => ({
-  alertas: alertasMock,
+  alertas: [],
+
+  cargarAlertas: async () => {
+    try {
+      const datos = await obtenerAlertas({ soloNoResueltas: true })
+      const mapeadas = datos.map(a => ({
+        id: a.id,
+        tipo: a.tipo,
+        tipoOrigen: a.tipoOrigen,
+        productoId: a.productoId,
+        boticaId: a.boticaId,
+        urgencia: a.urgencia,
+        resuelta: a.resuelta,
+        fechaCreacion: a.generadoEn,
+        mensaje: componerMensaje(a),
+        leida: false,
+      }))
+      set({ alertas: mapeadas })
+    } catch {
+      set({ alertas: [] })
+    }
+  },
 
   obtenerNoLeidas: () => get().alertas.filter(a => !a.leida),
   obtenerContadorNoLeidas: () => get().alertas.filter(a => !a.leida).length,

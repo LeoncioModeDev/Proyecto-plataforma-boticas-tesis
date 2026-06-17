@@ -41,6 +41,8 @@ export default function BarraSuperior() {
   const refMenu = useRef(null)
   const refNotif = useRef(null)
 
+  useEffect(() => { alertasStore.cargarAlertas() }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
   useEffect(() => {
     const cerrar = (e) => {
       if (refMenu.current && !refMenu.current.contains(e.target)) setMenuAbierto(false)

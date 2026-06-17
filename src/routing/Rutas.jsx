@@ -27,6 +27,7 @@ import PaginaReportes from '@/pages/central-portal/inventory-module/reports/Pagi
 import ReporteKardex from '@/pages/central-portal/inventory-module/reports/ReporteKardex'
 import ReporteStockCritico from '@/pages/central-portal/inventory-module/reports/ReporteStockCritico'
 import ReporteMovimientos from '@/pages/central-portal/inventory-module/reports/ReporteMovimientos'
+import ReporteRotacion from '@/pages/central-portal/inventory-module/reports/ReporteRotacion'
 import PaginaTransferencias from '@/pages/central-portal/distribution-module/PaginaTransferencias'
 import PaginaRedistribucionCentral from '@/pages/central-portal/distribution-module/PaginaRedistribucion'
 import FormularioTransferencia from '@/pages/central-portal/distribution-module/FormularioTransferencia'
@@ -85,6 +86,7 @@ import FormularioAjusteOperaciones from '@/pages/central-portal/inventory-module
 import ReporteKardexOperaciones from '@/pages/central-portal/inventory-module/reports/ReporteKardex'
 import ReporteStockCriticoOperaciones from '@/pages/central-portal/inventory-module/reports/ReporteStockCritico'
 import ReporteMovimientosOperaciones from '@/pages/central-portal/inventory-module/reports/ReporteMovimientos'
+import ReporteRotacionOperaciones from '@/pages/central-portal/inventory-module/reports/ReporteRotacion'
 import PaginaNuevoProveedorOperaciones from '@/pages/central-portal/suppliers-module/new/PaginaNuevoProveedor'
 import PaginaEditarProveedorOperaciones from '@/pages/central-portal/suppliers-module/edit/PaginaEditarProveedor'
 import PaginaRecepcionOrdenOperaciones from '@/pages/central-portal/suppliers-module/PaginaRecepcionOrden'
@@ -166,6 +168,7 @@ export default function Rutas() {
         <Route path="/central/inventario/reportes/kardex" element={<ReporteKardex />} />
         <Route path="/central/inventario/reportes/stock-critico" element={<ReporteStockCritico />} />
         <Route path="/central/inventario/reportes/movimientos" element={<ReporteMovimientos />} />
+        <Route path="/central/inventario/reportes/rotacion" element={<ReporteRotacion />} />
         <Route path="/central/distribucion/transferencias" element={<PaginaTransferencias />} />
         <Route path="/central/distribucion/transferencias/nueva" element={<FormularioTransferencia />} />
         <Route path="/central/distribucion/redistribucion" element={<PaginaRedistribucionCentral />} />
@@ -225,6 +228,7 @@ export default function Rutas() {
         <Route path="/operaciones/inventario/reportes/kardex" element={<ReporteKardexOperaciones />} />
         <Route path="/operaciones/inventario/reportes/stock-critico" element={<ReporteStockCriticoOperaciones />} />
         <Route path="/operaciones/inventario/reportes/movimientos" element={<ReporteMovimientosOperaciones />} />
+        <Route path="/operaciones/inventario/reportes/rotacion" element={<ReporteRotacionOperaciones />} />
         <Route path="/operaciones/distribucion/transferencias" element={<PaginaTransferenciasOperaciones />} />
         <Route path="/operaciones/distribucion/transferencias/nueva" element={<FormularioTransferenciaOperaciones />} />
         <Route path="/operaciones/distribucion/redistribucion" element={<PaginaRedistribucionOperaciones />} />

@@ -590,44 +590,35 @@ async function registrarRecepcion(supabase: any, perfil: PerfilUsuario, id: stri
         }
       }
 
-      // Actualizar stock_ubicaciones
-      const { data: stockExistente } = await supabase
-        .from("stock_ubicaciones")
-        .select("id, cantidad_disponible, stock_por_recibir")
-        .eq("producto_id", producto_id)
-        .eq("ubicacion_tipo", "drogueria")
-        .is("ubicacion_id", null)
-        .maybeSingle();
+      // El trigger trg_actualizar_stock ya actualiza stock_ubicaciones
+      // al insertar el movimiento de inventario (línea 574).
+      // Solo insertamos como fallback si aún no existe registro.
+      if (cantidad_recibida > 0) {
+        const { data: stockExistente } = await supabase
+          .from("stock_ubicaciones")
+          .select("id")
+          .eq("producto_id", producto_id)
+          .eq("ubicacion_tipo", "drogueria")
+          .is("ubicacion_id", null)
+          .maybeSingle();
 
-      if (stockExistente) {
-        const { error: errStock } = await supabase
-          .from("stock_ubicaciones")
-          .update({
-            cantidad_disponible: stockExistente.cantidad_disponible + cantidad_recibida,
-            stock_por_recibir: Math.max((stockExistente.stock_por_recibir || 0) - cantidad_recibida, 0),
-            updated_at: new Date().toISOString(),
-          })
-          .eq("id", stockExistente.id);
-        if (errStock) {
-          await supabase.from("recepciones_orden").delete().eq("id", recepcion.id);
-          return json({ error: errStock.message }, 400);
-        }
-      } else if (cantidad_recibida > 0) {
-        const { error: errStock } = await supabase
-          .from("stock_ubicaciones")
-          .insert({
-            producto_id,
-            ubicacion_tipo: "drogueria",
-            ubicacion_id: null,
-            org_id: perfil.org_id,
-            cantidad_disponible: cantidad_recibida,
-            stock_por_recibir: 0,
-            stock_en_transito: 0,
-            stock_minimo: 0,
-          });
-        if (errStock) {
-          await supabase.from("recepciones_orden").delete().eq("id", recepcion.id);
-          return json({ error: errStock.message }, 400);
+        if (!stockExistente) {
+          const { error: errStock } = await supabase
+            .from("stock_ubicaciones")
+            .insert({
+              producto_id,
+              ubicacion_tipo: "drogueria",
+              ubicacion_id: null,
+              org_id: perfil.org_id,
+              cantidad_disponible: cantidad_recibida,
+              stock_por_recibir: 0,
+              stock_en_transito: 0,
+              stock_minimo: 0,
+            });
+          if (errStock) {
+            await supabase.from("recepciones_orden").delete().eq("id", recepcion.id);
+            return json({ error: errStock.message }, 400);
+          }
         }
       }
 
