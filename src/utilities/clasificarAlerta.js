@@ -10,8 +10,8 @@ export function clasificarAlerta(registro) {
   const maximo = registro.stockMaximo ?? null
 
   if (disponible === 0) return 'sin_stock'
-  if (disponible < minimo) return 'bajo'
-  if (maximo !== null && disponible > maximo) return 'sobrestock'
+  if (minimo > 0 && disponible < minimo) return 'bajo'
+  if (maximo > 0 && disponible > maximo) return 'sobrestock'
   return 'normal'
 }
 

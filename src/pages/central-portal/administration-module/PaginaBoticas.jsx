@@ -55,8 +55,7 @@ export default function PaginaBoticas() {
     const matchTipo = filtroTipo ? b.tipo === filtroTipo : true
     const matchEstado = filtroEstado ? (filtroEstado === 'activa' ? b.activa : !b.activa) : true
     const matchBusqueda = busqueda
-      ? b.nombre.toLowerCase().includes(busqueda.toLowerCase()) ||
-        (b.encargadoVisibleNombre && b.encargadoVisibleNombre.toLowerCase().includes(busqueda.toLowerCase()))
+      ? b.nombre.toLowerCase().includes(busqueda.toLowerCase())
       : true
     return matchTipo && matchEstado && matchBusqueda
   })
@@ -119,16 +118,6 @@ export default function PaginaBoticas() {
       render: (r) => <Insignia color={COLORES_TIPO[r.tipo] || 'gris'}>{ETIQUETAS_TIPO[r.tipo]}</Insignia>,
     },
     {
-      campo: 'encargadoVisibleNombre',
-      encabezado: 'Encargado',
-      render: (r) => r.encargadoVisibleNombre ? (
-        <span className="text-sm">
-          {r.encargadoVisibleNombre}
-          {r.encargadoEsFallback && <span className="text-secundario text-xs ml-1">(por defecto)</span>}
-        </span>
-      ) : <span className="text-secundario text-sm">—</span>,
-    },
-    {
       campo: 'telefono',
       encabezado: 'Teléfono',
       render: (r) => r.telefono ? (
@@ -189,7 +178,7 @@ export default function PaginaBoticas() {
       <div className="flex flex-col sm:flex-row gap-4">
         <input
           type="text"
-          placeholder="Buscar por nombre o encargado..."
+          placeholder="Buscar por nombre..."
           value={busqueda}
           onChange={e => setBusqueda(e.target.value)}
           className="flex-1 px-4 py-2 border border-estilo rounded-tarjeta text-cuerpo bg-fondo-secundario focus:outline-none focus:ring-2 focus:ring-marca-principal"

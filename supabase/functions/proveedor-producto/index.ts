@@ -89,6 +89,8 @@ async function listarPorProducto(supabase: any, perfil: PerfilUsuario, url: URL)
   if (productoId) query = query.eq("producto_id", productoId);
   if (proveedorId) query = query.eq("proveedor_id", proveedorId);
 
+  query = query.eq("activo", true);
+
   const { data, error } = await query;
 
   if (error) return json({ error: error.message }, 400);
@@ -131,7 +133,16 @@ async function guardarRelacion(supabase: any, perfil: PerfilUsuario, body: any) 
 
   if (existente) {
     if (!existente.activo) {
-      return json({ error: "La relación proveedor-producto está desactivada. Actívala para modificarla." }, 400);
+      const { error: errUpd } = await supabase
+        .from("proveedor_producto")
+        .update({
+          lead_time_especifico,
+          precio_compra_referencial,
+          activo: true,
+        })
+        .eq("id", existente.id);
+      if (errUpd) return json({ error: errUpd.message }, 400);
+      return json({ exito: true, id: existente.id, actualizado: true });
     }
     const { error: errUpd } = await supabase
       .from("proveedor_producto")

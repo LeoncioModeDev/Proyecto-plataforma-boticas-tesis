@@ -66,6 +66,7 @@ Deno.serve(async (req) => {
         if (accion === "cancelar") return cancelarTransferencia(supabase, perfil, id, body);
         if (accion === "recibir") return recibirTransferencia(supabase, perfil, id);
         if (accion === "rechazar") return rechazarTransferencia(supabase, perfil, id, body);
+        if (accion === "confirmar-devolucion") return confirmarDevolucionOrigen(supabase, perfil, id);
 
         return json({ error: "Acción no válida" }, 400);
 
@@ -93,7 +94,9 @@ async function listarTransferencias(supabase, perfil, url) {
         id,
         producto_id,
         lote_id,
-        cantidad
+        cantidad,
+        producto:producto_id (id, nombre_comercial),
+        lote:lote_id (id, numero_lote, fecha_vencimiento)
       )
     `)
     .order("created_at", { ascending: false });
@@ -151,11 +154,130 @@ async function crearTransferencia(supabase, perfil, body) {
     return json({ error: "No tienes permisos para crear transferencias" }, 403);
   }
 
-  const { destino_id, observaciones, items } = body;
+  const { tipo_transferencia, destino_id, origen_id, observaciones, items } = body;
   if (!destino_id) return json({ error: "La botica destino es obligatoria" }, 400);
   if (!items || !items.length) return json({ error: "Debe incluir al menos un producto" }, 400);
 
-  // --- Obtener droguería central de la organización ---
+  const esRedistribucion = tipo_transferencia === "redistribucion";
+
+  if (esRedistribucion) {
+    // ─── VALIDAR REDISTRIBUCIÓN (botica → botica) ───────────
+    if (!origen_id) return json({ error: "La botica origen es obligatoria para redistribución" }, 400);
+    if (origen_id === destino_id) return json({ error: "El origen y destino no pueden ser la misma botica" }, 400);
+
+    // Validar botica origen
+    const { data: boticaOrigen, error: errOrigen } = await supabase
+      .from("boticas")
+      .select("id, org_id, activa, tipo")
+      .eq("id", origen_id)
+      .single();
+
+    if (errOrigen || !boticaOrigen) return json({ error: "La botica origen no existe" }, 400);
+    if (boticaOrigen.org_id !== perfil.org_id) return json({ error: "La botica origen no pertenece a tu organización" }, 400);
+    if (!boticaOrigen.activa) return json({ error: "La botica origen está inactiva" }, 400);
+    if (boticaOrigen.tipo !== "botica") return json({ error: "El origen no es una botica" }, 400);
+
+    // Validar botica destino
+    const { data: boticaDestino, error: errDestino } = await supabase
+      .from("boticas")
+      .select("id, org_id, activa, tipo")
+      .eq("id", destino_id)
+      .single();
+
+    if (errDestino || !boticaDestino) return json({ error: "La botica destino no existe" }, 400);
+    if (boticaDestino.org_id !== perfil.org_id) return json({ error: "La botica destino no pertenece a tu organización" }, 400);
+    if (!boticaDestino.activa) return json({ error: "La botica destino está inactiva" }, 400);
+    if (boticaDestino.tipo !== "botica") return json({ error: "El destino no es una botica" }, 400);
+
+    // Validar items para redistribución
+    const idsProductos = items.map((item: any) => item.producto_id);
+    if (idsProductos.length > 0) {
+      const { data: productos } = await supabase
+        .from("productos")
+        .select("id, estado")
+        .in("id", idsProductos);
+
+      const inactivos = (productos || [])
+        .filter((p: any) => p.estado !== "activo")
+        .map((p: any) => p.id);
+
+      if (inactivos.length > 0) {
+        return json({
+          error: `No se pueden redistribuir productos inactivos o descontinuados. IDs: ${inactivos.join(", ")}`,
+        }, 400);
+      }
+    }
+
+    for (const item of items) {
+      if (!item.producto_id) return json({ error: "Cada item debe tener un producto" }, 400);
+      if (!item.lote_id) return json({ error: "Cada item debe tener un lote" }, 400);
+      if (!item.cantidad || item.cantidad <= 0) return json({ error: "La cantidad debe ser mayor a 0" }, 400);
+      if (!Number.isInteger(item.cantidad)) return json({ error: "La cantidad debe ser un número entero" }, 400);
+
+      // Validar lote existe, pertenece a la org, está en la botica origen, tiene stock
+      const { data: lote, error: errLote } = await supabase
+        .from("lotes")
+        .select("id, producto_id, ubicacion_id, cantidad, org_id")
+        .eq("id", item.lote_id)
+        .single();
+
+      if (errLote || !lote) return json({ error: `Lote ${item.lote_id} no encontrado` }, 400);
+      if (lote.org_id !== perfil.org_id) return json({ error: `El lote no pertenece a tu organización` }, 400);
+      if (lote.ubicacion_id !== origen_id) return json({ error: `El lote debe estar en la botica origen` }, 400);
+      if (lote.producto_id !== item.producto_id) return json({ error: `El producto no coincide con el lote seleccionado` }, 400);
+      if (lote.cantidad <= 0) return json({ error: `El lote ${item.lote_id} no tiene stock disponible` }, 400);
+      if (item.cantidad > lote.cantidad) {
+        return json({ error: `La cantidad solicitada (${item.cantidad}) supera la disponible (${lote.cantidad}) en el lote` }, 400);
+      }
+    }
+
+    // Insertar cabecera de redistribución
+    const { data: transferencia, error: errIns } = await supabase
+      .from("transferencias")
+      .insert({
+        tipo_transferencia: "redistribucion",
+        origen_tipo: "botica",
+        origen_id,
+        destino_tipo: "botica",
+        destino_id,
+        estado: "creada",
+        creado_por: perfil.id,
+        observaciones: observaciones || null,
+        org_id: perfil.org_id,
+      })
+      .select("id")
+      .single();
+
+    if (errIns) return json({ error: errIns.message }, 400);
+
+    const itemsInsert = items.map((item) => ({
+      transferencia_id: transferencia.id,
+      producto_id: item.producto_id,
+      lote_id: item.lote_id,
+      cantidad: item.cantidad,
+      org_id: perfil.org_id,
+    }));
+
+    const { error: errItems } = await supabase
+      .from("transferencias_items")
+      .insert(itemsInsert);
+
+    if (errItems) return json({ error: errItems.message }, 400);
+
+    await supabase.from("auditoria").insert({
+      org_id: perfil.org_id,
+      usuario_id: perfil.id,
+      accion: "CREAR_REDISTRIBUCION",
+      entidad: "transferencias",
+      entidad_id: transferencia.id,
+      nivel: "info",
+      detalle: `Se creó redistribución de botica ${origen_id} a botica ${destino_id} con ${items.length} producto(s)`,
+    });
+
+    return json({ exito: true, id: transferencia.id });
+  }
+
+  // ─── TRANSFERENCIA CENTRAL (droguería → botica) ─────────
   const { data: drogueria, error: errDrogueria } = await supabase
     .from("boticas")
     .select("id")
@@ -167,27 +289,17 @@ async function crearTransferencia(supabase, perfil, body) {
     return json({ error: "No existe una droguería central en tu organización" }, 400);
   }
 
-  // --- Validar botica destino ---
   const { data: botica, error: errBotica } = await supabase
     .from("boticas")
     .select("id, org_id, activa")
     .eq("id", destino_id)
     .single();
 
-  if (errBotica || !botica) {
-    return json({ error: "La botica destino no existe" }, 400);
-  }
-  if (botica.org_id !== perfil.org_id) {
-    return json({ error: "La botica destino no pertenece a tu organización" }, 400);
-  }
-  if (!botica.activa) {
-    return json({ error: "La botica destino está inactiva" }, 400);
-  }
-  if (botica.id === drogueria.id) {
-    return json({ error: "El origen y destino no pueden ser la misma ubicación" }, 400);
-  }
+  if (errBotica || !botica) return json({ error: "La botica destino no existe" }, 400);
+  if (botica.org_id !== perfil.org_id) return json({ error: "La botica destino no pertenece a tu organización" }, 400);
+  if (!botica.activa) return json({ error: "La botica destino está inactiva" }, 400);
+  if (botica.id === drogueria.id) return json({ error: "El origen y destino no pueden ser la misma ubicación" }, 400);
 
-  // --- Validar items ---
   const idsProductos = items.map((item: any) => item.producto_id);
   if (idsProductos.length > 0) {
     const { data: productos } = await supabase
@@ -209,38 +321,24 @@ async function crearTransferencia(supabase, perfil, body) {
   for (const item of items) {
     if (!item.producto_id) return json({ error: "Cada item debe tener un producto" }, 400);
     if (!item.lote_id) return json({ error: "Cada item debe tener un lote" }, 400);
-    if (!item.cantidad || item.cantidad <= 0) {
-      return json({ error: "La cantidad debe ser mayor a 0" }, 400);
-    }
-    if (!Number.isInteger(item.cantidad)) {
-      return json({ error: "La cantidad debe ser un número entero" }, 400);
-    }
+    if (!item.cantidad || item.cantidad <= 0) return json({ error: "La cantidad debe ser mayor a 0" }, 400);
+    if (!Number.isInteger(item.cantidad)) return json({ error: "La cantidad debe ser un número entero" }, 400);
 
-    // Validar lote existe y está en la droguería
     const { data: lote, error: errLote } = await supabase
       .from("lotes")
       .select("id, producto_id, ubicacion_id, cantidad, org_id")
       .eq("id", item.lote_id)
       .single();
 
-    if (errLote || !lote) {
-      return json({ error: `Lote ${item.lote_id} no encontrado` }, 400);
-    }
-    if (lote.org_id !== perfil.org_id) {
-      return json({ error: `El lote no pertenece a tu organización` }, 400);
-    }
-    if (lote.ubicacion_id !== null) {
-      return json({ error: `El lote debe estar en la droguería central` }, 400);
-    }
-    if (lote.producto_id !== item.producto_id) {
-      return json({ error: `El producto no coincide con el lote seleccionado` }, 400);
-    }
+    if (errLote || !lote) return json({ error: `Lote ${item.lote_id} no encontrado` }, 400);
+    if (lote.org_id !== perfil.org_id) return json({ error: `El lote no pertenece a tu organización` }, 400);
+    if (lote.ubicacion_id !== null) return json({ error: `El lote debe estar en la droguería central` }, 400);
+    if (lote.producto_id !== item.producto_id) return json({ error: `El producto no coincide con el lote seleccionado` }, 400);
     if (item.cantidad > lote.cantidad) {
       return json({ error: `La cantidad solicitada (${item.cantidad}) supera la disponible (${lote.cantidad}) en el lote` }, 400);
     }
   }
 
-  // --- Insertar cabecera ---
   const { data: transferencia, error: errIns } = await supabase
     .from("transferencias")
     .insert({
@@ -259,7 +357,6 @@ async function crearTransferencia(supabase, perfil, body) {
 
   if (errIns) return json({ error: errIns.message }, 400);
 
-  // --- Insertar items ---
   const itemsInsert = items.map((item) => ({
     transferencia_id: transferencia.id,
     producto_id: item.producto_id,
@@ -274,7 +371,6 @@ async function crearTransferencia(supabase, perfil, body) {
 
   if (errItems) return json({ error: errItems.message }, 400);
 
-  // --- Auditoría ---
   await supabase.from("auditoria").insert({
     org_id: perfil.org_id,
     usuario_id: perfil.id,
@@ -297,7 +393,7 @@ async function enviarTransferencia(supabase, perfil, id) {
   // Validar que la transferencia existe y pertenece a la org
   const { data: t, error: errGet } = await supabase
     .from("transferencias")
-    .select("id, estado, org_id")
+    .select("id, estado, org_id, tipo_transferencia")
     .eq("id", id)
     .eq("org_id", perfil.org_id)
     .single();
@@ -307,16 +403,17 @@ async function enviarTransferencia(supabase, perfil, id) {
     return json({ error: `Estado inválido: "${t.estado}". Solo se pueden enviar transferencias en estado "creada"` }, 400);
   }
 
-  // RPC transaccional: ejecuta todo en una sola transacción
-  // Si falla, PostgreSQL revierte: lote, stock_ubicaciones, movimientos, estado
+  const rpc = t.tipo_transferencia === "redistribucion"
+    ? "enviar_redistribucion"
+    : "enviar_transferencia";
+
   const { data, error: errRpc } = await supabase
-    .rpc("enviar_transferencia", {
+    .rpc(rpc, {
       p_transferencia_id: id,
       p_usuario_id: perfil.id,
     });
 
   if (errRpc) {
-    // El mensaje incluye detalles del producto/lote que falló
     return json({ error: `Error al enviar transferencia: ${errRpc.message}` }, 400);
   }
 
@@ -402,6 +499,37 @@ async function recibirTransferencia(supabase, perfil, id) {
   }
 
   return json({ exito: true, estado: "recibida" });
+}
+
+// ─── CONFIRMAR DEVOLUCIÓN A ORIGEN ────────────────────────────
+async function confirmarDevolucionOrigen(supabase, perfil, id) {
+  if (!["admin_central", "operador_drogueria"].includes(perfil.rol)) {
+    return json({ error: "No tienes permisos para confirmar devoluciones" }, 403);
+  }
+
+  const { data: t, error: errGet } = await supabase
+    .from("transferencias")
+    .select("id, estado")
+    .eq("id", id)
+    .eq("org_id", perfil.org_id)
+    .single();
+
+  if (errGet || !t) return json({ error: "Transferencia no encontrada" }, 404);
+  if (t.estado !== "pendiente_devolucion") {
+    return json({ error: `Estado inválido: "${t.estado}". Solo se puede confirmar devolución en estado "pendiente_devolucion"` }, 400);
+  }
+
+  const { data, error: errRpc } = await supabase
+    .rpc("confirmar_devolucion_origen", {
+      p_transferencia_id: id,
+      p_usuario_id: perfil.id,
+    });
+
+  if (errRpc) {
+    return json({ error: `Error al confirmar devolución: ${errRpc.message}` }, 400);
+  }
+
+  return json({ exito: true, estado: "devuelta_a_origen" });
 }
 
 // ─── RECHAZAR ─────────────────────────────────────────────────

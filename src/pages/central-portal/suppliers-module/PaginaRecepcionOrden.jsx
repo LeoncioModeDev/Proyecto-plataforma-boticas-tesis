@@ -85,11 +85,27 @@ export default function PaginaRecepcionOrden() {
         return
       }
 
+      if (resultado === 'recibida_con_observacion' && !observacion.trim()) {
+        setError('Debes ingresar una observación para esta recepción')
+        setEnviando(false)
+        return
+      }
+
       const itemsValidos = items.filter(i => i.cantidadRecibida > 0)
       if (itemsValidos.length === 0) {
         setError('Debes registrar al menos un item con cantidad recibida')
         setEnviando(false)
         return
+      }
+
+      if (resultado === 'recibida_parcial') {
+        for (const item of itemsValidos) {
+          if (item.cantidadRecibida >= item.cantidadPendiente) {
+            setError(`"${item.productoNombre}": en recepción parcial la cantidad recibida debe ser menor a ${item.cantidadPendiente}`)
+            setEnviando(false)
+            return
+          }
+        }
       }
 
       const result = await registrarRecepcion(id, {
@@ -219,7 +235,7 @@ export default function PaginaRecepcionOrden() {
                           value={item.numeroLote}
                           onChange={e => actualizarItem(index, 'numeroLote', e.target.value)}
                           placeholder="Ej: LOTE001"
-                          required={item.cantidadRecibida > 0}
+                          required
                           className="px-3 py-2 text-cuerpo bg-fondo border border-estilo rounded-md"
                         />
                       </div>
@@ -229,27 +245,37 @@ export default function PaginaRecepcionOrden() {
                           type="date"
                           value={item.fechaVencimiento}
                           onChange={e => actualizarItem(index, 'fechaVencimiento', e.target.value)}
-                          required={item.cantidadRecibida > 0}
+                          min={new Date().toISOString().split('T')[0]}
+                          required
                           className="px-3 py-2 text-cuerpo bg-fondo border border-estilo rounded-md"
                         />
                       </div>
-                      <div className="flex flex-col gap-1">
-                        <label className="text-xs text-secundario">Cant. recibida *</label>
-                        <input
-                          type="number"
-                          value={item.cantidadRecibida}
-                          onChange={e => actualizarItem(index, 'cantidadRecibida', e.target.value)}
-                          min="0"
-                          max={item.cantidadPendiente}
-                          required
-                          className="px-3 py-2 text-cuerpo bg-fondo border border-estilo rounded-md text-center"
-                        />
-                      </div>
+                      {resultado === 'recibida_parcial' ? (
+                        <div className="flex flex-col gap-1">
+                          <label className="text-xs text-secundario">Cant. recibida *</label>
+                          <input
+                            type="number"
+                            value={item.cantidadRecibida}
+                            onChange={e => actualizarItem(index, 'cantidadRecibida', e.target.value)}
+                            min="1"
+                            max={item.cantidadPendiente - 1}
+                            required
+                            className="px-3 py-2 text-cuerpo bg-fondo border border-estilo rounded-md text-center"
+                          />
+                        </div>
+                      ) : (
+                        <div className="flex flex-col gap-1">
+                          <label className="text-xs text-secundario">Cantidad a recibir</label>
+                          <p className="px-3 py-2 text-cuerpo bg-fondo/50 border border-estilo rounded-md text-center text-principal font-medium">
+                            {item.cantidadPendiente}
+                          </p>
+                        </div>
+                      )}
                     </div>
 
-                    {item.cantidadRecibida > item.cantidadPendiente && (
+                    {resultado === 'recibida_parcial' && item.cantidadRecibida >= item.cantidadPendiente && (
                       <p className="text-xs text-estado-critico">
-                        La cantidad recibida ({item.cantidadRecibida}) excede el pendiente ({item.cantidadPendiente})
+                        En recepción parcial, la cantidad debe ser menor a {item.cantidadPendiente}
                       </p>
                     )}
                   </div>
@@ -258,12 +284,13 @@ export default function PaginaRecepcionOrden() {
 
               {(resultado === 'recibida_con_observacion') && (
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-sm font-medium text-principal">Observaciones</label>
+                  <label className="text-sm font-medium text-principal">Observaciones *</label>
                   <textarea
                     value={observacion}
                     onChange={e => setObservacion(e.target.value)}
-                    placeholder="Notas sobre esta recepción (embalaje defectuoso, cajas golpeadas, etc.)"
+                    placeholder="Detalle las observaciones de esta recepción (embalaje defectuoso, cajas golpeadas, etc.)"
                     rows={2}
+                    required
                     className="px-3 py-2 text-cuerpo bg-fondo border border-estilo rounded-md"
                   />
                 </div>

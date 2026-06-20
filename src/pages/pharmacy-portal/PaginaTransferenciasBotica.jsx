@@ -1,20 +1,12 @@
 import { useState, useEffect, useMemo } from 'react'
-import { Truck, PackageCheck, Clock, XCircle, ChevronDown, ChevronUp, CheckCircle, AlertTriangle, CalendarDays, X } from 'lucide-react'
+import { PackageCheck, Clock, XCircle, ChevronDown, ChevronUp, CheckCircle, AlertTriangle, CalendarDays, X } from 'lucide-react'
 import Tabla from '@/components/common/Tabla'
 import Insignia from '@/components/common/Insignia'
 import Modal from '@/components/common/Modal'
 import Boton from '@/components/common/Boton'
-import { ESTADOS_TRANSFERENCIA, ETIQUETAS_TRANSFERENCIA, COLORES_TRANSFERENCIA } from '@/constants/transferencias'
+import { ESTADOS_TRANSFERENCIA, ETIQUETAS_TRANSFERENCIA, COLORES_TRANSFERENCIA, ICONOS_ESTADO_TRANSFERENCIA } from '@/constants/transferencias'
 import { obtenerTransferencias, recibirTransferencia, rechazarTransferencia } from '@/services/supabase/transferencias'
 import { formatearFechaCorta, formatearFechaHora } from '@/utilities/formatearFecha'
-
-const ICONOS_ESTADO = {
-  [ESTADOS_TRANSFERENCIA.CREADA]: Clock,
-  [ESTADOS_TRANSFERENCIA.EN_TRANSITO]: Truck,
-  [ESTADOS_TRANSFERENCIA.RECIBIDA]: CheckCircle,
-  [ESTADOS_TRANSFERENCIA.CANCELADA]: XCircle,
-  [ESTADOS_TRANSFERENCIA.RECHAZADA]: AlertTriangle,
-}
 
 const MAPEO_COLORES = {
   amarillo: 'amarillo',
@@ -22,6 +14,7 @@ const MAPEO_COLORES = {
   verde: 'verde',
   rojo: 'rojo',
   naranja: 'naranja',
+  morado: 'morado',
 }
 
 export default function PaginaTransferenciasBotica() {
@@ -126,7 +119,7 @@ export default function PaginaTransferenciasBotica() {
     {
       campo: 'id',
       encabezado: 'ID',
-      render: (r) => <span className="font-mono text-cuerpo text-marca-principal">{r.id.toUpperCase()}</span>,
+      render: (r) => <span className="font-mono text-cuerpo text-marca-principal">{r.id?.slice(0, 8)}</span>,
     },
     {
       campo: 'tipoTransferencia',
@@ -155,7 +148,7 @@ export default function PaginaTransferenciasBotica() {
       campo: 'estado',
       encabezado: 'Estado',
       render: (r) => {
-        const Icono = ICONOS_ESTADO[r.estado] || Clock
+        const Icono = ICONOS_ESTADO_TRANSFERENCIA[r.estado] || Clock
         const color = MAPEO_COLORES[COLORES_TRANSFERENCIA[r.estado]] || 'gris'
         return (
           <Insignia color={color}>
@@ -288,16 +281,19 @@ export default function PaginaTransferenciasBotica() {
             <div className="flex items-center gap-3 p-3 bg-estado-info-fondo rounded-md">
               <AlertTriangle className="h-5 w-5 text-estado-info shrink-0" />
               <p className="text-sm text-principal">
-                Vas a confirmar la recepción de la transferencia <strong>{modalConfirmar.id.toUpperCase()}</strong>.
+                Vas a confirmar la recepción de la transferencia <strong>{modalConfirmar.id.slice(0, 8)}</strong>.
                 Esta acción no se puede deshacer.
               </p>
             </div>
 
             <div className="space-y-2">
               <p className="text-sm font-medium text-principal">Productos incluidos:</p>
-              {modalConfirmar.items.map((item) => (
-                <div key={item.id} className="flex justify-between text-sm p-2 bg-fondo rounded">
-                  <span className="text-principal">{item.producto?.nombreComercial || item.productoId}</span>
+              {modalConfirmar.lotesInfo.map((item) => (
+                <div key={item.id} className="flex items-center justify-between text-sm p-2 bg-fondo rounded">
+                  <div>
+                    <p className="text-principal font-medium">{item.productoNombre}</p>
+                    <p className="text-xs text-secundario font-mono">Lote {item.numeroLote}{item.fechaVencimiento ? ` — Vence: ${formatearFechaCorta(item.fechaVencimiento)}` : ''}</p>
+                  </div>
                   <span className="font-semibold text-marca-principal">{item.cantidad} uds</span>
                 </div>
               ))}
@@ -324,8 +320,8 @@ export default function PaginaTransferenciasBotica() {
             <div className="flex items-center gap-3 p-3 bg-rojo-claro rounded-md">
               <AlertTriangle className="h-5 w-5 text-estado-critico shrink-0" />
               <p className="text-sm text-principal">
-                Vas a rechazar la transferencia <strong>{modalRechazar.id.toUpperCase()}</strong>.
-                El stock en tránsito se revertirá.
+                Vas a rechazar la transferencia <strong>{modalRechazar.id.slice(0, 8)}</strong>.
+                El stock no se incorporará a la botica destino y quedará pendiente de regularización.
               </p>
             </div>
 
@@ -372,7 +368,7 @@ export default function PaginaTransferenciasBotica() {
         <div className="flex flex-col items-center py-4 text-center">
           <AlertTriangle className="h-12 w-12 text-naranja mb-3" />
           <p className="text-principal font-medium">Transferencia rechazada</p>
-          <p className="text-secundario text-sm mt-1">El stock en tránsito ha sido revertido.</p>
+          <p className="text-secundario text-sm mt-1">La transferencia fue rechazada. El stock no se incorporó a la botica destino y queda pendiente de regularización.</p>
         </div>
       </Modal>
     </div>

@@ -1,22 +1,15 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Plus, Truck, CheckCircle, Clock, ArrowRight, X, XCircle, AlertTriangle, CalendarDays, AlertCircle } from 'lucide-react'
+import { Plus, Truck, CheckCircle, Clock, ArrowRight, X, XCircle, CalendarDays, AlertCircle, Undo2, RotateCcw } from 'lucide-react'
 import Boton from '@/components/common/Boton'
 import Tabla from '@/components/common/Tabla'
 import Insignia from '@/components/common/Insignia'
 import Modal from '@/components/common/Modal'
+import ModalConfirmar from '@/components/common/ModalConfirmar'
 import TarjetaMetrica from '@/components/charts/TarjetaMetrica'
-import { ESTADOS_TRANSFERENCIA, ETIQUETAS_TRANSFERENCIA, COLORES_TRANSFERENCIA } from '@/constants/transferencias'
-import { obtenerTransferencias, enviarTransferencia, cancelarTransferencia } from '@/services/supabase/transferencias'
+import { ESTADOS_TRANSFERENCIA, ETIQUETAS_TRANSFERENCIA, COLORES_TRANSFERENCIA, ICONOS_ESTADO_TRANSFERENCIA } from '@/constants/transferencias'
+import { obtenerTransferencias, enviarTransferencia, cancelarTransferencia, confirmarDevolucionOrigen } from '@/services/supabase/transferencias'
 import { formatearFechaCorta } from '@/utilities/formatearFecha'
-
-const ICONOS_ESTADO = {
-  [ESTADOS_TRANSFERENCIA.CREADA]: Clock,
-  [ESTADOS_TRANSFERENCIA.EN_TRANSITO]: Truck,
-  [ESTADOS_TRANSFERENCIA.RECIBIDA]: CheckCircle,
-  [ESTADOS_TRANSFERENCIA.CANCELADA]: XCircle,
-  [ESTADOS_TRANSFERENCIA.RECHAZADA]: AlertTriangle,
-}
 
 const MAPEO_COLORES = {
   amarillo: 'amarillo',
@@ -24,6 +17,7 @@ const MAPEO_COLORES = {
   verde: 'verde',
   rojo: 'rojo',
   naranja: 'naranja',
+  morado: 'morado',
 }
 
 const OPCIONES_ESTADO = [
@@ -33,6 +27,8 @@ const OPCIONES_ESTADO = [
   { valor: ESTADOS_TRANSFERENCIA.RECIBIDA, etiqueta: ETIQUETAS_TRANSFERENCIA[ESTADOS_TRANSFERENCIA.RECIBIDA] },
   { valor: ESTADOS_TRANSFERENCIA.CANCELADA, etiqueta: ETIQUETAS_TRANSFERENCIA[ESTADOS_TRANSFERENCIA.CANCELADA] },
   { valor: ESTADOS_TRANSFERENCIA.RECHAZADA, etiqueta: ETIQUETAS_TRANSFERENCIA[ESTADOS_TRANSFERENCIA.RECHAZADA] },
+  { valor: ESTADOS_TRANSFERENCIA.PENDIENTE_DEVOLUCION, etiqueta: ETIQUETAS_TRANSFERENCIA[ESTADOS_TRANSFERENCIA.PENDIENTE_DEVOLUCION] },
+  { valor: ESTADOS_TRANSFERENCIA.DEVUELTA_A_ORIGEN, etiqueta: ETIQUETAS_TRANSFERENCIA[ESTADOS_TRANSFERENCIA.DEVUELTA_A_ORIGEN] },
 ]
 
 export default function PaginaTransferencias() {
@@ -43,6 +39,8 @@ export default function PaginaTransferencias() {
   const [error, setError] = useState(null)
   const [fefoModal, setFefoModal] = useState(null)
   const [accionModal, setAccionModal] = useState(null)
+  const [confirmarEnvio, setConfirmarEnvio] = useState(null)
+  const [confirmarDevolucion, setConfirmarDevolucion] = useState(null)
 
   useEffect(() => {
     cargarTransferencias()
@@ -95,9 +93,22 @@ export default function PaginaTransferencias() {
     }
   }
 
-  async function handleEnviar(id) {
+  async function handleEnviarConfirmado() {
+    if (!confirmarEnvio) return
     try {
-      await enviarTransferencia(id)
+      await enviarTransferencia(confirmarEnvio)
+      setConfirmarEnvio(null)
+      await cargarTransferencias()
+    } catch (e) {
+      setError(e.message)
+    }
+  }
+
+  async function handleDevolucionConfirmada() {
+    if (!confirmarDevolucion) return
+    try {
+      await confirmarDevolucionOrigen(confirmarDevolucion)
+      setConfirmarDevolucion(null)
       await cargarTransferencias()
     } catch (e) {
       setError(e.message)
@@ -118,7 +129,7 @@ export default function PaginaTransferencias() {
     {
       campo: 'id',
       encabezado: 'ID',
-      render: (r) => <span className="font-mono text-cuerpo font-medium text-marca-principal">{r.id.toUpperCase()}</span>,
+      render: (r) => <span className="font-mono text-cuerpo font-medium text-marca-principal">{r.id?.slice(0, 8)}</span>,
     },
     {
       campo: 'tipoTransferencia',
@@ -140,27 +151,30 @@ export default function PaginaTransferencias() {
       render: (r) => <span className="text-principal">{r.destinoNombre}</span>,
     },
     {
-      campo: 'productosList',
-      encabezado: 'Productos',
+      campo: 'items',
+      encabezado: 'Items / Lotes',
       render: (r) => (
-        <div className="flex flex-col gap-0.5">
-          {r.productosList.map((item, idx) => (
-            <span key={idx} className="text-xs text-principal">{item.productoNombre} x{item.cantidad}</span>
+        <div className="flex flex-col gap-1.5">
+          {r.lotesInfo.map((item, idx) => (
+            <div key={idx} className="text-xs">
+              <span className="font-medium text-principal">{item.productoNombre}</span>
+              <div className="flex items-center gap-2 text-secundario">
+                <span className="font-mono">Lote {item.numeroLote}</span>
+                {item.fechaVencimiento && (
+                  <span>Vence: {formatearFechaCorta(item.fechaVencimiento)}</span>
+                )}
+                <span className="font-medium text-marca-principal">{item.cantidad} uds</span>
+              </div>
+            </div>
           ))}
+          <button
+            onClick={(e) => { e.stopPropagation(); setFefoModal(r) }}
+            className="text-marca-principal hover:underline text-xs flex items-center gap-1 mt-0.5"
+          >
+            <CalendarDays className="h-3 w-3" />
+            Ordenar por FEFO
+          </button>
         </div>
-      ),
-    },
-    {
-      campo: 'lotesInfo',
-      encabezado: 'Lotes FEFO',
-      render: (r) => (
-        <button
-          onClick={(e) => { e.stopPropagation(); setFefoModal(r) }}
-          className="text-marca-principal hover:underline text-sm flex items-center gap-1"
-        >
-          <CalendarDays className="h-3.5 w-3.5" />
-          {r.lotesInfo.length} lote{r.lotesInfo.length !== 1 ? 's' : ''}
-        </button>
       ),
     },
     {
@@ -187,7 +201,7 @@ export default function PaginaTransferencias() {
       campo: 'estado',
       encabezado: 'Estado',
       render: (r) => {
-        const Icono = ICONOS_ESTADO[r.estado] || Clock
+        const Icono = ICONOS_ESTADO_TRANSFERENCIA[r.estado] || Clock
         const color = MAPEO_COLORES[COLORES_TRANSFERENCIA[r.estado]] || 'gris'
         return (
           <Insignia color={color}>
@@ -204,9 +218,12 @@ export default function PaginaTransferencias() {
         <div className="flex gap-1">
           {r.estado === ESTADOS_TRANSFERENCIA.CREADA && (
             <>
-              <Boton variante="icono" icono={ArrowRight} className="text-marca-principal hover:bg-marca-claro" onClick={() => handleEnviar(r.id)} title="Enviar" />
+              <Boton variante="icono" icono={ArrowRight} className="text-marca-principal hover:bg-marca-claro" onClick={() => setConfirmarEnvio(r.id)} title="Enviar" />
               <Boton variante="icono" icono={X} className="text-estado-critico hover:bg-rojo-claro" onClick={() => setAccionModal({ tipo: 'cancelar', id: r.id })} title="Cancelar" />
             </>
+          )}
+          {r.estado === ESTADOS_TRANSFERENCIA.PENDIENTE_DEVOLUCION && (
+            <Boton variante="icono" icono={Undo2} className="text-morado hover:bg-morado-claro" onClick={() => setConfirmarDevolucion(r.id)} title="Confirmar devolución a origen" />
           )}
         </div>
       ),
@@ -219,7 +236,8 @@ export default function PaginaTransferencias() {
     enTransito: datos.filter(t => t.estado === ESTADOS_TRANSFERENCIA.EN_TRANSITO).length,
     recibidas: datos.filter(t => t.estado === ESTADOS_TRANSFERENCIA.RECIBIDA).length,
     canceladas: datos.filter(t => t.estado === ESTADOS_TRANSFERENCIA.CANCELADA).length,
-    rechazadas: datos.filter(t => t.estado === ESTADOS_TRANSFERENCIA.RECHAZADA).length,
+    pendientesDevolucion: datos.filter(t => t.estado === ESTADOS_TRANSFERENCIA.PENDIENTE_DEVOLUCION).length,
+    devueltasOrigen: datos.filter(t => t.estado === ESTADOS_TRANSFERENCIA.DEVUELTA_A_ORIGEN).length,
   }
 
   if (cargando) return <div className="flex items-center justify-center py-20"><p className="text-secundario">Cargando transferencias...</p></div>
@@ -244,12 +262,13 @@ export default function PaginaTransferencias() {
         </div>
       )}
 
-      <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-7 gap-4">
         <TarjetaMetrica etiqueta="Total" valor={estadisticas.total} icono={Truck} />
         <TarjetaMetrica etiqueta="Creadas" valor={estadisticas.creadas} icono={Clock} />
         <TarjetaMetrica etiqueta="En Tránsito" valor={estadisticas.enTransito} icono={ArrowRight} />
         <TarjetaMetrica etiqueta="Recibidas" valor={estadisticas.recibidas} icono={CheckCircle} />
-        <TarjetaMetrica etiqueta="Rechazadas" valor={estadisticas.rechazadas} icono={AlertTriangle} />
+        <TarjetaMetrica etiqueta="Pend. Devolución" valor={estadisticas.pendientesDevolucion} icono={RotateCcw} />
+        <TarjetaMetrica etiqueta="Devueltas" valor={estadisticas.devueltasOrigen} icono={Undo2} />
         <TarjetaMetrica etiqueta="Canceladas" valor={estadisticas.canceladas} icono={XCircle} />
       </div>
 
@@ -327,6 +346,24 @@ export default function PaginaTransferencias() {
           </div>
         </div>
       </Modal>
+
+      <ModalConfirmar
+        abierto={!!confirmarEnvio}
+        alCerrar={() => setConfirmarEnvio(null)}
+        alConfirmar={handleEnviarConfirmado}
+        titulo="Confirmar envío de transferencia"
+        mensaje="Al enviar, el stock será descontado de la ubicación origen y pasará a stock en tránsito en la botica destino."
+        etiquetaBoton="Confirmar envío"
+      />
+
+      <ModalConfirmar
+        abierto={!!confirmarDevolucion}
+        alCerrar={() => setConfirmarDevolucion(null)}
+        alConfirmar={handleDevolucionConfirmada}
+        titulo="Confirmar devolución a origen"
+        mensaje="Al confirmar, el stock será restaurado en la ubicación origen y la transferencia quedará como devuelta a origen."
+        etiquetaBoton="Confirmar devolución"
+      />
     </div>
   )
 }

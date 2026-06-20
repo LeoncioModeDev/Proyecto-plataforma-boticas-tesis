@@ -59,6 +59,8 @@ export default function DetalleProducto() {
 
   const agregarProveedorProducto = async () => {
     if (!nuevoProvProd.proveedorId || !nuevoProvProd.leadTimeEspecifico || !nuevoProvProd.precioCompraReferencial) return
+    if (Number(nuevoProvProd.leadTimeEspecifico) < 1) { setError('El lead time debe ser mayor a 0 días'); return }
+    if (Number(nuevoProvProd.precioCompraReferencial) <= 0) { setError('El precio de compra debe ser mayor a 0'); return }
     try {
       await guardarRelacion({
         proveedorId: nuevoProvProd.proveedorId,
@@ -143,11 +145,11 @@ export default function DetalleProducto() {
 
       <Modal abierto={!!modalProveedores} alCerrar={() => setModalProveedores(null)} titulo={`Configurar Lead Times — ${producto.nombreComercial}`}>
         <div className="space-y-4">
-          {proveedoresProducto.length === 0 ? (
+          {proveedoresProducto.filter(r => r.activo !== false).length === 0 ? (
             <p className="text-secundario">Sin proveedores asociados</p>
           ) : (
             <div className="divide-y divide-estilo max-h-60 overflow-y-auto">
-              {proveedoresProducto.map(r => (
+              {proveedoresProducto.filter(r => r.activo !== false).map(r => (
                 <div key={r.id} className="flex items-center justify-between py-2">
                   <div>
                     <p className="text-sm font-medium">{r.proveedorNombre || r.proveedorId}</p>
@@ -173,11 +175,11 @@ export default function DetalleProducto() {
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="text-xs text-secundario">Lead time (días)</label>
-                <input type="number" value={nuevoProvProd.leadTimeEspecifico} onChange={e => setNuevoProvProd({ ...nuevoProvProd, leadTimeEspecifico: e.target.value })} className="w-full px-3 py-2 text-sm bg-fondo border border-estilo rounded-md" />
+                <input type="number" min="1" value={nuevoProvProd.leadTimeEspecifico} onChange={e => setNuevoProvProd({ ...nuevoProvProd, leadTimeEspecifico: e.target.value })} className="w-full px-3 py-2 text-sm bg-fondo border border-estilo rounded-md" />
               </div>
               <div>
                 <label className="text-xs text-secundario">Precio compra (S/)</label>
-                <input type="number" step="0.01" value={nuevoProvProd.precioCompraReferencial} onChange={e => setNuevoProvProd({ ...nuevoProvProd, precioCompraReferencial: e.target.value })} className="w-full px-3 py-2 text-sm bg-fondo border border-estilo rounded-md" />
+                <input type="number" min="0.01" step="0.01" value={nuevoProvProd.precioCompraReferencial} onChange={e => setNuevoProvProd({ ...nuevoProvProd, precioCompraReferencial: e.target.value })} className="w-full px-3 py-2 text-sm bg-fondo border border-estilo rounded-md" />
               </div>
             </div>
             <Boton variante="secundario" onClick={agregarProveedorProducto} className="w-full">Agregar</Boton>

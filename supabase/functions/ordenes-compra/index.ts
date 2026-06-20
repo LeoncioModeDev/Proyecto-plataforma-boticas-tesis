@@ -454,6 +454,10 @@ async function registrarRecepcion(supabase: any, perfil: PerfilUsuario, id: stri
     if (resultado === "en_devolucion") {
       if (!motivo_rechazo) return json({ error: "motivo_rechazo es requerido para devolución" }, 400);
 
+      // Revertir stock_por_recibir: quitar solo el saldo pendiente
+      const revertError = await revertirStockPorRecibir(supabase, perfil.org_id, id);
+      if (revertError?.error) return json({ error: revertError.error }, 400);
+
       const { data: recepcion, error: errRec } = await supabase
         .from("recepciones_orden")
         .insert({
@@ -476,11 +480,20 @@ async function registrarRecepcion(supabase: any, perfil: PerfilUsuario, id: stri
       return json({ error: "Se requiere al menos un item en la recepción" }, 400);
     }
 
+    if (resultado === "recibida_con_observacion" && !observacion?.trim()) {
+      return json({ error: "La observación es obligatoria para recibida con observación" }, 400);
+    }
+
+    const hoy = new Date().toISOString().split("T")[0];
+
     // Validar cantidades
     for (const item of itemsRecibidos) {
-      const { producto_id, cantidad_recibida } = item;
-      if (cantidad_recibida < 0) {
-        return json({ error: `cantidad_recibida no puede ser negativa para producto ${producto_id}` }, 400);
+      const { producto_id, cantidad_recibida, fecha_vencimiento } = item;
+      if (cantidad_recibida <= 0) {
+        return json({ error: `cantidad_recibida debe ser mayor a 0 para producto ${producto_id}` }, 400);
+      }
+      if (fecha_vencimiento && fecha_vencimiento < hoy) {
+        return json({ error: `La fecha de vencimiento del producto ${producto_id} no puede ser anterior a hoy` }, 400);
       }
       const itemOC = todosItems.find((i: any) => i.producto_id === producto_id);
       if (!itemOC) return json({ error: `Producto ${producto_id} no está en la orden` }, 400);
@@ -488,6 +501,16 @@ async function registrarRecepcion(supabase: any, perfil: PerfilUsuario, id: stri
       if (cantidad_recibida > pendiente) {
         return json({
           error: `Producto ${producto_id}: recibido ${cantidad_recibida} excede el pendiente ${pendiente}`
+        }, 400);
+      }
+      if (resultado === "recibida_parcial" && cantidad_recibida >= pendiente) {
+        return json({
+          error: `Producto ${producto_id}: en recepción parcial la cantidad recibida (${cantidad_recibida}) debe ser menor al pendiente (${pendiente})`
+        }, 400);
+      }
+      if (["recibida", "recibida_con_observacion"].includes(resultado) && cantidad_recibida !== pendiente) {
+        return json({
+          error: `Producto ${producto_id}: en ${resultado} la cantidad recibida debe ser igual al pendiente (${pendiente})`
         }, 400);
       }
     }
@@ -587,38 +610,6 @@ async function registrarRecepcion(supabase: any, perfil: PerfilUsuario, id: stri
         if (errMov) {
           await supabase.from("recepciones_orden").delete().eq("id", recepcion.id);
           return json({ error: errMov.message }, 400);
-        }
-      }
-
-      // El trigger trg_actualizar_stock ya actualiza stock_ubicaciones
-      // al insertar el movimiento de inventario (línea 574).
-      // Solo insertamos como fallback si aún no existe registro.
-      if (cantidad_recibida > 0) {
-        const { data: stockExistente } = await supabase
-          .from("stock_ubicaciones")
-          .select("id")
-          .eq("producto_id", producto_id)
-          .eq("ubicacion_tipo", "drogueria")
-          .is("ubicacion_id", null)
-          .maybeSingle();
-
-        if (!stockExistente) {
-          const { error: errStock } = await supabase
-            .from("stock_ubicaciones")
-            .insert({
-              producto_id,
-              ubicacion_tipo: "drogueria",
-              ubicacion_id: null,
-              org_id: perfil.org_id,
-              cantidad_disponible: cantidad_recibida,
-              stock_por_recibir: 0,
-              stock_en_transito: 0,
-              stock_minimo: 0,
-            });
-          if (errStock) {
-            await supabase.from("recepciones_orden").delete().eq("id", recepcion.id);
-            return json({ error: errStock.message }, 400);
-          }
         }
       }
 

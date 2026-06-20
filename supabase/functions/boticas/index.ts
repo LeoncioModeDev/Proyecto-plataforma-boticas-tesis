@@ -149,7 +149,7 @@ async function obtenerBotica(supabase: any, perfil: PerfilUsuario, id: string) {
 }
 
 async function crearBotica(supabase: any, perfil: PerfilUsuario, body: any) {
-  const { nombre, tipo, ubigeo, direccion, telefono, encargado_usuario_id, activa } = body;
+  const { nombre, tipo, ubigeo, direccion, telefono, activa } = body;
 
   if (!nombre || !tipo) {
     return json({ error: "Faltan datos obligatorios (nombre, tipo)" }, 400);
@@ -172,65 +172,66 @@ async function crearBotica(supabase: any, perfil: PerfilUsuario, body: any) {
     }
   }
 
-  if (encargado_usuario_id) {
-    const { data: encargado } = await supabase
-      .from("usuarios")
-      .select("id, org_id, rol")
-      .eq("id", encargado_usuario_id)
+  const MAX_INTENTOS = 3;
+
+  for (let intento = 1; intento <= MAX_INTENTOS; intento++) {
+    // Calcular siguiente código correlativo
+    const { data: maxData } = await supabase
+      .from("boticas")
+      .select("codigo_interno")
+      .eq("org_id", perfil.org_id)
+      .not("codigo_interno", "is", null)
+      .order("codigo_interno", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    let nextNum = 1;
+    if (maxData?.codigo_interno) {
+      const match = maxData.codigo_interno.match(/BOT-(\d+)/);
+      if (match) nextNum = parseInt(match[1], 10) + 1;
+    }
+    const codigoInterno = `BOT-${String(nextNum).padStart(6, "0")}`;
+
+    const { data: botica, error: errBot } = await supabase
+      .from("boticas")
+      .insert({
+        org_id: perfil.org_id,
+        codigo_interno: codigoInterno,
+        nombre,
+        tipo,
+        ubigeo: ubigeo || null,
+        direccion: direccion || null,
+        telefono: telefono || null,
+        encargado_usuario_id: null,
+        activa: activa !== undefined ? activa : true,
+      })
+      .select("id, nombre, codigo_interno")
       .single();
 
-    if (!encargado || encargado.org_id !== perfil.org_id) {
-      return json({ error: "El encargado debe pertenecer a tu organización" }, 400);
+    if (!errBot) {
+      await supabase.from("auditoria").insert({
+        org_id: perfil.org_id,
+        usuario_id: perfil.id,
+        accion: "CREAR_BOTICA",
+        entidad: "boticas",
+        entidad_id: botica.id,
+        nivel: "info",
+        detalle: `Se creó la botica "${nombre}" (${codigoInterno})`,
+      });
+
+      return json({ exito: true, id: botica.id, codigo_interno: botica.codigo_interno });
     }
-    if (!["admin_central", "operador_drogueria"].includes(encargado.rol)) {
-      return json({ error: "El encargado debe tener rol admin_central u operador_drogueria" }, 400);
+
+    // Si es violación de unique constraint, reintentar con nuevo código
+    if (errBot.message?.includes("idx_boticas_codigo_org") || errBot.message?.includes("unique constraint")) {
+      if (intento < MAX_INTENTOS) continue;
+      return json({
+        error: "No se pudo generar un código único para la botica. Intenta nuevamente.",
+      }, 409);
     }
+
+    return json({ error: errBot.message }, 400);
   }
-
-  const { data: maxData } = await supabase
-    .from("boticas")
-    .select("codigo_interno")
-    .eq("org_id", perfil.org_id)
-    .order("codigo_interno", { ascending: false })
-    .limit(1)
-    .maybeSingle();
-
-  let nextNum = 1;
-  if (maxData?.codigo_interno) {
-    const match = maxData.codigo_interno.match(/BOT-(\d+)/);
-    if (match) nextNum = parseInt(match[1]) + 1;
-  }
-  const codigoInterno = `BOT-${String(nextNum).padStart(6, "0")}`;
-
-  const { data: botica, error: errBot } = await supabase
-    .from("boticas")
-    .insert({
-      org_id: perfil.org_id,
-      codigo_interno: codigoInterno,
-      nombre,
-      tipo,
-      ubigeo: ubigeo || null,
-      direccion: direccion || null,
-      telefono: telefono || null,
-      encargado_usuario_id: encargado_usuario_id || null,
-      activa: activa !== undefined ? activa : true,
-    })
-    .select("id, nombre, codigo_interno")
-    .single();
-
-  if (errBot) return json({ error: errBot.message }, 400);
-
-  await supabase.from("auditoria").insert({
-    org_id: perfil.org_id,
-    usuario_id: perfil.id,
-    accion: "CREAR_BOTICA",
-    entidad: "boticas",
-    entidad_id: botica.id,
-    nivel: "info",
-    detalle: `Se creó la botica "${nombre}" (${codigoInterno})`,
-  });
-
-  return json({ exito: true, id: botica.id, codigo_interno: botica.codigo_interno });
 }
 
 async function actualizarBotica(supabase: any, perfil: PerfilUsuario, id: string, body: any) {

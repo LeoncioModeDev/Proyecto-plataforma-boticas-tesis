@@ -97,3 +97,46 @@ export async function rechazarTransferencia(id, motivoRechazo) {
   const { exito, estado } = await peticion('PUT', `/${id}/rechazar`, { motivo_rechazo: motivoRechazo })
   return { exito, estado }
 }
+
+export async function confirmarDevolucionOrigen(id) {
+  const { exito, estado } = await peticion('PUT', `/${id}/confirmar-devolucion`)
+  return { exito, estado }
+}
+
+export async function crearRedistribucion(datos) {
+  return crearTransferencia(datos)
+}
+
+export async function obtenerLotesParaRedistribucion() {
+  const { data, error } = await supabase
+    .from('lotes')
+    .select(`
+      id,
+      producto_id,
+      ubicacion_tipo,
+      ubicacion_id,
+      numero_lote,
+      fecha_vencimiento,
+      cantidad,
+      org_id,
+      productos:producto_id (nombre_comercial),
+      boticas:ubicacion_id (nombre)
+    `)
+    .gt('cantidad', 0)
+    .eq('ubicacion_tipo', 'botica')
+    .order('fecha_vencimiento', { ascending: true })
+
+  if (error) throw new Error('Error al cargar lotes para redistribución: ' + error.message)
+  return (data || []).map(item => ({
+    id: item.id,
+    productoId: item.producto_id,
+    ubicacionTipo: item.ubicacion_tipo,
+    ubicacionId: item.ubicacion_id,
+    numeroLote: item.numero_lote,
+    fechaVencimiento: item.fecha_vencimiento,
+    cantidad: item.cantidad,
+    orgId: item.org_id,
+    nombreProducto: item.productos?.nombre_comercial || item.producto_id,
+    nombreUbicacion: item.boticas?.nombre || item.ubicacion_id,
+  }))
+}

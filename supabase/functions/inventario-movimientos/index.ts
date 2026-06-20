@@ -107,6 +107,8 @@ async function listarMovimientos(supabase: any, perfil: PerfilUsuario, url: URL)
     query = query.eq("ubicacion_id", ubicacionId);
   }
 
+  query = query.eq("org_id", perfil.org_id);
+
   const { data, error } = await query;
   if (error) return json({ error: error.message }, 400);
 
@@ -174,6 +176,7 @@ async function registrarAjuste(supabase: any, perfil: PerfilUsuario, body: any) 
       cantidad,
       motivo,
       usuario_id: perfil.id,
+      org_id: perfil.org_id,
     })
     .select(`
       id,
@@ -254,6 +257,7 @@ async function registrarMerma(supabase: any, perfil: PerfilUsuario, body: any) {
       cantidad,
       motivo,
       usuario_id: perfil.id,
+      org_id: perfil.org_id,
     })
     .select(`
       id,

@@ -122,11 +122,8 @@ export default function FormularioTransferencia() {
 
   if (cargando) {
     return (
-      <div className="space-y-6 max-w-2xl">
-        <div className="flex items-center gap-4">
-          <Boton variante="texto" icono={ArrowLeft} onClick={() => navegar(-1)}>Volver</Boton>
-          <h1 className="text-h1 text-principal">Cargando...</h1>
-        </div>
+      <div className="flex items-center justify-center py-20">
+        <p className="text-secundario">Cargando...</p>
       </div>
     )
   }

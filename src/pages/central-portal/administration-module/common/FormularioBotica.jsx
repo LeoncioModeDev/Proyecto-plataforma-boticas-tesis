@@ -21,16 +21,13 @@ export default function FormularioBotica({ boticaEditar, alGuardar }) {
     ubigeo: boticaEditar?.ubigeo || '',
     direccion: boticaEditar?.direccion || '',
     telefono: boticaEditar?.telefono || '',
-    encargadoUsuarioId: boticaEditar?.encargadoUsuarioId || '',
     activa: boticaEditar?.activa ?? true,
   })
   const [error, setError] = useState('')
   const [enviando, setEnviando] = useState(false)
   const [ubigeos, setUbigeos] = useState([])
-  const [usuarios, setUsuarios] = useState([])
   const [tieneDrogueria, setTieneDrogueria] = useState(false)
   const [cargandoUbigeos, setCargandoUbigeos] = useState(true)
-  const [cargandoUsuarios, setCargandoUsuarios] = useState(true)
 
   useEffect(() => {
     if (!usuario?.orgId) return
@@ -45,21 +42,6 @@ export default function FormularioBotica({ boticaEditar, alGuardar }) {
       .catch(() => setError('Error al cargar ubigeos'))
       .finally(() => setCargandoUbigeos(false))
   }, [])
-
-  useEffect(() => {
-    if (!usuario?.orgId) return
-
-    import('@/services/supabase/usuarios').then(mod => {
-      mod.listarUsuarios({ activos: true })
-        .then(users => {
-          setUsuarios(users.filter(u =>
-            u.rol === 'admin_central' || u.rol === 'operador_drogueria'
-          ))
-        })
-        .catch(() => setError('Error al cargar usuarios'))
-        .finally(() => setCargandoUsuarios(false))
-    })
-  }, [usuario?.orgId])
 
   const validar = () => {
     if (!formulario.nombre.trim()) return 'El nombre es obligatorio'
@@ -81,7 +63,6 @@ export default function FormularioBotica({ boticaEditar, alGuardar }) {
       ubigeo: formulario.ubigeo || null,
       direccion: formulario.direccion.trim(),
       telefono: formulario.telefono.trim() || null,
-      encargado_usuario_id: formulario.encargadoUsuarioId || null,
       activa: formulario.activa,
     }
 
@@ -192,23 +173,6 @@ export default function FormularioBotica({ boticaEditar, alGuardar }) {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            <div className="flex flex-col gap-1.5">
-              <label className="text-sm font-medium text-principal">Encargado</label>
-              {cargandoUsuarios ? (
-                <div className="h-9 flex items-center"><Cargando tamano="pequeno" /></div>
-              ) : (
-                <select
-                  value={formulario.encargadoUsuarioId}
-                  onChange={e => manejarCambio('encargadoUsuarioId', e.target.value)}
-                  className="px-3 py-2 text-sm bg-fondo border border-estilo rounded-md text-principal focus:outline-none focus:border-marca-principal"
-                >
-                  <option value="">Sin encargado</option>
-                  {usuarios.map(u => (
-                    <option key={u.id} value={u.id}>{u.nombre} — {u.email}</option>
-                  ))}
-                </select>
-              )}
-            </div>
             <div className="flex items-end pb-2">
               <div className="flex items-center gap-2">
                 <input

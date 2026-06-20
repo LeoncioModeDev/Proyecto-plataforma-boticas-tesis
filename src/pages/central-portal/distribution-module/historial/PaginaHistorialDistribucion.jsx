@@ -64,7 +64,7 @@ export default function PaginaHistorialDistribucion() {
     {
       campo: 'id',
       encabezado: 'ID',
-      render: (r) => <span className="font-mono text-cuerpo">{r.id.toUpperCase()}</span>,
+      render: (r) => <span className="font-mono text-cuerpo">{r.id?.slice(0, 8)}</span>,
     },
     {
       campo: 'destinoId',

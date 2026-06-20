@@ -1,213 +1,244 @@
-import { useState, useMemo } from 'react'
-import { Lightbulb, CheckCircle, XCircle, AlertTriangle, ArrowRight, BrainCircuit, CalendarDays } from 'lucide-react'
+import { useState, useEffect, useMemo } from 'react'
+import { Link } from 'react-router-dom'
+import { Lightbulb, CheckCircle, XCircle, AlertTriangle, ArrowRight, CalendarDays, ExternalLink } from 'lucide-react'
 import Boton from '@/components/common/Boton'
 import Tarjeta from '@/components/common/Tarjeta'
 import Insignia from '@/components/common/Insignia'
 import Modal from '@/components/common/Modal'
 import Alerta from '@/components/common/Alerta'
 import Tabla from '@/components/common/Tabla'
-import { stock } from '@/mock-data/stock'
-import { productos as productosMock } from '@/mock-data/productos'
-import { boticas } from '@/mock-data/boticas'
-import { lotes } from '@/mock-data/lotes'
-import { alertas } from '@/mock-data/alertas'
-import { predicciones } from '@/mock-data/predicciones'
+import useAutenticacion from '@/state/useAutenticacion'
+import { listarBoticas } from '@/services/supabase/boticas'
+import { obtenerStockPorUbicacion } from '@/services/supabase/stock'
+import { obtenerTransferencias, crearRedistribucion, obtenerLotesParaRedistribucion } from '@/services/supabase/transferencias'
 import { clasificarAlerta } from '@/utilities/clasificarAlerta'
 import { formatearFechaCorta } from '@/utilities/formatearFecha'
+import { obtenerPortal } from '@/utilities/permisos'
 
-const DIAS_PARA_VENCIMIENTO_CRITICO = 30
+export default function PanelRedistribucion() {
+  const { usuario } = useAutenticacion()
 
-function obtenerAnalisisCompleto() {
-  const boticasActivas = boticas.filter(b => b.tipo === 'botica' && b.activa)
-  const propuestas = []
+  const [boticas, setBoticas] = useState([])
+  const [stock, setStock] = useState([])
+  const [lotes, setLotes] = useState([])
+  const [lotesComprometidos, setLotesComprometidos] = useState(new Set())
+  const [cargando, setCargando] = useState(true)
+  const [error, setError] = useState(null)
 
-  for (const botica of boticasActivas) {
-    const stockBotica = stock.filter(s => s.ubicacionId === botica.id)
-    const stockDrogueria = stock.filter(s => s.ubicacionTipo === 'drogueria')
+  const [propuestas, setPropuestas] = useState([])
+  const [propuestasIntentadas, setPropuestasIntentadas] = useState(false)
+  const [propuestasAceptadas, setPropuestasAceptadas] = useState(new Set())
+  const [procesando, setProcesando] = useState(null)
+  const [modalPropuesta, setModalPropuesta] = useState(null)
+  const [mensaje, setMensaje] = useState(null)
 
-    for (const sb of stockBotica) {
-      const alerta = clasificarAlerta(sb)
-      if (alerta !== 'bajo' && alerta !== 'sin_stock') continue
+  useEffect(() => {
+    if (!usuario) return
+    cargarDatos()
+  }, [usuario])
 
-      const producto = productosMock.find(p => p.id === sb.productoId)
-      if (!producto) continue
+  async function cargarDatos() {
+    try {
+      setCargando(true)
+      setError(null)
 
-      const prediccion = predicciones.find(p => p.productoId === sb.productoId && p.boticaId === botica.id)
-      const demandaEstimada = prediccion?.pronostico?.slice(0, 3).reduce((s, p) => s + p.predicho, 0) || 0
-      const deficit = sb.stockMinimo - sb.cantidadDisponible
-      const alertaML = alertas.find(a => a.productoId === sb.productoId && a.boticaId === botica.id && !a.resuelta)
+      const [boticasData, stockData, lotesData, transferenciasData] = await Promise.all([
+        listarBoticas({ activas: true }),
+        obtenerStockPorUbicacion(),
+        obtenerLotesParaRedistribucion(),
+        obtenerTransferencias(),
+      ])
 
-      const lotesBotica = lotes.filter(l => l.ubicacionId === botica.id && l.productoId === sb.productoId && l.cantidad > 0)
-        .sort((a, b) => new Date(a.fechaVencimiento) - new Date(b.fechaVencimiento))
-      const lotesProximoVencer = lotesBotica.filter(l => {
-        const dias = Math.ceil((new Date(l.fechaVencimiento) - new Date()) / (1000 * 60 * 60 * 24))
-        return dias > 0 && dias <= DIAS_PARA_VENCIMIENTO_CRITICO
-      })
+      const soloBoticas = boticasData.filter(b => b.tipo === 'botica')
+      const idsBoticas = new Set(soloBoticas.map(b => b.id))
 
-      const riesgoVencimiento = lotesProximoVencer.length > 0
+      setBoticas(soloBoticas)
+      setStock(stockData.filter(s => idsBoticas.has(s.ubicacionId)))
+      setLotes(lotesData.filter(l => idsBoticas.has(l.ubicacionId)))
 
-      const stockCentral = stockDrogueria.find(s => s.productoId === sb.productoId)
-      const disponibleCentral = stockCentral ? stockCentral.cantidadDisponible - stockCentral.stockMinimo : 0
-      const prioridad = alerta === 'sin_stock' ? 'alta' : riesgoVencimiento ? 'alta' : 'media'
-
-      if (disponibleCentral >= deficit) {
-        const lotesCentral = lotes.filter(l => l.ubicacionTipo === 'drogueria' && l.productoId === sb.productoId && l.cantidad > 0)
-          .sort((a, b) => new Date(a.fechaVencimiento) - new Date(b.fechaVencimiento))
-
-        const lotesSugeridos = []
-        let restante = deficit
-        for (const lote of lotesCentral) {
-          if (restante <= 0) break
-          const tomar = Math.min(lote.cantidad, restante)
-          lotesSugeridos.push({ loteId: lote.id, numeroLote: lote.numeroLote, cantidad: tomar, fechaVencimiento: lote.fechaVencimiento })
-          restante -= tomar
-        }
-
-        propuestas.push({
-          id: `prop-${propuestas.length + 1}`,
-          productoId: sb.productoId,
-          productoNombre: producto.nombreComercial,
-          origenId: 'ub-001',
-          origenNombre: 'Droguería Central',
-          origenTipo: 'drogueria',
-          destinoId: botica.id,
-          destinoNombre: botica.nombre,
-          tipo: 'transferencia',
-          cantidadSugerida: deficit,
-          lotesSugeridos,
-          criterioFEFO: 'FIFO por fecha de vencimiento — se priorizan lotes más próximos a vencer',
-          stockActual: sb.cantidadDisponible,
-          stockMinimo: sb.stockMinimo,
-          demandaEstimada: Math.round(demandaEstimada),
-          riesgo: alerta === 'sin_stock' ? 'Sin Stock' : 'Stock Bajo',
-          riesgoColor: alerta === 'sin_stock' ? 'rojo' : 'amarillo',
-          prioridad,
-          confianza: prediccion ? Math.round((1 - prediccion.metricas.mape / 100) * 100) : 75,
-          alertaML,
-          riesgoVencimiento,
-          motivo: `${botica.nombre} tiene ${alerta === 'sin_stock' ? '0 unidades' : sb.cantidadDisponible + ' unidades'} de ${producto.nombreComercial} (mínimo: ${sb.stockMinimo}). La Droguería Central dispone de ${disponibleCentral} unidades. ${riesgoVencimiento ? 'Además, hay lotes próximos a vencer en esta botica.' : ''} Se sugiere transferir ${deficit} unidades aplicando criterio FEFO.`,
-        })
-      }
-
-      if (disponibleCentral < deficit) {
-        for (const otra of boticasActivas) {
-          if (otra.id === botica.id) continue
-          const stockOtra = stock.find(s => s.ubicacionId === otra.id && s.productoId === sb.productoId)
-          if (!stockOtra) continue
-          const alertaOtra = clasificarAlerta(stockOtra)
-          if (alertaOtra !== 'sobrestock') continue
-          const excedente = stockOtra.cantidadDisponible - stockOtra.stockMinimo
-          if (excedente <= 0) continue
-
-          const cantRedistribuir = Math.min(excedente, deficit)
-
-          const lotesOtra = lotes.filter(l => l.ubicacionId === otra.id && l.productoId === sb.productoId && l.cantidad > 0)
-            .sort((a, b) => new Date(a.fechaVencimiento) - new Date(b.fechaVencimiento))
-          const lotesSugeridos = []
-          let restante = cantRedistribuir
-          for (const lote of lotesOtra) {
-            if (restante <= 0) break
-            const tomar = Math.min(lote.cantidad, restante)
-            lotesSugeridos.push({ loteId: lote.id, numeroLote: lote.numeroLote, cantidad: tomar, fechaVencimiento: lote.fechaVencimiento })
-            restante -= tomar
+      const estadosActivos = new Set(['creada', 'en_transito', 'pendiente_devolucion'])
+      const comprometidos = new Set()
+      for (const t of transferenciasData) {
+        if (estadosActivos.has(t.estado)) {
+          for (const item of t.items || []) {
+            if (item.loteId) comprometidos.add(item.loteId)
           }
-
-          const diasVencOtra = lotesOtra.length > 0 ? Math.ceil((new Date(lotesOtra[0].fechaVencimiento) - new Date()) / (1000 * 60 * 60 * 24)) : 999
-          const urgenciaVencimiento = diasVencOtra <= DIAS_PARA_VENCIMIENTO_CRITICO
-
-          propuestas.push({
-            id: `prop-${propuestas.length + 1}`,
-            productoId: sb.productoId,
-            productoNombre: producto.nombreComercial,
-            origenId: otra.id,
-            origenNombre: otra.nombre,
-            origenTipo: 'botica',
-            destinoId: botica.id,
-            destinoNombre: botica.nombre,
-            tipo: 'redistribucion',
-            cantidadSugerida: cantRedistribuir,
-            lotesSugeridos,
-            criterioFEFO: urgenciaVencimiento
-              ? 'FEFO por vencimiento próximo — se redistribuyen lotes cercanos a vencer para evitar merma'
-              : 'FIFO por fecha de vencimiento — se priorizan lotes más antiguos',
-            stockActual: sb.cantidadDisponible,
-            stockMinimo: sb.stockMinimo,
-            demandaEstimada: Math.round(demandaEstimada),
-            riesgo: alerta === 'sin_stock' ? 'Sin Stock' : 'Stock Bajo',
-            riesgoColor: alerta === 'sin_stock' ? 'rojo' : 'amarillo',
-            prioridad: urgenciaVencimiento ? 'alta' : 'media',
-            confianza: 85,
-            alertaML,
-            riesgoVencimiento: urgenciaVencimiento,
-            motivo: `${otra.nombre} tiene excedente de ${producto.nombreComercial} (${excedente} uds). ${urgenciaVencimiento ? `Además, el lote ${lotesSugeridos[0]?.numeroLote} vence en ${diasVencOtra} días. ` : ''}Se sugiere redistribuir ${cantRedistribuir} unidades a ${botica.nombre} que tiene ${alerta === 'sin_stock' ? 'stock agotado' : 'stock bajo'}.`,
-          })
         }
       }
+      setLotesComprometidos(comprometidos)
+
+      if (!soloBoticas.length) {
+        setError('No hay boticas activas en tu organización')
+      }
+    } catch (e) {
+      setError(e.message)
+    } finally {
+      setCargando(false)
     }
   }
 
-  return propuestas.sort((a, b) => {
-    const ordenPrioridad = { alta: 0, media: 1, baja: 2 }
-    const pa = ordenPrioridad[a.prioridad] || 2
-    const pb = ordenPrioridad[b.prioridad] || 2
-    if (pa !== pb) return pa - pb
-    const ordenRiesgo = { 'Sin Stock': 0, 'Stock Bajo': 1 }
-    return (ordenRiesgo[a.riesgo] || 2) - (ordenRiesgo[b.riesgo] || 2)
-  })
-}
+  const productosSobrestock = useMemo(() => {
+    if (!stock.length || !boticas.length) return []
+    return stock
+      .filter(s => clasificarAlerta(s) === 'sobrestock')
+      .map(s => {
+        const botica = boticas.find(b => b.id === s.ubicacionId)
+        const excedente = s.stockMaximo != null ? s.cantidadDisponible - s.stockMaximo : 0
+        return { ...s, nombreUbicacion: botica?.nombre || s.ubicacionId, excedente }
+      })
+      .filter(s => s.excedente > 0)
+  }, [stock, boticas])
 
-export default function PanelRedistribucion() {
-  const [propuestas, setPropuestas] = useState([])
-  const [modalPropuesta, setModalPropuesta] = useState(null)
-  const [mensaje, setMensaje] = useState(null)
-  const [propuestasAceptadas, setPropuestasAceptadas] = useState(new Set())
+  const stockBajo = useMemo(() => {
+    if (!stock.length || !boticas.length) return []
+    return stock
+      .filter(s => {
+        const alerta = clasificarAlerta(s)
+        return alerta === 'bajo' || alerta === 'sin_stock'
+      })
+      .map(s => {
+        const botica = boticas.find(b => b.id === s.ubicacionId)
+        return {
+          ...s,
+          nombreUbicacion: botica?.nombre || s.ubicacionId,
+          deficit: s.stockMinimo - s.cantidadDisponible,
+          sinStock: s.cantidadDisponible === 0,
+        }
+      })
+  }, [stock, boticas])
 
-  const productosSobrestock = useMemo(() =>
-    stock.filter(s => clasificarAlerta(s) === 'sobrestock').map(s => {
-      const producto = productosMock.find(p => p.id === s.productoId)
-      return {
-        ...s,
-        nombreProducto: producto?.nombreComercial || s.productoId,
-        ubicacionNombre: boticas.find(b => b.id === s.ubicacionId)?.nombre || s.ubicacionId,
-        excedente: s.cantidadDisponible - s.stockMinimo,
+  function generarPropuestas() {
+    const resultado = []
+
+    for (const destino of stockBajo) {
+      const productoId = destino.productoId
+      const deficit = destino.deficit
+
+      for (const origen of productosSobrestock) {
+        if (origen.ubicacionId === destino.ubicacionId) continue
+        if (origen.productoId !== productoId) continue
+
+        const excedente = origen.excedente
+        if (excedente <= 0) continue
+
+        const lotesDisponibles = lotes
+          .filter(l =>
+            l.productoId === productoId &&
+            l.ubicacionId === origen.ubicacionId &&
+            l.cantidad > 0 &&
+            !lotesComprometidos.has(l.id)
+          )
+          .sort((a, b) => new Date(a.fechaVencimiento) - new Date(b.fechaVencimiento))
+
+        if (!lotesDisponibles.length) continue
+
+        const lotesSugeridos = []
+        let restante = Math.min(deficit, excedente)
+
+        for (const lote of lotesDisponibles) {
+          if (restante <= 0) break
+          const tomar = Math.min(lote.cantidad, restante)
+          lotesSugeridos.push({
+            loteId: lote.id,
+            numeroLote: lote.numeroLote,
+            cantidad: tomar,
+            fechaVencimiento: lote.fechaVencimiento,
+          })
+          restante -= tomar
+        }
+
+        if (!lotesSugeridos.length) continue
+
+        const cantidadSugerida = lotesSugeridos.reduce((s, l) => s + l.cantidad, 0)
+        if (cantidadSugerida <= 0) continue
+
+        const prioridad = destino.sinStock ? 'urgente' : 'alta'
+        const riesgo = destino.sinStock ? 'Sin Stock' : 'Stock Bajo'
+        const riesgoColor = destino.sinStock ? 'rojo' : 'amarillo'
+
+        resultado.push({
+          id: `prop-${resultado.length + 1}`,
+          productoId,
+          productoNombre: destino.nombreProducto || origen.nombreProducto,
+          origenId: origen.ubicacionId,
+          origenNombre: origen.nombreUbicacion,
+          destinoId: destino.ubicacionId,
+          destinoNombre: destino.nombreUbicacion,
+          cantidadSugerida,
+          lotesSugeridos,
+          stockOrigen: origen.cantidadDisponible,
+          stockDestino: destino.cantidadDisponible,
+          stockMinimo: destino.stockMinimo,
+          stockMaximo: origen.stockMaximo,
+          excedente,
+          deficit,
+          tipo: 'redistribucion',
+          prioridad,
+          riesgo,
+          riesgoColor,
+          regla: `${destino.nombreUbicacion} tiene ${destino.sinStock ? 'stock agotado' : `stock bajo (${destino.cantidadDisponible}/${destino.stockMinimo})`}. ${origen.nombreUbicacion} tiene excedente de ${excedente} uds (${origen.cantidadDisponible}/${origen.stockMaximo}). Se sugiere redistribuir ${cantidadSugerida} uds aplicando criterio FEFO.`,
+        })
+
+        break
       }
-    }).filter(s => s.excedente > 0),
-  [])
+    }
 
-  const stockBajo = useMemo(() =>
-    stock.filter(s => clasificarAlerta(s) === 'bajo' || clasificarAlerta(s) === 'sin_stock').map(s => {
-      const producto = productosMock.find(p => p.id === s.productoId)
-      const ubicacion = boticas.find(b => b.id === s.ubicacionId)
-      return {
-        ...s,
-        nombreProducto: producto?.nombreComercial || s.productoId,
-        ubicacionNombre: ubicacion?.nombre || s.ubicacionId,
-        deficit: s.stockMinimo - s.cantidadDisponible,
+    resultado.sort((a, b) => {
+      const ordenPrioridad = { urgente: 0, alta: 1, normal: 2 }
+      if (a.prioridad !== b.prioridad) {
+        return ordenPrioridad[a.prioridad] - ordenPrioridad[b.prioridad]
       }
-    }),
-  [])
-
-  const generarPropuestas = () => {
-    const resultado = obtenerAnalisisCompleto()
-    setPropuestas(resultado)
-    setPropuestasAceptadas(new Set())
-  }
-
-  const aceptarPropuesta = (propuesta) => {
-    if (propuestasAceptadas.has(propuesta.id)) return
-    setPropuestasAceptadas(prev => new Set([...prev, propuesta.id]))
-    setModalPropuesta(null)
-
-    setMensaje({
-      tipo: 'exito',
-      texto: propuesta.tipo === 'transferencia'
-        ? `Transferencia creada: ${propuesta.cantidadSugerida} uds de ${propuesta.productoNombre} desde ${propuesta.origenNombre} → ${propuesta.destinoNombre}`
-        : `Redistribución creada: ${propuesta.cantidadSugerida} uds de ${propuesta.productoNombre} desde ${propuesta.origenNombre} → ${propuesta.destinoNombre}`
+      if (a.deficit !== b.deficit) return b.deficit - a.deficit
+      const aVence = a.lotesSugeridos[0]?.fechaVencimiento || '9999-12-31'
+      const bVence = b.lotesSugeridos[0]?.fechaVencimiento || '9999-12-31'
+      if (aVence !== bVence) return new Date(aVence) - new Date(bVence)
+      return b.excedente - a.excedente
     })
-    setTimeout(() => setMensaje(null), 4000)
+
+    setPropuestas(resultado)
+    setPropuestasIntentadas(true)
+    setPropuestasAceptadas(new Set())
+
+    if (resultado.length === 0) {
+      setMensaje({
+        tipo: 'info',
+        texto: 'No se encontraron propuestas. Verifica que las boticas tengan configurados stock mínimo y stock máximo, y que exista al menos una botica con sobrestock y otra con déficit para el mismo producto.',
+      })
+      setTimeout(() => setMensaje(null), 6000)
+    }
   }
 
-  const rechazarPropuesta = (id) => {
+  async function aceptarPropuesta(propuesta) {
+    if (propuestasAceptadas.has(propuesta.id)) return
+    try {
+      setProcesando(propuesta.id)
+      await crearRedistribucion({
+        tipo_transferencia: 'redistribucion',
+        origen_id: propuesta.origenId,
+        destino_id: propuesta.destinoId,
+        items: propuesta.lotesSugeridos.map(l => ({
+          producto_id: propuesta.productoId,
+          lote_id: l.loteId,
+          cantidad: l.cantidad,
+        })),
+      })
+      setPropuestasAceptadas(prev => new Set([...prev, propuesta.id]))
+      setModalPropuesta(null)
+      setMensaje({
+        tipo: 'exito',
+        texto: `Redistribución creada: ${propuesta.cantidadSugerida} uds de ${propuesta.productoNombre} desde ${propuesta.origenNombre} → ${propuesta.destinoNombre}`,
+        enlace: { ruta: `/${obtenerPortal(usuario)}/distribucion/transferencias`, texto: 'Ver transferencias' },
+      })
+      setTimeout(() => setMensaje(null), 6000)
+    } catch (e) {
+      setMensaje({ tipo: 'error', texto: `Error al crear redistribución: ${e.message}` })
+      setTimeout(() => setMensaje(null), 5000)
+    } finally {
+      setProcesando(null)
+    }
+  }
+
+  function rechazarPropuesta(id) {
     setPropuestas(prev => prev.filter(p => p.id !== id))
     setPropuestasAceptadas(prev => {
       const next = new Set(prev)
@@ -215,36 +246,49 @@ export default function PanelRedistribucion() {
       return next
     })
     setModalPropuesta(null)
-    setMensaje({ tipo: 'info', texto: 'Propuesta rechazada. Se generará una alerta operativa para revisión manual.' })
+    setMensaje({ tipo: 'info', texto: 'Propuesta descartada.' })
     setTimeout(() => setMensaje(null), 3000)
   }
+
+  const prioridadLabel = { urgente: 'Urgente', alta: 'Alta', normal: 'Normal' }
+  const prioridadColor = { urgente: 'rojo', alta: 'naranja', normal: 'amarillo' }
 
   const columnasPropuestas = [
     {
       campo: 'prioridad', encabezado: '', render: (r) => (
-        <Insignia color={r.prioridad === 'alta' ? 'rojo' : 'amarillo'}>
-          {r.prioridad === 'alta' ? 'Urgente' : 'Normal'}
-        </Insignia>
+        <Insignia color={prioridadColor[r.prioridad]}>{prioridadLabel[r.prioridad]}</Insignia>
       ),
     },
     { campo: 'productoNombre', encabezado: 'Producto', render: (r) => <span className="font-medium text-principal">{r.productoNombre}</span> },
     {
       campo: 'origenNombre', encabezado: 'Origen', render: (r) => (
-        <div><span className="text-principal">{r.origenNombre}</span><br /><span className="text-etiqueta text-secundario">{r.origenTipo === 'drogueria' ? 'Droguería Central' : 'Botica'}</span></div>
+        <div>
+          <span className="text-principal">{r.origenNombre}</span>
+          <br />
+          <span className="text-etiqueta text-secundario">Stock: {r.stockOrigen} / Máx: {r.stockMaximo}</span>
+        </div>
       ),
     },
     {
       campo: 'destinoNombre', encabezado: 'Destino', render: (r) => (
-        <div><span className="text-principal">{r.destinoNombre}</span><br /><span className="text-etiqueta text-secundario">Stock: {r.stockActual}/{r.stockMinimo}</span></div>
+        <div>
+          <span className="text-principal">{r.destinoNombre}</span>
+          <br />
+          <span className="text-etiqueta text-secundario">Stock: {r.stockDestino} / Mín: {r.stockMinimo}</span>
+        </div>
       ),
     },
     {
       campo: 'cantidadSugerida', encabezado: 'Cant.', render: (r) => (
-        <div><span className="font-semibold text-marca-principal">{r.cantidadSugerida} uds</span><br /><span className="text-etiqueta text-secundario">{r.tipo === 'transferencia' ? 'Central →' : 'Redistribución →'}</span></div>
+        <div>
+          <span className="font-semibold text-marca-principal">{r.cantidadSugerida} uds</span>
+          <br />
+          <span className="text-etiqueta text-secundario">Redistribución →</span>
+        </div>
       ),
     },
     {
-      campo: 'riesgo', encabezado: 'Riesgo', render: (r) => <Insignia color={r.riesgoColor}>{r.riesgo}</Insignia>,
+      campo: 'riesgo', encabezado: '', render: (r) => <Insignia color={r.riesgoColor}>{r.riesgo}</Insignia>,
     },
     {
       campo: 'lotes', encabezado: 'Lotes FEFO', render: (r) => (
@@ -256,19 +300,41 @@ export default function PanelRedistribucion() {
     {
       campo: 'acciones', encabezado: '',
       render: (r) => propuestasAceptadas.has(r.id) ? (
-        <span className="text-xs text-verde flex items-center gap-1"><CheckCircle className="h-3.5 w-3.5" />Aceptada</span>
+        <span className="text-xs text-verde flex items-center gap-1"><CheckCircle className="h-3.5 w-3.5" />Creada</span>
       ) : (
         <div className="flex gap-1">
-          <Boton variante="icono" icono={CheckCircle} onClick={() => aceptarPropuesta(r)} className="text-marca-principal hover:bg-marca-claro" title="Aceptar propuesta" />
-          <Boton variante="icono" icono={XCircle} onClick={() => rechazarPropuesta(r.id)} className="text-estado-critico hover:bg-rojo-claro" title="Rechazar propuesta" />
+          <Boton variante="icono" icono={CheckCircle} onClick={() => aceptarPropuesta(r)} cargando={procesando === r.id} className="text-marca-principal hover:bg-marca-claro" title="Crear redistribución" />
+          <Boton variante="icono" icono={XCircle} onClick={() => rechazarPropuesta(r.id)} className="text-estado-critico hover:bg-rojo-claro" title="Descartar propuesta" />
         </div>
       ),
     },
   ]
 
+  if (cargando) {
+    return <div className="flex items-center justify-center py-16"><p className="text-secundario">Cargando datos de inventario...</p></div>
+  }
+
+  if (error && !boticas.length) {
+    return (
+      <div className="space-y-4">
+        <Alerta tipo="error" titulo={error} />
+        <Boton variante="secundario" onClick={cargarDatos}>Reintentar</Boton>
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-6">
-      {mensaje && <Alerta tipo={mensaje.tipo} titulo={mensaje.texto} />}
+      {mensaje && (
+        <div className="space-y-2">
+          <Alerta tipo={mensaje.tipo} titulo={mensaje.texto} />
+          {mensaje.enlace && (
+            <Link to={mensaje.enlace.ruta} className="inline-flex items-center gap-1 text-sm text-marca-principal hover:underline ml-1">
+              {mensaje.enlace.texto} <ExternalLink className="h-3 w-3" />
+            </Link>
+          )}
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Tarjeta titulo="Productos con Excedente" descripcion="Disponibles para redistribuir desde boticas con sobrestock">
@@ -280,7 +346,7 @@ export default function PanelRedistribucion() {
                 <div key={`${p.ubicacionId}-${p.productoId}`} className="flex items-center justify-between p-2.5 bg-fondo rounded-md">
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-medium text-principal truncate">{p.nombreProducto}</p>
-                    <p className="text-xs text-secundario">{p.ubicacionNombre}</p>
+                    <p className="text-xs text-secundario">{p.nombreUbicacion}</p>
                   </div>
                   <Insignia color="azul">+{p.excedente} uds</Insignia>
                 </div>
@@ -298,7 +364,7 @@ export default function PanelRedistribucion() {
                 <div key={`${s.ubicacionId}-${s.productoId}`} className="flex items-center justify-between p-2.5 bg-fondo rounded-md">
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-medium text-principal truncate">{s.nombreProducto}</p>
-                    <p className="text-xs text-secundario">{s.ubicacionNombre}</p>
+                    <p className="text-xs text-secundario">{s.nombreUbicacion}</p>
                   </div>
                   <Insignia color="rojo">-{s.deficit} uds</Insignia>
                 </div>
@@ -308,7 +374,7 @@ export default function PanelRedistribucion() {
         </Tarjeta>
       </div>
 
-      <Tarjeta titulo="Propuestas Automáticas de Redistribución" descripcion="El sistema analiza stock, alertas ML, predicciones, lotes FEFO y vencimientos para generar sugerencias operativas">
+      <Tarjeta titulo="Propuestas Automáticas de Redistribución" descripcion="El sistema analiza el stock real de las boticas y sugiere redistribuciones según reglas de déficit y sobrestock">
         <div className="flex items-center gap-4 mb-4">
           <Boton variante="primario" icono={Lightbulb} onClick={generarPropuestas} disabled={productosSobrestock.length === 0 || stockBajo.length === 0}>
             Generar propuestas de redistribución
@@ -322,9 +388,9 @@ export default function PanelRedistribucion() {
           <div className="flex flex-col items-center py-8 text-center">
             <AlertTriangle className="h-10 w-10 text-secundario mb-3" />
             <p className="text-secundario">
-              {productosSobrestock.length === 0 || stockBajo.length === 0
-                ? 'No hay suficientes datos para generar propuestas. Se necesita al menos un producto con sobrestock y una botica con déficit del mismo producto.'
-                : 'Presiona "Generar propuestas" para analizar inventario, alertas ML, predicciones y lotes FEFO.'}
+              {!propuestasIntentadas
+                ? 'Presiona "Generar propuestas" para analizar inventario, stock mínimo/máximo y lotes FEFO.'
+                : 'No se encontraron propuestas de redistribución. Verifica que las boticas tengan configurados stock mínimo y stock máximo, y que exista al menos una botica con sobrestock y otra con déficit para el mismo producto.'}
             </p>
           </div>
         )}
@@ -348,14 +414,12 @@ export default function PanelRedistribucion() {
               </div>
               <div className="p-3 bg-fondo rounded-md">
                 <p className="text-xs text-secundario mb-1">Tipo</p>
-                <Insignia color={modalPropuesta.tipo === 'transferencia' ? 'azul' : 'verde'}>
-                  {modalPropuesta.tipo === 'transferencia' ? 'Transferencia Central' : 'Redistribución'}
-                </Insignia>
+                <Insignia color="verde">Redistribución</Insignia>
               </div>
               <div className="p-3 bg-fondo rounded-md">
                 <p className="text-xs text-secundario mb-1">Prioridad</p>
-                <Insignia color={modalPropuesta.prioridad === 'alta' ? 'rojo' : 'amarillo'}>
-                  {modalPropuesta.prioridad === 'alta' ? 'Urgente' : 'Normal'}
+                <Insignia color={prioridadColor[modalPropuesta.prioridad]}>
+                  {prioridadLabel[modalPropuesta.prioridad]}
                 </Insignia>
               </div>
             </div>
@@ -364,44 +428,32 @@ export default function PanelRedistribucion() {
               <div className="flex-1 text-center">
                 <p className="text-xs text-secundario">Origen</p>
                 <p className="text-sm font-medium text-principal">{modalPropuesta.origenNombre}</p>
-                <p className="text-xs text-secundario">{modalPropuesta.origenTipo === 'drogueria' ? 'Droguería Central' : 'Botica'}</p>
+                <p className="text-xs text-secundario">Stock: {modalPropuesta.stockOrigen} / Máx: {modalPropuesta.stockMaximo}</p>
               </div>
               <ArrowRight className="h-5 w-5 text-marca-principal shrink-0" />
               <div className="flex-1 text-center">
                 <p className="text-xs text-secundario">Destino</p>
                 <p className="text-sm font-medium text-principal">{modalPropuesta.destinoNombre}</p>
-                <p className="text-xs text-secundario">Stock: {modalPropuesta.stockActual}/{modalPropuesta.stockMinimo}</p>
+                <p className="text-xs text-secundario">Stock: {modalPropuesta.stockDestino} / Mín: {modalPropuesta.stockMinimo}</p>
               </div>
             </div>
 
-            <div className="bg-fondo rounded-md p-3">
-              <p className="text-xs text-secundario mb-2 flex items-center gap-1">
-                <BrainCircuit className="h-3.5 w-3.5" /> Análisis del modelo
-              </p>
-              <div className="grid grid-cols-3 gap-4 text-center mb-3">
-                <div>
-                  <p className="text-lg font-bold text-principal">{modalPropuesta.stockActual}</p>
-                  <p className="text-xs text-secundario">Stock Actual</p>
-                </div>
-                <div>
-                  <p className="text-lg font-bold text-principal">{modalPropuesta.stockMinimo}</p>
-                  <p className="text-xs text-secundario">Stock Mínimo</p>
-                </div>
-                <div>
-                  <p className="text-lg font-bold text-marca-principal">{modalPropuesta.demandaEstimada}</p>
-                  <p className="text-xs text-secundario">Demanda Est. 3m</p>
-                </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="p-3 bg-fondo rounded-md">
+                <p className="text-xs text-secundario mb-1">Excedente en origen</p>
+                <p className="text-lg font-bold text-azul">{modalPropuesta.excedente} uds</p>
               </div>
-              <Insignia color={modalPropuesta.confianza >= 80 ? 'verde' : modalPropuesta.confianza >= 60 ? 'amarillo' : 'rojo'}>
-                {modalPropuesta.confianza}% confianza ML
-              </Insignia>
+              <div className="p-3 bg-fondo rounded-md">
+                <p className="text-xs text-secundario mb-1">Déficit en destino</p>
+                <p className="text-lg font-bold text-estado-critico">{modalPropuesta.deficit} uds</p>
+              </div>
             </div>
 
             <div className="p-3 bg-fondo rounded-md">
               <p className="text-xs text-secundario mb-2 flex items-center gap-1">
                 <CalendarDays className="h-3.5 w-3.5" /> Criterio FEFO aplicado
               </p>
-              <p className="text-sm text-principal mb-2">{modalPropuesta.criterioFEFO}</p>
+              <p className="text-sm text-principal mb-2">Lotes ordenados por fecha de vencimiento (FEFO) — se priorizan lotes más próximos a vencer</p>
               <div className="space-y-1.5">
                 {modalPropuesta.lotesSugeridos.map((lote, idx) => (
                   <div key={idx} className="flex items-center justify-between text-sm p-2 bg-fondo-secundario rounded border border-estilo">
@@ -415,21 +467,15 @@ export default function PanelRedistribucion() {
 
             <div className="p-3 bg-estado-info-fondo rounded-md">
               <p className="text-xs text-secundario mb-1 flex items-center gap-1">
-                <Lightbulb className="h-3.5 w-3.5" /> Motivo de recomendación
+                <Lightbulb className="h-3.5 w-3.5" /> Regla aplicada
               </p>
-              <p className="text-sm text-principal">{modalPropuesta.motivo}</p>
-              {modalPropuesta.alertaML && (
-                <div className="mt-2 flex items-center gap-2">
-                  <AlertTriangle className="h-3.5 w-3.5 text-estado-critico" />
-                  <span className="text-xs text-estado-critico">Alerta activa: {modalPropuesta.alertaML.mensaje}</span>
-                </div>
-              )}
+              <p className="text-sm text-principal">{modalPropuesta.regla}</p>
             </div>
 
             <div className="flex justify-end gap-3 pt-3 border-t border-estilo">
-              <Boton variante="secundario" icono={XCircle} onClick={() => rechazarPropuesta(modalPropuesta.id)}>Rechazar propuesta</Boton>
-              <Boton variante="primario" icono={CheckCircle} onClick={() => aceptarPropuesta(modalPropuesta)} disabled={propuestasAceptadas.has(modalPropuesta.id)}>
-                Aceptar propuesta
+              <Boton variante="secundario" icono={XCircle} onClick={() => rechazarPropuesta(modalPropuesta.id)}>Descartar propuesta</Boton>
+              <Boton variante="primario" icono={CheckCircle} onClick={() => aceptarPropuesta(modalPropuesta)} disabled={propuestasAceptadas.has(modalPropuesta.id)} cargando={procesando === modalPropuesta.id}>
+                Crear redistribución
               </Boton>
             </div>
           </div>
