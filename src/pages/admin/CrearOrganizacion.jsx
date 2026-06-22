@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Building2, Globe, Mail, AtSign } from 'lucide-react'
+import { Building2, Globe, Mail, AtSign, Lock } from 'lucide-react'
 import { crearOrganizacion } from '@/services/supabase/crearCliente'
 import { obtenerOpcionesUbigeos } from '@/services/supabase/catalogo'
 import { esSuperAdmin } from '@/utilities/permisos'
@@ -40,6 +40,7 @@ const ESTADO_INICIAL = {
   drogueriaTelefono: '',
   adminNombre: '',
   adminNombreCuenta: '',
+  adminContrasena: '',
 }
 
 export default function CrearOrganizacion() {
@@ -83,6 +84,8 @@ export default function CrearOrganizacion() {
     if (!formulario.adminNombre?.trim()) nuevos.adminNombre = 'El nombre del administrador es obligatorio'
     if (!formulario.adminNombreCuenta?.trim()) nuevos.adminNombreCuenta = 'El nombre de cuenta es obligatorio'
     else if (!/^[a-z0-9]+(?:[._-][a-z0-9]+)*$/.test(formulario.adminNombreCuenta)) nuevos.adminNombreCuenta = 'Solo letras, números, punto, guion o guion bajo'
+    if (!formulario.adminContrasena?.trim()) nuevos.adminContrasena = 'La contraseña es obligatoria'
+    else if (formulario.adminContrasena.length < 6) nuevos.adminContrasena = 'La contraseña debe tener al menos 6 caracteres'
     setErrores(nuevos)
     return Object.keys(nuevos).length === 0
   }
@@ -114,6 +117,7 @@ export default function CrearOrganizacion() {
       administrador: {
         nombre: formulario.adminNombre.trim(),
         nombre_cuenta: formulario.adminNombreCuenta.trim(),
+        contrasena: formulario.adminContrasena,
       },
     })
 
@@ -193,7 +197,7 @@ export default function CrearOrganizacion() {
                 <div className="relative">
                   <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-secundario text-sm">@</span>
                   <input type="text" value={formulario.orgDominioCorreo} onChange={(e) => actualizar('orgDominioCorreo', e.target.value)}
-                    className={`${estiloInput} pl-8`} placeholder="boticasleonardo.com" />
+                    className={`${estiloInput} pl-8`} placeholder="miempresa.com" />
                 </div>
                 <p className="text-xs text-secundario mt-1.5">Sin @, sin protocolo, sin espacios. Ej: boticasleonardo.com</p>
                 {errores.orgDominioCorreo && <p className="text-xs text-estado-critico mt-1">{errores.orgDominioCorreo}</p>}
@@ -256,6 +260,16 @@ export default function CrearOrganizacion() {
               }} required className={estiloInput} placeholder="leonardo.ruiz" />
               <p className="text-xs text-secundario mt-1.5">Se combinará con el dominio institucional para generar el correo</p>
               {errores.adminNombreCuenta && <p className="text-xs text-estado-critico mt-1">{errores.adminNombreCuenta}</p>}
+            </div>
+            <div>
+              <label className="text-sm font-medium text-principal">
+                <Lock className="h-3.5 w-3.5 inline mr-1 text-secundario" />
+                Contraseña *
+              </label>
+              <input type="password" value={formulario.adminContrasena} onChange={(e) => actualizar('adminContrasena', e.target.value)}
+                required className={estiloInput} placeholder="Mínimo 6 caracteres" />
+              <p className="text-xs text-secundario mt-1.5">El administrador usará esta contraseña para iniciar sesión</p>
+              {errores.adminContrasena && <p className="text-xs text-estado-critico mt-1">{errores.adminContrasena}</p>}
             </div>
             {formulario.orgDominioCorreo && (
               <div className="bg-fondo border border-estilo rounded-md p-3 space-y-1.5">
