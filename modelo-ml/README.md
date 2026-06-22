@@ -1,27 +1,49 @@
-# Modelo ML — botica-demand-ml
+# Modelo ML - botica-demand-ml
 
-Este directorio contendrá el servicio de Machine Learning para predicción de demanda farmacéutica.
-
-## Tecnologías (Fase futura)
-
-- **Python 3.10+** con **FastAPI** para la API REST
-- **statsmodels** para SARIMA
-- **XGBoost** para gradient boosting
-- **scikit-learn** para preprocesamiento
-- **pandas** y **NumPy** para manejo de datos
-- Despliegue en **Docker + Google Cloud Run**
+Servicio de Machine Learning para predicción de demanda farmacéutica.
 
 ## Estructura
 
-```
+```text
 modelo-ml/
-├── api/              → Endpoints FastAPI
-├── entrenamiento/    → Scripts de entrenamiento
-├── modelos_guardados/→ Archivos de modelos serializados
-├── datos/            → Datasets de entrenamiento
-└── notebooks/        → Jupyter notebooks de exploración
+├── data/
+│   ├── features_entrenamiento.csv
+│   ├── productos.csv
+│   ├── boticas.csv
+│   ├── movimientos_inventario.csv
+│   └── ...
+├── src/
+│   ├── generar_dataset.py
+│   ├── pipeline.py
+│   ├── eda.py
+│   └── utils.py
+├── modelos/
+│   └── v1.0.0/
+│       ├── modelo.pkl
+│       ├── metricas.json
+│       ├── drift_metricas.json
+│       └── predicciones.csv
+├── api/
+│   ├── __init__.py
+│   └── main.py
+├── reports/
+│   ├── graficos/
+│   └── eda/
+├── requirements.txt
+├── Dockerfile
+└── README.md
 ```
 
-## Estado
+## Comandos
 
-**No desarrollado aún.** Este contenido se implementará en fases posteriores del proyecto.
+Desde `modelo-ml/`:
+
+```bash
+python src/generar_dataset.py
+python src/pipeline.py
+```
+
+## Artefactos
+
+- Datasets: `data/`
+- Modelos y resultados versionados: `modelos/`
