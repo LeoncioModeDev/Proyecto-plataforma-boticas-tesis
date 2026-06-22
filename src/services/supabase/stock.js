@@ -33,6 +33,7 @@ const MAPEAR_STOCK = (item) => ({
   stockEnTransito: item.stock_en_transito ?? 0,
   updatedAt: item.updated_at,
   nombreProducto: item.productos?.nombre_comercial || item.producto_id,
+  codigoProducto: item.productos?.codigo_interno || null,
   nombreUbicacion: item.boticas?.nombre || item.ubicacion_id || 'Droguería Central',
   stockDisponible: item.cantidad_disponible,
   ultimaActualizacion: item.updated_at,
@@ -49,7 +50,7 @@ const SELECCION = `
   stock_por_recibir,
   stock_en_transito,
   updated_at,
-  productos:producto_id (nombre_comercial),
+  productos:producto_id (nombre_comercial, codigo_interno),
   boticas:ubicacion_id (nombre)
 `
 

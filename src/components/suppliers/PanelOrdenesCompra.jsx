@@ -71,7 +71,7 @@ export default function PanelOrdenesCompra({ ordenes, onNueva, onActualizar, esA
   const puedeMarcarPorRecibir = (estado) => estado === 'aprobada'
 
   const columnas = [
-    { campo: 'id', encabezado: 'OC', render: (r) => <span className="font-mono text-cuerpo font-medium text-marca-principal">{r.id?.slice(0, 8)}</span> },
+    { campo: 'numeroOrden', encabezado: 'N.º de Orden', render: (r) => <span className="font-mono text-xs font-medium text-principal">{r.numeroOrden}</span> },
     { campo: 'proveedorNombre', encabezado: 'Proveedor', render: (r) => <span className="text-principal">{r.proveedorNombre}</span> },
     { campo: 'createdAt', encabezado: 'Creación', render: (r) => <span className="text-etiqueta text-secundario">{formatearFechaCorta(r.createdAt)}</span> },
     {

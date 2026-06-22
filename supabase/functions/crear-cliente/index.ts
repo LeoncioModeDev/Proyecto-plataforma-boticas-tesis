@@ -11,174 +11,278 @@ const CORS_HEADERS = {
     "authorization, x-client-info, apikey, content-type",
 };
 
+const TIPOS_IDENTIFICACION = ["ruc", "nit", "tax_id", "vat", "otro"];
+const ROLES_ADMIN = ["admin_central", "super_admin"];
+
+interface CrearPayload {
+  organizacion: {
+    nombre: string;
+    tipo_identificacion: string;
+    numero_identificacion: string;
+    pais_origen?: string;
+    dominio_correo: string;
+  };
+  drogueria: {
+    nombre: string;
+    ubigeo: string;
+    direccion?: string | null;
+    telefono?: string | null;
+  };
+  administrador: {
+    nombre: string;
+    nombre_cuenta: string;
+  };
+}
+
+function normalizarDominio(d: string): string {
+  return d
+    .toLowerCase()
+    .replace(/^https?:\/\//, "")
+    .replace(/^@/, "")
+    .replace(/\/$/, "")
+    .replace(/\/.*$/, "")
+    .replace(/\s/g, "")
+    .trim();
+}
+
+function validarNombreCuenta(n: string): boolean {
+  return /^[a-z0-9]+(?:[._-][a-z0-9]+)*$/.test(n);
+}
+
+function normalizarNombreCuenta(n: string): string {
+  const PARTICULAS = new Set(["del", "de", "la", "las", "los", "y", "e", "el", "en", "un", "una"]);
+  const partes = n
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z\s]/g, "")
+    .split(/\s+/)
+    .filter(Boolean);
+  const filtradas = partes.filter((p) => !PARTICULAS.has(p));
+  const nombre = filtradas[0] || partes[0] || "";
+  const apellido = filtradas.length > 1 ? filtradas[filtradas.length - 1] : "";
+  return [nombre, apellido].filter(Boolean).join(".").replace(/\.+/g, ".");
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: CORS_HEADERS });
   }
 
+  const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+
   const authHeader = req.headers.get("Authorization") || "";
   const jwt = authHeader.replace("Bearer ", "");
 
-  if (!jwt) {
-    return json({ error: "Token de autenticación requerido" }, 401);
-  }
+  if (!jwt) return json({ error: "Token de autenticación requerido" }, 401);
 
-  const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+  const { data: { user }, error: authError } = await supabase.auth.getUser(jwt);
+  if (authError || !user) return json({ error: "Token inválido o expirado" }, 401);
 
-  const {
-    data: { user },
-    error: authError,
-  } = await supabaseAdmin.auth.getUser(jwt);
-  if (authError || !user) {
-    return json({ error: "Token inválido o expirado" }, 401);
-  }
-
-  const { data: profile, error: profileError } = await supabaseAdmin
+  const { data: profile, error: profileError } = await supabase
     .from("usuarios")
     .select("rol, activo")
     .eq("id", user.id)
     .single();
 
-  if (profileError || !profile) {
-    return json({ error: "Perfil de usuario no encontrado" }, 403);
-  }
+  if (profileError || !profile) return json({ error: "Perfil de usuario no encontrado" }, 403);
+  if (!profile.activo) return json({ error: "Usuario desactivado" }, 403);
+  if (profile.rol !== "super_admin") return json({ error: "Se requiere rol super_admin" }, 403);
 
-  if (!profile.activo) {
-    return json({ error: "Usuario desactivado. Contacta al administrador." }, 403);
-  }
-
-  if (profile.rol !== "super_admin") {
-    return json({ error: "Se requiere rol super_admin" }, 403);
-  }
-
-  let body;
+  let body: CrearPayload;
   try {
     body = await req.json();
   } catch {
     return json({ error: "Cuerpo de solicitud inválido" }, 400);
   }
 
-  const { org, admin } = body;
+  const { organizacion: org, drogueria: drog, administrador: admin } = body;
 
-  if (
-    !org?.nombre ||
-    !org?.tipo_identificacion ||
-    !org?.numero_identificacion
-  ) {
-    return json(
-      {
-        error:
-          "Faltan datos de la organización (nombre, tipo_identificacion, numero_identificacion)",
-      },
-      400,
-    );
+  // Validar organización
+  if (!org?.nombre?.trim()) return json({ error: "El nombre de la organización es obligatorio" }, 400);
+  if (!org?.tipo_identificacion || !TIPOS_IDENTIFICACION.includes(org.tipo_identificacion)) {
+    return json({ error: `Tipo de identificación inválido. Debe ser: ${TIPOS_IDENTIFICACION.join(", ")}` }, 400);
+  }
+  if (!org?.numero_identificacion?.trim()) return json({ error: "El número de identificación es obligatorio" }, 400);
+
+  // Normalizar y validar dominio
+  const dominio = normalizarDominio(org.dominio_correo || "");
+  if (!dominio) return json({ error: "El dominio institucional es obligatorio" }, 400);
+  if (!/^[a-z0-9][a-z0-9.-]+\.[a-z]{2,}$/.test(dominio)) {
+    return json({ error: "El dominio institucional no tiene un formato válido. Ejemplo: boticasleonardo.com" }, 400);
   }
 
-  if (!admin?.nombre || !admin?.email || !admin?.password) {
-    return json(
-      { error: "Faltan datos del administrador (nombre, email, password)" },
-      400,
-    );
+  // Validar droguería
+  if (!drog?.nombre?.trim()) return json({ error: "El nombre de la droguería es obligatorio" }, 400);
+  if (!drog?.ubigeo?.trim()) return json({ error: "El ubigeo de la droguería es obligatorio" }, 400);
+
+  // Validar administrador
+  if (!admin?.nombre?.trim()) return json({ error: "El nombre del administrador es obligatorio" }, 400);
+  if (!admin?.nombre_cuenta?.trim()) return json({ error: "El nombre de cuenta del administrador es obligatorio" }, 400);
+
+  const nombreCuenta = normalizarNombreCuenta(admin.nombre_cuenta);
+  if (!validarNombreCuenta(nombreCuenta)) {
+    return json({ error: "El nombre de cuenta solo puede contener letras, números, punto, guion o guion bajo" }, 400);
   }
 
-  const { data: orgData, error: orgError } = await supabaseAdmin
-    .from("organizaciones")
-    .insert({
-      nombre: org.nombre,
-      tipo_identificacion: org.tipo_identificacion,
-      numero_identificacion: org.numero_identificacion,
-      pais_origen: org.pais_origen || "PE",
-    })
-    .select("id, nombre")
-    .single();
+  // Construir email
+  const email = `${nombreCuenta}@${dominio}`;
 
-  if (orgError) {
-    if (orgError.code === "23505") {
-      return json(
-        {
-          error:
-            "Ya existe una organización con ese tipo y número de identificación",
-        },
-        409,
-      );
+  // Verificar unicidad del dominio
+  const { data: dominioExistente } = await supabase
+    .from("configuracion_organizacion")
+    .select("org_id")
+    .eq("dominio_correo_organizacion", dominio)
+    .maybeSingle();
+
+  if (dominioExistente) {
+    return json({ error: `El dominio ${dominio} ya está registrado por otra organización` }, 409);
+  }
+
+  // Verificar unicidad del email
+  const { data: emailExistente } = await supabase
+    .from("usuarios")
+    .select("id")
+    .eq("email", email)
+    .maybeSingle();
+
+  if (emailExistente) {
+    return json({ error: `El correo ${email} ya está registrado` }, 409);
+  }
+
+  // ============================================================
+  // Iniciar creación
+  // ============================================================
+
+  let orgCreada: { id: string; nombre: string } | null = null;
+  let drogueriaCreada: { id: string; codigo_interno: string | null; nombre: string } | null = null;
+
+  try {
+    // 1. Crear organización
+    const { data: orgData, error: orgError } = await supabase
+      .from("organizaciones")
+      .insert({
+        nombre: org.nombre.trim(),
+        tipo_identificacion: org.tipo_identificacion,
+        numero_identificacion: org.numero_identificacion.trim(),
+        pais_origen: org.pais_origen || "PE",
+      })
+      .select("id, nombre")
+      .single();
+
+    if (orgError) {
+      if (orgError.code === "23505") {
+        return json({ error: "Ya existe una organización con ese tipo y número de identificación" }, 409);
+      }
+      return json({ error: orgError.message }, 400);
     }
-    return json({ error: orgError.message }, 400);
-  }
 
-  let drogueriaId = null;
-  if (org?.drogueria) {
-    const { data: boticaData, error: boticaError } = await supabaseAdmin
+    orgCreada = orgData;
+
+    // 2. Guardar dominio en configuracion_organizacion (trigger ya creó el registro)
+    const { error: configError } = await supabase
+      .from("configuracion_organizacion")
+      .update({ dominio_correo_organizacion: dominio })
+      .eq("org_id", orgData.id);
+
+    if (configError) {
+      console.error("Error al guardar dominio:", configError.message);
+    }
+
+    // 3. Crear droguería central
+    const { data: drogueria, error: boticaError } = await supabase
       .from("boticas")
       .insert({
         org_id: orgData.id,
-        nombre: org.drogueria.nombre || `Droguería Central - ${org.nombre}`,
+        nombre: drog.nombre.trim(),
         tipo: "drogueria",
-        ubigeo: org.drogueria.ubigeo || "150101",
-        direccion: org.drogueria.direccion || null,
-        telefono: org.drogueria.telefono || null,
+        ubigeo: drog.ubigeo.trim(),
+        direccion: drog.direccion?.trim() || null,
+        telefono: drog.telefono?.trim() || null,
       })
-      .select("id")
+      .select("id, codigo_interno, nombre")
       .single();
 
     if (boticaError) {
-      return json({ error: boticaError.message }, 400);
+      throw new Error(`Error al crear droguería: ${boticaError.message}`);
     }
-    drogueriaId = boticaData.id;
-  }
 
-  const { data: userData, error: userError } =
-    await supabaseAdmin.auth.admin.createUser({
-      email: admin.email,
-      password: admin.password,
-      email_confirm: true,
-      user_metadata: {
-        org_id: orgData.id,
-        org_nombre: orgData.nombre,
-        nombre: admin.nombre,
-        rol: "admin_central",
-        botica_id: drogueriaId,
+    drogueriaCreada = drogueria;
+
+    // 4. Invitar administrador
+    const { data: userData, error: userError } = await supabase.auth.admin.inviteUserByEmail(
+      email,
+      {
+        data: {
+          org_id: orgData.id,
+          org_nombre: orgData.nombre,
+          nombre: admin.nombre.trim(),
+          rol: "admin_central",
+          botica_id: drogueria.id,
+        },
+        app_metadata: {
+          rol: "admin_central",
+          org_id: orgData.id,
+          botica_id: drogueria.id,
+        },
       },
-      app_metadata: {
-        rol: "admin_central",
+    );
+
+    if (userError || !userData?.user?.id) {
+      throw new Error(`Error al invitar administrador: ${userError?.message || "No se pudo crear el usuario"}`);
+    }
+
+    // 5. Crear perfil del administrador
+    const { error: upsertError } = await supabase.from("usuarios").upsert(
+      {
+        id: userData.user.id,
         org_id: orgData.id,
-        botica_id: drogueriaId,
+        email,
+        nombre: admin.nombre.trim(),
+        rol: "admin_central",
+        botica_id: drogueria.id,
+        activo: true,
       },
+      { onConflict: "id" },
+    );
+
+    if (upsertError) {
+      console.error("Error al crear perfil del admin:", upsertError.message);
+    }
+
+    // 6. Auditoría
+    await supabase.from("auditoria").insert({
+      org_id: orgData.id,
+      usuario_id: user.id,
+      accion: "CREAR_ORGANIZACION",
+      entidad: "organizaciones",
+      entidad_id: orgData.id,
+      nivel: "info",
+      detalle: `Se creó la organización "${orgData.nombre}" con admin "${admin.nombre}" (${email}) y droguería "${drogueria.nombre}"`,
     });
 
-  if (userError) {
-    return json({ error: userError.message }, 400);
+    return json({
+      exito: true,
+      organizacion: { id: orgData.id, nombre: orgData.nombre },
+      drogueria: { id: drogueria.id, codigo_interno: drogueria.codigo_interno, nombre: drogueria.nombre },
+      administrador: { id: userData.user.id, email, nombre: admin.nombre.trim() },
+    });
+
+  } catch (e) {
+    const errorMsg = e instanceof Error ? e.message : "Error interno del servidor";
+    console.error("Error en crear-cliente:", errorMsg);
+
+    // Compensación: eliminar registros creados
+    if (drogueriaCreada?.id) {
+      await supabase.from("boticas").delete().eq("id", drogueriaCreada.id).catch(() => {});
+    }
+    if (orgCreada?.id) {
+      // La config se elimina en cascada por FK
+      await supabase.from("organizaciones").delete().eq("id", orgCreada.id).catch(() => {});
+    }
+
+    return json({ error: errorMsg }, 400);
   }
-
-  const { error: upsertError } = await supabaseAdmin.from("usuarios").upsert(
-    {
-      id: userData.user.id,
-      org_id: orgData.id,
-      email: admin.email,
-      nombre: admin.nombre,
-      rol: "admin_central",
-      botica_id: drogueriaId,
-      activo: true,
-    },
-    { onConflict: "id" },
-  );
-
-  if (upsertError) {
-    console.error("Error al sincronizar perfil:", upsertError.message);
-  }
-
-  return json({
-    exito: true,
-    organizacion: {
-      id: orgData.id,
-      nombre: orgData.nombre,
-    },
-    drogueria_id: drogueriaId,
-    administrador: {
-      id: userData.user.id,
-      email: admin.email,
-      nombre: admin.nombre,
-    },
-  });
 });
 
 function json(data: unknown, status = 200) {

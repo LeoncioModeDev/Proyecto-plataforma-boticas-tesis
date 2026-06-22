@@ -123,14 +123,60 @@ async function obtenerUsuario(supabase: any, perfil: PerfilUsuario, id: string) 
 }
 
 async function crearUsuario(supabase: any, perfil: PerfilUsuario, body: any) {
-  const { nombre, email, password, rol, botica_id, telefono } = body;
+  const { nombre, nombre_cuenta, rol, botica_id, telefono } = body;
 
-  if (!nombre || !email || !password || !rol) {
-    return json({ error: "Faltan datos obligatorios (nombre, email, password, rol)" }, 400);
+  if (!nombre || !nombre_cuenta || !rol) {
+    return json({ error: "Faltan datos obligatorios (nombre, nombre_cuenta, rol)" }, 400);
   }
 
   if (!["admin_central", "operador_drogueria", "visor_botica"].includes(rol)) {
     return json({ error: "Rol inválido" }, 400);
+  }
+
+  // Validar nombre_cuenta
+  if (!/^[a-z0-9][a-z0-9._-]*[a-z0-9]$/.test(nombre_cuenta)) {
+    return json({ error: "El nombre de cuenta solo puede contener letras, números, puntos, guiones y guiones bajos. Debe empezar y terminar con letra o número." }, 400);
+  }
+
+  if (nombre_cuenta.length < 3 || nombre_cuenta.length > 64) {
+    return json({ error: "El nombre de cuenta debe tener entre 3 y 64 caracteres" }, 400);
+  }
+
+  // Obtener dominio institucional
+  const { data: config } = await supabase
+    .from("configuracion_organizacion")
+    .select("dominio_correo_organizacion")
+    .eq("org_id", perfil.org_id)
+    .single();
+
+  const dominio = config?.dominio_correo_organizacion;
+
+  if (!dominio) {
+    return json({ error: "Tu organización no tiene un dominio institucional configurado. Contacta al super_admin." }, 400);
+  }
+
+  // Construir email
+  const email = `${nombre_cuenta}@${dominio}`;
+
+  // Validar dominio del email
+  const { data: dominioValido } = await supabase.rpc("validar_dominio_correo", {
+    p_email: email,
+    p_org_id: perfil.org_id,
+  });
+
+  if (!dominioValido) {
+    return json({ error: "El dominio del correo generado no está permitido para tu organización" }, 400);
+  }
+
+  // Verificar unicidad global del email
+  const { data: existingEmail } = await supabase
+    .from("usuarios")
+    .select("id")
+    .eq("email", email)
+    .maybeSingle();
+
+  if (existingEmail) {
+    return json({ error: `Ya existe un usuario con el correo ${email}` }, 409);
   }
 
   // --- Resolver drogueria_id para roles centrales ---
@@ -186,28 +232,23 @@ async function crearUsuario(supabase: any, perfil: PerfilUsuario, body: any) {
     }
   }
 
-  const { data: userData, error: userError } = await supabase.auth.admin.createUser({
+  const { data: userData, error: userError } = await supabase.auth.admin.inviteUserByEmail(
     email,
-    password,
-    email_confirm: true,
-    user_metadata: {
-      org_id: perfil.org_id,
-      nombre,
-      rol,
-      botica_id: rol === "visor_botica" ? (botica_id || null) : null,
-      drogueria_id,
-      telefono: telefono || null,
+    {
+      data: {
+        org_id: perfil.org_id,
+        nombre,
+        rol,
+        botica_id: rol === "visor_botica" ? (botica_id || null) : null,
+        drogueria_id,
+        telefono: telefono || null,
+      },
     },
-    app_metadata: {
-      rol,
-      org_id: perfil.org_id,
-      botica_id: rol === "visor_botica" ? (botica_id || null) : null,
-    },
-  });
+  );
 
   if (userError) {
     if (userError.message?.includes("already")) {
-      return json({ error: "Ya existe un usuario con ese email" }, 409);
+      return json({ error: `Ya existe un usuario con el correo ${email}` }, 409);
     }
     return json({ error: userError.message }, 400);
   }
@@ -238,7 +279,7 @@ async function crearUsuario(supabase: any, perfil: PerfilUsuario, body: any) {
     entidad: "usuarios",
     entidad_id: userData.user.id,
     nivel: "info",
-    detalle: `Se creó el usuario "${nombre}" con rol ${rol}`,
+    detalle: `Se creó el usuario "${nombre}" (${email}) con rol ${rol}. Invitación enviada.`,
   });
 
   return json({

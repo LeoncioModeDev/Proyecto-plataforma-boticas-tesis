@@ -1,18 +1,20 @@
 ﻿import { useState, useEffect } from 'react'
 import Tabla from '@/components/common/Tabla'
-
 import Insignia from '@/components/common/Insignia'
+import useConfiguracion from '@/state/useConfiguracion'
 import useAutenticacion from '@/state/useAutenticacion'
 import { obtenerLotesActivos } from '@/services/supabase/lotes'
 import { calcularFEFO } from '@/utilities/calcularFEFO'
 import { formatearFechaCorta, diasRestantes } from '@/utilities/formatearFecha'
 import { filtrarPorBotica } from '@/utilities/permisos'
+
 export default function PaginaLotesBotica() {
   const { usuario } = useAutenticacion()
   const [datos, setDatos] = useState([])
   const [cargando, setCargando] = useState(true)
   const [error, setError] = useState(null)
   const [filtroStock, setFiltroStock] = useState('con_stock')
+  const alertaDias = useConfiguracion(s => s.config?.alertaVencimientoDias ?? 30)
 
   useEffect(() => {
     setCargando(true)
@@ -34,15 +36,23 @@ export default function PaginaLotesBotica() {
   })
 
   const columnas = [
-    { campo: 'nombreProducto', encabezado: 'Producto', render: (r) => <span className={r.cantidad === 0 ? 'text-secundario' : ''}>{r.nombreProducto}</span> },
     { campo: 'numeroLote', encabezado: 'Nº Lote', render: (r) => <span className={r.cantidad === 0 ? 'text-secundario' : ''}>{r.numeroLote}</span> },
+    { campo: 'codigoProducto', encabezado: 'Código', render: (r) => <span className={`font-mono text-xs ${r.cantidad === 0 ? 'text-secundario' : ''}`}>{r.codigoProducto || '-'}</span> },
+    { campo: 'nombreProducto', encabezado: 'Producto', render: (r) => <span className={r.cantidad === 0 ? 'text-secundario' : ''}>{r.nombreProducto}</span> },
     { campo: 'cantidad', encabezado: 'Cantidad', render: (r) => r.cantidad === 0
       ? <span className="text-secundario line-through">0 <span className="not-italic text-xs">(Agotado)</span></span>
       : <span>{r.cantidad}</span>
     },
     { campo: 'fechaVencimiento', encabezado: 'Vencimiento', render: (r) => {
+      if (r.cantidad === 0) {
+        return <span className="text-secundario">{formatearFechaCorta(r.fechaVencimiento)}</span>
+      }
       const dias = diasRestantes(r.fechaVencimiento)
-      return <span className={r.cantidad === 0 ? 'text-secundario' : ''}>{formatearFechaCorta(r.fechaVencimiento)} <Insignia color={dias < 30 ? 'rojo' : dias < 90 ? 'amarillo' : 'verde'}>{dias}d</Insignia></span>
+      let color, etiqueta
+      if (dias < 0) { color = 'rojo'; etiqueta = 'Vencido' }
+      else if (dias <= alertaDias) { color = 'amarillo'; etiqueta = 'Próx. vencer' }
+      else { color = 'verde'; etiqueta = 'Vigente' }
+      return <span>{formatearFechaCorta(r.fechaVencimiento)} <Insignia color={color}>{etiqueta}</Insignia></span>
     }},
   ]
 

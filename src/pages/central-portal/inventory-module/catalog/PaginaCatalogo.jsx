@@ -105,7 +105,7 @@ export default function PaginaCatalogo() {
   }
 
   const columnas = [
-    { campo: 'id', encabezado: 'ID', render: (r) => <span className="font-mono text-xs">{r.id?.slice(0, 8)}</span> },
+    { campo: 'codigoInterno', encabezado: 'Código', render: (r) => <span className="font-mono text-xs font-medium">{r.codigoInterno}</span> },
     { campo: 'nombreComercial', encabezado: 'Nombre Comercial' },
     { campo: 'principioActivoDisplay', encabezado: 'Principio Activo' },
     { campo: 'formaDisplay', encabezado: 'Forma', render: (r) => <span className="capitalize">{r.formaDisplay}</span> },

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Users, Edit, ToggleLeft, ToggleRight, Plus, Mail, Shield, MapPin, Clock, Key } from 'lucide-react'
+import { Users, Edit, ToggleLeft, ToggleRight, Plus, Mail, Shield, MapPin, Clock } from 'lucide-react'
 import Boton from '@/components/common/Boton'
 import Tabla from '@/components/common/Tabla'
 import Insignia from '@/components/common/Insignia'
@@ -10,6 +10,8 @@ import { listarUsuarios, crearUsuario, actualizarUsuario, toggleUsuario } from '
 import { listarBoticas } from '@/services/supabase/boticas'
 import { ETIQUETAS_ROLES } from '@/constants/roles'
 import { formatearFechaRelativa } from '@/utilities/formatearFecha'
+import { normalizarNombreCuenta } from '@/utilities/normalizarNombreCuenta'
+import useConfiguracion from '@/state/useConfiguracion'
 
 const ESTADOS_USUARIO = {
   activo: { etiqueta: 'Activo', color: 'verde' },
@@ -25,8 +27,10 @@ const MAPEO_ERRORES = {
     'No se puede crear un operador de droguería. Asegúrate de que exista una droguería central. Créala desde Boticas.',
   'Ya existe un admin_central en tu organización. Solo puede haber uno.':
     'Ya existe un administrador central. Solo puede haber uno por organización.',
-  'Ya existe un usuario con ese email':
-    'Ya existe un usuario con ese correo electrónico.',
+  'El nombre de cuenta solo puede contener letras, números, puntos, guiones y guiones bajos. Debe empezar y terminar con letra o número.':
+    'El nombre de usuario contiene caracteres inválidos.',
+  'El nombre de cuenta debe tener entre 3 y 64 caracteres':
+    'El nombre de usuario debe tener entre 3 y 64 caracteres.',
   'El visor_botica no puede estar asociado a la droguería central':
     'Un visor de botica no puede asociarse a la droguería central. Selecciona una botica.',
   'El rol visor_botica requiere una botica asignada':
@@ -46,10 +50,11 @@ const COLORES_ROL = {
 }
 
 function formularioVacio() {
-  return { nombre: '', email: '', password: '', rol: '', boticaId: '', telefono: '', activo: true }
+  return { nombre: '', nombreCuenta: '', rol: '', boticaId: '', telefono: '', activo: true }
 }
 
 export default function PaginaUsuarios() {
+  const { config, cargarConfig, obtenerDominioCorreo } = useConfiguracion()
   const [usuarios, setUsuarios] = useState([])
   const [boticas, setBoticas] = useState([])
   const [drogueria, setDrogueria] = useState(null)
@@ -86,7 +91,7 @@ export default function PaginaUsuarios() {
     }
   }
 
-  useEffect(() => { cargarDatos() }, [])
+  useEffect(() => { cargarDatos(); cargarConfig() }, [])
 
   const filtrados = usuarios.filter(u => {
     const matchRol = filtroRol ? u.rol === filtroRol : true
@@ -137,11 +142,14 @@ export default function PaginaUsuarios() {
   }
 
   const abrirModalEditar = (usuario) => {
+    const dominio = obtenerDominioCorreo()
+    const nombreCuenta = dominio && usuario.email?.endsWith(`@${dominio}`)
+      ? usuario.email.slice(0, -(`@${dominio}`.length))
+      : ''
     setEditando(usuario)
     setFormulario({
       nombre: usuario.nombre,
-      email: usuario.email,
-      password: '',
+      nombreCuenta,
       rol: usuario.rol,
       boticaId: usuario.boticaId || '',
       telefono: usuario.telefono || '',
@@ -153,12 +161,12 @@ export default function PaginaUsuarios() {
 
   const validarFormulario = () => {
     if (!formulario.nombre.trim()) return 'El nombre es obligatorio'
-    if (!formulario.email.trim()) return 'El email es obligatorio'
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formulario.email)) return 'Email inválido'
+    if (!formulario.nombreCuenta.trim()) return 'El nombre de cuenta es obligatorio'
+    if (!/^[a-z0-9][a-z0-9._-]*[a-z0-9]$/.test(formulario.nombreCuenta)) return 'El nombre de usuario contiene caracteres inválidos'
     if (!formulario.rol) return 'El rol es obligatorio'
-    if (!editando && !formulario.password) return 'La contraseña es obligatoria para nuevos usuarios'
     if (formulario.rol === 'visor_botica' && !formulario.boticaId) return 'Debe seleccionar una botica para el rol Visor'
     if (formulario.rol === 'operador_drogueria' && !drogueria) return 'No hay droguería central disponible en tu organización'
+    if (!obtenerDominioCorreo()) return 'Tu organización no tiene un dominio institucional configurado. Contacta al super_admin.'
     return null
   }
 
@@ -170,6 +178,8 @@ export default function PaginaUsuarios() {
     setErrorForm('')
 
     try {
+      const dominio = obtenerDominioCorreo()
+      const emailCompleto = `${formulario.nombreCuenta}@${dominio}`
       if (editando) {
         await actualizarUsuario(editando.id, {
           nombre: formulario.nombre,
@@ -190,8 +200,7 @@ export default function PaginaUsuarios() {
       } else {
         const resultado = await crearUsuario({
           nombre: formulario.nombre,
-          email: formulario.email,
-          password: formulario.password,
+          nombreCuenta: formulario.nombreCuenta,
           rol: formulario.rol,
           boticaId: formulario.rol === 'visor_botica' ? formulario.boticaId : formulario.rol === 'operador_drogueria' ? drogueria?.id : null,
           telefono: formulario.telefono,
@@ -200,7 +209,7 @@ export default function PaginaUsuarios() {
         const nuevo = {
           id: resultado.id,
           nombre: formulario.nombre,
-          email: formulario.email,
+          email: emailCompleto,
           rol: formulario.rol,
           boticaId: formulario.rol === 'visor_botica' ? formulario.boticaId : null,
           boticaNombre: formulario.rol === 'visor_botica' ? boticaEncontrada?.nombre || null : null,
@@ -210,10 +219,10 @@ export default function PaginaUsuarios() {
           createdAt: new Date().toISOString(),
         }
         setUsuarios([nuevo, ...usuarios])
-        setExito('Usuario creado correctamente')
+        setExito(`Usuario creado correctamente. Se envió una invitación a ${emailCompleto}`)
       }
       setModalAbierto(false)
-      setTimeout(() => setExito(null), 2000)
+      setTimeout(() => setExito(null), 5000)
     } catch (err) {
       setErrorForm(mapearError(err.message) || 'Error al guardar el usuario')
     } finally {
@@ -222,9 +231,9 @@ export default function PaginaUsuarios() {
   }
 
   const boticasDisponibles = boticas.filter(b => b.activa)
+  const dominio = obtenerDominioCorreo()
 
   const columnas = [
-    { campo: 'id', encabezado: 'ID', render: (r) => <span className="font-mono text-cuerpo font-medium text-marca-principal">{r.id?.slice(0, 8)}</span> },
     {
       campo: 'nombre',
       encabezado: 'Usuario',
@@ -353,43 +362,43 @@ export default function PaginaUsuarios() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="flex flex-col gap-1.5">
-              <label className="text-sm font-medium text-principal">Nombre <span className="text-estado-critico">*</span></label>
+              <label className="text-sm font-medium text-principal">Nombre completo <span className="text-estado-critico">*</span></label>
               <input
                 type="text"
                 value={formulario.nombre}
-                onChange={e => setFormulario({ ...formulario, nombre: e.target.value })}
+                onChange={e => {
+                  const nuevoNombre = e.target.value
+                  const sugerencia = !editando ? normalizarNombreCuenta(nuevoNombre) : formulario.nombreCuenta
+                  setFormulario({ ...formulario, nombre: nuevoNombre, nombreCuenta: !editando && !formulario.nombreCuentaEditado ? sugerencia : formulario.nombreCuenta })
+                }}
                 className="px-3 py-2 text-sm bg-fondo border border-estilo rounded-md text-principal focus:outline-none focus:border-marca-principal"
-                placeholder="Nombre completo"
+                placeholder="Ej: Leonardo Ruiz"
               />
             </div>
             <div className="flex flex-col gap-1.5">
-              <label className="text-sm font-medium text-principal">Email <span className="text-estado-critico">*</span></label>
+              <label className="text-sm font-medium text-principal">Nombre de cuenta <span className="text-estado-critico">*</span></label>
               <input
-                type="email"
-                value={formulario.email}
-                onChange={e => setFormulario({ ...formulario, email: e.target.value })}
+                type="text"
+                value={formulario.nombreCuenta}
+                onChange={e => setFormulario({ ...formulario, nombreCuenta: e.target.value, nombreCuentaEditado: true })}
                 className="px-3 py-2 text-sm bg-fondo border border-estilo rounded-md text-principal focus:outline-none focus:border-marca-principal"
-                placeholder="correo@ejemplo.pe"
+                placeholder="leonardo.ruiz"
                 disabled={!!editando}
               />
             </div>
           </div>
 
-          {!editando && (
-            <div className="flex flex-col gap-1.5">
-              <label className="text-sm font-medium text-principal">Contraseña temporal <span className="text-estado-critico">*</span></label>
-              <div className="relative">
-                <Key className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-secundario" />
-                <input
-                  type="password"
-                  value={formulario.password}
-                  onChange={e => setFormulario({ ...formulario, password: e.target.value })}
-                  className="w-full pl-9 pr-3 py-2 text-sm bg-fondo border border-estilo rounded-md text-principal focus:outline-none focus:border-marca-principal"
-                  placeholder="Contraseña inicial"
-                />
-              </div>
+          <div className="flex flex-col gap-1.5">
+            <label className="text-sm font-medium text-principal">Correo electrónico</label>
+            <div className="flex items-center gap-2 px-3 py-2 text-sm bg-fondo-secundario border border-estilo rounded-md text-principal">
+              <Mail className="h-4 w-4 text-secundario shrink-0" />
+              <span className={formulario.nombreCuenta ? '' : 'text-secundario'}>
+                {formulario.nombreCuenta ? `${formulario.nombreCuenta}@` : 'cuenta@'}
+              </span>
+              <span className="font-medium">{dominio || '— dominio no configurado —'}</span>
             </div>
-          )}
+            <p className="text-xs text-secundario">El usuario recibirá una invitación por correo para establecer su contraseña.</p>
+          </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="flex flex-col gap-1.5">

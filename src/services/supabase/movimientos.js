@@ -14,8 +14,9 @@ const MAPEAR_MOVIMIENTO = (item) => ({
   transferenciaId: item.transferencia_id,
   createdAt: item.created_at,
   nombreProducto: item.productos?.nombre_comercial || item.producto_id,
+  codigoProducto: item.productos?.codigo_interno || null,
   nombreUbicacion: item.boticas?.nombre || item.ubicacion_id || 'Droguería Central',
-  nombreUsuario: item.usuario_id,
+  nombreUsuario: item.usuarios?.nombre || item.usuario_id,
 })
 
 const SELECCION = `
@@ -31,8 +32,9 @@ const SELECCION = `
   usuario_id,
   transferencia_id,
   created_at,
-  productos:producto_id (nombre_comercial),
-  boticas:ubicacion_id (nombre)
+  productos:producto_id (nombre_comercial, codigo_interno),
+  boticas:ubicacion_id (nombre),
+  usuarios:usuario_id (nombre)
 `
 
 export async function obtenerMovimientos(filtros = {}) {

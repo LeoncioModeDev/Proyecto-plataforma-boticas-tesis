@@ -10,6 +10,7 @@ const MAPEAR_LOTE = (item) => ({
   cantidad: item.cantidad,
   proveedorId: item.proveedor_id,
   nombreProducto: item.productos?.nombre_comercial || item.producto_id,
+  codigoProducto: item.productos?.codigo_interno || null,
   nombreUbicacion: item.boticas?.nombre || item.ubicacion_id || 'Droguería Central',
 })
 
@@ -22,7 +23,7 @@ const SELECCION = `
   fecha_vencimiento,
   cantidad,
   proveedor_id,
-  productos:producto_id (nombre_comercial),
+  productos:producto_id (nombre_comercial, codigo_interno),
   boticas:ubicacion_id (nombre)
 `
 

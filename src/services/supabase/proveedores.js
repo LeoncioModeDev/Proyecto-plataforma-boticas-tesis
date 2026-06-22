@@ -27,6 +27,7 @@ async function llamarEdgeFunction(method, path, body) {
 function mapearProveedor(p) {
   return {
     id: p.id,
+    codigoInterno: p.codigo_interno,
     razonSocial: p.razon_social,
     tipoIdentificacion: p.tipo_identificacion,
     numeroIdentificacion: p.numero_identificacion,

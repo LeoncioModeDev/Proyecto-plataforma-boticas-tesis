@@ -46,6 +46,7 @@ function mapearProducto(p) {
 
   return {
     id: p.id,
+    codigoInterno: p.codigo_interno,
     nombreComercial: p.nombre_comercial,
     formaFarmaceuticaId: p.forma_farmaceutica_id,
     formaFarmaceuticaNombre: p.formas_farmaceuticas?.nombre,

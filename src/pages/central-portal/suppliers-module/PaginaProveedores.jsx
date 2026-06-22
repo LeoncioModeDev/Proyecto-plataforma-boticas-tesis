@@ -20,7 +20,7 @@ function obtenerContactoPrincipal(proveedor) {
 }
 
 const ColumnasProveedor = ({ onEditar, onToggleActivo }) => [
-  { campo: 'id', encabezado: 'ID', render: (r) => <span className="font-mono text-xs">{r.id?.slice(0, 8)}</span> },
+  { campo: 'codigoInterno', encabezado: 'Código', render: (r) => <span className="font-mono text-xs font-medium">{r.codigoInterno}</span> },
   {
     campo: 'razonSocial',
     encabezado: 'Razón Social',

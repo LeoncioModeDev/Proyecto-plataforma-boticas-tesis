@@ -25,6 +25,7 @@ const MAPEAR_MOVIMIENTO = (item) => ({
   usuarioId: item.usuario_id,
   createdAt: item.created_at,
   nombreProducto: item.productos?.nombre_comercial || item.producto_id,
+  codigoProducto: item.productos?.codigo_interno || null,
   nombreUbicacion: item.boticas?.nombre || item.ubicacion_id || 'Droguería Central',
   nombreUsuario: item.usuario_id,
 })

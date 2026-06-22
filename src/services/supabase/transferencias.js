@@ -34,6 +34,8 @@ async function peticion(method, path, body = null) {
 
 const MAPEAR_TRANSFERENCIA = (item) => ({
   id: item.id,
+  codigoInterno: item.codigo_interno,
+  numeroTransferencia: item.numero_transferencia,
   tipoTransferencia: item.tipo_transferencia,
   origenTipo: item.origen_tipo,
   origenId: item.origen_id,

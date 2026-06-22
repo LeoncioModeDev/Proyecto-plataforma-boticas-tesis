@@ -61,8 +61,7 @@ export async function obtenerUsuario(id) {
 export async function crearUsuario(datos) {
   const { exito, id } = await peticion('POST', '', {
     nombre: datos.nombre,
-    email: datos.email,
-    password: datos.password,
+    nombre_cuenta: datos.nombreCuenta,
     rol: datos.rol,
     botica_id: datos.boticaId || null,
     telefono: datos.telefono || null,

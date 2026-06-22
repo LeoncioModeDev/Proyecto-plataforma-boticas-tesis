@@ -1,10 +1,9 @@
 ﻿import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { LogIn, Sun, Moon, Mail, Key, Eye, EyeOff } from 'lucide-react'
+import { LogIn, Mail, Key, Eye, EyeOff } from 'lucide-react'
 
 import useAutenticacion from '@/state/useAutenticacion'
 import Boton from '@/components/common/Boton'
-import useTema from '@/state/useTema'
 import LogoBoticAI from '@/assets/images/LogoBoticAI.png'
 
 const RUTA_POR_ROL = {
@@ -22,7 +21,6 @@ export default function InicioSesion() {
   const [error, setError] = useState(null)
   const { iniciarSesion } = useAutenticacion()
   const navegar = useNavigate()
-  const { tema, cambiarTema } = useTema()
 
   const manejarSubmit = async (e) => {
     e.preventDefault()
@@ -50,14 +48,6 @@ export default function InicioSesion() {
 
   return (
     <div className="min-h-screen bg-fondo flex transition-colors">
-      <button
-        onClick={cambiarTema}
-        className="fixed top-6 right-6 z-50 p-2.5 rounded-xl bg-fondo-secundario border border-estilo hover:bg-fondo transition-colors shadow-estilo"
-        title={tema === 'claro' ? 'Modo oscuro' : 'Modo claro'}
-      >
-        {tema === 'claro' ? <Moon className="h-5 w-5 text-secundario" /> : <Sun className="h-5 w-5 text-amber-400" />}
-      </button>
-
       <div className="flex w-full max-[900px]:flex-col max-[900px]:items-center max-[900px]:p-6">
         <div className="flex-[55] flex items-center justify-center p-8 lg:px-20 max-[900px]:p-0 max-[900px]:mb-8 max-[900px]:pt-8">
           <img
@@ -117,15 +107,6 @@ export default function InicioSesion() {
                     {verContrasena ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                   </button>
                 </div>
-              </div>
-
-              <div className="text-right">
-                <a
-                  href="/restablecer-contrasena"
-                  className="text-[14px] text-marca-principal hover:underline font-medium"
-                >
-                  ¿Olvidaste tu contraseña?
-                </a>
               </div>
 
               {error && (

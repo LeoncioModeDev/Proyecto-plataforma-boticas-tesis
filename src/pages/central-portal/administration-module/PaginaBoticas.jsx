@@ -92,8 +92,7 @@ export default function PaginaBoticas() {
   }
 
   const columnas = [
-    { campo: 'id', encabezado: 'ID', render: (r) => <span className="font-mono text-cuerpo font-medium text-marca-principal">{r.id?.slice(0, 8)}</span> },
-    { campo: 'codigoInterno', encabezado: 'Código', render: (r) => <span className="font-mono text-xs">{r.codigoInterno}</span> },
+    { campo: 'codigoInterno', encabezado: 'Código', render: (r) => <span className="font-mono text-xs font-medium">{r.codigoInterno}</span> },
     {
       campo: 'nombre',
       encabezado: 'Nombre',

@@ -117,10 +117,19 @@ async function crearProveedor(supabase: any, perfil: PerfilUsuario, body: any) {
     return json({ error: "Faltan datos obligatorios (razon_social, tipo_identificacion, numero_identificacion)" }, 400);
   }
 
+  const { data: prv, error: errPrv } = await supabase.rpc("generar_codigo_proveedor", {
+    p_org_id: perfil.org_id,
+  });
+
+  if (errPrv || !prv) {
+    return json({ error: "Error al generar código de proveedor: " + (errPrv?.message || "respuesta vacía") }, 500);
+  }
+
   const { data: proveedor, error: errProv } = await supabase
     .from("proveedores")
     .insert({
       org_id: perfil.org_id,
+      codigo_interno: prv,
       razon_social,
       tipo_identificacion,
       numero_identificacion,
@@ -158,7 +167,7 @@ async function crearProveedor(supabase: any, perfil: PerfilUsuario, body: any) {
     if (errCont) console.error("Error al insertar contactos:", errCont.message);
   }
 
-  return json({ exito: true, id: proveedorId });
+  return json({ exito: true, id: proveedorId, codigo_interno: prv });
 }
 
 async function actualizarProveedor(supabase: any, perfil: PerfilUsuario, id: string, body: any) {

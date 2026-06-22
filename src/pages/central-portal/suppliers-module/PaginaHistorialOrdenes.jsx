@@ -57,7 +57,7 @@ export default function PaginaHistorialOrdenes() {
   )
 
   const columnas = [
-    { campo: 'id', encabezado: 'OC', render: (r) => <span className="font-mono text-cuerpo text-marca-principal">{r.id}</span> },
+    { campo: 'numeroOrden', encabezado: 'N.º de Orden', render: (r) => <span className="font-mono text-xs text-principal">{r.numeroOrden}</span> },
     { campo: 'proveedorNombre', encabezado: 'Proveedor' },
     { campo: 'createdAt', encabezado: 'Creación', render: (r) => <span className="text-etiqueta text-secundario">{formatearFechaCorta(r.createdAt)}</span> },
     { campo: 'estado', encabezado: 'Estado', render: (r) => {

@@ -507,6 +507,7 @@ async function listarRecepciones(supabase, perfil, url) {
       *,
       ordenes_compra!inner(
         id,
+        numero_orden,
         proveedor_id,
         proveedores!inner(id, razon_social, org_id),
         estado
@@ -547,6 +548,7 @@ async function listarRecepciones(supabase, perfil, url) {
   const normalizados = datosFiltrados.map((r) => ({
     id: r.id,
     ordenCompraId: r.orden_compra_id,
+    ordenNumero: r.ordenes_compra?.numero_orden,
     proveedorId: r.ordenes_compra?.proveedor_id,
     proveedorNombre: r.ordenes_compra?.proveedores?.razon_social,
     ocEstado: r.ordenes_compra?.estado,

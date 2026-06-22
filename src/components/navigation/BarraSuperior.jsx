@@ -1,4 +1,4 @@
-import { Bell, Search, User, LogOut, LayoutDashboard, Building2, CheckCheck, Eye, AlertTriangle, Info } from 'lucide-react'
+import { Bell, User, LogOut, LayoutDashboard, Building2, CheckCheck, Eye, AlertTriangle, Info } from 'lucide-react'
 import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import useAutenticacion from '@/state/useAutenticacion'
@@ -68,11 +68,6 @@ export default function BarraSuperior() {
       </div>
 
       <div className="flex items-center gap-2 lg:gap-3">
-        <div className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-fondo border border-estilo rounded-md w-44 lg:w-56">
-          <Search className="h-4 w-4 text-secundario" />
-          <span className="text-secundario text-sm">Buscar...</span>
-        </div>
-
         <ControlesInterfaz />
 
         <div className="relative" ref={refNotif}>

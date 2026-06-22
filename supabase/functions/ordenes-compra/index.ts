@@ -210,10 +210,19 @@ async function crearOC(supabase: any, perfil: PerfilUsuario, body: any) {
     }
   }
 
+  const { data: numOrden, error: errNum } = await supabase.rpc("generar_numero_orden", {
+    p_org_id: perfil.org_id,
+  });
+
+  if (errNum || !numOrden) {
+    return json({ error: "Error al generar número de orden: " + (errNum?.message || "respuesta vacía") }, 500);
+  }
+
   const { data: oc, error: errOC } = await supabase
     .from("ordenes_compra")
     .insert({
       proveedor_id,
+      numero_orden: numOrden,
       creado_por: perfil.id,
       org_id: perfil.org_id,
       estado: "pendiente",
@@ -241,7 +250,7 @@ async function crearOC(supabase: any, perfil: PerfilUsuario, body: any) {
     return json({ error: errItems.message }, 400);
   }
 
-  return json({ exito: true, id: oc.id });
+  return json({ exito: true, id: oc.id, numero_orden: numOrden });
 }
 
 // ─── ACTUALIZAR (solo pendiente) ──────────────────────────────
@@ -472,7 +481,7 @@ async function registrarRecepcion(supabase: any, perfil: PerfilUsuario, id: stri
 
       await supabase.from("ordenes_compra").update({ estado: "en_devolucion" }).eq("id", id);
 
-      return json({ exito: true, recepcion_id: recepcion.id });
+      return json({ exito: true, recepcion_id: recepcion.id, numero_recepcion: numRec });
     }
 
     // CASO: Recepción aceptada
@@ -516,10 +525,19 @@ async function registrarRecepcion(supabase: any, perfil: PerfilUsuario, id: stri
     }
 
     // Crear cabecera de recepción
+    const { data: numRec, error: errNum } = await supabase.rpc("generar_numero_recepcion", {
+      p_org_id: perfil.org_id,
+    });
+    if (errNum || !numRec) {
+      return json({ error: "Error al generar número de recepción: " + (errNum?.message || "respuesta vacía") }, 500);
+    }
+
     const { data: recepcion, error: errRec } = await supabase
       .from("recepciones_orden")
       .insert({
         orden_compra_id: id,
+        org_id: perfil.org_id,
+        numero_recepcion: numRec,
         resultado,
         observacion: observacion || null,
         registrado_por: perfil.id,
@@ -632,7 +650,7 @@ async function registrarRecepcion(supabase: any, perfil: PerfilUsuario, id: stri
 
     await actualizarEstadoOC(supabase, id, nuevoEstado, perfil.id);
 
-    return json({ exito: true, recepcion_id: recepcion.id });
+    return json({ exito: true, recepcion_id: recepcion.id, numero_recepcion: numRec });
   } catch (e) {
     console.error("Error en registrarRecepcion:", e);
     const mensaje = e instanceof Error ? e.message : String(e);
@@ -814,6 +832,7 @@ async function listarRecepciones(supabase: any, perfil: PerfilUsuario, url: URL)
       *,
       ordenes_compra!inner(
         id,
+        numero_orden,
         proveedor_id,
         proveedores!inner(id, razon_social, org_id),
         estado
@@ -859,7 +878,9 @@ async function listarRecepciones(supabase: any, perfil: PerfilUsuario, url: URL)
 
   const normalizados = datosFiltrados.map((r: any) => ({
     id: r.id,
+    numeroRecepcion: r.numero_recepcion,
     ordenCompraId: r.orden_compra_id,
+    ordenNumero: r.ordenes_compra?.numero_orden,
     proveedorId: r.ordenes_compra?.proveedor_id,
     proveedorNombre: r.ordenes_compra?.proveedores?.razon_social,
     ocEstado: r.ordenes_compra?.estado,
@@ -891,6 +912,7 @@ function normalizarOC(r: any) {
   const moneda = r.proveedores?.monedas;
   return {
     id: r.id,
+    numeroOrden: r.numero_orden,
     proveedorId: r.proveedor_id,
     proveedorNombre: r.proveedores?.razon_social,
     moneda: moneda ? { id: moneda.id, codigo: moneda.codigo, simbolo: moneda.simbolo } : null,

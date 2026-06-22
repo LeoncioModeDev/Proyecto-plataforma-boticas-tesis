@@ -27,8 +27,8 @@ export default function PaginaAjustes() {
   }, [usuario?.orgId])
 
   const columnas = [
-    { campo: 'id', encabezado: 'ID', render: (r) => <span className="font-mono text-xs">{r.id.slice(0, 8)}...</span> },
-    { campo: 'createdAt', encabezado: 'Fecha', render: (r) => formatearFechaHora(r.createdAt) },
+    { campo: 'codigoProducto', encabezado: 'Código', render: (r) => <span className="font-mono text-xs text-secundario">{r.codigoProducto || '-'}</span> },
+    { campo: 'createdAt', encabezado: 'Fecha y Hora', render: (r) => formatearFechaHora(r.createdAt) },
     {
       campo: 'tipo',
       encabezado: 'Tipo',

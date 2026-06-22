@@ -83,12 +83,12 @@ export default function DetalleRecepcion() {
         <div className="grid grid-cols-2 gap-6">
           <div className="space-y-3">
             <div>
-              <p className="text-sm text-secundario">ID Recepción</p>
-              <p className="text-principal font-mono text-sm">{recepcion.id}</p>
+              <p className="text-sm text-secundario">Recepción</p>
+              <p className="text-principal font-mono text-sm">{recepcion.numeroRecepcion || recepcion.id}</p>
             </div>
             <div>
               <p className="text-sm text-secundario">Orden de Compra</p>
-              <p className="text-principal font-mono text-sm">{recepcion.ordenCompraId}</p>
+              <p className="text-principal font-mono text-sm">{recepcion.ordenNumero || recepcion.ordenCompraId}</p>
             </div>
             <div>
               <p className="text-sm text-secundario">Proveedor</p>

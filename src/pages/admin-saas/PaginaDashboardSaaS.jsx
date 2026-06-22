@@ -7,11 +7,13 @@ export default function PaginaDashboardSaaS() {
   const navegar = useNavigate()
 
   return (
-    <div className="max-w-4xl mx-auto">
-      <h1 className="text-2xl font-bold text-principal mb-2">Panel de Administración SaaS</h1>
-      <p className="text-secundario mb-8">
-        Bienvenido, {usuario?.nombre || 'Super Admin'}. Gestiona las organizaciones de la plataforma.
-      </p>
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-h1 text-principal">Panel de Administración SaaS</h1>
+        <p className="text-cuerpo text-secundario mt-1">
+          Bienvenido, {usuario?.nombre || 'Super Admin'}. Gestiona las organizaciones de la plataforma.
+        </p>
+      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <button
@@ -32,17 +34,23 @@ export default function PaginaDashboardSaaS() {
           </span>
         </button>
 
-        <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
+        <button
+          onClick={() => navegar('/admin-saas/organizaciones')}
+          className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700 text-left hover:shadow-md transition-shadow group"
+        >
           <div className="flex items-center gap-4 mb-3">
             <div className="p-3 bg-green-100 dark:bg-green-900/30 rounded-lg">
               <Building2 className="h-6 w-6 text-green-600 dark:text-green-400" />
             </div>
             <span className="font-semibold text-principal text-lg">Organizaciones</span>
           </div>
-          <p className="text-sm text-secundario">
-            Las organizaciones creadas se listarán aquí en futuras versiones.
+          <p className="text-sm text-secundario mb-3">
+            Lista, visualiza y edita las organizaciones registradas en la plataforma.
           </p>
-        </div>
+          <span className="text-sm text-marca-principal font-medium inline-flex items-center gap-1 group-hover:gap-2 transition-all">
+            Ver listado <ArrowRight className="h-4 w-4" />
+          </span>
+        </button>
       </div>
     </div>
   )

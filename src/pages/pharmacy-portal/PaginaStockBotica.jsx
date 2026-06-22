@@ -28,6 +28,7 @@ export default function PaginaStockBotica() {
   }, [usuario])
 
   const columnas = [
+    { campo: 'codigoProducto', encabezado: 'Código', render: (r) => <span className="font-mono text-xs text-secundario">{r.codigoProducto || '-'}</span> },
     { campo: 'nombreProducto', encabezado: 'Producto' },
     { campo: 'stockDisponible', encabezado: 'Disponible' },
     { campo: 'stockEnTransito', encabezado: 'En Tránsito', render: (r) => (

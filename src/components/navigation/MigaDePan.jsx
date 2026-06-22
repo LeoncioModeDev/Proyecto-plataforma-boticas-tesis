@@ -24,6 +24,7 @@ const NOMBRES_RUTA = {
   configuracion: 'Configuración',
   auditoria: 'Auditoría',
   'configuracion-avanzada': 'Config. Avanzada',
+  'importacion-datos': 'Importación de Datos',
   botica: 'Portal Botica',
   ml: 'Panel ML',
   predicciones: 'Predicciones',
@@ -31,6 +32,9 @@ const NOMBRES_RUTA = {
   recomendaciones: 'Recomendaciones',
   monitoreo: 'Monitoreo',
   nuevo: 'Nuevo',
+  'admin-saas': 'Admin SaaS',
+  organizaciones: 'Organizaciones',
+  editar: 'Editar',
 }
 
 const NOMBRES_PORTAL = {

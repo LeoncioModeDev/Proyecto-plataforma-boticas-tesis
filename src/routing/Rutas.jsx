@@ -45,11 +45,16 @@ import DetalleRecepcionCentral from '@/pages/central-portal/suppliers-module/Det
 import PaginaUsuarios from '@/pages/central-portal/administration-module/PaginaUsuarios'
 import PaginaBoticas from '@/pages/central-portal/administration-module/PaginaBoticas'
 import PaginaConfiguracionGeneral from '@/pages/central-portal/administration-module/PaginaConfiguracionGeneral'
+import PaginaConfiguracionAvanzada from '@/pages/central-portal/administration-module/PaginaConfiguracionAvanzada'
+import PaginaImportacionDatos from '@/pages/central-portal/administration-module/PaginaImportacionDatos'
 import PaginaAuditoria from '@/pages/central-portal/administration-module/PaginaAuditoria'
 import PaginaNuevaBotica from '@/pages/central-portal/administration-module/new/PaginaNuevaBotica'
 import PaginaEditarBotica from '@/pages/central-portal/administration-module/edit/PaginaEditarBotica'
 import CrearOrganizacion from '@/pages/admin/CrearOrganizacion'
 import PaginaDashboardSaaS from '@/pages/admin-saas/PaginaDashboardSaaS'
+import PaginaOrganizaciones from '@/pages/admin-saas/PaginaOrganizaciones'
+import PaginaDetalleOrganizacion from '@/pages/admin-saas/PaginaDetalleOrganizacion'
+import PaginaEditarOrganizacion from '@/pages/admin-saas/PaginaEditarOrganizacion'
 
 // Portal Boticas
 import PaginaStockBotica from '@/pages/pharmacy-portal/PaginaStockBotica'
@@ -188,6 +193,8 @@ export default function Rutas() {
         <Route path="/central/administracion/boticas/nueva" element={<PaginaNuevaBotica />} />
         <Route path="/central/administracion/boticas/:id" element={<PaginaEditarBotica />} />
         <Route path="/central/administracion/configuracion" element={<PaginaConfiguracionGeneral />} />
+        <Route path="/central/administracion/configuracion-avanzada" element={<PaginaConfiguracionAvanzada />} />
+        <Route path="/central/administracion/importacion-datos" element={<PaginaImportacionDatos />} />
         <Route path="/central/administracion/auditoria" element={<PaginaAuditoria />} />
       </Route>
 
@@ -265,8 +272,10 @@ export default function Rutas() {
         </RutaProtegida>
       }>
         <Route path="/admin-saas/dashboard" element={<PaginaDashboardSaaS />} />
-        <Route path="/admin-saas/organizaciones" element={<PaginaDashboardSaaS />} />
+        <Route path="/admin-saas/organizaciones" element={<PaginaOrganizaciones />} />
         <Route path="/admin-saas/organizaciones/crear" element={<CrearOrganizacion />} />
+        <Route path="/admin-saas/organizaciones/:id" element={<PaginaDetalleOrganizacion />} />
+        <Route path="/admin-saas/organizaciones/:id/editar" element={<PaginaEditarOrganizacion />} />
       </Route>
 
       {/* No autorizado */}

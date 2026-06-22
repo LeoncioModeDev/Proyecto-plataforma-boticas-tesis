@@ -60,7 +60,7 @@ export default function PaginaStock() {
   }
 
   const columnas = [
-    { campo: 'id', encabezado: 'ID', render: (r) => <span className="font-mono text-xs">{r.id}</span> },
+    { campo: 'codigoProducto', encabezado: 'Código', render: (r) => <span className="font-mono text-xs text-secundario">{r.codigoProducto || '-'}</span> },
     { campo: 'nombreProducto', encabezado: 'Producto' },
     { campo: 'nombreUbicacion', encabezado: 'Ubicación' },
     { campo: 'stockDisponible', encabezado: 'Stock Disp.', render: (r) => (

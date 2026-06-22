@@ -1,12 +1,9 @@
 import { useState, useEffect } from 'react'
-import { Info, AlertTriangle, XCircle, Search } from 'lucide-react'
+import { Info, AlertTriangle, XCircle, Search, ChevronLeft, ChevronRight } from 'lucide-react'
 import Tabla from '@/components/common/Tabla'
 import Insignia from '@/components/common/Insignia'
 import Modal from '@/components/common/Modal'
-import Tarjeta from '@/components/common/Tarjeta'
 import Boton from '@/components/common/Boton'
-
-import Alerta from '@/components/common/Alerta'
 import { listarAuditoria } from '@/services/supabase/auditoria'
 import { formatearFechaHora } from '@/utilities/formatearFecha'
 
@@ -150,7 +147,8 @@ export default function PaginaAuditoria() {
     },
   ]
 
-  if (cargando) return <div className="flex items-center justify-center py-20"><p className="text-secundario">Cargando auditoría...</p></div>
+  if (cargando) return <div className="flex items-center justify-center py-20"><p className="text-secundario">Cargando registros...</p></div>
+  if (error) return <div className="flex items-center justify-center h-64"><p className="text-estado-critico">Error: {error}</p></div>
 
   return (
     <div className="space-y-6">
@@ -158,8 +156,6 @@ export default function PaginaAuditoria() {
         <h1 className="text-h1 text-principal">Logs y Auditoría</h1>
         <p className="text-cuerpo text-secundario mt-1">Historial de actividades, cambios y eventos del sistema</p>
       </div>
-
-      {error && <Alerta tipo="error" titulo={error} className="mb-4" />}
 
       <div className="flex flex-col sm:flex-row gap-4">
         <input
@@ -191,31 +187,29 @@ export default function PaginaAuditoria() {
         </select>
       </div>
 
-      <Tarjeta>
-        <Tabla columnas={columnas} datos={registros} busqueda={false} />
-      </Tarjeta>
+      <Tabla columnas={columnas} datos={registros} busqueda={false} />
 
       {totalPaginas > 1 && (
-        <div className="flex items-center justify-between">
-          <p className="text-sm text-secundario">{total} registros en total</p>
-          <div className="flex gap-2">
-            <Boton
-              variante="secundario"
-              deshabilitado={pagina <= 1}
-              onClick={() => setPagina(p => p - 1)}
-            >
-              Anterior
-            </Boton>
-            <span className="flex items-center text-sm text-secundario px-2">
-              {pagina} / {totalPaginas}
-            </span>
-            <Boton
-              variante="secundario"
-              deshabilitado={pagina >= totalPaginas}
-              onClick={() => setPagina(p => p + 1)}
-            >
-              Siguiente
-            </Boton>
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-2 text-sm text-secundario">
+          <span>{total} registros en total</span>
+          <div className="flex items-center gap-2">
+            <span>Página {pagina} de {totalPaginas}</span>
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => setPagina(p => p - 1)}
+                disabled={pagina <= 1}
+                className="p-1.5 rounded hover:bg-fondo disabled:opacity-30 disabled:cursor-not-allowed"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </button>
+              <button
+                onClick={() => setPagina(p => p + 1)}
+                disabled={pagina >= totalPaginas}
+                className="p-1.5 rounded hover:bg-fondo disabled:opacity-30 disabled:cursor-not-allowed"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </button>
+            </div>
           </div>
         </div>
       )}

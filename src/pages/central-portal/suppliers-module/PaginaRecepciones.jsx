@@ -84,9 +84,9 @@ export default function PaginaRecepciones() {
   }), [recepciones])
 
   const columnas = [
-    { campo: 'id', encabezado: 'ID', render: (r) => <span className="font-mono text-cuerpo font-medium text-marca-principal">{r.id?.slice(0, 8)}</span> },
+    { campo: 'numeroRecepcion', encabezado: 'N.º de Recepción', render: (r) => <span className="font-mono text-xs font-medium text-principal">{r.numeroRecepcion}</span> },
     { campo: 'fechaRecepcion', encabezado: 'Fecha', render: (r) => <span className="text-etiqueta text-secundario">{formatearFechaRelativa(r.fechaRecepcion)}</span> },
-    { campo: 'ordenCompraId', encabezado: 'OC', render: (r) => <span className="font-mono text-xs text-secundario">{r.ordenCompraId?.slice(0, 8)}</span> },
+    { campo: 'ordenNumero', encabezado: 'N.º de Orden', render: (r) => <span className="font-mono text-xs font-medium text-principal">{r.ordenNumero}</span> },
     { campo: 'proveedorNombre', encabezado: 'Proveedor', render: (r) => <span className="text-principal">{r.proveedorNombre}</span> },
     { campo: 'registradoPorNombre', encabezado: 'Registrado por' },
     {

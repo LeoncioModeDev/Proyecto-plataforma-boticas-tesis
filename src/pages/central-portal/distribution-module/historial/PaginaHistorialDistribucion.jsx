@@ -62,9 +62,9 @@ export default function PaginaHistorialDistribucion() {
 
   const columnas = [
     {
-      campo: 'id',
-      encabezado: 'ID',
-      render: (r) => <span className="font-mono text-cuerpo">{r.id?.slice(0, 8)}</span>,
+      campo: 'numeroTransferencia',
+      encabezado: 'N.º de Transferencia',
+      render: (r) => <span className="font-mono text-xs text-principal">{r.numeroTransferencia}</span>,
     },
     {
       campo: 'destinoId',

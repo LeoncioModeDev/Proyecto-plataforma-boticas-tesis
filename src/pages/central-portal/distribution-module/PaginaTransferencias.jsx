@@ -126,11 +126,11 @@ export default function PaginaTransferencias() {
   }
 
   const columnas = [
-    {
-      campo: 'id',
-      encabezado: 'ID',
-      render: (r) => <span className="font-mono text-cuerpo font-medium text-marca-principal">{r.id?.slice(0, 8)}</span>,
-    },
+{
+  campo: 'numeroTransferencia',
+  encabezado: 'N.º de Transferencia',
+  render: (r) => <span className="font-mono text-xs font-medium text-principal">{r.numeroTransferencia}</span>,
+},
     {
       campo: 'tipoTransferencia',
       encabezado: 'Tipo',

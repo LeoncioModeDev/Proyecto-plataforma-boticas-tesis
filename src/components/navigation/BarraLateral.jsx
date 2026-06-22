@@ -142,6 +142,16 @@ const itemsAdminCentral = [
           icono: Settings,
         },
         {
+          etiqueta: "Config. Avanzada",
+          ruta: "/central/administracion/configuracion-avanzada",
+          icono: Activity,
+        },
+        {
+          etiqueta: "Importar Datos",
+          ruta: "/central/administracion/importacion-datos",
+          icono: FileBarChart,
+        },
+        {
           etiqueta: "Auditoría",
           ruta: "/central/administracion/auditoria",
           icono: ClipboardList,
@@ -180,6 +190,11 @@ const itemsNavegacion = {
       icono: Building2,
       ruta: "/admin-saas/organizaciones",
       subItems: [
+        {
+          etiqueta: "Lista",
+          ruta: "/admin-saas/organizaciones",
+          icono: Building2,
+        },
         {
           etiqueta: "Crear Organización",
           ruta: "/admin-saas/organizaciones/crear",

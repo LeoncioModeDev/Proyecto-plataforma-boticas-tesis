@@ -135,10 +135,19 @@ async function crearProducto(supabase: any, perfil: PerfilUsuario, body: any) {
     return json({ error: "Faltan datos obligatorios (nombre_comercial, clasificacion)" }, 400);
   }
 
+  const { data: sku, error: errSku } = await supabase.rpc("generar_codigo_producto_para_org", {
+    p_org_id: perfil.org_id,
+  });
+
+  if (errSku || !sku) {
+    return json({ error: "Error al generar SKU: " + (errSku?.message || "respuesta vacía") }, 500);
+  }
+
   const { data: producto, error: errProd } = await supabase
     .from("productos")
     .insert({
       org_id: perfil.org_id,
+      codigo_interno: sku,
       nombre_comercial,
       forma_farmaceutica_id: forma_farmaceutica_id || null,
       presentacion: presentacion || null,
@@ -174,6 +183,7 @@ async function crearProducto(supabase: any, perfil: PerfilUsuario, body: any) {
   return json({
     exito: true,
     id: producto.id,
+    codigo_interno: sku,
   });
 }
 

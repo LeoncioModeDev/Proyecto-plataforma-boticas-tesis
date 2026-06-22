@@ -90,7 +90,7 @@ async function listarMovimientos(supabase: any, perfil: PerfilUsuario, url: URL)
       motivo,
       usuario_id,
       created_at,
-      productos:producto_id (nombre_comercial),
+      productos:producto_id (nombre_comercial, codigo_interno),
       boticas:ubicacion_id (nombre),
       lotes:lote_id (numero_lote, fecha_vencimiento)
     `)
@@ -190,7 +190,7 @@ async function registrarAjuste(supabase: any, perfil: PerfilUsuario, body: any) 
       motivo,
       usuario_id,
       created_at,
-      productos:producto_id (nombre_comercial),
+      productos:producto_id (nombre_comercial, codigo_interno),
       boticas:ubicacion_id (nombre)
     `)
     .single();

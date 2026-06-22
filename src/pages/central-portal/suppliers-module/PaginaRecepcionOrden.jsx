@@ -162,7 +162,7 @@ export default function PaginaRecepcionOrden() {
       <Tarjeta>
         <div className="mb-4">
           <p className="text-sm text-secundario">Orden de Compra</p>
-          <p className="text-lg font-medium text-principal">{orden.id?.slice(0, 8)} — {orden.proveedorNombre}</p>
+          <p className="text-lg font-medium text-principal">{orden.numeroOrden || orden.id?.slice(0, 8)} — {orden.proveedorNombre}</p>
           <p className="text-sm text-secundario mt-1">
             {pendientes.length} producto(s) pendiente(s) de recibir
           </p>

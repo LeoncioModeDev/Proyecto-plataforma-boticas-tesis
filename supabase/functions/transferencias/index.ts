@@ -231,11 +231,19 @@ async function crearTransferencia(supabase, perfil, body) {
       }
     }
 
+    const { data: trfNum, error: errTrf } = await supabase.rpc("generar_numero_transferencia", {
+      p_org_id: perfil.org_id,
+    });
+    if (errTrf || !trfNum) {
+      return json({ error: "Error al generar número de transferencia: " + (errTrf?.message || "respuesta vacía") }, 500);
+    }
+
     // Insertar cabecera de redistribución
     const { data: transferencia, error: errIns } = await supabase
       .from("transferencias")
       .insert({
         tipo_transferencia: "redistribucion",
+        numero_transferencia: trfNum,
         origen_tipo: "botica",
         origen_id,
         destino_tipo: "botica",
@@ -274,7 +282,7 @@ async function crearTransferencia(supabase, perfil, body) {
       detalle: `Se creó redistribución de botica ${origen_id} a botica ${destino_id} con ${items.length} producto(s)`,
     });
 
-    return json({ exito: true, id: transferencia.id });
+    return json({ exito: true, id: transferencia.id, numero_transferencia: trfNum });
   }
 
   // ─── TRANSFERENCIA CENTRAL (droguería → botica) ─────────
@@ -339,10 +347,18 @@ async function crearTransferencia(supabase, perfil, body) {
     }
   }
 
+  const { data: trfNum, error: errTrf } = await supabase.rpc("generar_numero_transferencia", {
+    p_org_id: perfil.org_id,
+  });
+  if (errTrf || !trfNum) {
+    return json({ error: "Error al generar número de transferencia: " + (errTrf?.message || "respuesta vacía") }, 500);
+  }
+
   const { data: transferencia, error: errIns } = await supabase
     .from("transferencias")
     .insert({
       tipo_transferencia: "transferencia_central",
+      numero_transferencia: trfNum,
       origen_tipo: "drogueria",
       origen_id: drogueria.id,
       destino_tipo: "botica",
@@ -381,7 +397,7 @@ async function crearTransferencia(supabase, perfil, body) {
     detalle: `Se creó transferencia a botica ${destino_id} con ${items.length} producto(s)`,
   });
 
-  return json({ exito: true, id: transferencia.id });
+  return json({ exito: true, id: transferencia.id, numero_transferencia: trfNum });
 }
 
 // ─── ENVIAR ───────────────────────────────────────────────────

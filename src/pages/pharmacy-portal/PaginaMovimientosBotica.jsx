@@ -28,7 +28,8 @@ export default function PaginaMovimientosBotica() {
   }, [usuario])
 
   const columnas = [
-    { campo: 'createdAt', encabezado: 'Fecha', render: (r) => formatearFechaHora(r.createdAt) },
+    { campo: 'codigoProducto', encabezado: 'Código', render: (r) => <span className="font-mono text-xs text-secundario">{r.codigoProducto || '-'}</span> },
+    { campo: 'createdAt', encabezado: 'Fecha y Hora', render: (r) => formatearFechaHora(r.createdAt) },
     { campo: 'tipo', encabezado: 'Tipo', render: (r) => <Insignia color={COLORES_MOVIMIENTO[r.tipo]}>{ETIQUETAS_MOVIMIENTO[r.tipo]}</Insignia> },
     { campo: 'nombreProducto', encabezado: 'Producto' },
     { campo: 'cantidad', encabezado: 'Cantidad' },
