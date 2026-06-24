@@ -287,16 +287,18 @@ def factor_inicio_mes(fecha: date) -> float:
     return 1.15 if fecha.day <= 5 else 1.0
 
 
-def cantidad_demandada(producto: pd.Series, fecha: date, distrito: str, stock: int) -> int:
+def calcular_demanda_real(producto: pd.Series, fecha: date, distrito: str, factor_semanal: float) -> int:
     media = (
         producto["demanda_diaria_base"]
         * factor_estacional(fecha, producto["pico_invierno"], producto["pico_verano"])
         * factor_dia_semana(fecha)
         * factor_inicio_mes(fecha)
         * FACTOR_DISTRITO.get(distrito, 1.0)
+        * factor_semanal
     )
-    cantidad = int(RNG.lognormal(mean=np.log(max(media, 0.1)), sigma=producto["volatilidad"]))
-    return max(0, min(cantidad, stock))
+    evento = RNG.choice([0.45, 1.0, 2.2], p=[0.025, 0.95, 0.025])
+    cantidad = int(RNG.lognormal(mean=np.log(max(media * evento, 0.1)), sigma=producto["volatilidad"]))
+    return max(0, cantidad)
 
 
 def crear_lookup_usuarios(usuarios: pd.DataFrame) -> tuple[dict[str, str], str]:
@@ -360,8 +362,11 @@ def simular_operacion(tablas_maestras):
     eventos_stock = []
     lotes = []
     ventas = []
+    demanda_diaria = []
     movimientos = []
     secuencias = {"venta": 0, "movimiento": 0, "lote": 0}
+    reposiciones_pendientes = {}
+    factores_semanales = {}
 
     for _, producto in catalogo.iterrows():
         stock_minimo[producto["producto_id"]] = max(15, int(producto["demanda_diaria_base"] * 7))
@@ -410,9 +415,9 @@ def simular_operacion(tablas_maestras):
                 producto_id = producto["producto_id"]
                 clave = (producto_id, botica["id"])
 
-                if stock[clave] < stock_minimo[producto_id]:
-                    cantidad = int(RNG.integers(stock_minimo[producto_id] * 4, stock_minimo[producto_id] * 8 + 1))
-                    proveedor_id = proveedor_por_producto[producto_id]["proveedor_id"]
+                reposicion = reposiciones_pendientes.get(clave)
+                if reposicion and reposicion["fecha_llegada"] <= fecha:
+                    cantidad = reposicion["cantidad"]
                     secuencias["lote"] += 1
                     lote_id = uuid_deterministico(
                         f"lote:entrada:{producto_id}:{botica['id']}:{fecha_iso(fecha)}:{secuencias['lote']}"
@@ -426,7 +431,7 @@ def simular_operacion(tablas_maestras):
                         "numero_lote": f"LT-{producto_codigo[producto_id].replace('SKU-', '')}-{fecha:%Y%m}-{len(lotes) + 1:04d}",
                         "fecha_vencimiento": (fecha + timedelta(days=int(RNG.integers(180, 1096)))).isoformat(),
                         "cantidad": cantidad,
-                        "proveedor_id": proveedor_id,
+                        "proveedor_id": reposicion["proveedor_id"],
                     }
                     lotes.append(lote)
                     lotes_por_id[lote_id] = lote
@@ -443,18 +448,40 @@ def simular_operacion(tablas_maestras):
                         "ubicacion_id": botica["id"],
                         "tipo_movimiento": "entrada",
                         "cantidad": cantidad,
-                        "motivo": "Reposición por stock bajo mínimo",
+                        "motivo": "Llegada de reposición programada por stock bajo mínimo",
                         "usuario_id": usuarios_por_botica[botica["id"]],
                         "transferencia_id": None,
                         "created_at": fecha_iso(fecha),
                     })
+                    del reposiciones_pendientes[clave]
 
                 if fecha.weekday() < 6:
-                    cantidad = cantidad_demandada(producto, fecha, distrito, stock[clave])
-                    if cantidad > 0:
+                    semana = fecha - timedelta(days=fecha.weekday())
+                    clave_semana = (producto_id, botica["id"], semana)
+                    if clave_semana not in factores_semanales:
+                        factores_semanales[clave_semana] = float(np.clip(RNG.normal(1.0, 0.16), 0.65, 1.45))
+
+                    demanda_real = calcular_demanda_real(
+                        producto, fecha, distrito, factores_semanales[clave_semana]
+                    )
+                    cantidad_vendida = min(demanda_real, stock[clave])
+                    demanda_insatisfecha = max(demanda_real - cantidad_vendida, 0)
+                    stockout_flag = 1 if demanda_insatisfecha > 0 else 0
+                    demanda_diaria.append({
+                        "fecha": fecha_iso(fecha),
+                        "org_id": org_id,
+                        "botica_id": botica["id"],
+                        "producto_id": producto_id,
+                        "demanda_real": demanda_real,
+                        "cantidad_vendida": cantidad_vendida,
+                        "demanda_insatisfecha": demanda_insatisfecha,
+                        "stockout_flag": stockout_flag,
+                    })
+
+                    if cantidad_vendida > 0:
                         # Demanda observada: venta real que alimenta la variable objetivo.
-                        consumos = consumir_lotes_fefo(clave, cantidad, lotes_por_clave, lotes_por_id, saldo_lotes)
-                        stock[clave] -= cantidad
+                        consumos = consumir_lotes_fefo(clave, cantidad_vendida, lotes_por_clave, lotes_por_id, saldo_lotes)
+                        stock[clave] -= cantidad_vendida
                         secuencias["venta"] += 1
                         clave_idempotencia = f"venta:{org_id}:{botica['id']}:{producto_id}:{fecha.isoformat()}"
                         venta_id = uuid_deterministico(f"{clave_idempotencia}:{secuencias['venta']}")
@@ -464,7 +491,7 @@ def simular_operacion(tablas_maestras):
                             "botica_id": botica["id"],
                             "producto_id": producto_id,
                             "fecha_venta": fecha_iso(fecha),
-                            "cantidad": cantidad,
+                            "cantidad": cantidad_vendida,
                             "precio_unitario": None,
                             "importacion_id": None,
                             "clave_idempotencia": clave_idempotencia,
@@ -487,6 +514,17 @@ def simular_operacion(tablas_maestras):
                                 "transferencia_id": None,
                                 "created_at": fecha_iso(fecha),
                             })
+
+                    if stock[clave] <= stock_minimo[producto_id] and clave not in reposiciones_pendientes:
+                        proveedor_id = proveedor_por_producto[producto_id]["proveedor_id"]
+                        lead_time = int(proveedor_por_producto[producto_id]["lead_time_especifico"])
+                        objetivo = int(RNG.integers(stock_minimo[producto_id] * 4, stock_minimo[producto_id] * 8 + 1))
+                        cantidad_reposicion = max(stock_maximo[producto_id] - stock[clave], objetivo)
+                        reposiciones_pendientes[clave] = {
+                            "fecha_llegada": fecha + timedelta(days=lead_time),
+                            "cantidad": int(cantidad_reposicion),
+                            "proveedor_id": proveedor_id,
+                        }
 
                 if stock[clave] > 5 and RNG.random() < 0.01:
                     cantidad = int(RNG.integers(1, 4))
@@ -550,6 +588,7 @@ def simular_operacion(tablas_maestras):
 
     stock_ubicaciones = []
     for (producto_id, botica_id), cantidad in stock.items():
+        pendiente = reposiciones_pendientes.get((producto_id, botica_id), {})
         stock_ubicaciones.append({
             "id": uuid_deterministico(f"stock:{producto_id}:{botica_id}"),
             "org_id": org_id,
@@ -558,14 +597,15 @@ def simular_operacion(tablas_maestras):
             "ubicacion_id": botica_id,
             "cantidad_disponible": cantidad,
             "stock_minimo": stock_minimo[producto_id],
-            "stock_por_recibir": 0,
-            "stock_en_transito": 0,
+            "stock_por_recibir": int(pendiente.get("cantidad", 0)),
+            "stock_en_transito": int(pendiente.get("cantidad", 0)),
             "stock_maximo": stock_maximo[producto_id],
             "updated_at": fecha_iso(FECHA_FIN),
         })
 
     return {
         "ventas_historicas": pd.DataFrame(ventas),
+        "demanda_diaria": pd.DataFrame(demanda_diaria),
         "lotes": pd.DataFrame(lotes),
         "movimientos_inventario": pd.DataFrame(movimientos),
         "stock_ubicaciones": pd.DataFrame(stock_ubicaciones),
@@ -619,10 +659,20 @@ def construir_dataset_semanal(tablas):
     ventas = tablas["ventas_historicas"].copy()
     ventas["fecha_venta"] = pd.to_datetime(ventas["fecha_venta"])
     ventas["fecha_semana"] = ventas["fecha_venta"].dt.to_period("W-SUN").dt.start_time
+    demanda_diaria = tablas["demanda_diaria"].copy()
+    demanda_diaria["fecha"] = pd.to_datetime(demanda_diaria["fecha"])
+    demanda_diaria["fecha_semana"] = demanda_diaria["fecha"].dt.to_period("W-SUN").dt.start_time
 
     ventas_semanales = ventas.groupby(
         ["org_id", "botica_id", "producto_id", "fecha_semana"], as_index=False
     )["cantidad"].sum().rename(columns={"cantidad": "cantidad_vendida"})
+
+    demanda_semanal = demanda_diaria.groupby(
+        ["org_id", "botica_id", "producto_id", "fecha_semana"], as_index=False
+    ).agg(
+        demanda_insatisfecha=("demanda_insatisfecha", "sum"),
+        stockout_flag=("stockout_flag", "max"),
+    )
 
     boticas_venta = tablas["boticas"][tablas["boticas"]["tipo"] == "botica"]
     productos = tablas["productos"]
@@ -644,6 +694,13 @@ def construir_dataset_semanal(tablas):
         how="left",
     )
     dataset["cantidad_vendida"] = dataset["cantidad_vendida"].fillna(0).astype(int)
+    dataset = dataset.merge(
+        demanda_semanal,
+        on=["org_id", "botica_id", "producto_id", "fecha_semana"],
+        how="left",
+    )
+    dataset["demanda_insatisfecha"] = dataset["demanda_insatisfecha"].fillna(0).astype(int)
+    dataset["stockout_flag"] = dataset["stockout_flag"].fillna(0).astype(int)
 
     stock_historico["fecha_snapshot_dia"] = pd.to_datetime(stock_historico["fecha_snapshot_dia"])
     stock_historico["fecha_semana"] = stock_historico["fecha_snapshot_dia"] + pd.Timedelta(days=1)
@@ -681,6 +738,8 @@ def construir_dataset_semanal(tablas):
         "nombre_comercial",
         "categoria_terapeutica",
         "cantidad_vendida",
+        "demanda_insatisfecha",
+        "stockout_flag",
         "stock_inicio_semana",
         "stock_minimo",
         "stock_maximo",
@@ -716,21 +775,29 @@ def validar_dataset(tablas, dataset):
 
     assert set(tablas["ventas_historicas"]["producto_id"]).issubset(productos)
     assert set(tablas["ventas_historicas"]["botica_id"]).issubset(boticas_venta)
+    assert set(tablas["demanda_diaria"]["producto_id"]).issubset(productos)
+    assert set(tablas["demanda_diaria"]["botica_id"]).issubset(boticas_venta)
     assert set(tablas["movimientos_inventario"]["producto_id"]).issubset(productos)
     assert set(tablas["movimientos_inventario"]["usuario_id"]).issubset(usuarios)
     assert set(tablas["proveedor_producto"]["proveedor_id"]).issubset(proveedores)
     assert set(tablas["proveedor_producto"]["producto_id"]).issubset(productos)
     assert (tablas["lotes"]["cantidad"] >= 0).all()
 
-    for nombre in ["ventas_historicas", "movimientos_inventario", "stock_ubicaciones", "stock_historico"]:
+    for nombre in ["ventas_historicas", "demanda_diaria", "movimientos_inventario", "stock_ubicaciones", "stock_historico"]:
         cantidad_cols = [c for c in tablas[nombre].columns if c.startswith("cantidad") or c.startswith("stock_")]
         for columna in cantidad_cols:
             assert (tablas[nombre][columna].fillna(0) >= 0).all(), f"{nombre}.{columna} contiene negativos"
 
     assert not set(tablas["ventas_historicas"]["botica_id"]).intersection(droguerias)
+    assert not set(tablas["demanda_diaria"]["botica_id"]).intersection(droguerias)
+    assert (tablas["demanda_diaria"][["demanda_real", "cantidad_vendida", "demanda_insatisfecha"]] >= 0).all().all()
+    assert (tablas["demanda_diaria"]["cantidad_vendida"] <= tablas["demanda_diaria"]["demanda_real"]).all()
     assert not dataset.duplicated(["fecha_semana", "botica_id", "producto_id"]).any()
-    assert dataset[["stock_inicio_semana", "stock_minimo", "stock_maximo", "lead_time_dias"]].notna().all().all()
+    assert dataset[["stock_inicio_semana", "stock_minimo", "stock_maximo", "lead_time_dias", "demanda_insatisfecha", "stockout_flag"]].notna().all().all()
     assert (dataset["cantidad_vendida"] >= 0).all()
+    assert (dataset["demanda_insatisfecha"] >= 0).all()
+    assert set(dataset["stockout_flag"].unique()).issubset({0, 1})
+    assert set(tablas["demanda_diaria"]["stockout_flag"].unique()).issubset({0, 1})
 
     semanas_esperadas = len(pd.date_range(FECHA_INICIO, FECHA_FIN, freq="W-MON"))
     assert len(dataset) == len(boticas_venta) * len(productos) * semanas_esperadas
@@ -764,6 +831,7 @@ def exportar_csvs(tablas, dataset):
         "proveedor_producto",
         "precios",
         "ventas_historicas",
+        "demanda_diaria",
         "lotes",
         "movimientos_inventario",
         "stock_historico",

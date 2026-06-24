@@ -1,22 +1,17 @@
 {
-  "modelo_version_id": "c312f570-88f7-4f9e-85f3-994ce9782bde",
-  "fecha_calculo": "2026-05-27T06:32:47.743341+00:00",
-  "ventana_dias": 28,
+  "modelo_version_id": "74bff84c-0733-446b-a298-2f91515a201d",
+  "fecha_calculo": "2026-06-24T16:42:27.422008+00:00",
   "psi_features": {
-    "cantidad_vendida": 0.0203,
-    "precio_venta": 0.0,
-    "stock_actual": 0.0
+    "cantidad_vendida": 0.0139,
+    "stock_inicio_semana": 0.0013,
+    "ratio_stock_minimo": 0.0055,
+    "ratio_stock_maximo": 0.0055,
+    "lag_1": 0.0155,
+    "rolling_mean_4": 0.0188
   },
-  "psi_max": 0.0203,
-  "mape_rolling": 18.331,
-  "mape_baseline": 18.331,
-  "ratio_mape": 1.0,
-  "tendencia": "estable",
+  "psi_max": 0.0188,
   "requiere_retraining": false,
   "alerta_critica": false,
-  "reentrenamiento_disparado": false,
   "umbral_retrain_psi": 0.2,
-  "umbral_retrain_ratio_mape": 1.25,
-  "umbral_alerta_psi": 0.3,
-  "umbral_alerta_ratio_mape": 1.5
+  "umbral_alerta_psi": 0.3
 }

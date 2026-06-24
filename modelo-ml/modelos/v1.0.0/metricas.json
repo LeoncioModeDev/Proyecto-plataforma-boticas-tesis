@@ -1,83 +1,118 @@
 {
-  "version": "v1.0.0",
-  "algoritmo": "SARIMA+XGBoost",
-  "fecha_entrenamiento": "2026-05-27T06:32:47.705564+00:00",
-  "datos_desde": "2024-01-01",
-  "datos_hasta": "2026-03-16",
-  "mae": 9.406,
-  "rmse": 15.051,
-  "mape": 18.331,
-  "mape_objetivo": 20.0,
-  "fill_rate": 90.25,
-  "fill_rate_meta": 85.0,
-  "tasa_sobrestock": 64.0,
-  "series_totales": 150,
-  "series_entrenadas_sarima": 150,
-  "series_fallback_naive": 0,
-  "cumple_meta_acp": true,
-  "psi_baseline_jsonb": {
-    "cantidad_vendida": {
-      "bins": [
-        0,
-        5,
-        10,
-        20,
-        50,
-        100,
-        200,
-        500
-      ],
-      "frecuencias": [
-        0.0005172413793103448,
-        0.0034482758620689655,
-        0.044367816091954025,
-        0.3492528735632184,
-        0.4922988505747126,
-        0.10718390804597701,
-        0.0029310344827586207
-      ]
+  "modelo_version_id": "74bff84c-0733-446b-a298-2f91515a201d",
+  "split": {
+    "fecha_corte": "2026-02-09",
+    "semanas_holdout": 12,
+    "horizonte_semanas": 12,
+    "train_inicio": "2024-03-25",
+    "train_fin": "2026-02-09",
+    "holdout_inicio": "2026-02-16",
+    "holdout_fin": "2026-05-04"
+  },
+  "modelos": {
+    "seasonal_naive": {
+      "mae": 17.9906,
+      "rmse": 25.5919,
+      "mape": 45.4715
     },
-    "precio_venta": {
-      "bins": [
-        0,
-        5,
-        10,
-        20,
-        50,
-        100,
-        500
-      ],
-      "frecuencias": [
-        0.8666666666666667,
-        0.1,
-        0.03333333333333333,
-        0.0,
-        0.0,
-        0.0
-      ]
+    "sarima": {
+      "mae": 14.3102,
+      "rmse": 20.3125,
+      "mape": 35.8733
     },
-    "stock_actual": {
-      "bins": [
-        0,
-        10,
-        20,
-        50,
-        100,
-        200,
-        500
-      ],
-      "frecuencias": [
-        0.0,
-        0.006711409395973154,
-        0.026845637583892617,
-        0.2550335570469799,
-        0.3624161073825503,
-        0.348993288590604
-      ]
+    "xgboost": {
+      "mae": 17.5389,
+      "rmse": 25.2107,
+      "mape": 43.3493
+    },
+    "hibrido": {
+      "mae": 15.4614,
+      "rmse": 22.0588,
+      "mape": 38.5956
     }
   },
-  "hash": "7a193f66b99b859ed08c8cae4ca876a210f597a7a8a1a9c3dad6c3848b650017",
-  "modelo_version_id": "c312f570-88f7-4f9e-85f3-994ce9782bde",
-  "tiempo_entrenamiento_s": 10.013908624649048,
-  "tiempo_inferencia_por_sku_s": 0.06675939083099365
+  "mejor_modelo_evaluado": "sarima",
+  "modelo_exportado": "hibrido",
+  "metricas_hibrido_por_categoria": {
+    "Analgésico": {
+      "mae": 13.6368,
+      "rmse": 18.5309,
+      "mape": 26.4802
+    },
+    "Antibiótico": {
+      "mae": 10.7876,
+      "rmse": 14.3045,
+      "mape": 31.9203
+    },
+    "Antidiabético": {
+      "mae": 12.1551,
+      "rmse": 15.1433,
+      "mape": 18.5956
+    },
+    "Antifúngico": {
+      "mae": 14.2346,
+      "rmse": 17.8566,
+      "mape": 49.2647
+    },
+    "Antihipertensivo": {
+      "mae": 16.7411,
+      "rmse": 21.9968,
+      "mape": 54.9145
+    },
+    "Antihistamínico": {
+      "mae": 29.1875,
+      "rmse": 36.05,
+      "mape": 56.6002
+    },
+    "Antiinflamatorio": {
+      "mae": 15.624,
+      "rmse": 20.2035,
+      "mape": 54.5822
+    },
+    "Antiulceroso": {
+      "mae": 18.8484,
+      "rmse": 26.2107,
+      "mape": 31.5894
+    },
+    "Antivertiginoso": {
+      "mae": 8.637,
+      "rmse": 10.8752,
+      "mape": 89.5289
+    },
+    "Broncodilatador": {
+      "mae": 9.4214,
+      "rmse": 11.6076,
+      "mape": 28.609
+    },
+    "Corticosteroide": {
+      "mae": 5.5729,
+      "rmse": 7.0155,
+      "mape": 24.4607
+    },
+    "Hipolipemiante": {
+      "mae": 8.3244,
+      "rmse": 10.785,
+      "mape": 20.5999
+    },
+    "Suplemento": {
+      "mae": 9.3873,
+      "rmse": 11.5566,
+      "mape": 22.7855
+    },
+    "Vitamina": {
+      "mae": 26.8877,
+      "rmse": 37.5174,
+      "mape": 40.2387
+    }
+  },
+  "metricas_negocio": {
+    "fill_rate_real": 92.2575,
+    "porcentaje_registros_semanales_sobrestock": 5.1667
+  },
+  "series": {
+    "totales": 150,
+    "sarima": 150,
+    "fallback": 0,
+    "motivos_fallback": {}
+  }
 }

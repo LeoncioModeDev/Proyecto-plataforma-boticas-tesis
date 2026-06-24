@@ -1,0 +1,827 @@
+{
+  "resumen_general": {
+    "registros": 18450,
+    "productos": 30,
+    "boticas": 5,
+    "categorias": 14,
+    "semanas": 123,
+    "fecha_inicio": "2024-01-01",
+    "fecha_fin": "2026-05-04"
+  },
+  "validacion_datos": {
+    "nulos_total": 0,
+    "nulos_por_columna": {
+      "fecha_semana": 0,
+      "org_id": 0,
+      "botica_id": 0,
+      "producto_id": 0,
+      "codigo_producto": 0,
+      "nombre_comercial": 0,
+      "categoria_terapeutica": 0,
+      "cantidad_vendida": 0,
+      "demanda_insatisfecha": 0,
+      "stockout_flag": 0,
+      "stock_inicio_semana": 0,
+      "stock_minimo": 0,
+      "stock_maximo": 0,
+      "lead_time_dias": 0
+    },
+    "duplicados_exactos": 0,
+    "duplicados_clave_producto_botica_semana": 0,
+    "valores_negativos_por_columna": {
+      "cantidad_vendida": 0,
+      "demanda_insatisfecha": 0,
+      "stockout_flag": 0,
+      "stock_inicio_semana": 0,
+      "stock_minimo": 0,
+      "stock_maximo": 0,
+      "lead_time_dias": 0
+    },
+    "series_con_semanas_faltantes": 0,
+    "semanas_faltantes_total": 0,
+    "detalle_semanas_faltantes": []
+  },
+  "demanda": {
+    "total": 1056904,
+    "promedio": 57.28476964769648,
+    "top_10_productos": [
+      {
+        "producto_id": "d3961f5a-3ea7-53d3-89f4-78b65b0c0c6b",
+        "codigo_producto": "SKU-000001",
+        "nombre_comercial": "Paracetamol 500mg",
+        "categoria_terapeutica": "Analgésico",
+        "demanda_total": 82016,
+        "demanda_promedio": 133.35934959349592,
+        "demanda_std": 43.589131115082054,
+        "registros": 615,
+        "coef_variacion": 0.32685470683495255
+      },
+      {
+        "producto_id": "38adf7ba-476e-5e6b-9163-781a13538253",
+        "codigo_producto": "SKU-000012",
+        "nombre_comercial": "Loratadina 10mg",
+        "categoria_terapeutica": "Antihistamínico",
+        "demanda_total": 61140,
+        "demanda_promedio": 99.41463414634147,
+        "demanda_std": 39.92670949088894,
+        "registros": 615,
+        "coef_variacion": 0.4016180297169888
+      },
+      {
+        "producto_id": "0ec23038-d3ab-588c-bbd6-1f5c744cdde1",
+        "codigo_producto": "SKU-000025",
+        "nombre_comercial": "Vitamina C 500mg",
+        "categoria_terapeutica": "Vitamina",
+        "demanda_total": 54954,
+        "demanda_promedio": 89.35609756097561,
+        "demanda_std": 47.44029360215709,
+        "registros": 615,
+        "coef_variacion": 0.5309127736893877
+      },
+      {
+        "producto_id": "6d807393-f4ab-5f76-b544-251eeda27ba3",
+        "codigo_producto": "SKU-000003",
+        "nombre_comercial": "Ibuprofeno 400mg",
+        "categoria_terapeutica": "Antiinflamatorio",
+        "demanda_total": 51588,
+        "demanda_promedio": 83.8829268292683,
+        "demanda_std": 24.29345465969084,
+        "registros": 615,
+        "coef_variacion": 0.28961143319589566
+      },
+      {
+        "producto_id": "2933d8b7-2438-521b-b38d-d3a5224f87fc",
+        "codigo_producto": "SKU-000002",
+        "nombre_comercial": "Paracetamol 1g",
+        "categoria_terapeutica": "Analgésico",
+        "demanda_total": 49689,
+        "demanda_promedio": 80.79512195121951,
+        "demanda_std": 24.898169986447368,
+        "registros": 615,
+        "coef_variacion": 0.30816427260893015
+      },
+      {
+        "producto_id": "5bbfdec8-65ae-59e6-b211-5eccb5b765fa",
+        "codigo_producto": "SKU-000006",
+        "nombre_comercial": "Dipirona 500mg",
+        "categoria_terapeutica": "Analgésico",
+        "demanda_total": 47757,
+        "demanda_promedio": 77.65365853658537,
+        "demanda_std": 22.96673806704416,
+        "registros": 615,
+        "coef_variacion": 0.29575860944431515
+      },
+      {
+        "producto_id": "97d26d91-c562-5f27-9ebd-285e89c8f4bf",
+        "codigo_producto": "SKU-000018",
+        "nombre_comercial": "Metformina 850mg",
+        "categoria_terapeutica": "Antidiabético",
+        "demanda_total": 45539,
+        "demanda_promedio": 74.04715447154472,
+        "demanda_std": 16.912672451353863,
+        "registros": 615,
+        "coef_variacion": 0.22840408347971247
+      },
+      {
+        "producto_id": "82cd11ba-d1a0-58b1-b14f-edd741f36e87",
+        "codigo_producto": "SKU-000007",
+        "nombre_comercial": "Amoxicilina 500mg",
+        "categoria_terapeutica": "Antibiótico",
+        "demanda_total": 44062,
+        "demanda_promedio": 71.64552845528455,
+        "demanda_std": 26.783567486459194,
+        "registros": 615,
+        "coef_variacion": 0.37383446062757947
+      },
+      {
+        "producto_id": "cd81184b-b6f1-563c-b463-36a69ddfb598",
+        "codigo_producto": "SKU-000026",
+        "nombre_comercial": "Complejo B",
+        "categoria_terapeutica": "Vitamina",
+        "demanda_total": 43875,
+        "demanda_promedio": 71.34146341463415,
+        "demanda_std": 17.680769134951806,
+        "registros": 615,
+        "coef_variacion": 0.2478330032591535
+      },
+      {
+        "producto_id": "983871db-adfb-543e-b438-6b00044ffb64",
+        "codigo_producto": "SKU-000015",
+        "nombre_comercial": "Omeprazol 20mg",
+        "categoria_terapeutica": "Antiulceroso",
+        "demanda_total": 43083,
+        "demanda_promedio": 70.05365853658536,
+        "demanda_std": 30.28161064794444,
+        "registros": 615,
+        "coef_variacion": 0.4322630863330277
+      }
+    ],
+    "bottom_10_productos": [
+      {
+        "producto_id": "d9506935-1215-5499-93c0-8bdd86ab9418",
+        "codigo_producto": "SKU-000029",
+        "nombre_comercial": "Tramadol 50mg",
+        "categoria_terapeutica": "Analgésico",
+        "demanda_total": 8985,
+        "demanda_promedio": 14.609756097560975,
+        "demanda_std": 5.364611612969228,
+        "registros": 615,
+        "coef_variacion": 0.3671937831915499
+      },
+      {
+        "producto_id": "1e9605fd-5682-52b6-8f05-e8a92dd44513",
+        "codigo_producto": "SKU-000030",
+        "nombre_comercial": "Betahistina 16mg",
+        "categoria_terapeutica": "Antivertiginoso",
+        "demanda_total": 12086,
+        "demanda_promedio": 19.652032520325204,
+        "demanda_std": 8.521627492031504,
+        "registros": 615,
+        "coef_variacion": 0.4336257577030759
+      },
+      {
+        "producto_id": "4d9429b6-2ebf-5b5d-ac48-f779d5a1e270",
+        "codigo_producto": "SKU-000010",
+        "nombre_comercial": "Ciprofloxacino 500mg",
+        "categoria_terapeutica": "Antibiótico",
+        "demanda_total": 14083,
+        "demanda_promedio": 22.899186991869918,
+        "demanda_std": 11.245972829213159,
+        "registros": 615,
+        "coef_variacion": 0.4911079521384714
+      },
+      {
+        "producto_id": "22231140-3780-5fe8-a7d4-d33f61d15111",
+        "codigo_producto": "SKU-000023",
+        "nombre_comercial": "Dexametasona 4mg",
+        "categoria_terapeutica": "Corticosteroide",
+        "demanda_total": 16353,
+        "demanda_promedio": 26.590243902439024,
+        "demanda_std": 9.958279538837996,
+        "registros": 615,
+        "coef_variacion": 0.37450877003518424
+      },
+      {
+        "producto_id": "058c6382-bde2-59d1-93ff-20c6161a4736",
+        "codigo_producto": "SKU-000009",
+        "nombre_comercial": "Azitromicina 500mg",
+        "categoria_terapeutica": "Antibiótico",
+        "demanda_total": 20817,
+        "demanda_promedio": 33.84878048780488,
+        "demanda_std": 14.92298014668151,
+        "registros": 615,
+        "coef_variacion": 0.44087201759183015
+      },
+      {
+        "producto_id": "c0cf5e5c-b5c9-585a-8e79-d9830bc954f6",
+        "codigo_producto": "SKU-000011",
+        "nombre_comercial": "Metronidazol 500mg",
+        "categoria_terapeutica": "Antibiótico",
+        "demanda_total": 23540,
+        "demanda_promedio": 38.27642276422764,
+        "demanda_std": 11.41496019146676,
+        "registros": 615,
+        "coef_variacion": 0.2982243210599855
+      },
+      {
+        "producto_id": "2897aac2-f219-5167-b800-73fac27f6b85",
+        "codigo_producto": "SKU-000022",
+        "nombre_comercial": "Salbutamol inhalador",
+        "categoria_terapeutica": "Broncodilatador",
+        "demanda_total": 24492,
+        "demanda_promedio": 39.82439024390244,
+        "demanda_std": 18.779755288804925,
+        "registros": 615,
+        "coef_variacion": 0.47156416391536127
+      },
+      {
+        "producto_id": "012857cc-907f-5e7d-b8fb-796d2c9f1621",
+        "codigo_producto": "SKU-000028",
+        "nombre_comercial": "Sulfato Ferroso",
+        "categoria_terapeutica": "Suplemento",
+        "demanda_total": 25006,
+        "demanda_promedio": 40.66016260162602,
+        "demanda_std": 9.736092058565696,
+        "registros": 615,
+        "coef_variacion": 0.23945039654554515
+      },
+      {
+        "producto_id": "042e2e80-f954-5df4-97be-29dd428cc598",
+        "codigo_producto": "SKU-000004",
+        "nombre_comercial": "Ibuprofeno 600mg",
+        "categoria_terapeutica": "Antiinflamatorio",
+        "demanda_total": 25470,
+        "demanda_promedio": 41.41463414634146,
+        "demanda_std": 16.663623037150085,
+        "registros": 615,
+        "coef_variacion": 0.40236074471328237
+      },
+      {
+        "producto_id": "1ca3438e-9e23-58f0-a35f-f15f7a23beb9",
+        "codigo_producto": "SKU-000024",
+        "nombre_comercial": "Clotrimazol crema",
+        "categoria_terapeutica": "Antifúngico",
+        "demanda_total": 26551,
+        "demanda_promedio": 43.172357723577235,
+        "demanda_std": 18.194467520124928,
+        "registros": 615,
+        "coef_variacion": 0.4214378940483157
+      }
+    ],
+    "boticas_mayor_demanda": [
+      {
+        "botica_id": "26f7241d-a84e-5e4a-a43d-33eea1e54eea",
+        "demanda_total": 233300,
+        "demanda_promedio": 63.22493224932249
+      },
+      {
+        "botica_id": "43616d97-2221-569d-82eb-bcc14bcd6344",
+        "demanda_total": 219757,
+        "demanda_promedio": 59.55474254742548
+      },
+      {
+        "botica_id": "8ecedccf-c230-516b-bbc2-108f7a6fbe63",
+        "demanda_total": 211725,
+        "demanda_promedio": 57.3780487804878
+      },
+      {
+        "botica_id": "7fb983e8-6848-5425-97a2-14da72722d0f",
+        "demanda_total": 203552,
+        "demanda_promedio": 55.16314363143631
+      },
+      {
+        "botica_id": "d6f21f11-7533-52dd-a4dc-2fb8e260c02c",
+        "demanda_total": 188570,
+        "demanda_promedio": 51.1029810298103
+      }
+    ],
+    "categorias_mayor_demanda": [
+      {
+        "categoria_terapeutica": "Analgésico",
+        "demanda_total": 188447
+      },
+      {
+        "categoria_terapeutica": "Antibiótico",
+        "demanda_total": 138394
+      },
+      {
+        "categoria_terapeutica": "Antihistamínico",
+        "demanda_total": 135466
+      },
+      {
+        "categoria_terapeutica": "Antiulceroso",
+        "demanda_total": 112777
+      },
+      {
+        "categoria_terapeutica": "Antiinflamatorio",
+        "demanda_total": 104681
+      },
+      {
+        "categoria_terapeutica": "Vitamina",
+        "demanda_total": 98829
+      },
+      {
+        "categoria_terapeutica": "Antihipertensivo",
+        "demanda_total": 67175
+      },
+      {
+        "categoria_terapeutica": "Suplemento",
+        "demanda_total": 55651
+      },
+      {
+        "categoria_terapeutica": "Antidiabético",
+        "demanda_total": 45539
+      },
+      {
+        "categoria_terapeutica": "Hipolipemiante",
+        "demanda_total": 30463
+      }
+    ],
+    "distribucion_cantidad_vendida": {
+      "count": 18450.0,
+      "mean": 57.28476964769648,
+      "std": 33.834946594468235,
+      "min": 0.0,
+      "25%": 34.0,
+      "50%": 52.0,
+      "75%": 73.0,
+      "90%": 99.0,
+      "95%": 120.0,
+      "max": 319.0
+    },
+    "productos_mayor_variabilidad": [
+      {
+        "producto_id": "0ec23038-d3ab-588c-bbd6-1f5c744cdde1",
+        "codigo_producto": "SKU-000025",
+        "nombre_comercial": "Vitamina C 500mg",
+        "categoria_terapeutica": "Vitamina",
+        "demanda_total": 54954,
+        "demanda_promedio": 89.35609756097561,
+        "demanda_std": 47.44029360215709,
+        "registros": 615,
+        "coef_variacion": 0.5309127736893877
+      },
+      {
+        "producto_id": "9928e9a1-d9fc-5fdd-86c2-8909352fd7fe",
+        "codigo_producto": "SKU-000005",
+        "nombre_comercial": "Diclofenaco 50mg",
+        "categoria_terapeutica": "Antiinflamatorio",
+        "demanda_total": 27623,
+        "demanda_promedio": 44.91544715447154,
+        "demanda_std": 22.33158479740233,
+        "registros": 615,
+        "coef_variacion": 0.4971916392282675
+      },
+      {
+        "producto_id": "4d9429b6-2ebf-5b5d-ac48-f779d5a1e270",
+        "codigo_producto": "SKU-000010",
+        "nombre_comercial": "Ciprofloxacino 500mg",
+        "categoria_terapeutica": "Antibiótico",
+        "demanda_total": 14083,
+        "demanda_promedio": 22.899186991869918,
+        "demanda_std": 11.245972829213159,
+        "registros": 615,
+        "coef_variacion": 0.4911079521384714
+      },
+      {
+        "producto_id": "2897aac2-f219-5167-b800-73fac27f6b85",
+        "codigo_producto": "SKU-000022",
+        "nombre_comercial": "Salbutamol inhalador",
+        "categoria_terapeutica": "Broncodilatador",
+        "demanda_total": 24492,
+        "demanda_promedio": 39.82439024390244,
+        "demanda_std": 18.779755288804925,
+        "registros": 615,
+        "coef_variacion": 0.47156416391536127
+      },
+      {
+        "producto_id": "87b859e0-789a-56e6-b1ba-4fe76221d3bf",
+        "codigo_producto": "SKU-000014",
+        "nombre_comercial": "Cetirizina 10mg",
+        "categoria_terapeutica": "Antihistamínico",
+        "demanda_total": 41117,
+        "demanda_promedio": 66.8569105691057,
+        "demanda_std": 30.53490041795347,
+        "registros": 615,
+        "coef_variacion": 0.4567201828207647
+      },
+      {
+        "producto_id": "07371b94-955f-52a4-9bf9-f0a6ad2b4fa8",
+        "codigo_producto": "SKU-000008",
+        "nombre_comercial": "Amoxicilina jarabe",
+        "categoria_terapeutica": "Antibiótico",
+        "demanda_total": 35892,
+        "demanda_promedio": 58.360975609756096,
+        "demanda_std": 25.96269760250423,
+        "registros": 615,
+        "coef_variacion": 0.44486400940432697
+      },
+      {
+        "producto_id": "058c6382-bde2-59d1-93ff-20c6161a4736",
+        "codigo_producto": "SKU-000009",
+        "nombre_comercial": "Azitromicina 500mg",
+        "categoria_terapeutica": "Antibiótico",
+        "demanda_total": 20817,
+        "demanda_promedio": 33.84878048780488,
+        "demanda_std": 14.92298014668151,
+        "registros": 615,
+        "coef_variacion": 0.44087201759183015
+      },
+      {
+        "producto_id": "1e9605fd-5682-52b6-8f05-e8a92dd44513",
+        "codigo_producto": "SKU-000030",
+        "nombre_comercial": "Betahistina 16mg",
+        "categoria_terapeutica": "Antivertiginoso",
+        "demanda_total": 12086,
+        "demanda_promedio": 19.652032520325204,
+        "demanda_std": 8.521627492031504,
+        "registros": 615,
+        "coef_variacion": 0.4336257577030759
+      },
+      {
+        "producto_id": "983871db-adfb-543e-b438-6b00044ffb64",
+        "codigo_producto": "SKU-000015",
+        "nombre_comercial": "Omeprazol 20mg",
+        "categoria_terapeutica": "Antiulceroso",
+        "demanda_total": 43083,
+        "demanda_promedio": 70.05365853658536,
+        "demanda_std": 30.28161064794444,
+        "registros": 615,
+        "coef_variacion": 0.4322630863330277
+      },
+      {
+        "producto_id": "1ca3438e-9e23-58f0-a35f-f15f7a23beb9",
+        "codigo_producto": "SKU-000024",
+        "nombre_comercial": "Clotrimazol crema",
+        "categoria_terapeutica": "Antifúngico",
+        "demanda_total": 26551,
+        "demanda_promedio": 43.172357723577235,
+        "demanda_std": 18.194467520124928,
+        "registros": 615,
+        "coef_variacion": 0.4214378940483157
+      }
+    ],
+    "productos_menor_variabilidad": [
+      {
+        "producto_id": "2eb3a104-e572-583a-afa0-156ee0dc4cce",
+        "codigo_producto": "SKU-000019",
+        "nombre_comercial": "Enalapril 10mg",
+        "categoria_terapeutica": "Antihipertensivo",
+        "demanda_total": 37449,
+        "demanda_promedio": 60.892682926829266,
+        "demanda_std": 18.121419878843927,
+        "registros": 615,
+        "coef_variacion": 0.2975960165956104
+      },
+      {
+        "producto_id": "5bbfdec8-65ae-59e6-b211-5eccb5b765fa",
+        "codigo_producto": "SKU-000006",
+        "nombre_comercial": "Dipirona 500mg",
+        "categoria_terapeutica": "Analgésico",
+        "demanda_total": 47757,
+        "demanda_promedio": 77.65365853658537,
+        "demanda_std": 22.96673806704416,
+        "registros": 615,
+        "coef_variacion": 0.29575860944431515
+      },
+      {
+        "producto_id": "6d807393-f4ab-5f76-b544-251eeda27ba3",
+        "codigo_producto": "SKU-000003",
+        "nombre_comercial": "Ibuprofeno 400mg",
+        "categoria_terapeutica": "Antiinflamatorio",
+        "demanda_total": 51588,
+        "demanda_promedio": 83.8829268292683,
+        "demanda_std": 24.29345465969084,
+        "registros": 615,
+        "coef_variacion": 0.28961143319589566
+      },
+      {
+        "producto_id": "cd81184b-b6f1-563c-b463-36a69ddfb598",
+        "codigo_producto": "SKU-000026",
+        "nombre_comercial": "Complejo B",
+        "categoria_terapeutica": "Vitamina",
+        "demanda_total": 43875,
+        "demanda_promedio": 71.34146341463415,
+        "demanda_std": 17.680769134951806,
+        "registros": 615,
+        "coef_variacion": 0.2478330032591535
+      },
+      {
+        "producto_id": "012857cc-907f-5e7d-b8fb-796d2c9f1621",
+        "codigo_producto": "SKU-000028",
+        "nombre_comercial": "Sulfato Ferroso",
+        "categoria_terapeutica": "Suplemento",
+        "demanda_total": 25006,
+        "demanda_promedio": 40.66016260162602,
+        "demanda_std": 9.736092058565696,
+        "registros": 615,
+        "coef_variacion": 0.23945039654554515
+      },
+      {
+        "producto_id": "2082733c-4e17-51fe-bc8c-bf33d3ec5d7e",
+        "codigo_producto": "SKU-000016",
+        "nombre_comercial": "Omeprazol 40mg",
+        "categoria_terapeutica": "Antiulceroso",
+        "demanda_total": 30801,
+        "demanda_promedio": 50.082926829268295,
+        "demanda_std": 11.87480640896253,
+        "registros": 615,
+        "coef_variacion": 0.23710288437102545
+      },
+      {
+        "producto_id": "d0ae6d2d-e561-56b3-a2c1-113c1c56ae81",
+        "codigo_producto": "SKU-000021",
+        "nombre_comercial": "Atorvastatina 20mg",
+        "categoria_terapeutica": "Hipolipemiante",
+        "demanda_total": 30463,
+        "demanda_promedio": 49.53333333333333,
+        "demanda_std": 11.561552217809032,
+        "registros": 615,
+        "coef_variacion": 0.2334095333339643
+      },
+      {
+        "producto_id": "97d26d91-c562-5f27-9ebd-285e89c8f4bf",
+        "codigo_producto": "SKU-000018",
+        "nombre_comercial": "Metformina 850mg",
+        "categoria_terapeutica": "Antidiabético",
+        "demanda_total": 45539,
+        "demanda_promedio": 74.04715447154472,
+        "demanda_std": 16.912672451353863,
+        "registros": 615,
+        "coef_variacion": 0.22840408347971247
+      },
+      {
+        "producto_id": "6baabed2-52d7-5cb7-bf74-86c7cb3e4f07",
+        "codigo_producto": "SKU-000027",
+        "nombre_comercial": "Calcio + Vit D",
+        "categoria_terapeutica": "Suplemento",
+        "demanda_total": 30645,
+        "demanda_promedio": 49.829268292682926,
+        "demanda_std": 11.37236730250483,
+        "registros": 615,
+        "coef_variacion": 0.22822665658477634
+      },
+      {
+        "producto_id": "d2f08f15-f9f2-5f65-a740-b05896774467",
+        "codigo_producto": "SKU-000017",
+        "nombre_comercial": "Ranitidina 150mg",
+        "categoria_terapeutica": "Antiulceroso",
+        "demanda_total": 38893,
+        "demanda_promedio": 63.240650406504066,
+        "demanda_std": 14.394759256021738,
+        "registros": 615,
+        "coef_variacion": 0.22761877310707243
+      }
+    ]
+  },
+  "inventario": {
+    "porcentaje_stock_bajo_minimo": 18.981029810298104,
+    "porcentaje_stock_sobre_maximo": 5.842818428184282,
+    "porcentaje_stock_cero": 7.479674796747967,
+    "porcentaje_stock_normal": 75.17615176151762,
+    "conteos_estado_stock": {
+      "normal": 13870,
+      "bajo_minimo": 3502,
+      "sobrestock": 1078
+    },
+    "stockout": {
+      "disponible": true,
+      "porcentaje_semanas_con_quiebre": 17.414634146341463,
+      "demanda_total_insatisfecha": 93968.0,
+      "productos_con_mas_quiebres": [
+        {
+          "producto_id": "0ec23038-d3ab-588c-bbd6-1f5c744cdde1",
+          "nombre_comercial": "Vitamina C 500mg",
+          "quiebres": 238
+        },
+        {
+          "producto_id": "4d9429b6-2ebf-5b5d-ac48-f779d5a1e270",
+          "nombre_comercial": "Ciprofloxacino 500mg",
+          "quiebres": 213
+        },
+        {
+          "producto_id": "9928e9a1-d9fc-5fdd-86c2-8909352fd7fe",
+          "nombre_comercial": "Diclofenaco 50mg",
+          "quiebres": 205
+        },
+        {
+          "producto_id": "983871db-adfb-543e-b438-6b00044ffb64",
+          "nombre_comercial": "Omeprazol 20mg",
+          "quiebres": 195
+        },
+        {
+          "producto_id": "87b859e0-789a-56e6-b1ba-4fe76221d3bf",
+          "nombre_comercial": "Cetirizina 10mg",
+          "quiebres": 195
+        },
+        {
+          "producto_id": "afe9d181-1c64-5cca-b4b7-a9fa24eceeea",
+          "nombre_comercial": "Losartán 50mg",
+          "quiebres": 187
+        },
+        {
+          "producto_id": "1ca3438e-9e23-58f0-a35f-f15f7a23beb9",
+          "nombre_comercial": "Clotrimazol crema",
+          "quiebres": 175
+        },
+        {
+          "producto_id": "1e9605fd-5682-52b6-8f05-e8a92dd44513",
+          "nombre_comercial": "Betahistina 16mg",
+          "quiebres": 169
+        },
+        {
+          "producto_id": "058c6382-bde2-59d1-93ff-20c6161a4736",
+          "nombre_comercial": "Azitromicina 500mg",
+          "quiebres": 160
+        },
+        {
+          "producto_id": "94e18241-54bd-5516-b36f-94ab6e323aca",
+          "nombre_comercial": "Loratadina jarabe",
+          "quiebres": 158
+        }
+      ],
+      "boticas_con_mas_quiebres": [
+        {
+          "botica_id": "26f7241d-a84e-5e4a-a43d-33eea1e54eea",
+          "quiebres": 769
+        },
+        {
+          "botica_id": "43616d97-2221-569d-82eb-bcc14bcd6344",
+          "quiebres": 683
+        },
+        {
+          "botica_id": "8ecedccf-c230-516b-bbc2-108f7a6fbe63",
+          "quiebres": 639
+        },
+        {
+          "botica_id": "7fb983e8-6848-5425-97a2-14da72722d0f",
+          "quiebres": 602
+        },
+        {
+          "botica_id": "d6f21f11-7533-52dd-a4dc-2fb8e260c02c",
+          "quiebres": 520
+        }
+      ]
+    }
+  },
+  "relacion_demanda_stock_lead_time": {
+    "cantidad_vendida": {
+      "cantidad_vendida": 1.0,
+      "demanda_insatisfecha": -0.1838629051039206,
+      "stockout_flag": -0.19659685257373327,
+      "stock_inicio_semana": 0.4967978385546447,
+      "stock_minimo": 0.6866652450490444,
+      "stock_maximo": 0.6867076296663738,
+      "lead_time_dias": -0.25890970793126844
+    },
+    "demanda_insatisfecha": {
+      "cantidad_vendida": -0.1838629051039206,
+      "demanda_insatisfecha": 1.0,
+      "stockout_flag": 0.6995569294675871,
+      "stock_inicio_semana": -0.34020167338346796,
+      "stock_minimo": 0.12573467523796586,
+      "stock_maximo": 0.1257628246301642,
+      "lead_time_dias": 0.26577246523514614
+    },
+    "stockout_flag": {
+      "cantidad_vendida": -0.19659685257373327,
+      "demanda_insatisfecha": 0.6995569294675871,
+      "stockout_flag": 1.0,
+      "stock_inicio_semana": -0.47182045195445704,
+      "stock_minimo": -0.02011297847667252,
+      "stock_maximo": -0.01993818387833387,
+      "lead_time_dias": 0.2854336075042768
+    },
+    "stock_inicio_semana": {
+      "cantidad_vendida": 0.4967978385546447,
+      "demanda_insatisfecha": -0.34020167338346796,
+      "stockout_flag": -0.47182045195445704,
+      "stock_inicio_semana": 1.0,
+      "stock_minimo": 0.4746661508783456,
+      "stock_maximo": 0.4746456818585105,
+      "lead_time_dias": -0.23569088080196457
+    },
+    "stock_minimo": {
+      "cantidad_vendida": 0.6866652450490444,
+      "demanda_insatisfecha": 0.12573467523796586,
+      "stockout_flag": -0.02011297847667252,
+      "stock_inicio_semana": 0.4746661508783456,
+      "stock_minimo": 1.0,
+      "stock_maximo": 0.9999492705227623,
+      "lead_time_dias": -0.1306147639706975
+    },
+    "stock_maximo": {
+      "cantidad_vendida": 0.6867076296663738,
+      "demanda_insatisfecha": 0.1257628246301642,
+      "stockout_flag": -0.01993818387833387,
+      "stock_inicio_semana": 0.4746456818585105,
+      "stock_minimo": 0.9999492705227623,
+      "stock_maximo": 1.0,
+      "lead_time_dias": -0.13127460416671416
+    },
+    "lead_time_dias": {
+      "cantidad_vendida": -0.25890970793126844,
+      "demanda_insatisfecha": 0.26577246523514614,
+      "stockout_flag": 0.2854336075042768,
+      "stock_inicio_semana": -0.23569088080196457,
+      "stock_minimo": -0.1306147639706975,
+      "stock_maximo": -0.13127460416671416,
+      "lead_time_dias": 1.0
+    }
+  },
+  "series_representativas": [
+    {
+      "tipo": "alta",
+      "producto_id": "d3961f5a-3ea7-53d3-89f4-78b65b0c0c6b",
+      "botica_id": "43616d97-2221-569d-82eb-bcc14bcd6344",
+      "codigo_producto": "SKU-000001",
+      "nombre_comercial": "Paracetamol 500mg",
+      "demanda_promedio": 144.3008130081301,
+      "demanda_total": 17749,
+      "semanas": 123,
+      "adf": {
+        "ejecutada": true,
+        "estadistico": -2.3199366737305236,
+        "p_value": 0.1656185919350483,
+        "lags_usados": 3,
+        "observaciones": 119,
+        "estacionaria_5pct": false
+      }
+    },
+    {
+      "tipo": "media",
+      "producto_id": "d0ae6d2d-e561-56b3-a2c1-113c1c56ae81",
+      "botica_id": "43616d97-2221-569d-82eb-bcc14bcd6344",
+      "codigo_producto": "SKU-000021",
+      "nombre_comercial": "Atorvastatina 20mg",
+      "demanda_promedio": 53.422764227642276,
+      "demanda_total": 6571,
+      "semanas": 123,
+      "adf": {
+        "ejecutada": true,
+        "estadistico": -8.421934534396845,
+        "p_value": 1.9728491034597716e-13,
+        "lags_usados": 2,
+        "observaciones": 120,
+        "estacionaria_5pct": true
+      }
+    },
+    {
+      "tipo": "baja",
+      "producto_id": "d9506935-1215-5499-93c0-8bdd86ab9418",
+      "botica_id": "d6f21f11-7533-52dd-a4dc-2fb8e260c02c",
+      "codigo_producto": "SKU-000029",
+      "nombre_comercial": "Tramadol 50mg",
+      "demanda_promedio": 13.398373983739837,
+      "demanda_total": 1648,
+      "semanas": 123,
+      "adf": {
+        "ejecutada": true,
+        "estadistico": -8.324413227346781,
+        "p_value": 3.5018931381482085e-13,
+        "lags_usados": 2,
+        "observaciones": 120,
+        "estacionaria_5pct": true
+      }
+    }
+  ],
+  "graficos": {
+    "demanda_semanal_total": "C:\\Users\\Leonardo\\OneDrive\\Escritorio\\Tesis\\v2\\Proyecto-plataforma-boticas-tesis\\modelo-ml\\reports\\graficos\\demanda_semanal_total.png",
+    "top_10_productos": "C:\\Users\\Leonardo\\OneDrive\\Escritorio\\Tesis\\v2\\Proyecto-plataforma-boticas-tesis\\modelo-ml\\reports\\graficos\\top_10_productos.png",
+    "demanda_por_botica": "C:\\Users\\Leonardo\\OneDrive\\Escritorio\\Tesis\\v2\\Proyecto-plataforma-boticas-tesis\\modelo-ml\\reports\\graficos\\demanda_por_botica.png",
+    "demanda_por_categoria": "C:\\Users\\Leonardo\\OneDrive\\Escritorio\\Tesis\\v2\\Proyecto-plataforma-boticas-tesis\\modelo-ml\\reports\\graficos\\demanda_por_categoria.png",
+    "distribucion_cantidad_vendida": "C:\\Users\\Leonardo\\OneDrive\\Escritorio\\Tesis\\v2\\Proyecto-plataforma-boticas-tesis\\modelo-ml\\reports\\graficos\\distribucion_cantidad_vendida.png",
+    "demanda_promedio_semana_anio": "C:\\Users\\Leonardo\\OneDrive\\Escritorio\\Tesis\\v2\\Proyecto-plataforma-boticas-tesis\\modelo-ml\\reports\\graficos\\demanda_promedio_semana_anio.png",
+    "series_representativas": "C:\\Users\\Leonardo\\OneDrive\\Escritorio\\Tesis\\v2\\Proyecto-plataforma-boticas-tesis\\modelo-ml\\reports\\graficos\\series_representativas.png",
+    "acf_series_representativas": "C:\\Users\\Leonardo\\OneDrive\\Escritorio\\Tesis\\v2\\Proyecto-plataforma-boticas-tesis\\modelo-ml\\reports\\graficos\\acf_series_representativas.png",
+    "matriz_correlacion": "C:\\Users\\Leonardo\\OneDrive\\Escritorio\\Tesis\\v2\\Proyecto-plataforma-boticas-tesis\\modelo-ml\\reports\\graficos\\matriz_correlacion.png",
+    "estado_stock_porcentaje": "C:\\Users\\Leonardo\\OneDrive\\Escritorio\\Tesis\\v2\\Proyecto-plataforma-boticas-tesis\\modelo-ml\\reports\\graficos\\estado_stock_porcentaje.png"
+  },
+  "hallazgos": [
+    "La demanda total acumulada es 1056904 unidades.",
+    "El producto con mayor demanda es Paracetamol 500mg.",
+    "La categoría con mayor demanda es Analgésico.",
+    "La correlación lineal demanda-tiempo es -0.173.",
+    "La variable numérica más relacionada linealmente con la demanda es stock_maximo.",
+    "La demanda promedio por semana del año permite revisar un posible patrón estacional anual."
+  ],
+  "riesgos": [
+    "Hay una proporción relevante de registros con stock bajo el mínimo."
+  ],
+  "aptitud_sarima": {
+    "apta_para_continuar": true,
+    "observacion": "Las series son semanales y tienen más de un año de historia; conviene evaluar estacionariedad y estacionalidad por serie antes de entrenar.",
+    "adf_series_representativas_estacionarias": 2,
+    "adf_series_representativas_evaluadas": 3
+  },
+  "aptitud_xgboost": {
+    "apta_para_continuar": true,
+    "observacion": "El dataset es adecuado para continuar, pero las variables temporales derivadas deben construirse en Feature Engineering, no en este EDA."
+  },
+  "recomendaciones": [
+    "Mantener este EDA como control previo antes de generar features.",
+    "Construir lags, ventanas móviles y variables calendario en el módulo de Feature Engineering.",
+    "Evaluar SARIMA por familias de series o por series representativas antes de escalar a todos los productos.",
+    "Incorporar columnas de quiebre de stock si se desea medir demanda censurada o insatisfecha."
+  ]
+}

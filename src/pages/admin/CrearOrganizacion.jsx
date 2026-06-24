@@ -79,7 +79,7 @@ export default function CrearOrganizacion() {
     if (!formulario.orgNombre?.trim()) nuevos.orgNombre = 'El nombre de la organización es obligatorio'
     if (!formulario.orgNumeroIdentificacion?.trim()) nuevos.orgNumeroIdentificacion = 'El número de identificación es obligatorio'
     if (!formulario.orgDominioCorreo?.trim()) nuevos.orgDominioCorreo = 'El dominio institucional es obligatorio'
-    else if (!/^[a-z0-9][a-z0-9.-]+\.[a-z]{2,}$/.test(formulario.orgDominioCorreo.toLowerCase().trim())) nuevos.orgDominioCorreo = 'Formato de dominio inválido. Ejemplo: boticasleonardo.com'
+    else if (!/^[a-z0-9][a-z0-9.-]+\.[a-z]{2,}$/.test(formulario.orgDominioCorreo.toLowerCase().trim())) nuevos.orgDominioCorreo = 'Formato de dominio inválido. Ejemplo: organizacion.com'
     if (!formulario.drogueriaUbigeo) nuevos.drogueriaUbigeo = 'El ubigeo de la droguería es obligatorio'
     if (!formulario.adminNombre?.trim()) nuevos.adminNombre = 'El nombre del administrador es obligatorio'
     if (!formulario.adminNombreCuenta?.trim()) nuevos.adminNombreCuenta = 'El nombre de cuenta es obligatorio'
@@ -163,7 +163,7 @@ export default function CrearOrganizacion() {
             <div>
               <label className="text-sm font-medium text-principal">Nombre o Razón Social *</label>
               <input type="text" value={formulario.orgNombre} onChange={(e) => actualizar('orgNombre', e.target.value)} required
-                className={estiloInput} placeholder="Boticas Jhodaal S.A.C." />
+                className={estiloInput} placeholder="Nombre legal de la organización" />
               {errores.orgNombre && <p className="text-xs text-estado-critico mt-1">{errores.orgNombre}</p>}
             </div>
             <div className="grid grid-cols-2 gap-4">
@@ -177,7 +177,7 @@ export default function CrearOrganizacion() {
               <div>
                 <label className="text-sm font-medium text-principal">Número de Identificación *</label>
                 <input type="text" value={formulario.orgNumeroIdentificacion} onChange={(e) => actualizar('orgNumeroIdentificacion', e.target.value)} required
-                  className={estiloInput} placeholder="20123456789" />
+                  className={estiloInput} placeholder="Número de identificación" />
                 {errores.orgNumeroIdentificacion && <p className="text-xs text-estado-critico mt-1">{errores.orgNumeroIdentificacion}</p>}
               </div>
             </div>
@@ -197,9 +197,9 @@ export default function CrearOrganizacion() {
                 <div className="relative">
                   <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-secundario text-sm">@</span>
                   <input type="text" value={formulario.orgDominioCorreo} onChange={(e) => actualizar('orgDominioCorreo', e.target.value)}
-                    className={`${estiloInput} pl-8`} placeholder="miempresa.com" />
+                    className={`${estiloInput} pl-8`} placeholder="organizacion.com" />
                 </div>
-                <p className="text-xs text-secundario mt-1.5">Sin @, sin protocolo, sin espacios. Ej: boticasleonardo.com</p>
+                <p className="text-xs text-secundario mt-1.5">Sin @, sin protocolo, sin espacios. Ej: organizacion.com</p>
                 {errores.orgDominioCorreo && <p className="text-xs text-estado-critico mt-1">{errores.orgDominioCorreo}</p>}
               </div>
             </div>
@@ -246,7 +246,7 @@ export default function CrearOrganizacion() {
               <input type="text" value={formulario.adminNombre} onChange={(e) => {
                 actualizar('adminNombre', e.target.value)
                 if (!formulario.adminNombreCuentaEditado) sugerirNombreCuenta(e.target.value)
-              }} required className={estiloInput} placeholder="Leonardo Ruiz" />
+              }} required className={estiloInput} placeholder="Nombre y apellidos" />
               {errores.adminNombre && <p className="text-xs text-estado-critico mt-1">{errores.adminNombre}</p>}
             </div>
             <div>
@@ -257,7 +257,7 @@ export default function CrearOrganizacion() {
               <input type="text" value={formulario.adminNombreCuenta} onChange={(e) => {
                 actualizar('adminNombreCuenta', e.target.value)
                 setFormulario((prev) => ({ ...prev, adminNombreCuentaEditado: true }))
-              }} required className={estiloInput} placeholder="leonardo.ruiz" />
+              }} required className={estiloInput} placeholder="nombre.apellido" />
               <p className="text-xs text-secundario mt-1.5">Se combinará con el dominio institucional para generar el correo</p>
               {errores.adminNombreCuenta && <p className="text-xs text-estado-critico mt-1">{errores.adminNombreCuenta}</p>}
             </div>
@@ -267,7 +267,7 @@ export default function CrearOrganizacion() {
                 Contraseña *
               </label>
               <input type="password" value={formulario.adminContrasena} onChange={(e) => actualizar('adminContrasena', e.target.value)}
-                required className={estiloInput} placeholder="Mínimo 6 caracteres" />
+                required className={estiloInput} placeholder="Contraseña inicial" />
               <p className="text-xs text-secundario mt-1.5">El administrador usará esta contraseña para iniciar sesión</p>
               {errores.adminContrasena && <p className="text-xs text-estado-critico mt-1">{errores.adminContrasena}</p>}
             </div>
@@ -281,7 +281,7 @@ export default function CrearOrganizacion() {
                   {emailGenerado || '—'}
                 </p>
                 <p className="text-xs text-secundario pl-6">
-                  El correo se construye automáticamente en el servidor. No se enviará contraseña — el usuario recibirá una invitación.
+                  El correo se construye automáticamente en el servidor. La contraseña ingresada quedará configurada para este administrador.
                 </p>
               </div>
             )}
