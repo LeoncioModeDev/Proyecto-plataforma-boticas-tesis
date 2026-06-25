@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 
-from fastapi import BackgroundTasks, Depends, FastAPI, Header, Response, status
+from fastapi import BackgroundTasks, Depends, FastAPI, Header, status
 from fastapi.middleware.cors import CORSMiddleware
 
 from .config import config
@@ -22,7 +22,7 @@ from .schemas import (
     ReentrenamientoRequest,
     ReposicionRequest,
 )
-from .security import obtener_org_id
+from .security import obtener_org_id, obtener_perfil_autenticado
 from .services.data_service import data_service
 from .services.model_service import model_service
 from .services.prediction_service import prediction_service
@@ -40,8 +40,8 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=config.allowed_origins,
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "PATCH", "OPTIONS"],
+    allow_headers=["Authorization", "Content-Type", "X-Org-Id", "X-Retrain-Secret"],
 )
 
 
@@ -68,6 +68,19 @@ def metricas_modelo():
 @app.get("/api/v1/modelos/drift", tags=["Modelos"])
 def drift_modelo():
     return model_service.drift
+
+
+@app.get("/api/v1/diagnostico/supabase", tags=["Diagnostico"])
+def diagnostico_supabase(org_id: str = Depends(obtener_org_id)):
+    return data_service.diagnostico(org_id)
+
+
+@app.get("/api/v1/diagnostico/serie-valida", tags=["Diagnostico"])
+def diagnostico_serie_valida(org_id: str = Depends(obtener_org_id)):
+    serie = data_service.serie_valida(org_id)
+    if not serie:
+        error_http(404, "SERIE_VALIDA_NO_ENCONTRADA", "No se encontró una serie con ventas históricas para la organización.")
+    return serie
 
 
 @app.get("/api/v1/series/{botica_id}/{producto_id}/madurez", response_model=MadurezResponse, tags=["Predicciones"])
@@ -124,6 +137,14 @@ def consultar_predicciones(botica_id: str, producto_id: str, org_id: str = Depen
         "producto_id": producto_id,
         "predicciones": data_service.predicciones_guardadas(org_id, botica_id, producto_id),
     }
+
+
+@app.get("/api/v1/recomendaciones", tags=["Recomendaciones"])
+def consultar_recomendaciones(org_id: str = Depends(obtener_org_id)):
+    if not data_service.repo.disponible:
+        return {"org_id": org_id, "recomendaciones": list(data_service.recomendaciones.values())}
+    filas = data_service.repo.seleccionar_todo("recomendaciones_ml", {"org_id": org_id}, orden="generado_en")
+    return {"org_id": org_id, "recomendaciones": filas}
 
 
 @app.post("/api/v1/recomendaciones/reposicion", response_model=RecomendacionResponse, tags=["Recomendaciones"])

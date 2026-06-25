@@ -8,8 +8,9 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 
-RAIZ_MODELO = Path(__file__).parents[1]
-load_dotenv(RAIZ_MODELO / ".env")
+RAIZ_MODELO = Path(__file__).resolve().parents[1]
+ENV_FILE = RAIZ_MODELO / ".env"
+load_dotenv(ENV_FILE)
 
 
 class Configuracion:
@@ -24,7 +25,8 @@ class Configuracion:
         self.enable_automatic_retrain = os.getenv("ENABLE_AUTOMATIC_RETRAIN", "false").lower() == "true"
         self.min_weeks_xgboost = int(os.getenv("MIN_WEEKS_XGBOOST", "4"))
         self.min_weeks_sarima = int(os.getenv("MIN_WEEKS_SARIMA", "104"))
-        self.allowed_origins = [o.strip() for o in os.getenv("ALLOWED_ORIGINS", "http://localhost:5173").split(",") if o.strip()]
+        origins = os.getenv("ALLOWED_ORIGINS", "http://localhost:5173,http://127.0.0.1:5173")
+        self.allowed_origins = [o.strip() for o in origins.split(",") if o.strip()]
 
     @property
     def modo_supabase(self) -> bool:

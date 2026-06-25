@@ -94,6 +94,7 @@ class RecomendacionResponse(BaseModel):
     cantidad_disponible_origen: float | None = None
     cantidad_final_transferible: float | None = None
     stock_disponible: float
+    stock_comprometido: float = 0
     stock_en_transito: float
     stock_por_recibir: float
     stock_comprometido: float
@@ -105,6 +106,16 @@ class RecomendacionResponse(BaseModel):
     motivo: str
     estado: str
     modelo_version_id: str
+    cantidad_base: float | None = None
+    cantidad_minima_compra: int | None = None
+    multiplo_empaque: int | None = None
+    cantidad_final: float | None = None
+    lead_time_dias: int | None = None
+    precio_referencial: float | None = None
+    estrategia: str | None = None
+    nivel_madurez: str | None = None
+    proveedor_id: str | None = None
+    botica_id: str | None = None
 
 
 class ReentrenamientoRequest(BaseModel):

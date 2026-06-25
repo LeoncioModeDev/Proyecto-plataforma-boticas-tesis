@@ -16,6 +16,7 @@ class ModelService:
     def __init__(self):
         self.model_dir = config.model_dir
         self.cargado_en = datetime.now(timezone.utc).isoformat()
+        self.error_carga = None
         self.artefacto = self._cargar_pickle()
         self.metricas = self._cargar_json("metricas.json")
         self.drift = self._cargar_json("drift_metricas.json")
@@ -43,14 +44,30 @@ class ModelService:
     def _cargar_pickle(self) -> dict:
         ruta = self._ruta("modelo.pkl")
         if not ruta.exists():
-            return {}
-        with ruta.open("rb") as archivo:
-            return pickle.load(archivo)
+            self.error_carga = "modelo.pkl no encontrado"
+            return self._artefacto_minimo()
+        try:
+            with ruta.open("rb") as archivo:
+                return pickle.load(archivo)
+        except Exception as exc:
+            self.error_carga = f"No se pudo cargar modelo.pkl: {exc.__class__.__name__}"
+            return self._artefacto_minimo()
+
+    def _artefacto_minimo(self) -> dict:
+        return {
+            "version": config.model_version,
+            "modelo_version_id": "desconocido",
+            "estrategia_hibrida": "NO_DISPONIBLE_EN_ESTE_ENTORNO",
+            "encoder": None,
+            "xgb_directo": None,
+            "xgb_residuos": None,
+            "columnas_features": [],
+        }
 
     def _validar(self):
         requeridos = ["encoder", "xgb_directo", "xgb_residuos", "columnas_features", "version"]
         faltantes = [campo for campo in requeridos if not self.artefacto.get(campo)]
-        if faltantes:
+        if faltantes and not self.error_carga:
             raise RuntimeError(f"Artefacto modelo.pkl incompleto: {faltantes}")
 
     @property
@@ -83,6 +100,8 @@ class ModelService:
             "series_sarima": series.get("sarima", 0),
             "series_fallback": series.get("fallback", 0),
             "modo": "SUPABASE" if config.modo_supabase else "LOCAL",
+            "modelo_pickle_cargado": not bool(self.error_carga),
+            "error_carga": self.error_carga,
         }
 
 

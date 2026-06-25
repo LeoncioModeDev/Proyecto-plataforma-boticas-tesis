@@ -61,7 +61,7 @@ class PredictionService:
         if nivel == NivelMadurez.HISTORIAL_MADURO:
             pregeneradas = data_service.predicciones_guardadas(org_id, botica_id, producto_id)
             if pregeneradas:
-                estrategia = "HIBRIDO_PILOTO_PREGENERADO"
+                estrategia = "PREDICCION_PREGENERADA"
                 return self._respuesta_desde_pregeneradas(org_id, botica_id, producto_id, nivel, semanas, estrategia, pregeneradas, horizonte, advertencias)
             advertencias.append("No hay objeto SARIMA dinámico disponible; se usa XGBoost global o fallback.")
 
@@ -73,7 +73,7 @@ class PredictionService:
             if nivel == NivelMadurez.SIN_HISTORIAL:
                 advertencias.append("La organización aún no tiene historial suficiente; la estimación es inicial.")
 
-        return {
+        respuesta = {
             "org_id": org_id,
             "botica_id": botica_id,
             "producto_id": producto_id,
@@ -85,6 +85,8 @@ class PredictionService:
             "predicciones": predicciones,
             "advertencias": advertencias,
         }
+        data_service.guardar_predicciones(respuesta)
+        return respuesta
 
     def predecir_botica(self, org_id: str, botica_id: str, horizonte: int, categoria: str | None, producto_id: str | None, solo_historial: bool) -> list[dict]:
         productos = data_service.productos_activos(org_id, botica_id, categoria)
@@ -122,7 +124,7 @@ class PredictionService:
                 "intervalo_inf": float(fila["intervalo_inf"]),
                 "intervalo_sup": float(fila["intervalo_sup"]),
             })
-        return {
+        respuesta = {
             "org_id": org_id,
             "botica_id": botica_id,
             "producto_id": producto_id,
@@ -134,6 +136,8 @@ class PredictionService:
             "predicciones": predicciones,
             "advertencias": advertencias,
         }
+        data_service.guardar_predicciones(respuesta)
+        return respuesta
 
     def _predecir_fallback(self, org_id: str, serie: pd.DataFrame, horizonte: int, demanda_manual: float | None) -> list[dict]:
         if demanda_manual is not None:
