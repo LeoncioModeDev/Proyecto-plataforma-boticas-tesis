@@ -5,9 +5,19 @@ node_modules/
 dist/
 
 # Variables de entorno
-#.env
-#.env.local
-#.env.*.local
+.env
+.env.local
+.env.*.local
+modelo-ml/.env
+
+# Python
+.venv/
+venv/
+__pycache__/
+*.pyc
+modelo-ml/.venv/
+modelo-ml/__pycache__/
+modelo-ml/api/__pycache__/
 
 # IDE
 .vscode/

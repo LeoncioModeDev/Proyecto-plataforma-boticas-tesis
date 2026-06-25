@@ -42,6 +42,8 @@ function mapearProducto(p) {
     proveedorNombre: pp.proveedores?.razon_social,
     leadTimeEspecifico: pp.lead_time_especifico,
     precioCompraReferencial: pp.precio_compra_referencial,
+    cantidadMinimaCompra: pp.cantidad_minima_compra ?? 1,
+    multiploEmpaque: pp.multiplo_empaque ?? 1,
   }))
 
   return {

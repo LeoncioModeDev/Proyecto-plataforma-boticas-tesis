@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Save, ArrowLeft, Plus, Trash2 } from 'lucide-react'
 import Boton from '@/components/common/Boton'
@@ -26,7 +26,29 @@ export default function FormularioOrdenCompra({ onGuardar, redirectPath, ordenEx
   const [productosProveedor, setProductosProveedor] = useState([])
   const [cargando, setCargando] = useState(true)
 
-  const cargarProveedores = async () => {
+  const relacionProducto = (productoId) => productosProveedor.find(r => r.productoId === productoId)
+
+  const calcularCantidadSugerida = (cantidad, relacion) => {
+    const minimo = Number(relacion?.cantidadMinimaCompra || 1)
+    const multiplo = Number(relacion?.multiploEmpaque || 1)
+    const ajustada = Math.max(Number(cantidad || 0), minimo)
+    return Math.ceil(ajustada / multiplo) * multiplo
+  }
+
+  const validarItem = (item) => {
+    if (!item.productoId) return null
+    const relacion = relacionProducto(item.productoId)
+    if (!relacion) return null
+    const sugerida = calcularCantidadSugerida(item.cantidad, relacion)
+    if (Number(item.cantidad) === sugerida) return null
+    return {
+      compraMinima: relacion.cantidadMinimaCompra || 1,
+      multiploEmpaque: relacion.multiploEmpaque || 1,
+      cantidadSugerida: sugerida,
+    }
+  }
+
+  const cargarProveedores = useCallback(async () => {
     try {
       const query = supabase
         .from('proveedores')
@@ -44,9 +66,9 @@ export default function FormularioOrdenCompra({ onGuardar, redirectPath, ordenEx
     } finally {
       setCargando(false)
     }
-  }
+  }, [usuario])
 
-  const cargarProductosProveedor = async (provId) => {
+  const cargarProductosProveedor = useCallback(async (provId) => {
     try {
       const data = await listarPorProveedor(provId, true)
       setProductosProveedor(data)
@@ -54,13 +76,13 @@ export default function FormularioOrdenCompra({ onGuardar, redirectPath, ordenEx
       console.error('Error cargando productos del proveedor:', e)
       setProductosProveedor([])
     }
-  }
+  }, [])
 
-  useEffect(() => { cargarProveedores() }, [])
+  useEffect(() => { Promise.resolve().then(cargarProveedores) }, [cargarProveedores])
   useEffect(() => {
-    if (proveedorId) cargarProductosProveedor(proveedorId)
-    else setProductosProveedor([])
-  }, [proveedorId])
+    if (proveedorId) Promise.resolve().then(() => cargarProductosProveedor(proveedorId))
+    else Promise.resolve().then(() => setProductosProveedor([]))
+  }, [proveedorId, cargarProductosProveedor])
 
   const agregarItem = () => {
     setItems([...items, { productoId: '', cantidad: 1, precioUnitario: 0 }])
@@ -77,14 +99,26 @@ export default function FormularioOrdenCompra({ onGuardar, redirectPath, ordenEx
     if (campo === 'productoId') {
       const relacion = productosProveedor.find(r => r.productoId === valor)
       nuevos[index].precioUnitario = relacion?.precioCompraReferencial || 0
+      nuevos[index].leadTimeEspecifico = relacion?.leadTimeEspecifico || null
+      nuevos[index].cantidadMinimaCompra = relacion?.cantidadMinimaCompra || 1
+      nuevos[index].multiploEmpaque = relacion?.multiploEmpaque || 1
     }
     setItems(nuevos)
   }
 
-  const esValido = proveedorId && fechaEstimadaEntrega && items.some(i => i.productoId && i.cantidad > 0)
+  const erroresCantidad = items.map(validarItem)
+  const hayCantidadesInvalidas = erroresCantidad.some(Boolean)
+  const esValido = proveedorId && fechaEstimadaEntrega && items.some(i => i.productoId && i.cantidad > 0) && !hayCantidadesInvalidas
+
+  const aplicarCantidadSugerida = (index, cantidad) => {
+    const nuevos = [...items]
+    nuevos[index].cantidad = cantidad
+    setItems(nuevos)
+  }
 
   const alEnviar = async (e) => {
     e.preventDefault()
+    if (hayCantidadesInvalidas) return
     const itemsValidos = items.filter(i => i.productoId && i.cantidad > 0)
     const orden = {
       proveedorId,
@@ -158,8 +192,12 @@ export default function FormularioOrdenCompra({ onGuardar, redirectPath, ordenEx
             )}
 
             <div className="space-y-3">
-              {items.map((item, index) => (
-                <div key={index} className="flex gap-3 items-start">
+              {items.map((item, index) => {
+                const relacion = relacionProducto(item.productoId)
+                const errorCantidad = erroresCantidad[index]
+                return (
+                <div key={index} className="space-y-2">
+                  <div className="flex gap-3 items-start">
                   <div className="flex-1">
                     <select
                       value={item.productoId}
@@ -200,7 +238,25 @@ export default function FormularioOrdenCompra({ onGuardar, redirectPath, ordenEx
                   </div>
                   <Boton variante="icono" icono={Trash2} onClick={() => eliminarItem(index)} className="text-estado-critico hover:bg-rojo-claro mt-1" title="Eliminar" />
                 </div>
-              ))}
+                  {relacion && (
+                    <p className="text-xs text-secundario ml-1">
+                      Compra mínima: {relacion.cantidadMinimaCompra || 1} unidades · Múltiplo de empaque: {relacion.multiploEmpaque || 1} unidades · Lead time: {relacion.leadTimeEspecifico} días
+                    </p>
+                  )}
+                  {errorCantidad && (
+                    <Alerta
+                      tipo="advertencia"
+                      titulo="La cantidad ingresada no cumple las condiciones del proveedor."
+                      mensaje={`Compra mínima: ${errorCantidad.compraMinima}. Múltiplo de empaque: ${errorCantidad.multiploEmpaque}. Cantidad válida sugerida: ${errorCantidad.cantidadSugerida}.`}
+                    />
+                  )}
+                  {errorCantidad && (
+                    <Boton variante="secundario" tamano="pequeno" onClick={() => aplicarCantidadSugerida(index, errorCantidad.cantidadSugerida)}>
+                      Aplicar cantidad sugerida
+                    </Boton>
+                  )}
+                </div>
+              )})}
             </div>
           </div>
 

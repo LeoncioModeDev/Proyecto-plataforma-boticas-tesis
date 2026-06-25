@@ -193,6 +193,9 @@ async function crearOC(supabase: any, perfil: PerfilUsuario, body: any) {
   if (proveedor.org_id !== perfil.org_id) return json({ error: "No autorizado" }, 403);
 
   const idsProductos = items.map((i: any) => i.producto_id);
+  const errorCondiciones = await validarCondicionesCompra(supabase, proveedor_id, items);
+  if (errorCondiciones) return json({ error: errorCondiciones }, 400);
+
   if (idsProductos.length > 0) {
     const { data: productos } = await supabase
       .from("productos")
@@ -278,6 +281,14 @@ async function actualizarOC(supabase: any, perfil: PerfilUsuario, id: string, bo
   if (error) return json({ error: error.message }, 400);
 
   if (body.items) {
+    const { data: ocProveedor } = await supabase
+      .from("ordenes_compra")
+      .select("proveedor_id")
+      .eq("id", id)
+      .single();
+    const errorCondiciones = await validarCondicionesCompra(supabase, ocProveedor?.proveedor_id, body.items);
+    if (errorCondiciones) return json({ error: errorCondiciones }, 400);
+
     await supabase.from("ordenes_compra_items").delete().eq("orden_compra_id", id);
     const items = body.items.map((i: any) => ({
       orden_compra_id: id,
@@ -292,6 +303,32 @@ async function actualizarOC(supabase: any, perfil: PerfilUsuario, id: string, bo
   }
 
   return json({ exito: true });
+}
+
+async function validarCondicionesCompra(supabase: any, proveedorId: string, items: any[]) {
+  if (!proveedorId) return "Proveedor requerido para validar condiciones de compra";
+  for (const item of items) {
+    const { data: relacion, error } = await supabase
+      .from("proveedor_producto")
+      .select("cantidad_minima_compra, multiplo_empaque")
+      .eq("proveedor_id", proveedorId)
+      .eq("producto_id", item.producto_id)
+      .eq("activo", true)
+      .maybeSingle();
+
+    if (error || !relacion) return `Producto ${item.producto_id} no está configurado para el proveedor seleccionado`;
+
+    const minimo = Number(relacion.cantidad_minima_compra || 1);
+    const multiplo = Number(relacion.multiplo_empaque || 1);
+    const cantidad = Number(item.cantidad || 0);
+    const ajustada = Math.max(cantidad, minimo);
+    const sugerida = Math.ceil(ajustada / multiplo) * multiplo;
+
+    if (cantidad !== sugerida) {
+      return `La cantidad ingresada no cumple las condiciones del proveedor. Compra mínima: ${minimo}. Múltiplo de empaque: ${multiplo}. Cantidad válida sugerida: ${sugerida}.`;
+    }
+  }
+  return null;
 }
 
 // ─── APROBAR ──────────────────────────────────────────────────

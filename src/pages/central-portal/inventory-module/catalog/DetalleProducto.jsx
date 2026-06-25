@@ -23,7 +23,7 @@ export default function DetalleProducto() {
   const [modalProveedores, setModalProveedores] = useState(null)
   const [proveedoresProducto, setProveedoresProducto] = useState([])
   const [proveedoresDisponibles, setProveedoresDisponibles] = useState([])
-  const [nuevoProvProd, setNuevoProvProd] = useState({ proveedorId: '', leadTimeEspecifico: '', precioCompraReferencial: '' })
+  const [nuevoProvProd, setNuevoProvProd] = useState({ proveedorId: '', leadTimeEspecifico: '', precioCompraReferencial: '', cantidadMinimaCompra: '1', multiploEmpaque: '1' })
   const [exito, setExito] = useState(null)
 
   useEffect(() => {
@@ -61,16 +61,20 @@ export default function DetalleProducto() {
     if (!nuevoProvProd.proveedorId || !nuevoProvProd.leadTimeEspecifico || !nuevoProvProd.precioCompraReferencial) return
     if (Number(nuevoProvProd.leadTimeEspecifico) < 1) { setError('El lead time debe ser mayor a 0 días'); return }
     if (Number(nuevoProvProd.precioCompraReferencial) <= 0) { setError('El precio de compra debe ser mayor a 0'); return }
+    if (Number(nuevoProvProd.cantidadMinimaCompra) < 1) { setError('La cantidad mínima debe ser mayor a 0'); return }
+    if (Number(nuevoProvProd.multiploEmpaque) < 1) { setError('El múltiplo de empaque debe ser mayor a 0'); return }
     try {
       await guardarRelacion({
         proveedorId: nuevoProvProd.proveedorId,
         productoId: producto.id,
         leadTimeEspecifico: Number(nuevoProvProd.leadTimeEspecifico),
         precioCompraReferencial: Number(nuevoProvProd.precioCompraReferencial),
+        cantidadMinimaCompra: Number(nuevoProvProd.cantidadMinimaCompra),
+        multiploEmpaque: Number(nuevoProvProd.multiploEmpaque),
       })
       const actualizados = await listarPorProducto(producto.id)
       setProveedoresProducto(actualizados)
-      setNuevoProvProd({ proveedorId: '', leadTimeEspecifico: '', precioCompraReferencial: '' })
+      setNuevoProvProd({ proveedorId: '', leadTimeEspecifico: '', precioCompraReferencial: '', cantidadMinimaCompra: '1', multiploEmpaque: '1' })
     } catch (err) {
       setError(err.message)
     }
@@ -154,6 +158,7 @@ export default function DetalleProducto() {
                   <div>
                     <p className="text-sm font-medium">{r.proveedorNombre || r.proveedorId}</p>
                     <p className="text-xs text-secundario">Lead time: {r.leadTimeEspecifico} días | S/ {r.precioCompraReferencial}</p>
+                    <p className="text-xs text-secundario">Compra mínima: {r.cantidadMinimaCompra} unidades | Múltiplo de empaque: {r.multiploEmpaque} unidades</p>
                   </div>
                   <Boton variante="texto" onClick={() => eliminarProveedorProducto(r.id)} className="text-estado-critico text-sm">Eliminar</Boton>
                 </div>
@@ -180,6 +185,16 @@ export default function DetalleProducto() {
               <div>
                 <label className="text-xs text-secundario">Precio compra (S/)</label>
                 <input type="number" min="0.01" step="0.01" value={nuevoProvProd.precioCompraReferencial} onChange={e => setNuevoProvProd({ ...nuevoProvProd, precioCompraReferencial: e.target.value })} className="w-full px-3 py-2 text-sm bg-fondo border border-estilo rounded-md" />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-xs text-secundario">Cantidad mínima de compra</label>
+                <input type="number" min="1" value={nuevoProvProd.cantidadMinimaCompra} onChange={e => setNuevoProvProd({ ...nuevoProvProd, cantidadMinimaCompra: e.target.value })} className="w-full px-3 py-2 text-sm bg-fondo border border-estilo rounded-md" />
+              </div>
+              <div>
+                <label className="text-xs text-secundario">Múltiplo de empaque</label>
+                <input type="number" min="1" value={nuevoProvProd.multiploEmpaque} onChange={e => setNuevoProvProd({ ...nuevoProvProd, multiploEmpaque: e.target.value })} className="w-full px-3 py-2 text-sm bg-fondo border border-estilo rounded-md" />
               </div>
             </div>
             <Boton variante="secundario" onClick={agregarProveedorProducto} className="w-full">Agregar</Boton>

@@ -107,10 +107,14 @@ async function listarPorProducto(supabase: any, perfil: PerfilUsuario, url: URL)
 }
 
 async function guardarRelacion(supabase: any, perfil: PerfilUsuario, body: any) {
-  const { proveedor_id, producto_id, lead_time_especifico, precio_compra_referencial } = body;
+  const { proveedor_id, producto_id, lead_time_especifico, precio_compra_referencial, cantidad_minima_compra = 1, multiplo_empaque = 1 } = body;
 
   if (!proveedor_id || !producto_id || lead_time_especifico === undefined || precio_compra_referencial === undefined) {
     return json({ error: "Faltan datos (proveedor_id, producto_id, lead_time_especifico, precio_compra_referencial)" }, 400);
+  }
+
+  if (Number(cantidad_minima_compra) <= 0 || Number(multiplo_empaque) <= 0) {
+    return json({ error: "Cantidad mínima de compra y múltiplo de empaque deben ser mayores a 0" }, 400);
   }
 
   const { data: producto } = await supabase
@@ -138,6 +142,8 @@ async function guardarRelacion(supabase: any, perfil: PerfilUsuario, body: any) 
         .update({
           lead_time_especifico,
           precio_compra_referencial,
+          cantidad_minima_compra,
+          multiplo_empaque,
           activo: true,
         })
         .eq("id", existente.id);
@@ -149,6 +155,8 @@ async function guardarRelacion(supabase: any, perfil: PerfilUsuario, body: any) 
       .update({
         lead_time_especifico,
         precio_compra_referencial,
+        cantidad_minima_compra,
+        multiplo_empaque,
       })
       .eq("id", existente.id);
 
@@ -163,6 +171,8 @@ async function guardarRelacion(supabase: any, perfil: PerfilUsuario, body: any) 
       producto_id,
       lead_time_especifico,
       precio_compra_referencial,
+      cantidad_minima_compra,
+      multiplo_empaque,
       activo: true,
     })
     .select("id")

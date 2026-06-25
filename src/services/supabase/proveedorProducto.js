@@ -32,6 +32,8 @@ export async function listarPorProducto(productoId) {
     productoId: r.producto_id,
     leadTimeEspecifico: r.lead_time_especifico,
     precioCompraReferencial: r.precio_compra_referencial,
+    cantidadMinimaCompra: r.cantidad_minima_compra ?? 1,
+    multiploEmpaque: r.multiplo_empaque ?? 1,
     proveedorNombre: r.proveedores?.razon_social,
     proveedorActivo: r.proveedores?.activo,
     activo: r.activo,
@@ -47,6 +49,8 @@ export async function listarPorProveedor(proveedorId, soloActivos = false) {
     productoId: r.producto_id,
     leadTimeEspecifico: r.lead_time_especifico,
     precioCompraReferencial: r.precio_compra_referencial,
+    cantidadMinimaCompra: r.cantidad_minima_compra ?? 1,
+    multiploEmpaque: r.multiplo_empaque ?? 1,
     productoNombre: r.productos?.nombre_comercial,
     presentacion: r.productos?.presentacion,
     clasificacion: r.productos?.clasificacion,
@@ -55,12 +59,14 @@ export async function listarPorProveedor(proveedorId, soloActivos = false) {
   })) : []
 }
 
-export async function guardarRelacion({ proveedorId, productoId, leadTimeEspecifico, precioCompraReferencial }) {
+export async function guardarRelacion({ proveedorId, productoId, leadTimeEspecifico, precioCompraReferencial, cantidadMinimaCompra = 1, multiploEmpaque = 1 }) {
   return llamarEdgeFunction('POST', '', {
     proveedor_id: proveedorId,
     producto_id: productoId,
     lead_time_especifico: leadTimeEspecifico,
     precio_compra_referencial: precioCompraReferencial,
+    cantidad_minima_compra: cantidadMinimaCompra,
+    multiplo_empaque: multiploEmpaque,
   })
 }
 
