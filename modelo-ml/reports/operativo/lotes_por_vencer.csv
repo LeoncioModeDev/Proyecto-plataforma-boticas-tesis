@@ -1,0 +1,2 @@
+tipo_alerta,nivel_urgencia,lote_id,fecha_vencimiento,dias_vencimiento,criterio_rotacion
+vencimiento_proximo,ALTA,b5fd0811-e504-5502-9b51-9d24a8de0cda,2025-01-25,-520,FEFO

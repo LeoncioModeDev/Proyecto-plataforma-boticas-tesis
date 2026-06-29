@@ -1,0 +1,13 @@
+validacion,valor_observado,valor_esperado,cumple
+series,150,150,True
+categorias,14,14,True
+semanas,123,123,True
+observaciones_semanales,18450,18450,True
+filas_oof,7200,7200,True
+filas_holdout,1800,1800,True
+filas_categoria_semana,168,168,True
+duplicados_series,0,0,True
+duplicados_oof,0,0,True
+duplicados_holdout,0,0,True
+predicciones_negativas,0,0,True
+nan_predicciones,0,0,True

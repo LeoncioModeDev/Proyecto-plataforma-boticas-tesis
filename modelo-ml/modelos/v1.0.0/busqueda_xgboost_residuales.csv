@@ -1,0 +1,13 @@
+tipo,objective,config_num,macro_mape_validacion,alpha_global_exploratorio,n_estimators,max_depth,learning_rate,min_child_weight,reg_alpha,reg_lambda,gamma,subsample,colsample_bytree
+aditivo,reg:squarederror,1,13.99014309338203,0.4,70,2,0.03,5,0.1,10.0,0.0,0.8,0.8
+aditivo,reg:squarederror,2,14.034330337497973,0.3,100,2,0.02,10,0.5,10.0,0.1,0.8,0.8
+aditivo,reg:squarederror,3,14.000234286916898,0.3,70,3,0.03,10,0.1,15.0,0.1,0.85,0.8
+aditivo,reg:pseudohubererror,1,14.021395129732108,0.3,50,2,0.03,5,0.1,10.0,0.0,0.8,0.8
+aditivo,reg:pseudohubererror,2,13.996585038703374,0.4,94,2,0.02,10,0.5,10.0,0.1,0.8,0.8
+aditivo,reg:pseudohubererror,3,13.989410051745237,0.3,56,3,0.03,10,0.1,15.0,0.1,0.85,0.8
+log,reg:squarederror,1,14.078590311504133,1.0,20,2,0.03,5,0.1,10.0,0.0,0.8,0.8
+log,reg:squarederror,2,14.128737576041207,1.0,20,2,0.02,10,0.5,10.0,0.1,0.8,0.8
+log,reg:squarederror,3,14.022356439930439,1.2,20,3,0.03,10,0.1,15.0,0.1,0.85,0.8
+log,reg:pseudohubererror,1,14.089400657154446,0.4,59,2,0.03,5,0.1,10.0,0.0,0.8,0.8
+log,reg:pseudohubererror,2,14.073733058442729,0.5,55,2,0.02,10,0.5,10.0,0.1,0.8,0.8
+log,reg:pseudohubererror,3,14.10599054293244,0.4,35,3,0.03,10,0.1,15.0,0.1,0.85,0.8

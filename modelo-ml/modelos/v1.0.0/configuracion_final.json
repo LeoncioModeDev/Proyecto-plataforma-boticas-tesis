@@ -1,0 +1,190 @@
+{
+  "metrica_principal": "MAPE agregado por categoria terapeutica y semana",
+  "horizonte": 12,
+  "n_folds": 4,
+  "periodo_por_categoria": {
+    "Analgésico": 26,
+    "Antibiótico": 13,
+    "Antidiabético": 4,
+    "Antifúngico": 13,
+    "Antihipertensivo": 4,
+    "Antihistamínico": 4,
+    "Antiinflamatorio": 4,
+    "Antiulceroso": 4,
+    "Antivertiginoso": 26,
+    "Broncodilatador": 4,
+    "Corticosteroide": 13,
+    "Hipolipemiante": 4,
+    "Suplemento": 4,
+    "Vitamina": 4
+  },
+  "config_categoria": {
+    "Analgésico": {
+      "metodo": "aditivo",
+      "alpha": 1.5,
+      "mape_mediano": 16.885351748846755,
+      "mejora_mape_mediana_pct": 16.370990811371396,
+      "folds_con_mejora": 2,
+      "deterioro_rmse_mediano_pct": -1.03482576499359
+    },
+    "Antibiótico": {
+      "metodo": "sarima",
+      "alpha": 0.0,
+      "mape_mediano": 12.206496396149825,
+      "mejora_mape_mediana_pct": 0.0,
+      "folds_con_mejora": 0,
+      "deterioro_rmse_mediano_pct": 0.0
+    },
+    "Antidiabético": {
+      "metodo": "sarima",
+      "alpha": 0.0,
+      "mape_mediano": 7.38779974302059,
+      "mejora_mape_mediana_pct": 0.0,
+      "folds_con_mejora": 0,
+      "deterioro_rmse_mediano_pct": 0.0
+    },
+    "Antifúngico": {
+      "metodo": "aditivo",
+      "alpha": 1.5,
+      "mape_mediano": 18.628883396164042,
+      "mejora_mape_mediana_pct": 8.725243165864786,
+      "folds_con_mejora": 2,
+      "deterioro_rmse_mediano_pct": 1.104706608782866
+    },
+    "Antihipertensivo": {
+      "metodo": "aditivo",
+      "alpha": 0.6,
+      "mape_mediano": 9.222561060183526,
+      "mejora_mape_mediana_pct": 8.8066874545404,
+      "folds_con_mejora": 2,
+      "deterioro_rmse_mediano_pct": -2.43018199359592
+    },
+    "Antihistamínico": {
+      "metodo": "sarima",
+      "alpha": 0.0,
+      "mape_mediano": 12.137901759052012,
+      "mejora_mape_mediana_pct": 0.0,
+      "folds_con_mejora": 0,
+      "deterioro_rmse_mediano_pct": 0.0
+    },
+    "Antiinflamatorio": {
+      "metodo": "sarima",
+      "alpha": 0.0,
+      "mape_mediano": 7.587164944297438,
+      "mejora_mape_mediana_pct": 0.0,
+      "folds_con_mejora": 0,
+      "deterioro_rmse_mediano_pct": 0.0
+    },
+    "Antiulceroso": {
+      "metodo": "aditivo",
+      "alpha": 1.0,
+      "mape_mediano": 8.101177659947563,
+      "mejora_mape_mediana_pct": 22.522773443246013,
+      "folds_con_mejora": 3,
+      "deterioro_rmse_mediano_pct": -6.012154407300759
+    },
+    "Antivertiginoso": {
+      "metodo": "aditivo",
+      "alpha": 0.3,
+      "mape_mediano": 18.061393108197255,
+      "mejora_mape_mediana_pct": 3.002748648337817,
+      "folds_con_mejora": 2,
+      "deterioro_rmse_mediano_pct": -1.6485555844718651
+    },
+    "Broncodilatador": {
+      "metodo": "aditivo",
+      "alpha": 0.8,
+      "mape_mediano": 17.89275835408337,
+      "mejora_mape_mediana_pct": 9.558759617215658,
+      "folds_con_mejora": 2,
+      "deterioro_rmse_mediano_pct": -2.997552068474534
+    },
+    "Corticosteroide": {
+      "metodo": "sarima",
+      "alpha": 0.0,
+      "mape_mediano": 18.597754994933293,
+      "mejora_mape_mediana_pct": 0.0,
+      "folds_con_mejora": 0,
+      "deterioro_rmse_mediano_pct": 0.0
+    },
+    "Hipolipemiante": {
+      "metodo": "sarima",
+      "alpha": 0.0,
+      "mape_mediano": 7.3260601993907075,
+      "mejora_mape_mediana_pct": 0.0,
+      "folds_con_mejora": 0,
+      "deterioro_rmse_mediano_pct": 0.0
+    },
+    "Suplemento": {
+      "metodo": "sarima",
+      "alpha": 0.0,
+      "mape_mediano": 5.563804280236156,
+      "mejora_mape_mediana_pct": 0.0,
+      "folds_con_mejora": 0,
+      "deterioro_rmse_mediano_pct": 0.0
+    },
+    "Vitamina": {
+      "metodo": "aditivo",
+      "alpha": 0.5,
+      "mape_mediano": 11.695650438709576,
+      "mejora_mape_mediana_pct": 22.248927734035245,
+      "folds_con_mejora": 3,
+      "deterioro_rmse_mediano_pct": -6.579298468125618
+    }
+  },
+  "mejor_xgb_aditivo": {
+    "objective": "reg:pseudohubererror",
+    "params": {
+      "max_depth": 3,
+      "learning_rate": 0.03,
+      "min_child_weight": 10,
+      "reg_alpha": 0.1,
+      "reg_lambda": 15.0,
+      "gamma": 0.1,
+      "subsample": 0.85,
+      "colsample_bytree": 0.8
+    },
+    "n_estimators": 56,
+    "macro_mape_validacion": 13.989410051745237
+  },
+  "mejor_xgb_log": {
+    "objective": "reg:squarederror",
+    "params": {
+      "max_depth": 3,
+      "learning_rate": 0.03,
+      "min_child_weight": 10,
+      "reg_alpha": 0.1,
+      "reg_lambda": 15.0,
+      "gamma": 0.1,
+      "subsample": 0.85,
+      "colsample_bytree": 0.8
+    },
+    "n_estimators": 20,
+    "macro_mape_validacion": 14.022356439930439
+  },
+  "mejor_xgb_independiente": {
+    "objective": "reg:squarederror",
+    "params": {
+      "max_depth": 3,
+      "learning_rate": 0.03,
+      "min_child_weight": 10,
+      "reg_alpha": 0.1,
+      "reg_lambda": 15.0,
+      "gamma": 0.1,
+      "subsample": 0.85,
+      "colsample_bytree": 0.8
+    },
+    "n_estimators": 88,
+    "macro_mape_validacion": 16.237098894112393,
+    "features_excluidas_por_dependencia_sarima": [
+      "pred_sarima",
+      "log_pred_sarima",
+      "ratio_lag1_sarima",
+      "ratio_media4_sarima"
+    ]
+  },
+  "macro_mape_xgboost": 12.788940737964031,
+  "macro_mape_sarima": 12.85781441965303,
+  "macro_mape_hibrido": 12.349016982065416,
+  "mejora_macro_mape_vs_sarima_pct": 3.9571067133300843
+}

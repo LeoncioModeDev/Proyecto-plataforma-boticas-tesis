@@ -1,0 +1,22 @@
+{
+  "security_invoker_requerido": true,
+  "vistas": [
+    "vw_demanda_semanal_ml",
+    "vw_predicciones_demanda",
+    "vw_alertas_inventario",
+    "vw_recomendaciones_reposicion"
+  ],
+  "tablas_base_con_org_id": [
+    "ventas_historicas",
+    "productos",
+    "stock_historico",
+    "stock_ubicaciones",
+    "proveedor_producto",
+    "predicciones_ml",
+    "alertas_ml",
+    "recomendaciones_ml",
+    "modelos_ml"
+  ],
+  "prueba_sql": "supabase/migrations/00000000000034_ml_vistas_productivas.sql",
+  "resultado_esperado": "Las vistas se ejecutan con permisos del invocador y heredan RLS de tablas base por org_id."
+}

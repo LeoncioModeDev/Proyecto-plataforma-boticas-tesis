@@ -9,6 +9,7 @@ import pandas as pd
 
 from ..config import RAIZ_MODELO, config
 from ..repositories.supabase_repository import SupabaseRepository
+from src.feature_engineering import CLAVES_SERIE, construir_features_historicas
 
 
 class DataService:
@@ -155,8 +156,8 @@ class DataService:
             fila = filas[0]
             return {
                 "proveedor_id": fila.get("proveedor_id"),
-                "lead_time_dias": int(fila.get("lead_time_especifico") or 7),
-                "precio_referencial": float(fila.get("precio_compra_referencial") or 0),
+                "lead_time_dias": int(fila.get("lead_time_dias") or fila.get("lead_time_especifico") or 7),
+                "precio_referencial": float(fila.get("precio_referencial") or fila.get("precio_compra_referencial") or fila.get("precio_compra") or 0),
                 "cantidad_minima_compra": int(fila.get("cantidad_minima_compra") or 1),
                 "multiplo_empaque": int(fila.get("multiplo_empaque") or 1),
                 "proveedor_nombre": fila.get("proveedores", {}).get("razon_social"),
@@ -286,7 +287,6 @@ class DataService:
         df["fecha_venta"] = pd.to_datetime(df["fecha_venta"])
         semanal = df.set_index("fecha_venta").resample("W-MON", label="left", closed="left")["cantidad"].sum().reset_index()
         semanal = semanal.rename(columns={"fecha_venta": "fecha_semana", "cantidad": "cantidad_vendida"})
-        semanal = semanal[semanal["cantidad_vendida"] > 0].copy()
         if semanal.empty:
             return semanal
         producto = self._producto(org_id, producto_id)
@@ -297,7 +297,9 @@ class DataService:
         semanal["producto_id"] = producto_id
         semanal["codigo_producto"] = producto.get("codigo_interno")
         semanal["nombre_comercial"] = producto.get("nombre_comercial")
-        semanal["categoria_terapeutica"] = producto.get("clasificacion") or "SIN_CATEGORIA"
+        semanal["categoria_terapeutica"] = producto.get("categoria_terapeutica") or producto.get("clasificacion") or "SIN_CATEGORIA"
+        semanal["demanda_insatisfecha"] = 0
+        semanal["stockout_flag"] = 0
         semanal["stock_inicio_semana"] = stock["stock_actual"]
         semanal["stock_minimo"] = stock["stock_minimo"]
         semanal["stock_maximo"] = stock["stock_maximo"]
@@ -305,24 +307,8 @@ class DataService:
         return self._agregar_features(semanal)
 
     def _agregar_features(self, df: pd.DataFrame) -> pd.DataFrame:
-        df = df.sort_values("fecha_semana").copy()
-        df["anio"] = df["fecha_semana"].dt.year
-        df["mes"] = df["fecha_semana"].dt.month
-        df["trimestre"] = df["fecha_semana"].dt.quarter
-        df["semana_anio"] = df["fecha_semana"].dt.isocalendar().week.astype(int)
-        df["es_invierno"] = df["mes"].isin([6, 7, 8]).astype(int)
-        df["es_verano"] = df["mes"].isin([12, 1, 2, 3]).astype(int)
-        df["ratio_stock_minimo"] = df.apply(lambda r: (r["stock_inicio_semana"] / r["stock_minimo"]) if r["stock_minimo"] else 0, axis=1)
-        df["ratio_stock_maximo"] = df.apply(lambda r: (r["stock_inicio_semana"] / r["stock_maximo"]) if r["stock_maximo"] else 0, axis=1)
-        df["stock_bajo_minimo"] = (df["stock_inicio_semana"] < df["stock_minimo"]).astype(int)
-        df["sobrestock"] = ((df["stock_maximo"] > 0) & (df["stock_inicio_semana"] > df["stock_maximo"])).astype(int)
-        for n in [1, 2, 4, 8, 12]:
-            df[f"lag_{n}"] = df["cantidad_vendida"].shift(n).fillna(0)
-        for n in [4, 8, 12]:
-            df[f"rolling_mean_{n}"] = df["cantidad_vendida"].shift(1).rolling(n, min_periods=1).mean().fillna(df["cantidad_vendida"].mean())
-        df["variacion_1_semana"] = df["lag_1"] - df["lag_2"]
-        df["variacion_4_semanas"] = df["lag_1"] - df["lag_4"]
-        return df
+        df = df.sort_values([*CLAVES_SERIE, "fecha_semana"]).copy()
+        return construir_features_historicas(df).fillna(0)
 
     def _producto(self, org_id: str, producto_id: str) -> dict[str, Any]:
         filas = self.repo.seleccionar("productos", {"org_id": org_id, "id": producto_id}, 1)
