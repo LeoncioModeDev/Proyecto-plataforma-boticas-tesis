@@ -38,7 +38,7 @@ class DataService:
                     "producto_id": p["id"],
                     "codigo_producto": p.get("codigo_interno"),
                     "nombre_comercial": p.get("nombre_comercial"),
-                    "categoria_terapeutica": p.get("clasificacion") or "SIN_CATEGORIA",
+                    "categoria_terapeutica": p.get("categoria_terapeutica") or p.get("clasificacion") or "SIN_CATEGORIA",
                 })
             return resultado
         df = self.features[self.features["org_id"] == org_id]
@@ -46,7 +46,7 @@ class DataService:
             df = df[df["botica_id"] == botica_id]
         if categoria:
             df = df[df["categoria_terapeutica"] == categoria]
-        cols = ["producto_id", "codigo_producto", "nombre_comercial", "categoria_terapeutica"]
+        cols = [c for c in ["producto_id", "codigo_producto", "nombre_comercial", "categoria_terapeutica"] if c in df.columns]
         return df[cols].drop_duplicates("producto_id").to_dict("records")
 
     def boticas(self, org_id: str) -> list[str]:
@@ -70,7 +70,7 @@ class DataService:
             if not ventas:
                 return 1.0
             df = pd.DataFrame(ventas)
-            return float(df["cantidad"].tail(52).mean()) if not df.empty else 1.0
+            return float(df["cantidad"].tail(52).mean()) if "cantidad" in df.columns and not df.empty else 1.0
         df = self.features[self.features["org_id"] == org_id]
         if categoria:
             df = df[df["categoria_terapeutica"] == categoria]
@@ -90,7 +90,8 @@ class DataService:
         if serie.empty:
             return []
         df = self.predicciones[
-            (self.predicciones["botica_id"] == botica_id)
+            (self.predicciones.get("org_id", org_id) == org_id)
+            & (self.predicciones["botica_id"] == botica_id)
             & (self.predicciones["producto_id"] == producto_id)
         ].copy()
         return df.to_dict("records")

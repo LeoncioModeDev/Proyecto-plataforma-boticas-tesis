@@ -12,10 +12,12 @@ modelo-ml/.env
 
 # Python
 .venv/
+.venv311/
 venv/
 __pycache__/
 *.pyc
 modelo-ml/.venv/
+modelo-ml/.venv311/
 modelo-ml/__pycache__/
 modelo-ml/api/__pycache__/
 

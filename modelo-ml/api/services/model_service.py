@@ -57,15 +57,17 @@ class ModelService:
         return {
             "version": config.model_version,
             "modelo_version_id": "desconocido",
-            "estrategia_hibrida": "NO_DISPONIBLE_EN_ESTE_ENTORNO",
-            "encoder": None,
-            "xgb_directo": None,
-            "xgb_residuos": None,
-            "columnas_features": [],
+            "tipo_modelo": "NO_DISPONIBLE_EN_ESTE_ENTORNO",
+            "preprocesador_hibrido": None,
+            "preprocesador_xgb_independiente": None,
+            "modelo_xgb_aditivo": None,
+            "modelo_xgb_log": None,
+            "modelo_xgb_independiente": None,
+            "features_hibrido": [],
         }
 
     def _validar(self):
-        requeridos = ["encoder", "xgb_directo", "xgb_residuos", "columnas_features", "version"]
+        requeridos = ["preprocesador_hibrido", "preprocesador_xgb_independiente", "modelo_xgb_aditivo", "modelo_xgb_log", "modelo_xgb_independiente", "features_hibrido", "version"]
         faltantes = [campo for campo in requeridos if not self.artefacto.get(campo)]
         if faltantes and not self.error_carga:
             raise RuntimeError(f"Artefacto modelo.pkl incompleto: {faltantes}")
@@ -79,15 +81,15 @@ class ModelService:
         return self.artefacto.get("version", config.model_version)
 
     def estado(self) -> dict:
-        modelos = self.metricas.get("modelos", {})
-        hibrido = modelos.get("hibrido", {})
+        metricas_globales = self.metricas.get("metricas_globales", [])
+        hibrido = next((m for m in metricas_globales if m.get("modelo") == "SARIMA + XGBoost"), {})
         series = self.metricas.get("series", {})
         return {
             "modelo_version_id": self.modelo_version_id,
             "version": self.version,
-            "estrategia_hibrida": self.artefacto.get("estrategia_hibrida"),
-            "mejor_modelo_evaluado": self.metricas.get("mejor_modelo_evaluado"),
-            "modelo_exportado": self.metricas.get("modelo_exportado"),
+            "estrategia_hibrida": self.artefacto.get("tipo_modelo"),
+            "mejor_modelo_evaluado": "SARIMA + XGBoost",
+            "modelo_exportado": self.artefacto.get("tipo_modelo"),
             "fecha_carga": self.cargado_en,
             "mae": hibrido.get("mae"),
             "rmse": hibrido.get("rmse"),

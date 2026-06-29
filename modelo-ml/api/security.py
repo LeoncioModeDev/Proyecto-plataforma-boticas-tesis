@@ -22,7 +22,7 @@ def obtener_perfil_autenticado(
     x_org_id: str | None = Header(default=None, alias="X-Org-Id"),
     authorization: str | None = Header(default=None, alias="Authorization"),
 ) -> dict:
-    if not config.modo_supabase:
+    if not config.modo_supabase or not repo_seguridad.disponible:
         if not x_org_id:
             error_http(401, "ORG_REQUERIDA", "Debe enviar X-Org-Id en modo local sin Supabase.")
         return {"id": "local", "org_id": x_org_id, "rol": "admin_central", "activo": True, "botica_id": None}

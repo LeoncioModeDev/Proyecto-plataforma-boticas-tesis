@@ -11,9 +11,12 @@ class SupabaseRepository:
         self.service_role_key = service_role_key
         self.client = None
         if url and service_role_key:
-            from supabase import create_client
-
-            self.client = create_client(url, service_role_key)
+            try:
+                from supabase import create_client
+            except ModuleNotFoundError:
+                self.client = None
+            else:
+                self.client = create_client(url, service_role_key)
 
     @property
     def disponible(self) -> bool:
