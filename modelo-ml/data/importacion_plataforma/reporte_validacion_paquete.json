@@ -1,0 +1,80 @@
+{
+  "valido": true,
+  "errores": [],
+  "advertencias": [],
+  "conteos": {
+    "categorias_terapeuticas": 14,
+    "boticas": 5,
+    "productos": 30,
+    "proveedores": 5,
+    "proveedor_producto": 30,
+    "precios": 150,
+    "stock_inicial": 150,
+    "stock_historico": 600,
+    "ventas_historicas": 7748
+  },
+  "uuid_publicos": {
+    "categorias_terapeuticas": 0,
+    "boticas": 0,
+    "productos": 0,
+    "proveedores": 0,
+    "proveedor_producto": 0,
+    "precios": 0,
+    "stock_inicial": 0,
+    "stock_historico": 0,
+    "ventas_historicas": 0
+  },
+  "duplicados": {
+    "categorias_terapeuticas": 0,
+    "boticas": 0,
+    "productos": 0,
+    "proveedores": 0,
+    "proveedor_producto": 0,
+    "precios": 0,
+    "stock_inicial": 0,
+    "stock_historico": 0,
+    "ventas_historicas": 0
+  },
+  "relaciones_invalidas": {
+    "categorias_inexistentes": 0,
+    "productos_sin_categoria": 0,
+    "productos_inexistentes": 0,
+    "boticas_inexistentes": 0,
+    "proveedores_inexistentes": 0
+  },
+  "negativos": {
+    "precios_negativos": 0,
+    "stocks_negativos": 0
+  },
+  "consistencia_demanda": {
+    "diferencia_maxima_cantidad_vendida": 0.0,
+    "filas_diferentes": 0,
+    "series_diferentes": 0,
+    "semanas_diferentes": 0
+  },
+  "consistencia_stock": {
+    "diferencia_maxima_stock_inicio_semana": 0.0,
+    "diferencia_maxima_stock_minimo_oficial": 0.0,
+    "diferencia_maxima_stock_maximo_oficial": 0.0,
+    "diferencia_maxima_demanda_insatisfecha_oficial": 0.0,
+    "diferencia_maxima_stockout_flag_oficial": 0.0
+  },
+  "ventas": {
+    "modo": "52w",
+    "filas_semana_total": 7800,
+    "filas_ventas_positivas": 7748,
+    "filas_cero_omitidas": 52
+  },
+  "stock_historico": {
+    "modo": "4w",
+    "filas_semana_total": 600,
+    "filas_generadas": 600
+  },
+  "series": {
+    "productos": 30,
+    "boticas_venta": 5,
+    "series": 150,
+    "semanas": 123,
+    "observaciones": 18450
+  }
+}

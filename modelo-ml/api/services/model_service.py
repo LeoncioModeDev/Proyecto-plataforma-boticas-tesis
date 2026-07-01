@@ -15,6 +15,7 @@ from ..config import config
 class ModelService:
     def __init__(self):
         self.model_dir = config.model_dir
+        self.model_path = config.model_path
         self.cargado_en = datetime.now(timezone.utc).isoformat()
         self.error_carga = None
         self.artefacto = self._cargar_pickle()
@@ -42,9 +43,9 @@ class ModelService:
         return pd.read_csv(ruta)
 
     def _cargar_pickle(self) -> dict:
-        ruta = self._ruta("modelo.pkl")
+        ruta = self.model_path
         if not ruta.exists():
-            self.error_carga = "modelo.pkl no encontrado"
+            self.error_carga = f"modelo.pkl no encontrado en {ruta}"
             return self._artefacto_minimo()
         try:
             with ruta.open("rb") as archivo:

@@ -23,13 +23,13 @@ import numpy as np
 import pandas as pd
 from pmdarima.arima import ARIMA
 
-from feature_engineering import (
+from src.feature_engineering import (
     CLAVES_SERIE,
     FEATURES_HIBRIDO,
     FEATURES_XGB_INDEPENDIENTE,
     construir_fila_horizonte,
 )
-from recomendaciones import calcular_reposicion, generar_alertas_vencimiento
+from src.recomendaciones import calcular_reposicion, generar_alertas_vencimiento
 
 
 RAIZ_MODELO = Path(__file__).resolve().parents[1]

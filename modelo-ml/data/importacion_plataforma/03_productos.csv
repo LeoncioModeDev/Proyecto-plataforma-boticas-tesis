@@ -1,0 +1,31 @@
+codigo_interno,nombre_comercial,codigo_categoria,forma_farmaceutica,presentacion,clasificacion,principio_activo,concentracion,unidad_medida
+SKU-001,Paracetamol 500mg,CAT-001,Tableta,,otc,Paracetamol,500,mg
+SKU-002,Paracetamol 1g,CAT-001,Tableta,,otc,Paracetamol,1,g
+SKU-003,Ibuprofeno 400mg,CAT-007,Tableta,,otc,Ibuprofeno,400,mg
+SKU-004,Ibuprofeno 600mg,CAT-007,Tableta,,receta,Ibuprofeno,600,mg
+SKU-005,Diclofenaco 50mg,CAT-007,Tableta,,otc,Diclofenaco,50,mg
+SKU-006,Dipirona 500mg,CAT-001,Tableta,,otc,Metamizol,500,mg
+SKU-007,Amoxicilina 500mg,CAT-002,Cápsula,,receta,Amoxicilina,500,mg
+SKU-008,Amoxicilina jarabe,CAT-002,Suspensión,,receta,Amoxicilina,250,mg/5ml
+SKU-009,Azitromicina 500mg,CAT-002,Tableta,,receta,Azitromicina,500,mg
+SKU-010,Ciprofloxacino 500mg,CAT-002,Tableta,,receta,Ciprofloxacino,500,mg
+SKU-011,Metronidazol 500mg,CAT-002,Tableta,,receta,Metronidazol,500,mg
+SKU-012,Loratadina 10mg,CAT-006,Tableta,,otc,Loratadina,10,mg
+SKU-013,Loratadina jarabe,CAT-006,Jarabe,,otc,Loratadina,5,mg/5ml
+SKU-014,Cetirizina 10mg,CAT-006,Tableta,,otc,Cetirizina,10,mg
+SKU-015,Omeprazol 20mg,CAT-008,Cápsula,,receta,Omeprazol,20,mg
+SKU-016,Omeprazol 40mg,CAT-008,Cápsula,,receta,Omeprazol,40,mg
+SKU-017,Ranitidina 150mg,CAT-008,Tableta,,otc,Ranitidina,150,mg
+SKU-018,Metformina 850mg,CAT-003,Tableta,,receta,Metformina,850,mg
+SKU-019,Enalapril 10mg,CAT-005,Tableta,,receta,Enalapril,10,mg
+SKU-020,Losartán 50mg,CAT-005,Tableta,,receta,Losartán,50,mg
+SKU-021,Atorvastatina 20mg,CAT-012,Tableta,,receta,Atorvastatina,20,mg
+SKU-022,Salbutamol inhalador,CAT-010,Inhalador,,receta,Salbutamol,100,mcg
+SKU-023,Dexametasona 4mg,CAT-011,Inyectable,,receta,Dexametasona,4,mg/ml
+SKU-024,Clotrimazol crema,CAT-004,Crema,,otc,Clotrimazol,1,%
+SKU-025,Vitamina C 500mg,CAT-014,Tableta,,otc,Ácido ascórbico,500,mg
+SKU-026,Complejo B,CAT-014,Tableta,,otc,Vitaminas B,,
+SKU-027,Calcio + Vit D,CAT-013,Tableta,,otc,Carbonato Ca,500,mg+200UI
+SKU-028,Sulfato Ferroso,CAT-013,Tableta,,otc,Sulfato ferroso,325,mg
+SKU-029,Tramadol 50mg,CAT-001,Cápsula,,receta,Tramadol,50,mg
+SKU-030,Betahistina 16mg,CAT-009,Tableta,,receta,Betahistina,16,mg

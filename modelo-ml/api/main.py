@@ -94,7 +94,7 @@ def prediccion_individual(datos: PrediccionRequest, org_id: str = Depends(obtene
         org_id,
         datos.botica_id,
         datos.producto_id,
-        datos.horizonte_semanas,
+        datos.horizonte,
         datos.demanda_inicial_manual,
     )
 
@@ -107,7 +107,7 @@ def predicciones_botica(datos: PrediccionesBoticaRequest, org_id: str = Depends(
         "predicciones": prediction_service.predecir_botica(
             org_id,
             datos.botica_id,
-            datos.horizonte_semanas,
+            datos.horizonte,
             datos.categoria_terapeutica,
             datos.producto_id,
             datos.solo_productos_con_historial,
@@ -121,7 +121,7 @@ def predicciones_organizacion(datos: PrediccionesOrganizacionRequest, org_id: st
         "org_id": org_id,
         "predicciones": prediction_service.predecir_organizacion(
             org_id,
-            datos.horizonte_semanas,
+            datos.horizonte,
             datos.categoria_terapeutica,
             datos.solo_productos_con_historial,
             datos.batch_size,
@@ -161,7 +161,7 @@ def recomendar_compra(datos: CompraRequest, org_id: str = Depends(obtener_org_id
 def recomendar_reposicion_masiva(datos: PrediccionesBoticaRequest, org_id: str = Depends(obtener_org_id)):
     recomendaciones = []
     for producto in data_service.productos_activos(org_id, datos.botica_id, datos.categoria_terapeutica):
-        req = ReposicionRequest(botica_id=datos.botica_id, drogueria_id=datos.botica_id, producto_id=producto["producto_id"], horizonte_semanas=datos.horizonte_semanas)
+        req = ReposicionRequest(botica_id=datos.botica_id, drogueria_id=datos.botica_id, producto_id=producto["producto_id"], horizonte_semanas=datos.horizonte)
         recomendaciones.append(recommendation_service.recomendar_reposicion(org_id, req))
     return {"org_id": org_id, "recomendaciones": recomendaciones}
 

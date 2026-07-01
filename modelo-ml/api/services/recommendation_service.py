@@ -34,7 +34,7 @@ class RecommendationService:
         return float(stock["stock_minimo"]), "STOCK_MINIMO"
 
     def recomendar_reposicion(self, org_id: str, datos) -> dict:
-        pred = prediction_service.predecir(org_id, datos.botica_id, datos.producto_id, datos.horizonte_semanas)
+        pred = prediction_service.predecir(org_id, datos.botica_id, datos.producto_id, datos.horizonte_semanas, guardar=False)
         stock_botica = data_service.stock(org_id, datos.botica_id, datos.producto_id)
         stock_origen = data_service.stock(org_id, datos.drogueria_id, datos.producto_id)
         proveedor = data_service.proveedor_producto(org_id, datos.producto_id)
@@ -96,7 +96,7 @@ class RecommendationService:
         stock = data_service.stock(org_id, datos.almacen_id, datos.producto_id)
         demandas = []
         for botica_id in data_service.boticas(org_id):
-            pred = prediction_service.predecir(org_id, botica_id, datos.producto_id, datos.horizonte_semanas)
+            pred = prediction_service.predecir(org_id, botica_id, datos.producto_id, datos.horizonte_semanas, guardar=False)
             demandas.append(sum(p["cantidad_predicha"] for p in pred["predicciones"]) / max(1, datos.horizonte_semanas))
         demanda_semanal = float(np.sum(demandas)) if demandas else 0.0
         lead = proveedor["lead_time_dias"]

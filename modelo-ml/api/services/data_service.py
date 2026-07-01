@@ -206,26 +206,34 @@ class DataService:
                 "periodo_inicio": pred["periodo_inicio"],
                 "periodo_fin": pred["periodo_fin"],
                 "cantidad_predicha": pred["cantidad_predicha"],
+                "prediccion_sarima": pred.get("prediccion_sarima"),
+                "prediccion_xgboost": pred.get("prediccion_xgboost"),
+                "horizonte": respuesta.get("horizonte_semanas", len(respuesta.get("predicciones", []))),
                 "intervalo_inf": pred["intervalo_inf"],
-                "intervalosup": pred["intervalo_sup"],
                 "intervalo_sup": pred["intervalo_sup"],
                 "confianza": 0.9,
                 "modelo_version_id": modelo_id,
                 "estrategia": respuesta.get("estrategia_utilizada"),
+                "metodo_aplicado": pred.get("metodo_aplicado"),
+                "alpha": pred.get("alpha"),
                 "nivel_madurez": str(respuesta.get("nivel_madurez")),
                 "generado_en": generado_en,
             })
         if not filas:
             return []
-        return self.repo.upsert("predicciones_ml", filas, on_conflict="org_id,botica_id,producto_id,modelo_version_id,periodo_inicio")
+        return self.repo.upsert("predicciones_ml", filas, on_conflict="org_id,producto_id,botica_id,periodo_inicio,modelo_version_id")
 
     def asegurar_modelo_ml(self) -> str:
         from .model_service import model_service
 
-        modelo_id = model_service.modelo_version_id
-        filas = self.repo.seleccionar("modelos_ml", {"id": modelo_id}, 1)
+        filas = self.repo.seleccionar("modelos_ml", {"version": model_service.version, "status": "production"}, 1)
         if filas:
-            return modelo_id
+            return filas[0]["id"]
+        filas = self.repo.seleccionar("modelos_ml", {"id": model_service.modelo_version_id}, 1)
+        if filas:
+            return filas[0]["id"]
+        import uuid
+        modelo_id = str(uuid.uuid4())
         metricas = model_service.metricas
         hibrido = metricas.get("modelos", {}).get("hibrido", {})
         split = metricas.get("split", {})
@@ -275,36 +283,29 @@ class DataService:
         return None
 
     def _serie_supabase(self, org_id: str, botica_id: str, producto_id: str) -> pd.DataFrame:
-        ventas = self.repo.seleccionar_todo(
-            "ventas_historicas",
+        filas = self.repo.seleccionar_todo(
+            "vw_demanda_semanal_ml",
             {"org_id": org_id, "botica_id": botica_id, "producto_id": producto_id},
-            select="fecha_venta, cantidad",
-            orden="fecha_venta",
+            select="fecha_semana,cantidad_vendida,categoria_terapeutica,stock_inicio_semana,stock_minimo,stock_maximo,lead_time_dias",
+            orden="fecha_semana",
         )
-        if not ventas:
+        if not filas:
             return pd.DataFrame()
-        df = pd.DataFrame(ventas)
-        df["fecha_venta"] = pd.to_datetime(df["fecha_venta"])
-        semanal = df.set_index("fecha_venta").resample("W-MON", label="left", closed="left")["cantidad"].sum().reset_index()
-        semanal = semanal.rename(columns={"fecha_venta": "fecha_semana", "cantidad": "cantidad_vendida"})
-        if semanal.empty:
-            return semanal
-        producto = self._producto(org_id, producto_id)
-        stock = self.stock(org_id, botica_id, producto_id)
-        proveedor = self.proveedor_producto(org_id, producto_id)
-        semanal["org_id"] = org_id
-        semanal["botica_id"] = botica_id
-        semanal["producto_id"] = producto_id
-        semanal["codigo_producto"] = producto.get("codigo_interno")
-        semanal["nombre_comercial"] = producto.get("nombre_comercial")
-        semanal["categoria_terapeutica"] = producto.get("categoria_terapeutica") or producto.get("clasificacion") or "SIN_CATEGORIA"
-        semanal["demanda_insatisfecha"] = 0
-        semanal["stockout_flag"] = 0
-        semanal["stock_inicio_semana"] = stock["stock_actual"]
-        semanal["stock_minimo"] = stock["stock_minimo"]
-        semanal["stock_maximo"] = stock["stock_maximo"]
-        semanal["lead_time_dias"] = proveedor["lead_time_dias"]
-        return self._agregar_features(semanal)
+        df = pd.DataFrame(filas)
+        df["fecha_semana"] = pd.to_datetime(df["fecha_semana"])
+        for columna in ("stock_inicio_semana", "stock_minimo", "stock_maximo", "lead_time_dias"):
+            if columna not in df.columns:
+                df[columna] = 0.0
+        numeric_cols = ["cantidad_vendida", "stock_inicio_semana", "stock_minimo", "stock_maximo", "lead_time_dias"]
+        for columna in numeric_cols:
+            df[columna] = pd.to_numeric(df[columna], errors="coerce").fillna(0.0)
+        df["org_id"] = org_id
+        df["botica_id"] = botica_id
+        df["producto_id"] = producto_id
+        df["categoria_terapeutica"] = df.get("categoria_terapeutica", "SIN_CATEGORIA").fillna("SIN_CATEGORIA")
+        df["demanda_insatisfecha"] = 0
+        df["stockout_flag"] = 0
+        return self._agregar_features(df)
 
     def _agregar_features(self, df: pd.DataFrame) -> pd.DataFrame:
         df = df.sort_values([*CLAVES_SERIE, "fecha_semana"]).copy()

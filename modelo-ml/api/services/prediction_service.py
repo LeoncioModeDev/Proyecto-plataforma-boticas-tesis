@@ -9,7 +9,7 @@ from ..config import config
 from ..schemas import NivelMadurez
 from .data_service import data_service
 from .model_service import model_service
-from src.feature_engineering import construir_fila_horizonte
+from src.pipeline import predecir_demanda
 
 
 def clasificar_madurez(semanas: int) -> NivelMadurez:
@@ -53,13 +53,14 @@ class PredictionService:
             "xgboost_disponible": semanas >= config.min_weeks_xgboost and bool(model_service.artefacto.get("modelo_xgb_independiente")),
         }
 
-    def predecir(self, org_id: str, botica_id: str, producto_id: str, horizonte: int, demanda_manual: float | None = None) -> dict:
+    def predecir(self, org_id: str, botica_id: str, producto_id: str, horizonte: int, demanda_manual: float | None = None, guardar: bool = True) -> dict:
         serie = data_service.serie(org_id, botica_id, producto_id)
         semanas = int(len(serie))
         nivel = clasificar_madurez(semanas)
         advertencias: list[str] = []
         sarima_dinamico = self._sarima_dinamico_disponible(org_id, botica_id, producto_id)
         estrategia = estrategia_por_madurez(nivel, sarima_dinamico)
+        orden_sarima_encontrada = self._sarima_dinamico_disponible(org_id, botica_id, producto_id)
 
         if nivel == NivelMadurez.MODELO_COMPLETO:
             pregeneradas = data_service.predicciones_guardadas(org_id, botica_id, producto_id)
@@ -69,8 +70,8 @@ class PredictionService:
             advertencias.append("No hay objeto SARIMA dinámico disponible; se usa XGBoost global o fallback.")
 
         if semanas >= config.min_weeks_xgboost and model_service.artefacto.get("modelo_xgb_independiente"):
-            predicciones = self._predecir_pipeline(org_id, botica_id, producto_id, serie, horizonte, advertencias)
-            estrategia = "SARIMA_XGBOOST_HIBRIDO_ADAPTATIVO" if nivel == NivelMadurez.MODELO_COMPLETO else "XGBOOST_GLOBAL_CON_FEATURES_OFICIALES"
+            predicciones = self._predecir_con_pipeline(org_id, botica_id, producto_id, serie, horizonte, advertencias)
+            estrategia = estrategia_por_madurez(nivel, orden_sarima_encontrada)
         else:
             predicciones = self._predecir_fallback(org_id, serie, horizonte, demanda_manual)
             if nivel == NivelMadurez.SIN_DATOS:
@@ -82,13 +83,18 @@ class PredictionService:
             "producto_id": producto_id,
             "nivel_madurez": nivel,
             "estrategia_utilizada": estrategia,
+            "orden_sarima_encontrada": orden_sarima_encontrada,
             "semanas_historial": semanas,
             "modelo_version_id": model_service.modelo_version_id,
             "horizonte_semanas": horizonte,
             "predicciones": predicciones,
             "advertencias": advertencias,
         }
-        data_service.guardar_predicciones(respuesta)
+        if guardar:
+            try:
+                data_service.guardar_predicciones(respuesta)
+            except Exception as exc:
+                advertencias.append(f"No se pudo persistir predicciones ({exc.__class__.__name__}); retorno sin guardar.")
         return respuesta
 
     def predecir_botica(self, org_id: str, botica_id: str, horizonte: int, categoria: str | None, producto_id: str | None, solo_historial: bool) -> list[dict]:
@@ -122,6 +128,10 @@ class PredictionService:
                 "periodo_inicio": str(fila["periodo_inicio"]),
                 "periodo_fin": str(fila["periodo_fin"]),
                 "cantidad_predicha": float(fila["cantidad_predicha"]),
+                "prediccion_sarima": fila.get("prediccion_sarima"),
+                "prediccion_xgboost": fila.get("prediccion_xgboost"),
+                "metodo_aplicado": fila.get("metodo_aplicado"),
+                "alpha": fila.get("alpha"),
                 "intervalo_inf": float(fila["intervalo_inf"]),
                 "intervalo_sup": float(fila["intervalo_sup"]),
             })
@@ -137,7 +147,10 @@ class PredictionService:
             "predicciones": predicciones,
             "advertencias": advertencias,
         }
-        data_service.guardar_predicciones(respuesta)
+        try:
+            data_service.guardar_predicciones(respuesta)
+        except Exception:
+            pass
         return respuesta
 
     def _predecir_fallback(self, org_id: str, serie: pd.DataFrame, horizonte: int, demanda_manual: float | None) -> list[dict]:
@@ -150,7 +163,7 @@ class PredictionService:
         inicio = pd.Timestamp.today().normalize() + pd.offsets.Week(weekday=0)
         return self._predicciones_constantes(inicio, horizonte, base, base * 0.75, base * 1.25)
 
-    def _predecir_pipeline(self, org_id: str, botica_id: str, producto_id: str, serie: pd.DataFrame, horizonte: int, advertencias: list[str]) -> list[dict]:
+    def _predecir_con_pipeline(self, org_id: str, botica_id: str, producto_id: str, serie: pd.DataFrame, horizonte: int, advertencias: list[str]) -> list[dict]:
         categoria = str(serie.iloc[-1].get("categoria_terapeutica", "SIN_CATEGORIA"))
         snapshot = {
             "stock_inicio_semana": float(serie.iloc[-1].get("stock_inicio_semana", 0) or 0),
@@ -159,46 +172,38 @@ class PredictionService:
             "ratio_stock_maximo": float(serie.iloc[-1].get("ratio_stock_maximo", 0) or 0),
         }
         try:
-            salida = self._predecir_con_artefacto(org_id, botica_id, producto_id, horizonte, serie, categoria, snapshot)
+            salida = predecir_demanda(
+                org_id=org_id,
+                botica_id=botica_id,
+                producto_id=producto_id,
+                horizonte=horizonte,
+                serie=serie,
+                categoria=categoria,
+                metadata_operativa=snapshot,
+                artefacto=model_service.artefacto,
+            )
         except Exception as exc:
-            advertencias.append(f"No se pudo usar el pipeline oficial ({exc.__class__.__name__}); se usa fallback.")
+            advertencias.append(f"No se pudo usar pipeline.predecir_demanda ({exc.__class__.__name__}); se usa fallback.")
+            return self._predecir_fallback(org_id, serie, horizonte, None)
+        if salida.empty:
+            advertencias.append("Pipeline devolvió DataFrame vacío; se usa fallback.")
             return self._predecir_fallback(org_id, serie, horizonte, None)
         predicciones = []
         for _, fila in salida.iterrows():
-            inicio = pd.Timestamp(fila["fecha_semana"])
-            pred = float(fila["cantidad_predicha"])
+            fecha_objetivo = pd.Timestamp(fila["fecha_objetivo"])
+            pred_hibrida = float(fila["prediccion_hibrida"])
             predicciones.append({
-                "periodo_inicio": inicio.date().isoformat(),
-                "periodo_fin": (inicio + pd.Timedelta(days=6)).date().isoformat(),
-                "cantidad_predicha": round(pred, 2),
-                "intervalo_inf": round(max(0.0, pred * 0.75), 2),
-                "intervalo_sup": round(pred * 1.25, 2),
+                "periodo_inicio": fecha_objetivo.date().isoformat(),
+                "periodo_fin": (fecha_objetivo + pd.Timedelta(days=6)).date().isoformat(),
+                "cantidad_predicha": round(max(0.0, pred_hibrida), 2),
+                "prediccion_sarima": round(max(0.0, float(fila["prediccion_sarima"])), 2),
+                "prediccion_xgboost": round(max(0.0, float(fila["prediccion_xgboost"])), 2),
+                "metodo_aplicado": str(fila.get("metodo_aplicado", "sarima")),
+                "alpha": float(fila.get("alpha", 0.0)),
+                "intervalo_inf": round(max(0.0, pred_hibrida * 0.75), 2),
+                "intervalo_sup": round(pred_hibrida * 1.25, 2),
             })
         return predicciones
-
-    def _predecir_con_artefacto(self, org_id, botica_id, producto_id, horizonte, serie, categoria, snapshot):
-        artefacto = model_service.artefacto
-        hist = serie.sort_values("fecha_semana")["cantidad_vendida"].astype(float).tolist()
-        fecha_base = pd.Timestamp(serie["fecha_semana"].max())
-        fechas = pd.date_range(fecha_base + pd.Timedelta(weeks=1), periods=horizonte, freq=artefacto.get("frecuencia", "W-MON"))
-        pred_base = float(np.mean(hist[-4:])) if hist else 0.0
-        config_categoria = artefacto.get("configuracion_categoria", {}).get(categoria, {"metodo": "sarima", "alpha": 0.0})
-        filas = []
-        for h, fecha in enumerate(fechas, start=1):
-            fila = construir_fila_horizonte(org_id, botica_id, producto_id, categoria, fecha, hist, snapshot, h, pred_base)
-            x_hibrido = artefacto["preprocesador_hibrido"].transform(pd.DataFrame([fila])[artefacto["features_hibrido"]])
-            pred_aditivo = float(artefacto["modelo_xgb_aditivo"].predict(x_hibrido)[0])
-            pred_log = float(artefacto["modelo_xgb_log"].predict(x_hibrido)[0])
-            metodo = config_categoria["metodo"]
-            alpha = float(config_categoria["alpha"])
-            if metodo == "aditivo" and alpha > 0:
-                pred = pred_base + alpha * pred_aditivo * float(fila["escala_serie"])
-            elif metodo == "log" and alpha > 0:
-                pred = np.expm1(np.log1p(max(pred_base, 0.0)) + alpha * pred_log)
-            else:
-                pred = pred_base
-            filas.append({"fecha_semana": fecha, "cantidad_predicha": max(0.0, float(pred))})
-        return pd.DataFrame(filas)
 
     def _predicciones_constantes(self, inicio: pd.Timestamp, horizonte: int, valor: float, inf: float, sup: float) -> list[dict]:
         return [
@@ -206,6 +211,10 @@ class PredictionService:
                 "periodo_inicio": (inicio + pd.Timedelta(weeks=i)).date().isoformat(),
                 "periodo_fin": (inicio + pd.Timedelta(weeks=i, days=6)).date().isoformat(),
                 "cantidad_predicha": round(float(valor), 2),
+                "prediccion_sarima": None,
+                "prediccion_xgboost": None,
+                "metodo_aplicado": "fallback",
+                "alpha": 0.0,
                 "intervalo_inf": round(max(0.0, float(inf)), 2),
                 "intervalo_sup": round(max(float(sup), float(valor)), 2),
             }

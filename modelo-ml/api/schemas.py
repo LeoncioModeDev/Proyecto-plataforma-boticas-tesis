@@ -5,7 +5,7 @@ from __future__ import annotations
 from enum import Enum
 from typing import Any, Literal
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import AliasChoices, BaseModel, Field, field_validator
 
 
 class NivelMadurez(str, Enum):
@@ -19,20 +19,20 @@ class NivelMadurez(str, Enum):
 class PrediccionRequest(BaseModel):
     botica_id: str = Field(..., examples=["bot-001"])
     producto_id: str = Field(..., examples=["prod-001"])
-    horizonte_semanas: int = Field(12, ge=1, le=12)
+    horizonte: int = Field(12, ge=1, le=12, validation_alias=AliasChoices("horizonte", "horizonte_semanas"))
     demanda_inicial_manual: float | None = Field(None, ge=0)
 
 
 class PrediccionesBoticaRequest(BaseModel):
     botica_id: str
-    horizonte_semanas: int = Field(12, ge=1, le=12)
+    horizonte: int = Field(12, ge=1, le=12, validation_alias=AliasChoices("horizonte", "horizonte_semanas"))
     categoria_terapeutica: str | None = None
     producto_id: str | None = None
     solo_productos_con_historial: bool = False
 
 
 class PrediccionesOrganizacionRequest(BaseModel):
-    horizonte_semanas: int = Field(12, ge=1, le=12)
+    horizonte: int = Field(12, ge=1, le=12, validation_alias=AliasChoices("horizonte", "horizonte_semanas"))
     categoria_terapeutica: str | None = None
     solo_productos_con_historial: bool = False
     batch_size: int = Field(100, ge=1, le=500)
@@ -42,6 +42,10 @@ class PrediccionSemanal(BaseModel):
     periodo_inicio: str
     periodo_fin: str
     cantidad_predicha: float
+    prediccion_sarima: float | None = None
+    prediccion_xgboost: float | None = None
+    metodo_aplicado: str | None = None
+    alpha: float | None = None
     intervalo_inf: float
     intervalo_sup: float
 
