@@ -40,8 +40,8 @@ function mapearProducto(p) {
     id: pp.id,
     proveedorId: pp.proveedores?.id || pp.proveedor_id,
     proveedorNombre: pp.proveedores?.razon_social,
-    leadTimeEspecifico: pp.lead_time_especifico,
-    precioCompraReferencial: pp.precio_compra_referencial,
+    leadTimeEspecifico: pp.lead_time_dias ?? pp.lead_time_especifico,
+    precioCompraReferencial: pp.precio_referencial ?? pp.precio_compra_referencial,
     cantidadMinimaCompra: pp.cantidad_minima_compra ?? 1,
     multiploEmpaque: pp.multiplo_empaque ?? 1,
   }))
@@ -50,6 +50,9 @@ function mapearProducto(p) {
     id: p.id,
     codigoInterno: p.codigo_interno,
     nombreComercial: p.nombre_comercial,
+    categoriaTerapeuticaId: p.categoria_terapeutica_id,
+    categoriaTerapeuticaCodigo: p.categorias_terapeuticas?.codigo,
+    categoriaTerapeuticaNombre: p.categorias_terapeuticas?.nombre,
     formaFarmaceuticaId: p.forma_farmaceutica_id,
     formaFarmaceuticaNombre: p.formas_farmaceuticas?.nombre,
     presentacion: p.presentacion,
@@ -78,6 +81,7 @@ export async function obtenerProductoPorId(id) {
 export async function crearProducto(datos) {
   const body = {
     nombre_comercial: datos.nombreComercial,
+    categoria_terapeutica_id: datos.categoriaTerapeuticaId,
     forma_farmaceutica_id: datos.formaFarmaceuticaId || null,
     presentacion: datos.presentacion || null,
     clasificacion: datos.clasificacion,
@@ -94,6 +98,7 @@ export async function crearProducto(datos) {
 export async function actualizarProducto(id, datos) {
   const body = {
     nombre_comercial: datos.nombreComercial,
+    categoria_terapeutica_id: datos.categoriaTerapeuticaId,
     forma_farmaceutica_id: datos.formaFarmaceuticaId,
     presentacion: datos.presentacion,
     clasificacion: datos.clasificacion,

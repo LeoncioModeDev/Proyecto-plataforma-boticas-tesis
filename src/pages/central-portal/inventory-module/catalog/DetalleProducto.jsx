@@ -135,6 +135,7 @@ export default function DetalleProducto() {
                 <span className="text-secundario ml-1">({p.concentracion} {p.unidad})</span>
               </div>
             )) : '—'],
+            ['Categoría terapéutica', producto.categoriaTerapeuticaNombre || 'Sin categoría'],
             ['Forma Farmacéutica', formaDisplay],
             ['Presentación', producto.presentacion || '—'],
             ['Clasificación', <Insignia key="c" color={COLORES_CLASIFICACION[producto.clasificacion]}>{ETIQUETAS_CLASIFICACION[producto.clasificacion]}</Insignia>],

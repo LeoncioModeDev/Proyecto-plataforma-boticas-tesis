@@ -33,9 +33,36 @@ SET lead_time_dias = lead_time_especifico
 WHERE lead_time_dias IS NULL
   AND lead_time_especifico IS NOT NULL;
 
-UPDATE proveedor_producto
-SET precio_referencial = COALESCE(precio_compra_referencial, precio_compra)
-WHERE precio_referencial IS NULL;
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'public'
+      AND table_name = 'proveedor_producto'
+      AND column_name = 'precio_compra_referencial'
+  ) THEN
+    EXECUTE '
+      UPDATE proveedor_producto
+      SET precio_referencial = precio_compra_referencial
+      WHERE precio_referencial IS NULL
+        AND precio_compra_referencial IS NOT NULL
+    ';
+  END IF;
+
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'public'
+      AND table_name = 'proveedor_producto'
+      AND column_name = 'precio_compra'
+  ) THEN
+    EXECUTE '
+      UPDATE proveedor_producto
+      SET precio_referencial = precio_compra
+      WHERE precio_referencial IS NULL
+        AND precio_compra IS NOT NULL
+    ';
+  END IF;
+END $$;
 
 ALTER TABLE precios
   ADD COLUMN IF NOT EXISTS org_id uuid REFERENCES organizaciones(id),

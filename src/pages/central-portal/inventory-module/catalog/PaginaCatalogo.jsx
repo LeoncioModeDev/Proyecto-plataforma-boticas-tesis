@@ -18,6 +18,7 @@ function enriquecerProductos(productos) {
     principioActivoDisplay: (p.principiosActivos || []).map(pa => pa.principioActivoNombre).join(', '),
     concentracionDisplay: (p.principiosActivos || []).map(pa => `${pa.concentracion} ${pa.unidadMedidaSimbolo || ''}`).join(', '),
     formaDisplay: p.formaFarmaceuticaNombre || p.formaFarmaceuticaId || '—',
+    categoriaDisplay: p.categoriaTerapeuticaNombre || 'Sin categoría',
     presentacionDisplay: p.presentacion || '—',
   }))
 }
@@ -111,6 +112,7 @@ export default function PaginaCatalogo() {
   const columnas = [
     { campo: 'codigoInterno', encabezado: 'Código', render: (r) => <span className="font-mono text-xs font-medium">{r.codigoInterno}</span> },
     { campo: 'nombreComercial', encabezado: 'Nombre Comercial' },
+    { campo: 'categoriaDisplay', encabezado: 'Categoría' },
     { campo: 'principioActivoDisplay', encabezado: 'Principio Activo' },
     { campo: 'formaDisplay', encabezado: 'Forma', render: (r) => <span className="capitalize">{r.formaDisplay}</span> },
     { campo: 'concentracionDisplay', encabezado: 'Concentración' },

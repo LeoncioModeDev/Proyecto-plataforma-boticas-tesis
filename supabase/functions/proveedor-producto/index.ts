@@ -107,10 +107,17 @@ async function listarPorProducto(supabase: any, perfil: PerfilUsuario, url: URL)
 }
 
 async function guardarRelacion(supabase: any, perfil: PerfilUsuario, body: any) {
-  const { proveedor_id, producto_id, lead_time_especifico, precio_compra_referencial, cantidad_minima_compra = 1, multiplo_empaque = 1 } = body;
+  const {
+    proveedor_id,
+    producto_id,
+    lead_time_dias = body.lead_time_especifico,
+    precio_referencial = body.precio_compra_referencial,
+    cantidad_minima_compra = 1,
+    multiplo_empaque = 1,
+  } = body;
 
-  if (!proveedor_id || !producto_id || lead_time_especifico === undefined || precio_compra_referencial === undefined) {
-    return json({ error: "Faltan datos (proveedor_id, producto_id, lead_time_especifico, precio_compra_referencial)" }, 400);
+  if (!proveedor_id || !producto_id || lead_time_dias === undefined || precio_referencial === undefined) {
+    return json({ error: "Faltan datos (proveedor_id, producto_id, lead_time_dias, precio_referencial)" }, 400);
   }
 
   if (Number(cantidad_minima_compra) <= 0 || Number(multiplo_empaque) <= 0) {
@@ -140,8 +147,11 @@ async function guardarRelacion(supabase: any, perfil: PerfilUsuario, body: any) 
       const { error: errUpd } = await supabase
         .from("proveedor_producto")
         .update({
-          lead_time_especifico,
-          precio_compra_referencial,
+          org_id: perfil.org_id,
+          lead_time_dias,
+          precio_referencial,
+          lead_time_especifico: lead_time_dias,
+          precio_compra_referencial: precio_referencial,
           cantidad_minima_compra,
           multiplo_empaque,
           activo: true,
@@ -153,8 +163,11 @@ async function guardarRelacion(supabase: any, perfil: PerfilUsuario, body: any) 
     const { error: errUpd } = await supabase
       .from("proveedor_producto")
       .update({
-        lead_time_especifico,
-        precio_compra_referencial,
+        org_id: perfil.org_id,
+        lead_time_dias,
+        precio_referencial,
+        lead_time_especifico: lead_time_dias,
+        precio_compra_referencial: precio_referencial,
         cantidad_minima_compra,
         multiplo_empaque,
       })
@@ -169,8 +182,11 @@ async function guardarRelacion(supabase: any, perfil: PerfilUsuario, body: any) 
     .insert({
       proveedor_id,
       producto_id,
-      lead_time_especifico,
-      precio_compra_referencial,
+      org_id: perfil.org_id,
+      lead_time_dias,
+      precio_referencial,
+      lead_time_especifico: lead_time_dias,
+      precio_compra_referencial: precio_referencial,
       cantidad_minima_compra,
       multiplo_empaque,
       activo: true,

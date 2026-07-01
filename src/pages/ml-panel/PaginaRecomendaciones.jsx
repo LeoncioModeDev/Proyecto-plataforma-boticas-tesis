@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
-import { CheckCircle, XCircle } from 'lucide-react'
+import { CheckCircle, Eye, XCircle } from 'lucide-react'
 import Boton from '@/components/common/Boton'
-import Tarjeta from '@/components/common/Tarjeta'
 import Tabla from '@/components/common/Tabla'
 import Alerta from '@/components/common/Alerta'
 import Insignia from '@/components/common/Insignia'
@@ -55,7 +54,7 @@ export default function PaginaRecomendaciones() {
   const [estadoFiltro, setEstadoFiltro] = useState('TODOS')
   const [recomendaciones, setRecomendaciones] = useState([])
   const [detalle, setDetalle] = useState(null)
-  const [cargando, setCargando] = useState(false)
+  const [cargando, setCargando] = useState(true)
   const [error, setError] = useState(null)
 
   useEffect(() => {
@@ -74,6 +73,8 @@ export default function PaginaRecomendaciones() {
         setRecomendaciones((recs.recomendaciones || []).map(mapearRecomendacion))
       } catch (err) {
         setError(err.message)
+      } finally {
+        setCargando(false)
       }
     }
     cargar()
@@ -133,51 +134,50 @@ export default function PaginaRecomendaciones() {
     { campo: 'stockPorRecibir', encabezado: 'Por recibir' },
     { campo: 'cantidadFinal', encabezado: 'Cantidad final' },
     { campo: 'acciones', encabezado: 'Acciones', render: r => (
-      <div className="flex gap-2">
-        <Boton variante="texto" tamano="pequeno" onClick={() => setDetalle(r)}>Ver</Boton>
-        {r.estado === 'PENDIENTE' && <Boton variante="primario" tamano="pequeno" icono={CheckCircle} onClick={() => cambiarEstado(r.id, 'aprobar')}>Aprobar</Boton>}
-        {r.estado === 'PENDIENTE' && <Boton variante="secundario" tamano="pequeno" icono={XCircle} onClick={() => cambiarEstado(r.id, 'rechazar')}>Rechazar</Boton>}
+      <div className="flex gap-1">
+        <Boton variante="icono" icono={Eye} onClick={() => setDetalle(r)} title="Ver detalle" className="text-marca-principal hover:bg-marca-claro" />
+        {r.estado === 'PENDIENTE' && <Boton variante="icono" icono={CheckCircle} onClick={() => cambiarEstado(r.id, 'aprobar')} title="Aprobar recomendación" className="text-marca-principal hover:bg-marca-claro" />}
+        {r.estado === 'PENDIENTE' && <Boton variante="icono" icono={XCircle} onClick={() => cambiarEstado(r.id, 'rechazar')} title="Rechazar recomendación" className="text-estado-critico hover:bg-red-50 dark:hover:bg-red-950/30" />}
       </div>
     ) },
   ]
+
+  if (cargando && recomendaciones.length === 0 && productos.length === 0) {
+    return <div className="flex justify-center py-12"><p className="text-secundario">Cargando recomendaciones...</p></div>
+  }
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-h1 text-principal">Recomendaciones Operativas ML</h1>
-        <p className="text-secundario mt-1">Compra y reposición usando demanda prevista, stock libre, tránsito y condiciones comerciales.</p>
+        <p className="text-secundario mt-1">{filas.length} recomendaciones encontradas</p>
       </div>
 
       {!estadoML.cargando && !estadoML.disponible && <Alerta tipo="error" titulo="API ML no disponible" mensaje={estadoML.error} />}
       {error && <Alerta tipo="error" titulo="No fue posible completar la operación" mensaje={error} alCerrar={() => setError(null)} />}
 
-      <Tarjeta titulo="Generar recomendación">
-        <div className="grid gap-4 md:grid-cols-5">
-          <select value={boticaId} onChange={e => setBoticaId(e.target.value)} className="px-3 py-2 bg-fondo border border-estilo rounded-md">
+      <div className="flex flex-wrap gap-4">
+          <select value={boticaId} onChange={e => setBoticaId(e.target.value)} className="px-3 py-2 text-cuerpo bg-fondo border border-estilo rounded-md">
             {boticas.map(b => <option key={b.id} value={b.id}>{b.nombre}</option>)}
           </select>
-          <select value={productoId} onChange={e => setProductoId(e.target.value)} className="px-3 py-2 bg-fondo border border-estilo rounded-md md:col-span-2">
+          <select value={productoId} onChange={e => setProductoId(e.target.value)} className="px-3 py-2 text-cuerpo bg-fondo border border-estilo rounded-md min-w-72">
             {productos.map(p => <option key={p.id} value={p.id}>{p.nombreComercial}</option>)}
           </select>
-          <select value={tipo} onChange={e => setTipo(e.target.value)} className="px-3 py-2 bg-fondo border border-estilo rounded-md">
+          <select value={tipo} onChange={e => setTipo(e.target.value)} className="px-3 py-2 text-cuerpo bg-fondo border border-estilo rounded-md">
+            <option value="TODOS">Todos los tipos</option>
             <option value="COMPRA">COMPRA</option>
             <option value="REPOSICION_INTERNA">REPOSICION_INTERNA</option>
           </select>
-          <Boton onClick={generar} cargando={cargando} deshabilitado={!estadoML.disponible || !boticaId || !productoId}>Generar</Boton>
-        </div>
-      </Tarjeta>
-
-      <Tarjeta titulo="Recomendaciones guardadas">
-        <div className="mb-4 flex gap-3">
-          <select value={estadoFiltro} onChange={e => setEstadoFiltro(e.target.value)} className="px-3 py-2 bg-fondo border border-estilo rounded-md">
+          <Boton onClick={generar} cargando={cargando} deshabilitado={!estadoML.disponible || !boticaId || !productoId || tipo === 'TODOS'}>Generar</Boton>
+          <select value={estadoFiltro} onChange={e => setEstadoFiltro(e.target.value)} className="px-3 py-2 text-cuerpo bg-fondo border border-estilo rounded-md">
             <option value="TODOS">Todos los estados</option>
             <option value="PENDIENTE">Pendiente</option>
             <option value="CONFIRMADA">Aprobada</option>
             <option value="RECHAZADA">Rechazada</option>
           </select>
-        </div>
-        <Tabla columnas={columnas} datos={filas} tamanoPagina={8} />
-      </Tarjeta>
+      </div>
+
+      <Tabla columnas={columnas} datos={filas} tamanoPagina={8} />
 
       <Modal abierto={!!detalle} alCerrar={() => setDetalle(null)} titulo="Detalle de recomendación" tamano="lg">
         {detalle && (

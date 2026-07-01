@@ -1,0 +1,26 @@
+{
+  "objetivo": "Validar resolucion de codigos publicos a UUID internos sin exponer org_id ni UUID en plantillas.",
+  "flujo_controlado": [
+    "Importar categoria: codigo=CAT-ANA",
+    "Importar botica: codigo_interno=BOT-001",
+    "Importar producto: codigo_interno=SKU-001, codigo_categoria=CAT-ANA",
+    "Importar proveedor: codigo_interno=PRV-001",
+    "Importar proveedor_producto: codigo_proveedor=PRV-001, codigo_producto=SKU-001",
+    "Importar precio: codigo_producto=SKU-001, codigo_botica=BOT-001",
+    "Importar stock inicial: codigo_producto=SKU-001, codigo_botica=BOT-001",
+    "Importar venta historica: codigo_producto=SKU-001, codigo_botica=BOT-001"
+  ],
+  "resoluciones_obligatorias": {
+    "codigo_categoria": "org_id + codigo -> categorias_terapeuticas.id",
+    "codigo_producto": "org_id + codigo_interno -> productos.id",
+    "codigo_botica": "org_id + codigo_interno -> boticas.id",
+    "codigo_proveedor": "org_id + codigo_interno -> proveedores.id"
+  },
+  "campos_no_requeridos_al_usuario": [
+    "org_id",
+    "categoria_terapeutica_id",
+    "producto_id",
+    "botica_id",
+    "proveedor_id"
+  ]
+}

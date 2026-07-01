@@ -80,6 +80,7 @@ async function listarProductos(supabase: any, perfil: PerfilUsuario, url: URL) {
     .from("productos")
     .select(`
       *,
+      categorias_terapeuticas(id, codigo, nombre),
       formas_farmaceuticas!inner(nombre),
       producto_principio_activo(
         id, concentracion,
@@ -87,7 +88,7 @@ async function listarProductos(supabase: any, perfil: PerfilUsuario, url: URL) {
         unidades_medida!inner(id, nombre, simbolo)
       ),
       proveedor_producto(
-        id, lead_time_especifico, precio_compra_referencial,
+        id, lead_time_dias, lead_time_especifico, precio_referencial, precio_compra_referencial,
         proveedores!inner(id, razon_social)
       )
     `)
@@ -108,6 +109,7 @@ async function obtenerProducto(supabase: any, perfil: PerfilUsuario, id: string)
     .from("productos")
     .select(`
       *,
+      categorias_terapeuticas(id, codigo, nombre),
       formas_farmaceuticas(nombre),
       producto_principio_activo(
         id, concentracion,
@@ -115,7 +117,7 @@ async function obtenerProducto(supabase: any, perfil: PerfilUsuario, id: string)
         unidades_medida(id, nombre, simbolo)
       ),
       proveedor_producto(
-        id, lead_time_especifico, precio_compra_referencial,
+        id, lead_time_dias, lead_time_especifico, precio_referencial, precio_compra_referencial,
         proveedores(id, razon_social)
       )
     `)
@@ -129,10 +131,22 @@ async function obtenerProducto(supabase: any, perfil: PerfilUsuario, id: string)
 }
 
 async function crearProducto(supabase: any, perfil: PerfilUsuario, body: any) {
-  const { nombre_comercial, forma_farmaceutica_id, presentacion, clasificacion, estado, principios_activos } = body;
+  const { nombre_comercial, categoria_terapeutica_id, forma_farmaceutica_id, presentacion, clasificacion, estado, principios_activos } = body;
 
-  if (!nombre_comercial || !clasificacion) {
-    return json({ error: "Faltan datos obligatorios (nombre_comercial, clasificacion)" }, 400);
+  if (!nombre_comercial || !categoria_terapeutica_id || !clasificacion) {
+    return json({ error: "Faltan datos obligatorios (nombre_comercial, categoria_terapeutica_id, clasificacion)" }, 400);
+  }
+
+  const { data: categoria } = await supabase
+    .from("categorias_terapeuticas")
+    .select("id")
+    .eq("id", categoria_terapeutica_id)
+    .eq("org_id", perfil.org_id)
+    .eq("activo", true)
+    .maybeSingle();
+
+  if (!categoria) {
+    return json({ error: "La categoría terapéutica no existe o no está activa en tu organización" }, 400);
   }
 
   const { data: sku, error: errSku } = await supabase.rpc("generar_codigo_producto_para_org", {
@@ -149,6 +163,7 @@ async function crearProducto(supabase: any, perfil: PerfilUsuario, body: any) {
       org_id: perfil.org_id,
       codigo_interno: sku,
       nombre_comercial,
+      categoria_terapeutica_id,
       forma_farmaceutica_id: forma_farmaceutica_id || null,
       presentacion: presentacion || null,
       clasificacion,
@@ -188,12 +203,24 @@ async function crearProducto(supabase: any, perfil: PerfilUsuario, body: any) {
 }
 
 async function actualizarProducto(supabase: any, perfil: PerfilUsuario, id: string, body: any) {
-  const { nombre_comercial, forma_farmaceutica_id, presentacion, clasificacion, estado, principios_activos } = body;
+  const { nombre_comercial, categoria_terapeutica_id, forma_farmaceutica_id, presentacion, clasificacion, estado, principios_activos } = body;
+
+  if (categoria_terapeutica_id !== undefined) {
+    const { data: categoria } = await supabase
+      .from("categorias_terapeuticas")
+      .select("id")
+      .eq("id", categoria_terapeutica_id)
+      .eq("org_id", perfil.org_id)
+      .eq("activo", true)
+      .maybeSingle();
+    if (!categoria) return json({ error: "La categoría terapéutica no existe o no está activa en tu organización" }, 400);
+  }
 
   const { error: errProd } = await supabase
     .from("productos")
     .update({
       ...(nombre_comercial !== undefined && { nombre_comercial }),
+      ...(categoria_terapeutica_id !== undefined && { categoria_terapeutica_id }),
       ...(forma_farmaceutica_id !== undefined && { forma_farmaceutica_id }),
       ...(presentacion !== undefined && { presentacion }),
       ...(clasificacion !== undefined && { clasificacion }),

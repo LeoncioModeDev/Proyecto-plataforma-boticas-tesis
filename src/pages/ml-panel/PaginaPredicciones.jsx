@@ -7,14 +7,11 @@ import GraficaArea from '@/components/charts/GraficaArea'
 import Insignia from '@/components/common/Insignia'
 import { listarBoticas } from '@/services/supabase/boticas'
 import { obtenerProductos } from '@/services/supabase/productos'
+import { listarVentasHistoricasImportadas } from '@/services/supabase/ventasHistoricas'
 import { generarPrediccion, obtenerMadurezSerie } from '@/services/ml-model/prediccionesML'
 import { useMLStatus } from '@/services/ml-model/useMLStatus'
 
 const HORIZONTES = [4, 8, 12]
-
-function principalActivo(producto) {
-  return producto?.principiosActivos?.[0] || null
-}
 
 export default function PaginaPredicciones() {
   const estadoML = useMLStatus()
@@ -25,20 +22,29 @@ export default function PaginaPredicciones() {
   const [horizonte, setHorizonte] = useState(12)
   const [madurez, setMadurez] = useState(null)
   const [resultado, setResultado] = useState(null)
+  const [indicadoresDatos, setIndicadoresDatos] = useState(null)
   const [cargando, setCargando] = useState(false)
   const [error, setError] = useState(null)
 
   useEffect(() => {
     async function cargarCatalogos() {
       try {
-        const [boticasData, productosData] = await Promise.all([
+        const [boticasData, productosData, ventasData] = await Promise.all([
           listarBoticas({ activas: true }),
           obtenerProductos({ activos: true }),
+          listarVentasHistoricasImportadas({ limite: 1000 }),
         ])
         setBoticas(boticasData.filter(b => b.tipo === 'botica'))
         setProductos(productosData)
         setBoticaId(boticasData.find(b => b.tipo === 'botica')?.id || '')
         setProductoId(productosData[0]?.id || '')
+        setIndicadoresDatos({
+          seriesDisponibles: new Set((ventasData.datos || []).map(v => `${v.botica_id}-${v.producto_id}`)).size,
+          semanasHistoricas: new Set((ventasData.datos || []).map(v => v.fecha_venta?.slice(0, 7)).filter(Boolean)).size,
+          categorias: new Set(productosData.map(p => p.categoriaTerapeuticaId || p.categoriaTerapeuticaNombre || p.clasificacion).filter(Boolean)).size,
+          productosSinCategoria: productosData.filter(p => !p.categoriaTerapeuticaId && !p.categoriaTerapeuticaNombre && !p.clasificacion).length,
+          boticasConVentas: new Set((ventasData.datos || []).map(v => v.botica_id).filter(Boolean)).size,
+        })
       } catch (err) {
         setError(err.message)
       }
@@ -62,7 +68,6 @@ export default function PaginaPredicciones() {
 
   const producto = productos.find(p => p.id === productoId)
   const botica = boticas.find(b => b.id === boticaId)
-  const activo = principalActivo(producto)
 
   const datosGrafica = useMemo(() => (
     resultado?.predicciones?.map((p, index) => ({
@@ -105,50 +110,30 @@ export default function PaginaPredicciones() {
         <p className="text-cuerpo text-secundario">Predicción local con FastAPI y datos reales de Supabase</p>
       </div>
 
-      {estadoML.cargando && <Alerta tipo="info" titulo="Validando servicio ML" mensaje="Consultando estado del modelo predictivo." />}
       {!estadoML.cargando && !estadoML.disponible && <Alerta tipo="error" titulo="API ML no disponible" mensaje={estadoML.error} />}
-      {estadoML.disponible && (
-        <Alerta tipo={estadoML.modo === 'SUPABASE' ? 'exito' : 'advertencia'} titulo={`Modelo ${estadoML.modeloCargado ? 'cargado' : 'no cargado'}`} mensaje={`Modo: ${estadoML.modo || 'desconocido'} · Versión: ${estadoML.version || 'sin versión'}`} />
-      )}
       {error && <Alerta tipo="error" titulo="No fue posible completar la operación" mensaje={error} alCerrar={() => setError(null)} />}
 
-      <Tarjeta titulo="Filtros de predicción">
-        <div className="grid gap-4 md:grid-cols-4">
-          <label className="flex flex-col gap-1.5">
-            <span className="text-etiqueta font-medium text-principal">Botica</span>
-            <select value={boticaId} onChange={e => setBoticaId(e.target.value)} className="px-3 py-2 text-cuerpo bg-fondo border border-estilo rounded-md">
-              {boticas.map(b => <option key={b.id} value={b.id}>{b.nombre}</option>)}
-            </select>
-          </label>
-          <label className="flex flex-col gap-1.5 md:col-span-2">
-            <span className="text-etiqueta font-medium text-principal">Producto</span>
-            <select value={productoId} onChange={e => setProductoId(e.target.value)} className="px-3 py-2 text-cuerpo bg-fondo border border-estilo rounded-md">
-              {productos.map(p => <option key={p.id} value={p.id}>{p.nombreComercial}</option>)}
-            </select>
-          </label>
-          <label className="flex flex-col gap-1.5">
-            <span className="text-etiqueta font-medium text-principal">Horizonte</span>
-            <select value={horizonte} onChange={e => setHorizonte(e.target.value)} className="px-3 py-2 text-cuerpo bg-fondo border border-estilo rounded-md">
-              {HORIZONTES.map(h => <option key={h} value={h}>{h} semanas</option>)}
-            </select>
-          </label>
-        </div>
-      </Tarjeta>
+      <div className="flex flex-wrap gap-4">
+        <select value={boticaId} onChange={e => setBoticaId(e.target.value)} className="px-3 py-2 text-cuerpo bg-fondo border border-estilo rounded-md">
+          {boticas.map(b => <option key={b.id} value={b.id}>{b.nombre}</option>)}
+        </select>
+        <select value={productoId} onChange={e => setProductoId(e.target.value)} className="px-3 py-2 text-cuerpo bg-fondo border border-estilo rounded-md min-w-72">
+          {productos.map(p => <option key={p.id} value={p.id}>{p.nombreComercial}</option>)}
+        </select>
+        <select value={horizonte} onChange={e => setHorizonte(e.target.value)} className="px-3 py-2 text-cuerpo bg-fondo border border-estilo rounded-md">
+          {HORIZONTES.map(h => <option key={h} value={h}>{h} semanas</option>)}
+        </select>
+        <Boton onClick={generar} cargando={cargando} deshabilitado={!boticaId || !productoId || !estadoML.disponible}>Generar predicción</Boton>
+      </div>
 
-      <Tarjeta titulo="Información previa">
-        <div className="grid gap-3 md:grid-cols-3">
-          <div><p className="text-etiqueta text-secundario">Semanas de historial</p><p className="font-semibold text-principal">{madurez?.semanas_historial ?? 'Sin calcular'}</p></div>
-          <div><p className="text-etiqueta text-secundario">Nivel de madurez</p><p className="font-semibold text-principal">{madurez?.nivel_madurez || 'Sin calcular'}</p></div>
-          <div><p className="text-etiqueta text-secundario">Estrategia estimada</p><p className="font-semibold text-principal">{madurez?.estrategia_disponible || 'Sin calcular'}</p></div>
-          <div><p className="text-etiqueta text-secundario">Principio activo principal</p><p className="font-semibold text-principal">{activo?.principioActivoNombre || 'SIN CLASIFICAR'}</p></div>
-          <div><p className="text-etiqueta text-secundario">Categoría terapéutica</p><p className="font-semibold text-principal">{producto?.clasificacion || 'SIN CLASIFICAR'}</p></div>
-          <div><p className="text-etiqueta text-secundario">Código ATC</p><p className="font-semibold text-principal">{activo?.codigoAtc || 'SIN CLASIFICAR'}</p></div>
-        </div>
-        {!activo?.codigoAtc && <Alerta tipo="advertencia" titulo="Producto sin ATC" mensaje="La predicción puede generarse, pero el producto no tiene código ATC clasificado." className="mt-4" />}
-        <div className="mt-4">
-          <Boton onClick={generar} cargando={cargando} deshabilitado={!boticaId || !productoId || !estadoML.disponible}>Generar predicción</Boton>
-        </div>
-      </Tarjeta>
+      <div className="grid gap-3 md:grid-cols-3">
+        <div><p className="text-etiqueta text-secundario">Series disponibles</p><p className="font-semibold text-principal">{indicadoresDatos?.seriesDisponibles ?? '-'}</p></div>
+        <div><p className="text-etiqueta text-secundario">Semanas históricas</p><p className="font-semibold text-principal">{indicadoresDatos?.semanasHistoricas ?? '-'}</p></div>
+        <div><p className="text-etiqueta text-secundario">Boticas con ventas</p><p className="font-semibold text-principal">{indicadoresDatos?.boticasConVentas ?? '-'}</p></div>
+        <div><p className="text-etiqueta text-secundario">Semanas de historial</p><p className="font-semibold text-principal">{madurez?.semanas_historial ?? 'Sin calcular'}</p></div>
+        <div><p className="text-etiqueta text-secundario">Nivel de madurez</p><p className="font-semibold text-principal">{madurez?.nivel_madurez || 'Sin calcular'}</p></div>
+        <div><p className="text-etiqueta text-secundario">Estrategia estimada</p><p className="font-semibold text-principal">{madurez?.estrategia_disponible || 'Sin calcular'}</p></div>
+      </div>
 
       {resultado && (
         <>
@@ -161,9 +146,7 @@ export default function PaginaPredicciones() {
             </div>
             <GraficaArea datos={datosGrafica} altura={320} />
           </Tarjeta>
-          <Tarjeta titulo="Detalle semanal">
-            <Tabla columnas={columnas} datos={filas} busqueda={false} paginacion={false} />
-          </Tarjeta>
+          <Tabla columnas={columnas} datos={filas} busqueda={false} paginacion={false} />
         </>
       )}
     </div>

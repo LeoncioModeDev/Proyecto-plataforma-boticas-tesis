@@ -47,6 +47,7 @@ import PaginaBoticas from '@/pages/central-portal/administration-module/PaginaBo
 import PaginaConfiguracionGeneral from '@/pages/central-portal/administration-module/PaginaConfiguracionGeneral'
 import PaginaConfiguracionAvanzada from '@/pages/central-portal/administration-module/PaginaConfiguracionAvanzada'
 import PaginaImportacionDatos from '@/pages/central-portal/administration-module/PaginaImportacionDatos'
+import PaginaCategoriasTerapeuticas from '@/pages/central-portal/administration-module/PaginaCategoriasTerapeuticas'
 import PaginaAuditoria from '@/pages/central-portal/administration-module/PaginaAuditoria'
 import PaginaNuevaBotica from '@/pages/central-portal/administration-module/new/PaginaNuevaBotica'
 import PaginaEditarBotica from '@/pages/central-portal/administration-module/edit/PaginaEditarBotica'
@@ -103,6 +104,9 @@ import PaginaPredicciones from '@/pages/ml-panel/PaginaPredicciones'
 import PaginaAlertas from '@/pages/ml-panel/PaginaAlertas'
 import PaginaRecomendaciones from '@/pages/ml-panel/PaginaRecomendaciones'
 import PaginaMonitoreoML from '@/pages/ml-panel/PaginaMonitoreoML'
+import PaginaPrecios from '@/pages/shared/validation-module/PaginaPrecios'
+import PaginaVentasHistoricas from '@/pages/shared/validation-module/PaginaVentasHistoricas'
+import PaginaStockHistorico from '@/pages/shared/validation-module/PaginaStockHistorico'
 
 function LayoutPrincipal() {
   const { colapsada } = useBarraLateral()
@@ -164,6 +168,9 @@ export default function Rutas() {
         <Route path="/central/inventario/catalogo/:id" element={<DetalleProducto />} />
         <Route path="/central/inventario/catalogo/:id/editar" element={<FormularioProducto />} />
         <Route path="/central/inventario/stock" element={<PaginaStock />} />
+        <Route path="/central/inventario/precios" element={<PaginaPrecios />} />
+        <Route path="/central/inventario/stock-historico" element={<PaginaStockHistorico />} />
+        <Route path="/central/inventario/categorias-terapeuticas" element={<PaginaCategoriasTerapeuticas />} />
         <Route path="/central/inventario/lotes" element={<PaginaLotes />} />
 
         <Route path="/central/inventario/movimientos" element={<PaginaMovimientos />} />
@@ -194,7 +201,9 @@ export default function Rutas() {
         <Route path="/central/administracion/boticas/:id" element={<PaginaEditarBotica />} />
         <Route path="/central/administracion/configuracion" element={<PaginaConfiguracionGeneral />} />
         <Route path="/central/administracion/configuracion-avanzada" element={<PaginaConfiguracionAvanzada />} />
+        <Route path="/central/administracion/categorias-terapeuticas" element={<Navigate to="/central/inventario/categorias-terapeuticas" replace />} />
         <Route path="/central/administracion/importacion-datos" element={<PaginaImportacionDatos />} />
+        <Route path="/central/administracion/ventas-historicas" element={<PaginaVentasHistoricas />} />
         <Route path="/central/administracion/auditoria" element={<PaginaAuditoria />} />
       </Route>
 
@@ -205,6 +214,9 @@ export default function Rutas() {
         </RutaProtegida>
       }>
         <Route path="/botica/stock" element={<PaginaStockBotica />} />
+        <Route path="/botica/precios" element={<PaginaPrecios />} />
+        <Route path="/botica/stock-historico" element={<PaginaStockHistorico />} />
+        <Route path="/botica/ventas-historicas" element={<PaginaVentasHistoricas />} />
         <Route path="/botica/lotes" element={<PaginaLotesBotica />} />
         <Route path="/botica/movimientos" element={<PaginaMovimientosBotica />} />
         <Route path="/botica/dashboard" element={<PaginaDashboardBotica />} />
@@ -226,6 +238,8 @@ export default function Rutas() {
         <Route path="/operaciones/inventario/catalogo/:id" element={<DetalleProductoOperaciones />} />
         <Route path="/operaciones/inventario/catalogo/:id/editar" element={<FormularioProductoOperaciones />} />
         <Route path="/operaciones/inventario/stock" element={<PaginaStockOperaciones />} />
+        <Route path="/operaciones/inventario/precios" element={<PaginaPrecios />} />
+        <Route path="/operaciones/inventario/stock-historico" element={<PaginaStockHistorico />} />
         <Route path="/operaciones/inventario/lotes" element={<PaginaLotesOperaciones />} />
 
         <Route path="/operaciones/inventario/movimientos" element={<PaginaMovimientosOperaciones />} />
@@ -248,6 +262,7 @@ export default function Rutas() {
         <Route path="/operaciones/ordenes-compra/:id/recibir" element={<PaginaRecepcionOrdenOperaciones />} />
         <Route path="/operaciones/recepciones" element={<PaginaRecepcionesOperaciones />} />
         <Route path="/operaciones/recepciones/:id" element={<DetalleRecepcionOperaciones />} />
+        <Route path="/operaciones/administracion/ventas-historicas" element={<PaginaVentasHistoricas />} />
         <Route path="/operaciones/alertas" element={<PaginaAlertasOperaciones />} />
         <Route path="/operaciones/ml/predicciones" element={<PaginaPrediccionesOperaciones />} />
         <Route path="/operaciones/ml/alertas-demanda" element={<PaginaAlertasDemandaOperaciones />} />
@@ -263,6 +278,7 @@ export default function Rutas() {
         <Route path="/ml/alertas" element={<PaginaAlertas />} />
         <Route path="/ml/recomendaciones" element={<PaginaRecomendaciones />} />
         <Route path="/ml/monitoreo" element={<PaginaMonitoreoML />} />
+        <Route path="/ml/madurez-series" element={<PaginaMonitoreoML />} />
       </Route>
 
       {/* Portal SaaS (solo SUPER_ADMIN) */}

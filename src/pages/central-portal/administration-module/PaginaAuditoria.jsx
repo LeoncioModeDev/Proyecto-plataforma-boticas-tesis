@@ -154,21 +154,21 @@ export default function PaginaAuditoria() {
     <div className="space-y-6">
       <div>
         <h1 className="text-h1 text-principal">Logs y Auditoría</h1>
-        <p className="text-cuerpo text-secundario mt-1">Historial de actividades, cambios y eventos del sistema</p>
+        <p className="text-secundario mt-1">{total} registros encontrados</p>
       </div>
 
-      <div className="flex flex-col sm:flex-row gap-4">
+      <div className="flex flex-wrap gap-4">
         <input
           type="text"
           placeholder="Buscar por usuario, acción, entidad..."
           value={busqueda}
           onChange={e => setBusqueda(e.target.value)}
-          className="flex-1 px-4 py-2 border border-estilo rounded-md text-cuerpo bg-fondo-secundario focus:outline-none focus:ring-2 focus:ring-marca-principal"
+          className="min-w-72 px-3 py-2 border border-estilo rounded-md text-cuerpo bg-fondo"
         />
         <select
           value={filtroNivel}
           onChange={e => setFiltroNivel(e.target.value)}
-          className="px-4 py-2 border border-estilo rounded-md text-cuerpo bg-fondo-secundario"
+          className="px-3 py-2 border border-estilo rounded-md text-cuerpo bg-fondo"
         >
           <option value="">Todos los niveles</option>
           {OPCIONES_NIVEL.map(op => (
@@ -178,7 +178,7 @@ export default function PaginaAuditoria() {
         <select
           value={filtroAccion}
           onChange={e => setFiltroAccion(e.target.value)}
-          className="px-4 py-2 border border-estilo rounded-md text-cuerpo bg-fondo-secundario"
+          className="px-3 py-2 border border-estilo rounded-md text-cuerpo bg-fondo"
         >
           <option value="">Todas las acciones</option>
           {ACCIONES_AUDITORIA.map(a => (

@@ -1,0 +1,7 @@
+{
+  "reporte": "productos_sin_categoria",
+  "estado": "pendiente_de_ejecucion_en_supabase",
+  "consulta": "select id, org_id, codigo_interno, nombre_comercial from public.productos where estado = 'activo' and categoria_terapeutica_id is null order by org_id, codigo_interno;",
+  "criterio": "No se eliminan productos existentes. La columna categoria_terapeutica_id queda nullable para migracion segura y se permite asignacion manual o por importacion usando codigo_interno.",
+  "bloqueo_ml_recomendado": "No ejecutar entrenamiento productivo desde Supabase si esta consulta devuelve productos activos usados por ventas historicas."
+}

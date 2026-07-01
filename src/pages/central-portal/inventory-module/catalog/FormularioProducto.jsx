@@ -14,6 +14,7 @@ import { OPCIONES_CLASIFICACION } from '@/constants/clasificacionProducto'
 import { OPCIONES_ESTADO } from '@/constants/estadoProducto'
 import { crearProducto, actualizarProducto, obtenerProductoPorId } from '@/services/supabase/productos'
 import { obtenerOpcionesFormasFarmaceuticas, obtenerOpcionesPrincipiosActivos, obtenerOpcionesUnidadesMedida } from '@/services/supabase/catalogo'
+import { listarCategoriasTerapeuticas } from '@/services/supabase/categoriasTerapeuticas'
 
 export default function FormularioProducto({ productoEditar }) {
   const navegar = useNavigate()
@@ -21,6 +22,7 @@ export default function FormularioProducto({ productoEditar }) {
   const [cargando, setCargando] = useState(!!id && !productoEditar)
   const [error, setError] = useState(null)
   const [opcionesFormas, setOpcionesFormas] = useState([])
+  const [opcionesCategorias, setOpcionesCategorias] = useState([])
   const [opcionesPrincipios, setOpcionesPrincipios] = useState([])
   const [opcionesUnidades, setOpcionesUnidades] = useState([])
   const esEdicion = !!(id || productoEditar)
@@ -29,6 +31,7 @@ export default function FormularioProducto({ productoEditar }) {
     resolver: zodResolver(productoEsquema),
     defaultValues: {
       nombreComercial: '',
+      categoriaTerapeuticaId: '',
       formaFarmaceuticaId: '',
       presentacion: '',
       clasificacion: '',
@@ -45,12 +48,14 @@ export default function FormularioProducto({ productoEditar }) {
   useEffect(() => {
     async function cargarCatalogos() {
       try {
-        const [formas, principios, unidades] = await Promise.all([
+        const [formas, principios, unidades, categorias] = await Promise.all([
           obtenerOpcionesFormasFarmaceuticas(),
           obtenerOpcionesPrincipiosActivos(),
           obtenerOpcionesUnidadesMedida(),
+          listarCategoriasTerapeuticas({ activo: true }),
         ])
         setOpcionesFormas(formas)
+        setOpcionesCategorias(categorias.map(c => ({ valor: c.id, etiqueta: `${c.codigo} — ${c.nombre}` })))
         setOpcionesPrincipios(principios)
         setOpcionesUnidades(unidades)
       } catch (err) {
@@ -70,6 +75,7 @@ export default function FormularioProducto({ productoEditar }) {
         if (!datos) throw new Error('Producto no encontrado')
 
         setValue('nombreComercial', datos.nombreComercial)
+        setValue('categoriaTerapeuticaId', datos.categoriaTerapeuticaId || '')
         setValue('formaFarmaceuticaId', datos.formaFarmaceuticaId || '')
         setValue('presentacion', datos.presentacion || '')
         setValue('clasificacion', datos.clasificacion)
@@ -133,6 +139,7 @@ export default function FormularioProducto({ productoEditar }) {
   const limpiar = () => {
     replace([])
     setValue('nombreComercial', '')
+    setValue('categoriaTerapeuticaId', '')
     setValue('formaFarmaceuticaId', '')
     setValue('presentacion', '')
     setValue('clasificacion', '')
@@ -152,6 +159,7 @@ export default function FormularioProducto({ productoEditar }) {
       <Tarjeta>
         <form onSubmit={handleSubmit(alEnviar)} className="space-y-5">
           <CampoTexto nombre="nombreComercial" etiqueta="Nombre Comercial" requerido register={register} error={errors.nombreComercial?.message} placeholder="Ingrese el nombre comercial" />
+          <CampoSeleccion nombre="categoriaTerapeuticaId" etiqueta="Categoría terapéutica" opciones={opcionesCategorias} requerido register={register} error={errors.categoriaTerapeuticaId?.message} placeholder="Seleccione la categoría" />
 
           <CampoSeleccionMultiple
             nombre="principiosActivos"

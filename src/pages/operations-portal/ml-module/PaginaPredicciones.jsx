@@ -22,6 +22,15 @@ export default function PaginaPredicciones() {
       <h1 className="text-h1 text-principal">Predicciones de Demanda</h1>
       <p className="text-secundario">Pronósticos del modelo ML para toda la red</p>
 
+      <Tarjeta titulo="Datos requeridos para ejecutar el modelo" descripcion="Valide las vistas de importacion antes de usar predicciones. Este modulo no edita datos maestros.">
+        <div className="grid gap-3 md:grid-cols-4 text-sm text-principal">
+          <div className="rounded-lg border border-estilo bg-fondo p-3">Productos categorizados</div>
+          <div className="rounded-lg border border-estilo bg-fondo p-3">Ventas historicas</div>
+          <div className="rounded-lg border border-estilo bg-fondo p-3">Stock historico o stock actual</div>
+          <div className="rounded-lg border border-estilo bg-fondo p-3">Proveedor-producto con lead time</div>
+        </div>
+      </Tarjeta>
+
       <div className="flex gap-4 items-end">
         <div className="flex flex-col gap-1.5">
           <label className="text-etiqueta font-medium text-principal">Producto</label>

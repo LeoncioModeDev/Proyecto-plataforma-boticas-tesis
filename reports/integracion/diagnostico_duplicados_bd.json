@@ -1,0 +1,44 @@
+{
+  "generado_en": "2026-06-29T20:20:29.220Z",
+  "fuente": "supabase_remoto",
+  "nota": "Diagnostico previo a migracion 36. No consolida ni elimina registros.",
+  "resumen": {
+    "tablas_diagnosticadas": 6,
+    "grupos_duplicados": 0,
+    "requiere_revision_manual": false
+  },
+  "resumen_por_tabla": {
+    "proveedor_producto": {
+      "filas_diagnosticadas": 10,
+      "grupos_duplicados": 0,
+      "registros_en_duplicados": 0
+    },
+    "stock_ubicaciones": {
+      "filas_diagnosticadas": 22,
+      "grupos_duplicados": 0,
+      "registros_en_duplicados": 0
+    },
+    "stock_historico": {
+      "filas_diagnosticadas": 0,
+      "grupos_duplicados": 0,
+      "registros_en_duplicados": 0
+    },
+    "lotes": {
+      "filas_diagnosticadas": 42,
+      "grupos_duplicados": 0,
+      "registros_en_duplicados": 0
+    },
+    "predicciones_ml": {
+      "filas_diagnosticadas": 0,
+      "grupos_duplicados": 0,
+      "registros_en_duplicados": 0
+    },
+    "inferencias": {
+      "filas_diagnosticadas": 0,
+      "grupos_duplicados": 0,
+      "registros_en_duplicados": 0
+    }
+  },
+  "duplicados": [],
+  "errores_consulta": []
+}

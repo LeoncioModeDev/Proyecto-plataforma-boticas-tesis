@@ -1,0 +1,820 @@
+{
+  "generado_en": "2026-07-01T04:41:09.867Z",
+  "total_codigos_paquete": 30,
+  "productos_encontrados": 90,
+  "productos_no_importados": 0,
+  "productos_incompletos": 0,
+  "productos_duplicados": 90,
+  "resultados": [
+    {
+      "codigo_interno": "SKU-001",
+      "producto_id": "a81c0a02-3267-4a29-a5cc-cb0949290db6",
+      "categoria_asignada": true,
+      "principios_activos_asociados": 0,
+      "fila_origen": 2,
+      "estado": "duplicado",
+      "accion_aplicada": "diagnostico_sin_cambios"
+    },
+    {
+      "codigo_interno": "SKU-001",
+      "producto_id": "82b5525b-9a34-44f8-bac7-2b85cc420d2d",
+      "categoria_asignada": true,
+      "principios_activos_asociados": 0,
+      "fila_origen": 2,
+      "estado": "duplicado",
+      "accion_aplicada": "diagnostico_sin_cambios"
+    },
+    {
+      "codigo_interno": "SKU-001",
+      "producto_id": "0583cf1d-8a6e-4e77-b697-15dc259f1308",
+      "categoria_asignada": true,
+      "principios_activos_asociados": 0,
+      "fila_origen": 2,
+      "estado": "duplicado",
+      "accion_aplicada": "diagnostico_sin_cambios"
+    },
+    {
+      "codigo_interno": "SKU-002",
+      "producto_id": "a490d6e5-24de-4232-aa19-672354b1e84c",
+      "categoria_asignada": true,
+      "principios_activos_asociados": 0,
+      "fila_origen": 3,
+      "estado": "duplicado",
+      "accion_aplicada": "diagnostico_sin_cambios"
+    },
+    {
+      "codigo_interno": "SKU-002",
+      "producto_id": "e4888b4e-182e-4262-abbc-b2db19f9ce54",
+      "categoria_asignada": true,
+      "principios_activos_asociados": 0,
+      "fila_origen": 3,
+      "estado": "duplicado",
+      "accion_aplicada": "diagnostico_sin_cambios"
+    },
+    {
+      "codigo_interno": "SKU-002",
+      "producto_id": "f4104106-4271-4939-a479-fc49aa515010",
+      "categoria_asignada": true,
+      "principios_activos_asociados": 0,
+      "fila_origen": 3,
+      "estado": "duplicado",
+      "accion_aplicada": "diagnostico_sin_cambios"
+    },
+    {
+      "codigo_interno": "SKU-003",
+      "producto_id": "7010a9ac-cca1-41c6-a303-3f866cd1a94b",
+      "categoria_asignada": true,
+      "principios_activos_asociados": 0,
+      "fila_origen": 4,
+      "estado": "duplicado",
+      "accion_aplicada": "diagnostico_sin_cambios"
+    },
+    {
+      "codigo_interno": "SKU-003",
+      "producto_id": "31659821-e49d-48dd-b867-b3eaffe33e21",
+      "categoria_asignada": true,
+      "principios_activos_asociados": 0,
+      "fila_origen": 4,
+      "estado": "duplicado",
+      "accion_aplicada": "diagnostico_sin_cambios"
+    },
+    {
+      "codigo_interno": "SKU-003",
+      "producto_id": "95e3dbac-5f10-4af3-9fc1-74a20f9061e1",
+      "categoria_asignada": true,
+      "principios_activos_asociados": 0,
+      "fila_origen": 4,
+      "estado": "duplicado",
+      "accion_aplicada": "diagnostico_sin_cambios"
+    },
+    {
+      "codigo_interno": "SKU-004",
+      "producto_id": "8d044c5f-6089-4ce0-bfce-d26f88f5c9c3",
+      "categoria_asignada": true,
+      "principios_activos_asociados": 0,
+      "fila_origen": 5,
+      "estado": "duplicado",
+      "accion_aplicada": "diagnostico_sin_cambios"
+    },
+    {
+      "codigo_interno": "SKU-004",
+      "producto_id": "3730a2f0-49f2-41f8-a572-f85f9069ec48",
+      "categoria_asignada": true,
+      "principios_activos_asociados": 0,
+      "fila_origen": 5,
+      "estado": "duplicado",
+      "accion_aplicada": "diagnostico_sin_cambios"
+    },
+    {
+      "codigo_interno": "SKU-004",
+      "producto_id": "a035017d-0cbb-45b7-ac94-591f4e14f0ec",
+      "categoria_asignada": true,
+      "principios_activos_asociados": 0,
+      "fila_origen": 5,
+      "estado": "duplicado",
+      "accion_aplicada": "diagnostico_sin_cambios"
+    },
+    {
+      "codigo_interno": "SKU-005",
+      "producto_id": "8fcd2679-bb90-44a6-a10f-29ae8491cc43",
+      "categoria_asignada": true,
+      "principios_activos_asociados": 0,
+      "fila_origen": 6,
+      "estado": "duplicado",
+      "accion_aplicada": "diagnostico_sin_cambios"
+    },
+    {
+      "codigo_interno": "SKU-005",
+      "producto_id": "9303f9e5-7e3b-4caa-9097-2f2c7c79a96c",
+      "categoria_asignada": true,
+      "principios_activos_asociados": 0,
+      "fila_origen": 6,
+      "estado": "duplicado",
+      "accion_aplicada": "diagnostico_sin_cambios"
+    },
+    {
+      "codigo_interno": "SKU-005",
+      "producto_id": "cb90f0b2-43b7-403e-ba6a-d9fbfc556c4a",
+      "categoria_asignada": true,
+      "principios_activos_asociados": 0,
+      "fila_origen": 6,
+      "estado": "duplicado",
+      "accion_aplicada": "diagnostico_sin_cambios"
+    },
+    {
+      "codigo_interno": "SKU-006",
+      "producto_id": "46148ef2-4fa2-413b-9252-8bc5de7704f4",
+      "categoria_asignada": true,
+      "principios_activos_asociados": 0,
+      "fila_origen": 7,
+      "estado": "duplicado",
+      "accion_aplicada": "diagnostico_sin_cambios"
+    },
+    {
+      "codigo_interno": "SKU-006",
+      "producto_id": "8f1736e9-7eab-401c-bdfb-25ab5418e546",
+      "categoria_asignada": true,
+      "principios_activos_asociados": 0,
+      "fila_origen": 7,
+      "estado": "duplicado",
+      "accion_aplicada": "diagnostico_sin_cambios"
+    },
+    {
+      "codigo_interno": "SKU-006",
+      "producto_id": "61d17908-f6cb-48c9-bf44-3bf854e0d46e",
+      "categoria_asignada": true,
+      "principios_activos_asociados": 0,
+      "fila_origen": 7,
+      "estado": "duplicado",
+      "accion_aplicada": "diagnostico_sin_cambios"
+    },
+    {
+      "codigo_interno": "SKU-007",
+      "producto_id": "8837f069-0538-41b4-8498-20765203c4d4",
+      "categoria_asignada": true,
+      "principios_activos_asociados": 0,
+      "fila_origen": 8,
+      "estado": "duplicado",
+      "accion_aplicada": "diagnostico_sin_cambios"
+    },
+    {
+      "codigo_interno": "SKU-007",
+      "producto_id": "9e3cf950-099e-4070-b02e-68f93bd40ebd",
+      "categoria_asignada": true,
+      "principios_activos_asociados": 0,
+      "fila_origen": 8,
+      "estado": "duplicado",
+      "accion_aplicada": "diagnostico_sin_cambios"
+    },
+    {
+      "codigo_interno": "SKU-007",
+      "producto_id": "e4971a49-e03d-4656-ab9e-be83a651832a",
+      "categoria_asignada": true,
+      "principios_activos_asociados": 0,
+      "fila_origen": 8,
+      "estado": "duplicado",
+      "accion_aplicada": "diagnostico_sin_cambios"
+    },
+    {
+      "codigo_interno": "SKU-008",
+      "producto_id": "c1dbafb6-db0c-4307-af32-3c0dfca7a514",
+      "categoria_asignada": true,
+      "principios_activos_asociados": 0,
+      "fila_origen": 9,
+      "estado": "duplicado",
+      "accion_aplicada": "diagnostico_sin_cambios"
+    },
+    {
+      "codigo_interno": "SKU-008",
+      "producto_id": "f86e008c-a780-4ee0-9683-8a8be012c312",
+      "categoria_asignada": true,
+      "principios_activos_asociados": 0,
+      "fila_origen": 9,
+      "estado": "duplicado",
+      "accion_aplicada": "diagnostico_sin_cambios"
+    },
+    {
+      "codigo_interno": "SKU-008",
+      "producto_id": "03148f53-1cb5-4561-81c8-da1f285030b6",
+      "categoria_asignada": true,
+      "principios_activos_asociados": 0,
+      "fila_origen": 9,
+      "estado": "duplicado",
+      "accion_aplicada": "diagnostico_sin_cambios"
+    },
+    {
+      "codigo_interno": "SKU-009",
+      "producto_id": "9592a8b3-6af3-4f89-9cb8-52bf3bee5845",
+      "categoria_asignada": true,
+      "principios_activos_asociados": 0,
+      "fila_origen": 10,
+      "estado": "duplicado",
+      "accion_aplicada": "diagnostico_sin_cambios"
+    },
+    {
+      "codigo_interno": "SKU-009",
+      "producto_id": "f0032327-b985-4265-b39c-f342e14a4f8e",
+      "categoria_asignada": true,
+      "principios_activos_asociados": 0,
+      "fila_origen": 10,
+      "estado": "duplicado",
+      "accion_aplicada": "diagnostico_sin_cambios"
+    },
+    {
+      "codigo_interno": "SKU-009",
+      "producto_id": "20a72841-55d9-42e5-a86d-cc6cf6dfaeca",
+      "categoria_asignada": true,
+      "principios_activos_asociados": 0,
+      "fila_origen": 10,
+      "estado": "duplicado",
+      "accion_aplicada": "diagnostico_sin_cambios"
+    },
+    {
+      "codigo_interno": "SKU-010",
+      "producto_id": "aefa3080-b939-4ae8-b7b1-2331a06b6c88",
+      "categoria_asignada": true,
+      "principios_activos_asociados": 0,
+      "fila_origen": 11,
+      "estado": "duplicado",
+      "accion_aplicada": "diagnostico_sin_cambios"
+    },
+    {
+      "codigo_interno": "SKU-010",
+      "producto_id": "18244a88-95ee-4137-b0af-a5b432cf04ce",
+      "categoria_asignada": true,
+      "principios_activos_asociados": 0,
+      "fila_origen": 11,
+      "estado": "duplicado",
+      "accion_aplicada": "diagnostico_sin_cambios"
+    },
+    {
+      "codigo_interno": "SKU-010",
+      "producto_id": "0c554d6c-eb39-4306-8b11-441d24166313",
+      "categoria_asignada": true,
+      "principios_activos_asociados": 0,
+      "fila_origen": 11,
+      "estado": "duplicado",
+      "accion_aplicada": "diagnostico_sin_cambios"
+    },
+    {
+      "codigo_interno": "SKU-011",
+      "producto_id": "2667e93b-727e-4128-8b9e-2087dfb62140",
+      "categoria_asignada": true,
+      "principios_activos_asociados": 0,
+      "fila_origen": 12,
+      "estado": "duplicado",
+      "accion_aplicada": "diagnostico_sin_cambios"
+    },
+    {
+      "codigo_interno": "SKU-011",
+      "producto_id": "1bba84c1-7527-4b75-8d32-da2bc945238f",
+      "categoria_asignada": true,
+      "principios_activos_asociados": 0,
+      "fila_origen": 12,
+      "estado": "duplicado",
+      "accion_aplicada": "diagnostico_sin_cambios"
+    },
+    {
+      "codigo_interno": "SKU-011",
+      "producto_id": "b1bde2f0-8bec-4fd0-a964-cd1406260654",
+      "categoria_asignada": true,
+      "principios_activos_asociados": 0,
+      "fila_origen": 12,
+      "estado": "duplicado",
+      "accion_aplicada": "diagnostico_sin_cambios"
+    },
+    {
+      "codigo_interno": "SKU-012",
+      "producto_id": "47dbe9e6-6a2c-4556-8a44-e512181c2d62",
+      "categoria_asignada": true,
+      "principios_activos_asociados": 0,
+      "fila_origen": 13,
+      "estado": "duplicado",
+      "accion_aplicada": "diagnostico_sin_cambios"
+    },
+    {
+      "codigo_interno": "SKU-012",
+      "producto_id": "21b6e412-4868-4f61-ad4e-9fd669c26dd7",
+      "categoria_asignada": true,
+      "principios_activos_asociados": 0,
+      "fila_origen": 13,
+      "estado": "duplicado",
+      "accion_aplicada": "diagnostico_sin_cambios"
+    },
+    {
+      "codigo_interno": "SKU-012",
+      "producto_id": "4c3c003a-b6c9-4735-a766-842b68e7c64f",
+      "categoria_asignada": true,
+      "principios_activos_asociados": 0,
+      "fila_origen": 13,
+      "estado": "duplicado",
+      "accion_aplicada": "diagnostico_sin_cambios"
+    },
+    {
+      "codigo_interno": "SKU-013",
+      "producto_id": "899f3fe1-4425-4dc2-9021-2ee3b2c546fc",
+      "categoria_asignada": true,
+      "principios_activos_asociados": 0,
+      "fila_origen": 14,
+      "estado": "duplicado",
+      "accion_aplicada": "diagnostico_sin_cambios"
+    },
+    {
+      "codigo_interno": "SKU-013",
+      "producto_id": "61dd96bf-73fa-47dd-8286-00551cd749d9",
+      "categoria_asignada": true,
+      "principios_activos_asociados": 0,
+      "fila_origen": 14,
+      "estado": "duplicado",
+      "accion_aplicada": "diagnostico_sin_cambios"
+    },
+    {
+      "codigo_interno": "SKU-013",
+      "producto_id": "7a7aa532-b892-4733-bff2-69735690ce8c",
+      "categoria_asignada": true,
+      "principios_activos_asociados": 0,
+      "fila_origen": 14,
+      "estado": "duplicado",
+      "accion_aplicada": "diagnostico_sin_cambios"
+    },
+    {
+      "codigo_interno": "SKU-014",
+      "producto_id": "e41b5c9b-9bb2-4606-b912-40e2f1f61fed",
+      "categoria_asignada": true,
+      "principios_activos_asociados": 0,
+      "fila_origen": 15,
+      "estado": "duplicado",
+      "accion_aplicada": "diagnostico_sin_cambios"
+    },
+    {
+      "codigo_interno": "SKU-014",
+      "producto_id": "613e27ba-635a-4552-89e8-61c57dd97dfe",
+      "categoria_asignada": true,
+      "principios_activos_asociados": 0,
+      "fila_origen": 15,
+      "estado": "duplicado",
+      "accion_aplicada": "diagnostico_sin_cambios"
+    },
+    {
+      "codigo_interno": "SKU-014",
+      "producto_id": "dc440fae-5d42-4f3e-a7f6-f60c0e374ca6",
+      "categoria_asignada": true,
+      "principios_activos_asociados": 0,
+      "fila_origen": 15,
+      "estado": "duplicado",
+      "accion_aplicada": "diagnostico_sin_cambios"
+    },
+    {
+      "codigo_interno": "SKU-015",
+      "producto_id": "219433f7-be51-4f5c-af1e-d6e6cee38e4f",
+      "categoria_asignada": true,
+      "principios_activos_asociados": 0,
+      "fila_origen": 16,
+      "estado": "duplicado",
+      "accion_aplicada": "diagnostico_sin_cambios"
+    },
+    {
+      "codigo_interno": "SKU-015",
+      "producto_id": "fed3f601-02f9-417d-a7d8-3448ef1d61ef",
+      "categoria_asignada": true,
+      "principios_activos_asociados": 0,
+      "fila_origen": 16,
+      "estado": "duplicado",
+      "accion_aplicada": "diagnostico_sin_cambios"
+    },
+    {
+      "codigo_interno": "SKU-015",
+      "producto_id": "e0563760-3d96-405d-8f18-e39b8c19165e",
+      "categoria_asignada": true,
+      "principios_activos_asociados": 0,
+      "fila_origen": 16,
+      "estado": "duplicado",
+      "accion_aplicada": "diagnostico_sin_cambios"
+    },
+    {
+      "codigo_interno": "SKU-016",
+      "producto_id": "7db89ae1-6dd4-4211-8dde-b95ef2c8f426",
+      "categoria_asignada": true,
+      "principios_activos_asociados": 0,
+      "fila_origen": 17,
+      "estado": "duplicado",
+      "accion_aplicada": "diagnostico_sin_cambios"
+    },
+    {
+      "codigo_interno": "SKU-016",
+      "producto_id": "759d2809-746a-4ab5-a3d2-ed4232d4009d",
+      "categoria_asignada": true,
+      "principios_activos_asociados": 0,
+      "fila_origen": 17,
+      "estado": "duplicado",
+      "accion_aplicada": "diagnostico_sin_cambios"
+    },
+    {
+      "codigo_interno": "SKU-016",
+      "producto_id": "178a2d60-dd6b-49c4-a2b2-455652730099",
+      "categoria_asignada": true,
+      "principios_activos_asociados": 0,
+      "fila_origen": 17,
+      "estado": "duplicado",
+      "accion_aplicada": "diagnostico_sin_cambios"
+    },
+    {
+      "codigo_interno": "SKU-017",
+      "producto_id": "9193b30b-6569-4ccb-bbfc-4b10ac81bc13",
+      "categoria_asignada": true,
+      "principios_activos_asociados": 0,
+      "fila_origen": 18,
+      "estado": "duplicado",
+      "accion_aplicada": "diagnostico_sin_cambios"
+    },
+    {
+      "codigo_interno": "SKU-017",
+      "producto_id": "930a0f93-0e69-493c-a949-13bb1dd24ec8",
+      "categoria_asignada": true,
+      "principios_activos_asociados": 0,
+      "fila_origen": 18,
+      "estado": "duplicado",
+      "accion_aplicada": "diagnostico_sin_cambios"
+    },
+    {
+      "codigo_interno": "SKU-017",
+      "producto_id": "608acfdb-c75f-40d7-bee4-cbdc70c9264a",
+      "categoria_asignada": true,
+      "principios_activos_asociados": 0,
+      "fila_origen": 18,
+      "estado": "duplicado",
+      "accion_aplicada": "diagnostico_sin_cambios"
+    },
+    {
+      "codigo_interno": "SKU-018",
+      "producto_id": "ba6de134-1f6e-4874-8190-0fd2ee419244",
+      "categoria_asignada": true,
+      "principios_activos_asociados": 0,
+      "fila_origen": 19,
+      "estado": "duplicado",
+      "accion_aplicada": "diagnostico_sin_cambios"
+    },
+    {
+      "codigo_interno": "SKU-018",
+      "producto_id": "7f8ba1bc-5df2-42bb-bc99-2cf957c9eda3",
+      "categoria_asignada": true,
+      "principios_activos_asociados": 0,
+      "fila_origen": 19,
+      "estado": "duplicado",
+      "accion_aplicada": "diagnostico_sin_cambios"
+    },
+    {
+      "codigo_interno": "SKU-018",
+      "producto_id": "3dfdf24b-3a8b-4067-9906-fe71096eb069",
+      "categoria_asignada": true,
+      "principios_activos_asociados": 0,
+      "fila_origen": 19,
+      "estado": "duplicado",
+      "accion_aplicada": "diagnostico_sin_cambios"
+    },
+    {
+      "codigo_interno": "SKU-019",
+      "producto_id": "195adce8-52d5-4e3f-a320-f1193f439fed",
+      "categoria_asignada": true,
+      "principios_activos_asociados": 0,
+      "fila_origen": 20,
+      "estado": "duplicado",
+      "accion_aplicada": "diagnostico_sin_cambios"
+    },
+    {
+      "codigo_interno": "SKU-019",
+      "producto_id": "629c9f62-febc-4001-a9f6-752fd0fada0e",
+      "categoria_asignada": true,
+      "principios_activos_asociados": 0,
+      "fila_origen": 20,
+      "estado": "duplicado",
+      "accion_aplicada": "diagnostico_sin_cambios"
+    },
+    {
+      "codigo_interno": "SKU-019",
+      "producto_id": "dabcd08b-8642-4cc3-85f7-9e58d857a12f",
+      "categoria_asignada": true,
+      "principios_activos_asociados": 0,
+      "fila_origen": 20,
+      "estado": "duplicado",
+      "accion_aplicada": "diagnostico_sin_cambios"
+    },
+    {
+      "codigo_interno": "SKU-020",
+      "producto_id": "bce87aab-ed12-4438-b7ec-40a6974bcc82",
+      "categoria_asignada": true,
+      "principios_activos_asociados": 0,
+      "fila_origen": 21,
+      "estado": "duplicado",
+      "accion_aplicada": "diagnostico_sin_cambios"
+    },
+    {
+      "codigo_interno": "SKU-020",
+      "producto_id": "d145521c-123a-4a60-929f-ecd287240d42",
+      "categoria_asignada": true,
+      "principios_activos_asociados": 0,
+      "fila_origen": 21,
+      "estado": "duplicado",
+      "accion_aplicada": "diagnostico_sin_cambios"
+    },
+    {
+      "codigo_interno": "SKU-020",
+      "producto_id": "47d6b098-fbf9-4dca-8eb2-815626222dea",
+      "categoria_asignada": true,
+      "principios_activos_asociados": 0,
+      "fila_origen": 21,
+      "estado": "duplicado",
+      "accion_aplicada": "diagnostico_sin_cambios"
+    },
+    {
+      "codigo_interno": "SKU-021",
+      "producto_id": "cdd20f44-4bd3-4df9-b0d6-93a2c28de189",
+      "categoria_asignada": true,
+      "principios_activos_asociados": 0,
+      "fila_origen": 22,
+      "estado": "duplicado",
+      "accion_aplicada": "diagnostico_sin_cambios"
+    },
+    {
+      "codigo_interno": "SKU-021",
+      "producto_id": "4bc7981a-ae4c-4e5c-909c-516e6d6bff29",
+      "categoria_asignada": true,
+      "principios_activos_asociados": 0,
+      "fila_origen": 22,
+      "estado": "duplicado",
+      "accion_aplicada": "diagnostico_sin_cambios"
+    },
+    {
+      "codigo_interno": "SKU-021",
+      "producto_id": "7f6b50d6-4bb4-4228-8901-38d2d7b330de",
+      "categoria_asignada": true,
+      "principios_activos_asociados": 0,
+      "fila_origen": 22,
+      "estado": "duplicado",
+      "accion_aplicada": "diagnostico_sin_cambios"
+    },
+    {
+      "codigo_interno": "SKU-022",
+      "producto_id": "23805743-0fd3-49ad-83a4-c39a76075e2f",
+      "categoria_asignada": true,
+      "principios_activos_asociados": 0,
+      "fila_origen": 23,
+      "estado": "duplicado",
+      "accion_aplicada": "diagnostico_sin_cambios"
+    },
+    {
+      "codigo_interno": "SKU-022",
+      "producto_id": "13c796d7-d633-4237-a3b0-1dc40ddf306e",
+      "categoria_asignada": true,
+      "principios_activos_asociados": 0,
+      "fila_origen": 23,
+      "estado": "duplicado",
+      "accion_aplicada": "diagnostico_sin_cambios"
+    },
+    {
+      "codigo_interno": "SKU-022",
+      "producto_id": "305cefcf-f993-4b6f-a026-ae7bceb6060a",
+      "categoria_asignada": true,
+      "principios_activos_asociados": 0,
+      "fila_origen": 23,
+      "estado": "duplicado",
+      "accion_aplicada": "diagnostico_sin_cambios"
+    },
+    {
+      "codigo_interno": "SKU-023",
+      "producto_id": "08c281e6-ce34-4b7b-bfab-63ea291c9a59",
+      "categoria_asignada": true,
+      "principios_activos_asociados": 0,
+      "fila_origen": 24,
+      "estado": "duplicado",
+      "accion_aplicada": "diagnostico_sin_cambios"
+    },
+    {
+      "codigo_interno": "SKU-023",
+      "producto_id": "55c0dd71-c936-4315-b9f0-ef68ea1ff030",
+      "categoria_asignada": true,
+      "principios_activos_asociados": 0,
+      "fila_origen": 24,
+      "estado": "duplicado",
+      "accion_aplicada": "diagnostico_sin_cambios"
+    },
+    {
+      "codigo_interno": "SKU-023",
+      "producto_id": "4e63f762-5759-4416-ba5a-198b60dbdaa1",
+      "categoria_asignada": true,
+      "principios_activos_asociados": 0,
+      "fila_origen": 24,
+      "estado": "duplicado",
+      "accion_aplicada": "diagnostico_sin_cambios"
+    },
+    {
+      "codigo_interno": "SKU-024",
+      "producto_id": "ef000a45-4aca-4117-8909-33763c5f6116",
+      "categoria_asignada": true,
+      "principios_activos_asociados": 0,
+      "fila_origen": 25,
+      "estado": "duplicado",
+      "accion_aplicada": "diagnostico_sin_cambios"
+    },
+    {
+      "codigo_interno": "SKU-024",
+      "producto_id": "f60e6510-dbe0-46e2-8e27-3ffa1020b316",
+      "categoria_asignada": true,
+      "principios_activos_asociados": 0,
+      "fila_origen": 25,
+      "estado": "duplicado",
+      "accion_aplicada": "diagnostico_sin_cambios"
+    },
+    {
+      "codigo_interno": "SKU-024",
+      "producto_id": "bd822514-429a-45b3-8f0b-2a7e096c455f",
+      "categoria_asignada": true,
+      "principios_activos_asociados": 0,
+      "fila_origen": 25,
+      "estado": "duplicado",
+      "accion_aplicada": "diagnostico_sin_cambios"
+    },
+    {
+      "codigo_interno": "SKU-025",
+      "producto_id": "227073b0-9d9c-4245-a8f8-7d2a3914ab73",
+      "categoria_asignada": true,
+      "principios_activos_asociados": 0,
+      "fila_origen": 26,
+      "estado": "duplicado",
+      "accion_aplicada": "diagnostico_sin_cambios"
+    },
+    {
+      "codigo_interno": "SKU-025",
+      "producto_id": "8f53b8b5-1365-4432-86a3-ccd805f75533",
+      "categoria_asignada": true,
+      "principios_activos_asociados": 0,
+      "fila_origen": 26,
+      "estado": "duplicado",
+      "accion_aplicada": "diagnostico_sin_cambios"
+    },
+    {
+      "codigo_interno": "SKU-025",
+      "producto_id": "d61aadb4-7268-475a-b09d-692ffacdf7aa",
+      "categoria_asignada": true,
+      "principios_activos_asociados": 0,
+      "fila_origen": 26,
+      "estado": "duplicado",
+      "accion_aplicada": "diagnostico_sin_cambios"
+    },
+    {
+      "codigo_interno": "SKU-026",
+      "producto_id": "112cd823-44c4-45aa-b506-be8cb6795e3a",
+      "categoria_asignada": true,
+      "principios_activos_asociados": 0,
+      "fila_origen": 27,
+      "estado": "duplicado",
+      "accion_aplicada": "diagnostico_sin_cambios"
+    },
+    {
+      "codigo_interno": "SKU-026",
+      "producto_id": "c843e019-0d25-466e-a518-21adaa64f2f9",
+      "categoria_asignada": true,
+      "principios_activos_asociados": 0,
+      "fila_origen": 27,
+      "estado": "duplicado",
+      "accion_aplicada": "diagnostico_sin_cambios"
+    },
+    {
+      "codigo_interno": "SKU-026",
+      "producto_id": "b5554378-57c6-474b-a102-010fd6bc1430",
+      "categoria_asignada": true,
+      "principios_activos_asociados": 0,
+      "fila_origen": 27,
+      "estado": "duplicado",
+      "accion_aplicada": "diagnostico_sin_cambios"
+    },
+    {
+      "codigo_interno": "SKU-027",
+      "producto_id": "d881379f-1e0a-4dd1-b1f4-96f01858a4b9",
+      "categoria_asignada": true,
+      "principios_activos_asociados": 0,
+      "fila_origen": 28,
+      "estado": "duplicado",
+      "accion_aplicada": "diagnostico_sin_cambios"
+    },
+    {
+      "codigo_interno": "SKU-027",
+      "producto_id": "dc37d34f-db0e-4863-a6df-304705ac66a3",
+      "categoria_asignada": true,
+      "principios_activos_asociados": 0,
+      "fila_origen": 28,
+      "estado": "duplicado",
+      "accion_aplicada": "diagnostico_sin_cambios"
+    },
+    {
+      "codigo_interno": "SKU-027",
+      "producto_id": "0f8ec8cb-1e04-4243-bac4-92cf74e2eee3",
+      "categoria_asignada": true,
+      "principios_activos_asociados": 0,
+      "fila_origen": 28,
+      "estado": "duplicado",
+      "accion_aplicada": "diagnostico_sin_cambios"
+    },
+    {
+      "codigo_interno": "SKU-028",
+      "producto_id": "3aca9b4d-46ca-4075-863c-756f46f70e97",
+      "categoria_asignada": true,
+      "principios_activos_asociados": 0,
+      "fila_origen": 29,
+      "estado": "duplicado",
+      "accion_aplicada": "diagnostico_sin_cambios"
+    },
+    {
+      "codigo_interno": "SKU-028",
+      "producto_id": "f4190ef5-eae8-46ea-9b92-0e0ea12c1aa7",
+      "categoria_asignada": true,
+      "principios_activos_asociados": 0,
+      "fila_origen": 29,
+      "estado": "duplicado",
+      "accion_aplicada": "diagnostico_sin_cambios"
+    },
+    {
+      "codigo_interno": "SKU-028",
+      "producto_id": "385d7332-912e-439f-b96a-65dbf46887a8",
+      "categoria_asignada": true,
+      "principios_activos_asociados": 0,
+      "fila_origen": 29,
+      "estado": "duplicado",
+      "accion_aplicada": "diagnostico_sin_cambios"
+    },
+    {
+      "codigo_interno": "SKU-029",
+      "producto_id": "b1c866ad-4e37-42ee-9402-41b22e85832d",
+      "categoria_asignada": true,
+      "principios_activos_asociados": 0,
+      "fila_origen": 30,
+      "estado": "duplicado",
+      "accion_aplicada": "diagnostico_sin_cambios"
+    },
+    {
+      "codigo_interno": "SKU-029",
+      "producto_id": "2a9b1dd3-7207-4ed0-b689-ac154b0413d8",
+      "categoria_asignada": true,
+      "principios_activos_asociados": 0,
+      "fila_origen": 30,
+      "estado": "duplicado",
+      "accion_aplicada": "diagnostico_sin_cambios"
+    },
+    {
+      "codigo_interno": "SKU-029",
+      "producto_id": "0ae115aa-8034-4531-92e7-fb7a64dbfc7b",
+      "categoria_asignada": true,
+      "principios_activos_asociados": 0,
+      "fila_origen": 30,
+      "estado": "duplicado",
+      "accion_aplicada": "diagnostico_sin_cambios"
+    },
+    {
+      "codigo_interno": "SKU-030",
+      "producto_id": "17191ed7-c154-46c3-9c59-d7f5cef139dc",
+      "categoria_asignada": true,
+      "principios_activos_asociados": 0,
+      "fila_origen": 31,
+      "estado": "duplicado",
+      "accion_aplicada": "diagnostico_sin_cambios"
+    },
+    {
+      "codigo_interno": "SKU-030",
+      "producto_id": "87a004d3-f701-426b-95ad-8236635d384e",
+      "categoria_asignada": true,
+      "principios_activos_asociados": 0,
+      "fila_origen": 31,
+      "estado": "duplicado",
+      "accion_aplicada": "diagnostico_sin_cambios"
+    },
+    {
+      "codigo_interno": "SKU-030",
+      "producto_id": "3038ac12-4205-4813-98e8-9c7c3ef525f8",
+      "categoria_asignada": true,
+      "principios_activos_asociados": 0,
+      "fila_origen": 31,
+      "estado": "duplicado",
+      "accion_aplicada": "diagnostico_sin_cambios"
+    }
+  ]
+}
