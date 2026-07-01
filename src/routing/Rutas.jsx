@@ -278,7 +278,6 @@ export default function Rutas() {
         <Route path="/ml/alertas" element={<PaginaAlertas />} />
         <Route path="/ml/recomendaciones" element={<PaginaRecomendaciones />} />
         <Route path="/ml/monitoreo" element={<PaginaMonitoreoML />} />
-        <Route path="/ml/madurez-series" element={<PaginaMonitoreoML />} />
       </Route>
 
       {/* Portal SaaS (solo SUPER_ADMIN) */}

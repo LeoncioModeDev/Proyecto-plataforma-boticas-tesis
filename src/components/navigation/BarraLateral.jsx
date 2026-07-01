@@ -23,7 +23,6 @@ import {
   Building2,
   Activity,
   UserPlus,
-  Tags,
   DollarSign,
   History,
 } from "lucide-react";
@@ -45,47 +44,12 @@ const itemsAdminCentral = [
       icono: Package,
       ruta: "/central/inventario",
       subItems: [
-        {
-          etiqueta: "Productos",
-          ruta: "/central/inventario/catalogo",
-          icono: Package,
-        },
-        {
-          etiqueta: "Categoría",
-          ruta: "/central/inventario/categorias-terapeuticas",
-          icono: Tags,
-        },
-        {
-          etiqueta: "Precios",
-          ruta: "/central/inventario/precios",
-          icono: DollarSign,
-        },
-        {
-          etiqueta: "Stock histórico",
-          ruta: "/central/inventario/stock-historico",
-          icono: History,
-        },
+        { etiqueta: "Productos", ruta: "/central/inventario/catalogo", icono: Package },
         { etiqueta: "Stock actual", ruta: "/central/inventario/stock", icono: Boxes },
-        {
-          etiqueta: "Lotes",
-          ruta: "/central/inventario/lotes",
-          icono: CalendarClock,
-        },
-        {
-          etiqueta: "Movimientos",
-          ruta: "/central/inventario/movimientos",
-          icono: ArrowLeftRight,
-        },
-        {
-          etiqueta: "Ajustes",
-          ruta: "/central/inventario/ajustes",
-          icono: ClipboardList,
-        },
-        {
-          etiqueta: "Reportes",
-          ruta: "/central/inventario/reportes",
-          icono: FileBarChart,
-        },
+        { etiqueta: "Lotes", ruta: "/central/inventario/lotes", icono: CalendarClock },
+        { etiqueta: "Movimientos", ruta: "/central/inventario/movimientos", icono: ArrowLeftRight },
+        { etiqueta: "Ajustes", ruta: "/central/inventario/ajustes", icono: ClipboardList },
+        { etiqueta: "Reportes", ruta: "/central/inventario/reportes", icono: FileBarChart },
       ],
     },
     {
@@ -161,7 +125,17 @@ const itemsAdminCentral = [
           icono: FileBarChart,
         },
         {
-          etiqueta: "Ventas históricas importadas",
+          etiqueta: "Precios importados",
+          ruta: "/central/inventario/precios",
+          icono: DollarSign,
+        },
+        {
+          etiqueta: "Stock histórico importados",
+          ruta: "/central/inventario/stock-historico",
+          icono: History,
+        },
+        {
+          etiqueta: "Ventas históricas",
           ruta: "/central/administracion/ventas-historicas",
           icono: BarChart3,
         },
@@ -190,7 +164,6 @@ const itemsAdminCentral = [
           icono: Lightbulb,
         },
         { etiqueta: "Monitoreo", ruta: "/ml/monitoreo", icono: Activity },
-        { etiqueta: "Madurez de series", ruta: "/ml/madurez-series", icono: History },
       ],
     },
 ]
@@ -230,46 +203,12 @@ const itemsNavegacion = {
       icono: Package,
       ruta: "/operaciones/inventario/catalogo",
       subItems: [
-        {
-          etiqueta: "Productos",
-          ruta: "/operaciones/inventario/catalogo",
-          icono: Package,
-        },
-        {
-          etiqueta: "Precios",
-          ruta: "/operaciones/inventario/precios",
-          icono: DollarSign,
-        },
-        {
-          etiqueta: "Stock histórico",
-          ruta: "/operaciones/inventario/stock-historico",
-          icono: History,
-        },
-        {
-          etiqueta: "Stock actual",
-          ruta: "/operaciones/inventario/stock",
-          icono: Boxes,
-        },
-        {
-          etiqueta: "Lotes",
-          ruta: "/operaciones/inventario/lotes",
-          icono: CalendarClock,
-        },
-        {
-          etiqueta: "Movimientos",
-          ruta: "/operaciones/inventario/movimientos",
-          icono: ArrowLeftRight,
-        },
-        {
-          etiqueta: "Ajustes",
-          ruta: "/operaciones/inventario/ajustes",
-          icono: ClipboardList,
-        },
-        {
-          etiqueta: "Reportes",
-          ruta: "/operaciones/inventario/reportes",
-          icono: FileBarChart,
-        },
+        { etiqueta: "Productos", ruta: "/operaciones/inventario/catalogo", icono: Package },
+        { etiqueta: "Stock actual", ruta: "/operaciones/inventario/stock", icono: Boxes },
+        { etiqueta: "Lotes", ruta: "/operaciones/inventario/lotes", icono: CalendarClock },
+        { etiqueta: "Movimientos", ruta: "/operaciones/inventario/movimientos", icono: ArrowLeftRight },
+        { etiqueta: "Ajustes", ruta: "/operaciones/inventario/ajustes", icono: ClipboardList },
+        { etiqueta: "Reportes", ruta: "/operaciones/inventario/reportes", icono: FileBarChart },
       ],
     },
     {
@@ -320,7 +259,17 @@ const itemsNavegacion = {
       ruta: "/operaciones/administracion/ventas-historicas",
       subItems: [
         {
-          etiqueta: "Ventas históricas importadas",
+          etiqueta: "Precios importados",
+          ruta: "/operaciones/inventario/precios",
+          icono: DollarSign,
+        },
+        {
+          etiqueta: "Stock histórico importados",
+          ruta: "/operaciones/inventario/stock-historico",
+          icono: History,
+        },
+        {
+          etiqueta: "Ventas históricas",
           ruta: "/operaciones/administracion/ventas-historicas",
           icono: BarChart3,
         },
@@ -353,8 +302,8 @@ const itemsNavegacion = {
       icono: LayoutDashboard,
     },
     { etiqueta: "Stock actual", ruta: "/botica/stock", icono: Boxes },
-    { etiqueta: "Precios", ruta: "/botica/precios", icono: DollarSign },
-    { etiqueta: "Stock histórico", ruta: "/botica/stock-historico", icono: History },
+    { etiqueta: "Precios importados", ruta: "/botica/precios", icono: DollarSign },
+    { etiqueta: "Stock histórico importados", ruta: "/botica/stock-historico", icono: History },
     { etiqueta: "Ventas históricas", ruta: "/botica/ventas-historicas", icono: BarChart3 },
     { etiqueta: "Lotes", ruta: "/botica/lotes", icono: CalendarClock },
     {

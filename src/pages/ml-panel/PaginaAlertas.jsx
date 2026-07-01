@@ -1,14 +1,38 @@
-﻿import Insignia from '@/components/common/Insignia'
-import { alertas } from '@/mock-data/alertas'
+﻿import { useEffect } from 'react'
+import Insignia from '@/components/common/Insignia'
+import useAlertas from '@/state/useAlertas'
 import { ETIQUETAS_ALERTA, COLORES_ALERTA } from '@/constants/tiposAlerta'
 import { formatearFechaRelativa } from '@/utilities/formatearFecha'
-import { AlertTriangle, TrendingUp, Clock, BrainCircuit } from 'lucide-react'
+import { AlertTriangle, TrendingUp, Clock, BrainCircuit, Loader2 } from 'lucide-react'
 
 const ICONOS = { quiebre: AlertTriangle, sobrestock: TrendingUp, vencimiento: Clock, prediccion: BrainCircuit }
 
 export default function PaginaAlertas() {
-  const alertasReglas = alertas.filter(a => a.tipo !== 'prediccion')
-  const alertasPredictivas = alertas.filter(a => a.tipo === 'prediccion')
+  const { alertas, cargando, error, cargarAlertas } = useAlertas()
+
+  useEffect(() => { cargarAlertas() }, [cargarAlertas])
+
+  const alertasReglas = alertas.filter(a => a.tipoOrigen === 'regla')
+  const alertasPredictivas = alertas.filter(a => a.tipoOrigen === 'modelo')
+
+  if (cargando) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <Loader2 className="h-8 w-8 animate-spin text-marca-principal" />
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 text-center">
+        <AlertTriangle className="h-10 w-10 text-estado-critico mb-4" />
+        <p className="text-cuerpo text-estado-critico">Error al cargar alertas</p>
+        <p className="text-sm text-secundario mt-1">{error}</p>
+        <button onClick={cargarAlertas} className="mt-4 text-sm text-marca-principal hover:underline">Reintentar</button>
+      </div>
+    )
+  }
 
   const renderAlerta = (alerta) => {
     const Icono = ICONOS[alerta.tipo] || AlertTriangle
@@ -35,10 +59,12 @@ export default function PaginaAlertas() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         <div className="space-y-3 sm:space-y-4">
           <h2 className="text-base sm:text-h3 text-principal font-medium">Alertas por Reglas ({alertasReglas.length})</h2>
+          {alertasReglas.length === 0 && <p className="text-secundario text-sm">Sin alertas por reglas</p>}
           {alertasReglas.map(renderAlerta)}
         </div>
         <div className="space-y-3 sm:space-y-4">
           <h2 className="text-base sm:text-h3 text-principal font-medium">Alertas Predictivas ({alertasPredictivas.length})</h2>
+          {alertasPredictivas.length === 0 && <p className="text-secundario text-sm">Sin alertas predictivas</p>}
           {alertasPredictivas.map(renderAlerta)}
         </div>
       </div>

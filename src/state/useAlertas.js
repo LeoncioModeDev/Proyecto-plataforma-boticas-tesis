@@ -15,8 +15,11 @@ function componerMensaje(alerta) {
 
 const useAlertas = create((set, get) => ({
   alertas: [],
+  cargando: false,
+  error: null,
 
   cargarAlertas: async () => {
+    set({ cargando: true, error: null })
     try {
       const datos = await obtenerAlertas({ soloNoResueltas: true })
       const mapeadas = datos.map(a => ({
@@ -31,9 +34,9 @@ const useAlertas = create((set, get) => ({
         mensaje: componerMensaje(a),
         leida: false,
       }))
-      set({ alertas: mapeadas })
-    } catch {
-      set({ alertas: [] })
+      set({ alertas: mapeadas, cargando: false })
+    } catch (err) {
+      set({ alertas: [], cargando: false, error: err.message })
     }
   },
 

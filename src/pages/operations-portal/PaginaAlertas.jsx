@@ -1,8 +1,8 @@
-import { useState } from 'react'
-import { Bell, AlertTriangle, Info, Eye, CheckCheck } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { Bell, AlertTriangle, Info, Eye, CheckCheck, Loader2 } from 'lucide-react'
 import Insignia from '@/components/common/Insignia'
 import TarjetaMetrica from '@/components/charts/TarjetaMetrica'
-import { alertas } from '@/mock-data/alertas'
+import useAlertas from '@/state/useAlertas'
 import { formatearFechaRelativa } from '@/utilities/formatearFecha'
 
 const COLORES_URGENCIA = { alta: 'rojo', media: 'amarillo', baja: 'gris' }
@@ -10,6 +10,9 @@ const COLORES_URGENCIA = { alta: 'rojo', media: 'amarillo', baja: 'gris' }
 export default function PaginaAlertas() {
   const [filtroUrgencia, setFiltroUrgencia] = useState('')
   const [leidas, setLeidas] = useState({})
+  const { alertas, cargando, error, cargarAlertas } = useAlertas()
+
+  useEffect(() => { cargarAlertas() }, [cargarAlertas])
 
   let datos = [...alertas].sort((a, b) => new Date(b.fechaCreacion) - new Date(a.fechaCreacion))
   if (filtroUrgencia) datos = datos.filter(a => a.urgencia === filtroUrgencia)
@@ -17,6 +20,25 @@ export default function PaginaAlertas() {
   const marcarLeida = (id) => setLeidas(prev => ({ ...prev, [id]: true }))
 
   const noLeidas = datos.filter(a => !leidas[a.id]).length
+
+  if (cargando) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <Loader2 className="h-8 w-8 animate-spin text-marca-principal" />
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 text-center">
+        <AlertTriangle className="h-10 w-10 text-estado-critico mb-4" />
+        <p className="text-cuerpo text-estado-critico">Error al cargar alertas</p>
+        <p className="text-sm text-secundario mt-1">{error}</p>
+        <button onClick={cargarAlertas} className="mt-4 text-sm text-marca-principal hover:underline">Reintentar</button>
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-6">

@@ -1,13 +1,38 @@
+import { useEffect } from 'react'
 import Insignia from '@/components/common/Insignia'
 import useAutenticacion from '@/state/useAutenticacion'
-import { alertas } from '@/mock-data/alertas'
+import useAlertas from '@/state/useAlertas'
 import { formatearFechaRelativa } from '@/utilities/formatearFecha'
 import { COLORES_ALERTA, ETIQUETAS_ALERTA } from '@/constants/tiposAlerta'
-import { filtrarPorBoticaId } from '@/utilities/permisos'
+import { AlertTriangle, Loader2 } from 'lucide-react'
 
 export default function PaginaAlertasBotica() {
   const { usuario } = useAutenticacion()
-  const datos = filtrarPorBoticaId(usuario, alertas, 'boticaId')
+  const { alertas, cargando, error, cargarAlertas } = useAlertas()
+
+  useEffect(() => { cargarAlertas() }, [cargarAlertas])
+
+  if (cargando) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <Loader2 className="h-8 w-8 animate-spin text-marca-principal" />
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 text-center">
+        <AlertTriangle className="h-10 w-10 text-estado-critico mb-4" />
+        <p className="text-cuerpo text-estado-critico">Error al cargar alertas</p>
+        <p className="text-sm text-secundario mt-1">{error}</p>
+        <button onClick={cargarAlertas} className="mt-4 text-sm text-marca-principal hover:underline">Reintentar</button>
+      </div>
+    )
+  }
+
+  const datos = alertas
+    .filter(a => !usuario.boticaId || a.boticaId === usuario.boticaId)
     .sort((a, b) => new Date(b.fechaCreacion) - new Date(a.fechaCreacion))
 
   return (

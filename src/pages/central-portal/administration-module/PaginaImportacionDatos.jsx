@@ -24,7 +24,7 @@ const TIPOS = [
   { id: 'stock_inicial', etiqueta: '7. Stock Inicial', descripcion: 'Requiere productos, boticas y lotes', icono: PackageOpen },
   { id: 'stock_historico', etiqueta: '8. Stock Histórico', descripcion: 'Snapshots semanales oficiales para ML', icono: History },
   { id: 'ventas_historicas', etiqueta: '9. Ventas Históricas', descripcion: 'Requiere productos y boticas', icono: BarChart3 },
-  { id: 'usuarios', etiqueta: '10. Usuarios', descripcion: 'Visores requieren boticas', icono: Users },
+
 ]
 
 const ETIQUETAS_ESTADO = {

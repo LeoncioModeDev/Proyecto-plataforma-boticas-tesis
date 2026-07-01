@@ -65,6 +65,7 @@ export async function crearUsuario(datos) {
     rol: datos.rol,
     botica_id: datos.boticaId || null,
     telefono: datos.telefono || null,
+    contrasena: datos.contrasena,
   })
   return { exito, id }
 }

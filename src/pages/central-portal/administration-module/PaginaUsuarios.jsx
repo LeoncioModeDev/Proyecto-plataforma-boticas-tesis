@@ -50,7 +50,7 @@ const COLORES_ROL = {
 }
 
 function formularioVacio() {
-  return { nombre: '', nombreCuenta: '', rol: '', boticaId: '', telefono: '', activo: true }
+  return { nombre: '', nombreCuenta: '', rol: '', boticaId: '', telefono: '', contrasena: '', activo: true }
 }
 
 export default function PaginaUsuarios() {
@@ -167,6 +167,8 @@ export default function PaginaUsuarios() {
     if (formulario.rol === 'visor_botica' && !formulario.boticaId) return 'Debe seleccionar una botica para el rol Visor'
     if (formulario.rol === 'operador_drogueria' && !drogueria) return 'No hay droguería central disponible en tu organización'
     if (!obtenerDominioCorreo()) return 'Tu organización no tiene un dominio institucional configurado. Contacta al super_admin.'
+    if (!editando && !formulario.contrasena) return 'La contraseña es obligatoria'
+    if (!editando && formulario.contrasena.length < 6) return 'La contraseña debe tener al menos 6 caracteres'
     return null
   }
 
@@ -204,6 +206,7 @@ export default function PaginaUsuarios() {
           rol: formulario.rol,
           boticaId: formulario.rol === 'visor_botica' ? formulario.boticaId : formulario.rol === 'operador_drogueria' ? drogueria?.id : null,
           telefono: formulario.telefono,
+          contrasena: formulario.contrasena,
         })
         const boticaEncontrada = boticas.find(b => b.id === formulario.boticaId)
         const nuevo = {
@@ -397,7 +400,19 @@ export default function PaginaUsuarios() {
               </span>
               <span className="font-medium">{dominio || '— dominio no configurado —'}</span>
             </div>
-            <p className="text-xs text-secundario">El usuario recibirá una invitación por correo para establecer su contraseña.</p>
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <label className="text-sm font-medium text-principal">Contraseña <span className="text-estado-critico">*</span></label>
+            <input
+              type="text"
+              value={formulario.contrasena}
+              onChange={e => setFormulario({ ...formulario, contrasena: e.target.value })}
+              className="px-3 py-2 text-sm bg-fondo border border-estilo rounded-md text-principal focus:outline-none focus:border-marca-principal"
+              placeholder="Contraseña temporal"
+              disabled={!!editando}
+            />
+            <p className="text-xs text-secundario">El usuario usará esta contraseña para iniciar sesión.</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

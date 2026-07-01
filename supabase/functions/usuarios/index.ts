@@ -123,10 +123,14 @@ async function obtenerUsuario(supabase: any, perfil: PerfilUsuario, id: string) 
 }
 
 async function crearUsuario(supabase: any, perfil: PerfilUsuario, body: any) {
-  const { nombre, nombre_cuenta, rol, botica_id, telefono } = body;
+  const { nombre, nombre_cuenta, rol, botica_id, telefono, contrasena } = body;
 
   if (!nombre || !nombre_cuenta || !rol) {
     return json({ error: "Faltan datos obligatorios (nombre, nombre_cuenta, rol)" }, 400);
+  }
+
+  if (!contrasena || contrasena.length < 6) {
+    return json({ error: "La contraseña debe tener al menos 6 caracteres" }, 400);
   }
 
   if (!["admin_central", "operador_drogueria", "visor_botica"].includes(rol)) {
@@ -232,19 +236,19 @@ async function crearUsuario(supabase: any, perfil: PerfilUsuario, body: any) {
     }
   }
 
-  const { data: userData, error: userError } = await supabase.auth.admin.inviteUserByEmail(
+  const { data: userData, error: userError } = await supabase.auth.admin.createUser({
     email,
-    {
-      data: {
-        org_id: perfil.org_id,
-        nombre,
-        rol,
-        botica_id: rol === "visor_botica" ? (botica_id || null) : null,
-        drogueria_id,
-        telefono: telefono || null,
-      },
+    password: contrasena,
+    email_confirm: true,
+    user_metadata: {
+      org_id: perfil.org_id,
+      nombre,
+      rol,
+      botica_id: rol === "visor_botica" ? (botica_id || null) : null,
+      drogueria_id,
+      telefono: telefono || null,
     },
-  );
+  });
 
   if (userError) {
     if (userError.message?.includes("already")) {
@@ -279,7 +283,7 @@ async function crearUsuario(supabase: any, perfil: PerfilUsuario, body: any) {
     entidad: "usuarios",
     entidad_id: userData.user.id,
     nivel: "info",
-    detalle: `Se creó el usuario "${nombre}" (${email}) con rol ${rol}. Invitación enviada.`,
+    detalle: `Se creó el usuario "${nombre}" (${email}) con rol ${rol}.`,
   });
 
   return json({
