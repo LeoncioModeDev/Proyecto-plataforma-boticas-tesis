@@ -180,9 +180,9 @@ export default function PaginaTransferenciasBotica() {
           <span className="text-xs text-verde flex items-center gap-1">
             <CheckCircle className="h-3.5 w-3.5" /> Recibida
           </span>
-        ) : r.estado === ESTADOS_TRANSFERENCIA.RECHAZADA ? (
+        ) : r.estado === ESTADOS_TRANSFERENCIA.PENDIENTE_DEVOLUCION ? (
           <span className="text-xs text-naranja flex items-center gap-1">
-            <AlertTriangle className="h-3.5 w-3.5" /> Rechazada
+            <AlertTriangle className="h-3.5 w-3.5" /> Pendiente devolución
           </span>
         ) : r.estado === ESTADOS_TRANSFERENCIA.CANCELADA ? (
           <span className="text-xs text-rojo flex items-center gap-1">

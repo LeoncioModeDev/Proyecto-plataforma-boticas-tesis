@@ -1,11 +1,9 @@
 import { useState, useEffect } from 'react'
-import { Activity, Brain, RefreshCw, AlertTriangle, CheckCircle, Loader2 } from 'lucide-react'
+import { Activity, Brain, AlertTriangle, CheckCircle, Loader2 } from 'lucide-react'
 import Tarjeta from '@/components/common/Tarjeta'
 import TarjetaMetrica from '@/components/charts/TarjetaMetrica'
 import GraficaLinea from '@/components/charts/GraficaLinea'
 import Insignia from '@/components/common/Insignia'
-import Boton from '@/components/common/Boton'
-import Alerta from '@/components/common/Alerta'
 import { obtenerEstadoModelo, obtenerMetricasModelo } from '@/services/ml-model/modelosML'
 import { formatearFechaRelativa } from '@/utilities/formatearFecha'
 
@@ -14,8 +12,6 @@ export default function PaginaMonitoreoML() {
   const [error, setError] = useState(null)
   const [estado, setEstado] = useState(null)
   const [metricas, setMetricas] = useState(null)
-  const [reentrenando, setReentrenando] = useState(false)
-  const [exito, setExito] = useState(null)
 
   useEffect(() => {
     async function cargar() {
@@ -36,15 +32,6 @@ export default function PaginaMonitoreoML() {
     }
     cargar()
   }, [])
-
-  const manejarReentrenar = () => {
-    setReentrenando(true)
-    setTimeout(() => {
-      setReentrenando(false)
-      setExito('Solicitud de reentrenamiento enviada al pipeline.')
-      setTimeout(() => setExito(null), 4000)
-    }, 2500)
-  }
 
   if (cargando) {
     return (
@@ -72,8 +59,11 @@ export default function PaginaMonitoreoML() {
   const version = estado?.version || '—'
   const modo = estado?.modo || '—'
   const fechaCarga = estado?.fecha_carga
+  const fechaEntrenamiento = estado?.fecha_entrenamiento
   const seriesSarima = estado?.series_sarima ?? 0
   const seriesFallback = estado?.series_fallback ?? 0
+  const totalPredicciones = estado?.total_predicciones ?? 0
+  const ultimaInferencia = estado?.ultima_inferencia
 
   const historialDrift = psi != null
     ? [
@@ -90,17 +80,7 @@ export default function PaginaMonitoreoML() {
           <h1 className="text-h1 text-principal">Monitoreo del Modelo</h1>
           <p className="text-cuerpo text-secundario">Drift, métricas de rendimiento y reentrenamiento del modelo ML</p>
         </div>
-        <Boton
-          variante="primario"
-          icono={RefreshCw}
-          onClick={manejarReentrenar}
-          cargando={reentrenando}
-        >
-          Reentrenar modelo
-        </Boton>
       </div>
-
-      {exito && <Alerta tipo="exito" titulo={exito} />}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <TarjetaMetrica etiqueta="MAPE Actual" valor={mape != null ? `${mape}%` : '—'} variacion={mape != null ? -2.1 : null} icono={Brain} />
@@ -138,6 +118,16 @@ export default function PaginaMonitoreoML() {
                 <span className="text-sm text-principal">{formatearFechaRelativa(fechaCarga)}</span>
               </div>
             )}
+            {fechaEntrenamiento && (
+              <div className="flex justify-between p-2 bg-fondo rounded-md">
+                <span className="text-sm text-principal">Fecha entrenamiento</span>
+                <span className="text-sm text-principal">{formatearFechaRelativa(fechaEntrenamiento)}</span>
+              </div>
+            )}
+            <div className="flex justify-between p-2 bg-fondo rounded-md">
+              <span className="text-sm text-principal">Modelo cargado</span>
+              <span className="text-sm text-principal">{estado?.modelo_pickle_cargado ? 'Sí' : 'No'}</span>
+            </div>
             <div className="flex justify-between p-2 bg-fondo rounded-md">
               <span className="text-sm text-principal">Series SARIMA</span>
               <span className="text-sm text-principal">{seriesSarima}</span>
@@ -145,6 +135,14 @@ export default function PaginaMonitoreoML() {
             <div className="flex justify-between p-2 bg-fondo rounded-md">
               <span className="text-sm text-principal">Series Fallback</span>
               <span className="text-sm text-principal">{seriesFallback}</span>
+            </div>
+            <div className="flex justify-between p-2 bg-fondo rounded-md">
+              <span className="text-sm text-principal">Total predicciones cargadas</span>
+              <span className="text-sm text-principal">{totalPredicciones}</span>
+            </div>
+            <div className="flex justify-between p-2 bg-fondo rounded-md">
+              <span className="text-sm text-principal">Última inferencia</span>
+              <span className="text-sm text-principal">{ultimaInferencia ? formatearFechaRelativa(ultimaInferencia) : 'Sin datos'}</span>
             </div>
           </div>
         </Tarjeta>

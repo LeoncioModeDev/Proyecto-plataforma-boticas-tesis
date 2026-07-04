@@ -10,8 +10,6 @@ const CORS_HEADERS = {
     "authorization, x-client-info, apikey, content-type",
 };
 
-const ESTADOS_PERMITIDOS_ADMIN = ["creada", "en_transito", "recibida", "rechazada", "cancelada"];
-
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: CORS_HEADERS });
@@ -62,6 +60,7 @@ Deno.serve(async (req) => {
         if (!id) return json({ error: "ID de transferencia requerido" }, 400);
         const body = await req.json().catch(() => ({}));
 
+        if (accion === "aprobar") return aprobarTransferencia(supabase, perfil, id);
         if (accion === "enviar") return enviarTransferencia(supabase, perfil, id);
         if (accion === "cancelar") return cancelarTransferencia(supabase, perfil, id, body);
         if (accion === "recibir") return recibirTransferencia(supabase, perfil, id);
@@ -95,6 +94,7 @@ async function listarTransferencias(supabase, perfil, url) {
         producto_id,
         lote_id,
         cantidad,
+        stock_comprometido,
         producto:producto_id (id, nombre_comercial),
         lote:lote_id (id, numero_lote, fecha_vencimiento)
       )
@@ -131,6 +131,7 @@ async function obtenerTransferencia(supabase, perfil, id) {
         producto_id,
         lote_id,
         cantidad,
+        stock_comprometido,
         producto:producto_id (id, nombre_comercial),
         lote:lote_id (id, numero_lote, fecha_vencimiento)
       )
@@ -401,6 +402,36 @@ async function crearTransferencia(supabase, perfil, body) {
 }
 
 // ─── ENVIAR ───────────────────────────────────────────────────
+async function aprobarTransferencia(supabase, perfil, id) {
+  if (!["admin_central", "operador_drogueria"].includes(perfil.rol)) {
+    return json({ error: "No tienes permisos para aprobar transferencias" }, 403);
+  }
+
+  const { data: t, error: errGet } = await supabase
+    .from("transferencias")
+    .select("id, estado, org_id")
+    .eq("id", id)
+    .eq("org_id", perfil.org_id)
+    .single();
+
+  if (errGet || !t) return json({ error: "Transferencia no encontrada" }, 404);
+  if (t.estado !== "creada") {
+    return json({ error: `Estado inválido: "${t.estado}". Solo se pueden aprobar transferencias en estado "creada"` }, 400);
+  }
+
+  const { error: errRpc } = await supabase
+    .rpc("aprobar_transferencia", {
+      p_transferencia_id: id,
+      p_usuario_id: perfil.id,
+    });
+
+  if (errRpc) {
+    return json({ error: `Error al aprobar transferencia: ${errRpc.message}` }, 400);
+  }
+
+  return json({ exito: true, estado: "aprobada" });
+}
+
 async function enviarTransferencia(supabase, perfil, id) {
   if (!["admin_central", "operador_drogueria"].includes(perfil.rol)) {
     return json({ error: "No tienes permisos para enviar transferencias" }, 403);
@@ -415,8 +446,8 @@ async function enviarTransferencia(supabase, perfil, id) {
     .single();
 
   if (errGet || !t) return json({ error: "Transferencia no encontrada" }, 404);
-  if (t.estado !== "creada") {
-    return json({ error: `Estado inválido: "${t.estado}". Solo se pueden enviar transferencias en estado "creada"` }, 400);
+  if (t.estado !== "aprobada") {
+    return json({ error: `Estado inválido: "${t.estado}". Solo se pueden despachar transferencias en estado "aprobada"` }, 400);
   }
 
   const rpc = t.tipo_transferencia === "redistribucion"
@@ -450,29 +481,17 @@ async function cancelarTransferencia(supabase, perfil, id, body) {
     .single();
 
   if (errGet || !t) return json({ error: "Transferencia no encontrada" }, 404);
-  if (t.estado !== "creada") return json({ error: "Solo se pueden cancelar transferencias en estado 'creada'" }, 400);
+  if (!["creada", "aprobada"].includes(t.estado)) {
+    return json({ error: "Solo se pueden cancelar transferencias en estado 'creada' o 'aprobada'" }, 400);
+  }
 
-  const { error: errUpd } = await supabase
-    .from("transferencias")
-    .update({
-      estado: "cancelada",
-      observaciones: body.motivo
-        ? `Cancelada: ${body.motivo}`
-        : "Cancelada por el usuario",
-    })
-    .eq("id", id);
-
-  if (errUpd) return json({ error: errUpd.message }, 400);
-
-  await supabase.from("auditoria").insert({
-    org_id: perfil.org_id,
-    usuario_id: perfil.id,
-    accion: "CANCELAR_TRANSFERENCIA",
-    entidad: "transferencias",
-    entidad_id: id,
-    nivel: "advertencia",
-    detalle: `Se canceló la transferencia. Motivo: ${body.motivo || "No especificado"}`,
+  const { error: errRpc } = await supabase.rpc("cancelar_transferencia", {
+    p_transferencia_id: id,
+    p_usuario_id: perfil.id,
+    p_motivo: body.motivo || null,
   });
+
+  if (errRpc) return json({ error: `Error al cancelar transferencia: ${errRpc.message}` }, 400);
 
   return json({ exito: true, estado: "cancelada" });
 }
@@ -578,7 +597,7 @@ async function rechazarTransferencia(supabase, perfil, id, body) {
     return json({ error: `Estado inválido: "${t.estado}". Solo se pueden rechazar transferencias en estado "en_transito"` }, 400);
   }
 
-  // RPC transaccional: descuenta stock_en_transito, actualiza estado, registra auditoría
+  // RPC transaccional: mantiene tránsito y deja pendiente devolución física
   const { data, error: errRpc } = await supabase
     .rpc("rechazar_transferencia", {
       p_transferencia_id: id,
@@ -590,7 +609,7 @@ async function rechazarTransferencia(supabase, perfil, id, body) {
     return json({ error: `Error al rechazar transferencia: ${errRpc.message}` }, 400);
   }
 
-  return json({ exito: true, estado: "rechazada" });
+  return json({ exito: true, estado: "pendiente_devolucion" });
 }
 
 // ─── HELPERS ──────────────────────────────────────────────────

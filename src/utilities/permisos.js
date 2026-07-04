@@ -36,7 +36,7 @@ export function puedeGestionarOrdenesCompra(usuario) {
 }
 
 export function puedeVerMLOperativo(usuario) {
-  return ES_ADMIN(usuario?.rol) || usuario?.rol === ROLES.OPERADOR_DROGUERIA
+  return usuario?.rol === ROLES.ADMIN_CENTRAL
 }
 
 export function puedeConfigurar(usuario) {
@@ -44,11 +44,11 @@ export function puedeConfigurar(usuario) {
 }
 
 export function puedeVerMLTecnico(usuario) {
-  return ES_ADMIN(usuario?.rol)
+  return usuario?.rol === ROLES.ADMIN_CENTRAL
 }
 
 export function puedeVerMLCompleto(usuario) {
-  return ES_ADMIN(usuario?.rol)
+  return usuario?.rol === ROLES.ADMIN_CENTRAL
 }
 
 export function esSuperAdmin(usuario) {

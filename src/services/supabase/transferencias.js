@@ -45,6 +45,9 @@ const MAPEAR_TRANSFERENCIA = (item) => ({
   creadoPor: item.creado_por,
   fechaDespacho: item.fecha_despacho,
   fechaRecepcion: item.fecha_recepcion,
+  aprobadoPor: item.aprobado_por,
+  fechaAprobacion: item.fecha_aprobacion,
+  fechaDevolucion: item.fecha_devolucion,
   observaciones: item.observaciones,
   motivoRechazo: item.motivo_rechazo,
   orgId: item.org_id,
@@ -60,6 +63,7 @@ const MAPEAR_ITEM = (item) => ({
   productoId: item.producto_id,
   loteId: item.lote_id,
   cantidad: item.cantidad,
+  stockComprometido: item.stock_comprometido ?? false,
   producto: item.producto ? { id: item.producto.id, nombreComercial: item.producto.nombre_comercial } : null,
   lote: item.lote ? { id: item.lote.id, numeroLote: item.lote.numero_lote, fechaVencimiento: item.lote.fecha_vencimiento } : null,
 })
@@ -82,6 +86,11 @@ export async function crearTransferencia(datos) {
 
 export async function enviarTransferencia(id) {
   const { exito, estado } = await peticion('PUT', `/${id}/enviar`)
+  return { exito, estado }
+}
+
+export async function aprobarTransferencia(id) {
+  const { exito, estado } = await peticion('PUT', `/${id}/aprobar`)
   return { exito, estado }
 }
 

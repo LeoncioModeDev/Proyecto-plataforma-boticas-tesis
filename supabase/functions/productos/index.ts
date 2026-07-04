@@ -195,6 +195,17 @@ async function crearProducto(supabase: any, perfil: PerfilUsuario, body: any) {
     if (errPa) console.error("Error al insertar principios activos:", errPa.message);
   }
 
+  await supabase.from("auditoria").insert({
+    org_id: perfil.org_id,
+    usuario_id: perfil.id,
+    accion: "CREAR_PRODUCTO",
+    entidad: "productos",
+    entidad_id: producto.id,
+    nivel: "info",
+    detalle: `Producto creado: ${nombre_comercial}`,
+    metadata_jsonb: { valores_nuevos: { codigo_interno: sku, nombre_comercial, categoria_terapeutica_id, clasificacion } },
+  });
+
   return json({
     exito: true,
     id: producto.id,
@@ -204,6 +215,13 @@ async function crearProducto(supabase: any, perfil: PerfilUsuario, body: any) {
 
 async function actualizarProducto(supabase: any, perfil: PerfilUsuario, id: string, body: any) {
   const { nombre_comercial, categoria_terapeutica_id, forma_farmaceutica_id, presentacion, clasificacion, estado, principios_activos } = body;
+
+  const { data: anterior } = await supabase
+    .from("productos")
+    .select("*")
+    .eq("id", id)
+    .eq("org_id", perfil.org_id)
+    .maybeSingle();
 
   if (categoria_terapeutica_id !== undefined) {
     const { data: categoria } = await supabase
@@ -253,6 +271,17 @@ async function actualizarProducto(supabase: any, perfil: PerfilUsuario, id: stri
       if (errPa) console.error("Error al re-insertar principios activos:", errPa.message);
     }
   }
+
+  await supabase.from("auditoria").insert({
+    org_id: perfil.org_id,
+    usuario_id: perfil.id,
+    accion: "EDITAR_PRODUCTO",
+    entidad: "productos",
+    entidad_id: id,
+    nivel: "info",
+    detalle: `Producto actualizado: ${nombre_comercial || anterior?.nombre_comercial || id}`,
+    metadata_jsonb: { valores_anteriores: anterior, valores_nuevos: body },
+  });
 
   return json({ exito: true });
 }
@@ -323,12 +352,28 @@ async function actualizarStockConfig(supabase: any, perfil: PerfilUsuario, produ
     if (stock_maximo !== undefined) updates.stock_maximo = stock_maximo;
     updates.updated_at = new Date().toISOString();
 
+    const { data: anterior } = await supabase
+      .from("stock_ubicaciones")
+      .select("stock_minimo, stock_maximo")
+      .eq("id", existente.id)
+      .maybeSingle();
+
     const { error } = await supabase
       .from("stock_ubicaciones")
       .update(updates)
       .eq("id", existente.id);
 
     if (error) return json({ error: error.message }, 400);
+    await supabase.from("auditoria").insert({
+      org_id: perfil.org_id,
+      usuario_id: perfil.id,
+      accion: "CONFIGURAR_STOCK",
+      entidad: "stock_ubicaciones",
+      entidad_id: existente.id,
+      nivel: "info",
+      detalle: "Configuración de stock mínimo/máximo actualizada",
+      metadata_jsonb: { producto_id: productoId, valores_anteriores: anterior, valores_nuevos: updates },
+    });
     return json({ exito: true, id: existente.id });
   }
 
@@ -353,6 +398,16 @@ async function actualizarStockConfig(supabase: any, perfil: PerfilUsuario, produ
     .single();
 
   if (error) return json({ error: error.message }, 400);
+  await supabase.from("auditoria").insert({
+    org_id: perfil.org_id,
+    usuario_id: perfil.id,
+    accion: "CONFIGURAR_STOCK",
+    entidad: "stock_ubicaciones",
+    entidad_id: nuevo.id,
+    nivel: "info",
+    detalle: "Configuración de stock mínimo/máximo creada",
+    metadata_jsonb: { producto_id: productoId, valores_nuevos: { ubicacion_tipo, ubicacion_id: ubicacion_id || null, stock_minimo, stock_maximo } },
+  });
   return json({ exito: true, id: nuevo.id });
 }
 

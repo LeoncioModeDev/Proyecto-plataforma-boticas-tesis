@@ -144,60 +144,22 @@ async function registrarAjuste(supabase: any, perfil: PerfilUsuario, body: any) 
     return json({ error: "motivo debe tener al menos 10 caracteres" }, 400);
   }
 
-  // Validar que el lote existe y pertenece al producto
-  const { data: lote, error: errLote } = await supabase
-    .from("lotes")
-    .select("id, cantidad, producto_id")
-    .eq("id", lote_id)
-    .single();
+  const { data, error } = await supabase.rpc("registrar_ajuste_inventario", {
+    p_org_id: perfil.org_id,
+    p_usuario_id: perfil.id,
+    p_producto_id: producto_id,
+    p_lote_id: lote_id,
+    p_ubicacion_tipo: ubicacion_tipo,
+    p_ubicacion_id: ubicacion_tipo === "drogueria" ? null : ubicacion_id,
+    p_tipo_movimiento: "ajuste",
+    p_direccion_ajuste: direccion_ajuste,
+    p_cantidad: cantidad,
+    p_motivo: motivo,
+  });
 
-  if (errLote || !lote) return json({ error: "Lote no encontrado" }, 404);
-  if (lote.producto_id !== producto_id) {
-    return json({ error: "El lote no corresponde al producto indicado" }, 400);
-  }
+  if (error) return json({ error: error.message }, 400);
 
-  // Si es decremento, validar cantidad disponible
-  if (direccion_ajuste === "decremento" && cantidad > lote.cantidad) {
-    return json({
-      error: `Cantidad de ajuste (${cantidad}) excede la disponible en el lote (${lote.cantidad})`,
-    }, 400);
-  }
-
-  // Insertar movimiento
-  const { data: movimiento, error: errMov } = await supabase
-    .from("movimientos_inventario")
-    .insert({
-      producto_id,
-      lote_id,
-      ubicacion_tipo,
-      ubicacion_id: ubicacion_tipo === "drogueria" ? null : ubicacion_id,
-      tipo_movimiento: "ajuste",
-      direccion_ajuste,
-      cantidad,
-      motivo,
-      usuario_id: perfil.id,
-      org_id: perfil.org_id,
-    })
-    .select(`
-      id,
-      tipo_movimiento,
-      direccion_ajuste,
-      producto_id,
-      lote_id,
-      ubicacion_tipo,
-      ubicacion_id,
-      cantidad,
-      motivo,
-      usuario_id,
-      created_at,
-      productos:producto_id (nombre_comercial, codigo_interno),
-      boticas:ubicacion_id (nombre)
-    `)
-    .single();
-
-  if (errMov) return json({ error: errMov.message }, 400);
-
-  return json({ datos: movimiento }, 201);
+  return responderMovimientoCreado(supabase, perfil.org_id, data?.movimiento_id);
 }
 
 // ─── REGISTRAR MERMA ───────────────────────────────────────────
@@ -225,40 +187,30 @@ async function registrarMerma(supabase: any, perfil: PerfilUsuario, body: any) {
     return json({ error: "motivo debe tener al menos 10 caracteres" }, 400);
   }
 
-  // Validar que el lote existe y pertenece al producto
-  const { data: lote, error: errLote } = await supabase
-    .from("lotes")
-    .select("id, cantidad, producto_id")
-    .eq("id", lote_id)
-    .single();
+  const { data, error } = await supabase.rpc("registrar_ajuste_inventario", {
+    p_org_id: perfil.org_id,
+    p_usuario_id: perfil.id,
+    p_producto_id: producto_id,
+    p_lote_id: lote_id,
+    p_ubicacion_tipo: ubicacion_tipo,
+    p_ubicacion_id: ubicacion_tipo === "drogueria" ? null : ubicacion_id,
+    p_tipo_movimiento: "merma",
+    p_direccion_ajuste: null,
+    p_cantidad: cantidad,
+    p_motivo: motivo,
+  });
 
-  if (errLote || !lote) return json({ error: "Lote no encontrado" }, 404);
-  if (lote.producto_id !== producto_id) {
-    return json({ error: "El lote no corresponde al producto indicado" }, 400);
-  }
+  if (error) return json({ error: error.message }, 400);
 
-  // Validar cantidad disponible en lote
-  if (cantidad > lote.cantidad) {
-    return json({
-      error: `Cantidad de merma (${cantidad}) excede la disponible en el lote (${lote.cantidad})`,
-    }, 400);
-  }
+  return responderMovimientoCreado(supabase, perfil.org_id, data?.movimiento_id);
+}
 
-  // Insertar movimiento
-  const { data: movimiento, error: errMov } = await supabase
+// ─── HELPERS ───────────────────────────────────────────────────
+async function responderMovimientoCreado(supabase: any, orgId: string, movimientoId: string | null) {
+  if (!movimientoId) return json({ error: "No se pudo obtener el movimiento creado" }, 500);
+
+  const { data: movimiento, error } = await supabase
     .from("movimientos_inventario")
-    .insert({
-      producto_id,
-      lote_id,
-      ubicacion_tipo,
-      ubicacion_id: ubicacion_tipo === "drogueria" ? null : ubicacion_id,
-      tipo_movimiento: "merma",
-      direccion_ajuste: null,
-      cantidad,
-      motivo,
-      usuario_id: perfil.id,
-      org_id: perfil.org_id,
-    })
     .select(`
       id,
       tipo_movimiento,
@@ -271,17 +223,19 @@ async function registrarMerma(supabase: any, perfil: PerfilUsuario, body: any) {
       motivo,
       usuario_id,
       created_at,
-      productos:producto_id (nombre_comercial),
-      boticas:ubicacion_id (nombre)
+      productos:producto_id (nombre_comercial, codigo_interno),
+      boticas:ubicacion_id (nombre),
+      lotes:lote_id (numero_lote, fecha_vencimiento)
     `)
+    .eq("org_id", orgId)
+    .eq("id", movimientoId)
     .single();
 
-  if (errMov) return json({ error: errMov.message }, 400);
+  if (error) return json({ error: error.message }, 400);
 
   return json({ datos: movimiento }, 201);
 }
 
-// ─── HELPERS ───────────────────────────────────────────────────
 function json(data: unknown, status = 200) {
   return new Response(JSON.stringify(data), {
     status,

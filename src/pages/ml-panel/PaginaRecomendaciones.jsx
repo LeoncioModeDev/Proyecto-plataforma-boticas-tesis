@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { CheckCircle, Eye, XCircle, ShoppingCart, Truck } from 'lucide-react'
+import { CheckCircle, Eye, XCircle } from 'lucide-react'
 import Boton from '@/components/common/Boton'
 import Tabla from '@/components/common/Tabla'
 import Alerta from '@/components/common/Alerta'
@@ -8,8 +8,6 @@ import Modal from '@/components/common/Modal'
 import { listarBoticas } from '@/services/supabase/boticas'
 import { listarProveedores } from '@/services/supabase/proveedores'
 import { obtenerProductos } from '@/services/supabase/productos'
-import { crearOrden } from '@/services/supabase/ordenesCompra'
-import { crearTransferencia } from '@/services/supabase/transferencias'
 import { aprobarRecomendacion, generarRecomendacionCompra, generarRecomendacionReposicion, obtenerRecomendaciones, rechazarRecomendacion } from '@/services/ml-model/recomendacionesML'
 import { useMLStatus } from '@/services/ml-model/useMLStatus'
 
@@ -30,10 +28,12 @@ function mapearRecomendacion(r) {
     proveedorId: r.proveedor_id || datos.proveedor_id,
     drogueriaId: r.botica_origen_id || datos.drogueria_id,
     stockDisponible,
-    stockReservado,
-    stockLibre: stockDisponible - stockReservado,
+    stockComprometido: stockReservado,
+    stockLibre: Number(datos.stock_libre ?? r.stock_libre ?? Math.max(stockDisponible - stockReservado, 0)),
     stockEnTransito: Number(datos.stock_en_transito ?? r.stock_en_transito ?? 0),
     stockPorRecibir: Number(datos.stock_por_recibir ?? r.stock_por_recibir ?? 0),
+    stockConsiderado: Number(datos.stock_considerado ?? r.stock_considerado ?? 0),
+    stockProyectado: Number(datos.stock_proyectado ?? r.stock_proyectado ?? 0),
     stockSeguridad: Number(datos.stock_seguridad ?? r.stock_seguridad ?? 0),
     demandaDuranteLeadTime: Number(datos.demanda_durante_lead_time ?? r.demanda_durante_lead_time ?? 0),
     cantidadBase: Number(datos.cantidad_base ?? r.cantidad_base ?? 0),
@@ -44,6 +44,7 @@ function mapearRecomendacion(r) {
     precioReferencial: datos.precio_referencial ?? r.precio_referencial ?? 0,
     estrategia: datos.estrategia ?? r.estrategia ?? '-',
     nivelMadurez: datos.nivel_madurez ?? r.nivel_madurez ?? '-',
+    prioridad: datos.prioridad ?? r.nivel_urgencia ?? r.prioridad ?? '-',
     motivo: datos.motivo ?? r.motivo,
   }
 }
@@ -75,7 +76,7 @@ export default function PaginaRecomendaciones() {
           obtenerRecomendaciones(),
         ])
         const boticasActivas = boticasData.filter(b => b.tipo === 'botica')
-        setBoticas(boticasActivas)
+        setBoticas(boticasData)
         setProductos(productosData)
         setProveedores(proveedoresData)
         setBoticaId(boticasActivas[0]?.id || '')
@@ -108,9 +109,9 @@ export default function PaginaRecomendaciones() {
     setError(null)
     try {
       if (tipo === 'COMPRA') {
-        await generarRecomendacionCompra({ almacen_id: boticaId, producto_id: productoId, horizonte_semanas: 12, nivel_servicio: 0.9 })
+        await generarRecomendacionCompra({ producto_id: productoId, horizonte_semanas: 12, nivel_servicio: 0.9 })
       } else {
-        await generarRecomendacionReposicion({ botica_id: boticaId, drogueria_id: boticaId, producto_id: productoId, horizonte_semanas: 12, nivel_servicio: 0.9 })
+        await generarRecomendacionReposicion({ botica_id: boticaId, producto_id: productoId, horizonte_semanas: 12, nivel_servicio: 0.9 })
       }
       await recargar()
     } catch (err) {
@@ -136,36 +137,11 @@ export default function PaginaRecomendaciones() {
     setCreando(true)
     setError(null)
     try {
-      await aprobarRecomendacion(aprobarRec.id)
-
-      if (aprobarRec.tipo === 'COMPRA') {
-        const fechaEntrega = new Date()
-        const leadTime = Number(aprobarRec.leadTimeDias) || 7
-        fechaEntrega.setDate(fechaEntrega.getDate() + leadTime)
-        await crearOrden({
-          proveedorId: aprobarRec.proveedorId,
-          fechaEstimadaEntrega: fechaEntrega.toISOString().split('T')[0],
-          observaciones: aprobarRec.motivo || `Recomendación ML — ${aprobarRec.estrategia}`,
-          items: [{
-            productoId: aprobarRec.productoId,
-            cantidad: Math.round(aprobarRec.cantidadFinal),
-            precioUnitario: Number(aprobarRec.precioReferencial) || 0,
-          }],
-        })
-        setExito(`Orden de compra creada para ${obtenerNombreProducto(aprobarRec.productoId)}`)
-      } else {
-        await crearTransferencia({
-          tipo_transferencia: 'transferencia_central',
-          origen_id: aprobarRec.drogueriaId || aprobarRec.boticaId,
-          destino_id: aprobarRec.boticaId,
-          observaciones: aprobarRec.motivo || `Reposición ML — ${aprobarRec.estrategia}`,
-          items: [{
-            producto_id: aprobarRec.productoId,
-            cantidad: Math.round(aprobarRec.cantidadFinal),
-          }],
-        })
-        setExito(`Transferencia creada para ${obtenerNombreProducto(aprobarRec.productoId)}`)
-      }
+      const resultado = await aprobarRecomendacion(aprobarRec.id)
+      const datos = resultado?.datos_para_plataforma || {}
+      setExito(aprobarRec.tipo === 'COMPRA'
+        ? `Orden de compra ${datos.numero_orden || ''} creada desde recomendación`
+        : `Transferencia ${datos.numero_transferencia || ''} creada con FEFO desde recomendación`)
 
       setAprobarRec(null)
       setTimeout(() => setExito(null), 5000)
@@ -192,12 +168,21 @@ export default function PaginaRecomendaciones() {
   const columnas = [
     { campo: 'tipo', encabezado: 'Tipo', render: r => <Insignia color={r.tipo === 'COMPRA' ? 'azul' : 'verde'}>{r.tipo}</Insignia> },
     { campo: 'estado', encabezado: 'Estado' },
+    { campo: 'productoId', encabezado: 'Producto', render: r => obtenerNombreProducto(r.productoId) },
+    { campo: 'boticaId', encabezado: 'Ubicación destino', render: r => obtenerNombreBotica(r.boticaId) },
+    { campo: 'drogueriaId', encabezado: 'Origen', render: r => r.tipo === 'COMPRA' ? obtenerNombreProveedor(r.proveedorId) : obtenerNombreBotica(r.drogueriaId) },
     { campo: 'stockDisponible', encabezado: 'Stock disponible' },
-    { campo: 'stockReservado', encabezado: 'Stock reservado' },
+    { campo: 'stockComprometido', encabezado: 'Stock comprometido' },
     { campo: 'stockLibre', encabezado: 'Stock libre' },
-    { campo: 'stockEnTransito', encabezado: 'En tránsito' },
-    { campo: 'stockPorRecibir', encabezado: 'Por recibir' },
+    { campo: 'stockEnTransito', encabezado: 'Stock en tránsito' },
+    { campo: 'stockPorRecibir', encabezado: 'Stock por recibir' },
+    { campo: 'stockConsiderado', encabezado: 'Stock considerado' },
+    { campo: 'demandaDuranteLeadTime', encabezado: 'Demanda LT' },
+    { campo: 'stockSeguridad', encabezado: 'Stock seguridad' },
+    { campo: 'stockProyectado', encabezado: 'Stock proyectado' },
+    { campo: 'cantidadBase', encabezado: 'Cantidad base' },
     { campo: 'cantidadFinal', encabezado: 'Cantidad final' },
+    { campo: 'prioridad', encabezado: 'Prioridad' },
     { campo: 'acciones', encabezado: 'Acciones', render: r => (
       <div className="flex gap-1">
         <Boton variante="icono" icono={Eye} onClick={() => setDetalle(r)} title="Ver detalle" className="text-marca-principal hover:bg-marca-claro" />
@@ -224,7 +209,7 @@ export default function PaginaRecomendaciones() {
 
       <div className="flex flex-wrap gap-4">
           <select value={boticaId} onChange={e => setBoticaId(e.target.value)} className="px-3 py-2 text-cuerpo bg-fondo border border-estilo rounded-md">
-            {boticas.map(b => <option key={b.id} value={b.id}>{b.nombre}</option>)}
+            {boticas.filter(b => b.tipo === 'botica').map(b => <option key={b.id} value={b.id}>{b.nombre}</option>)}
           </select>
           <select value={productoId} onChange={e => setProductoId(e.target.value)} className="px-3 py-2 text-cuerpo bg-fondo border border-estilo rounded-md min-w-72">
             {productos.map(p => <option key={p.id} value={p.id}>{p.nombreComercial}</option>)}
@@ -250,10 +235,12 @@ export default function PaginaRecomendaciones() {
           <div className="grid gap-3 md:grid-cols-2 text-sm">
             <div><p className="text-etiqueta text-secundario">Demanda prevista durante lead time</p><p className="font-semibold">{detalle.demandaDuranteLeadTime}</p></div>
             <div><p className="text-etiqueta text-secundario">Stock disponible</p><p className="font-semibold">{detalle.stockDisponible}</p></div>
-            <div><p className="text-etiqueta text-secundario">Stock reservado</p><p className="font-semibold">{detalle.stockReservado}</p></div>
+            <div><p className="text-etiqueta text-secundario">Stock comprometido</p><p className="font-semibold">{detalle.stockComprometido}</p></div>
             <div><p className="text-etiqueta text-secundario">Stock libre</p><p className="font-semibold">{detalle.stockLibre}</p></div>
             <div><p className="text-etiqueta text-secundario">Stock en tránsito</p><p className="font-semibold">{detalle.stockEnTransito}</p></div>
             <div><p className="text-etiqueta text-secundario">Stock por recibir</p><p className="font-semibold">{detalle.stockPorRecibir}</p></div>
+            <div><p className="text-etiqueta text-secundario">Stock considerado</p><p className="font-semibold">{detalle.stockConsiderado}</p></div>
+            <div><p className="text-etiqueta text-secundario">Stock proyectado</p><p className="font-semibold">{detalle.stockProyectado}</p></div>
             <div><p className="text-etiqueta text-secundario">Stock de seguridad</p><p className="font-semibold">{detalle.stockSeguridad}</p></div>
             <div><p className="text-etiqueta text-secundario">Cantidad base</p><p className="font-semibold">{detalle.cantidadBase}</p></div>
             <div><p className="text-etiqueta text-secundario">Cantidad mínima</p><p className="font-semibold">{detalle.cantidadMinimaCompra}</p></div>
@@ -314,7 +301,7 @@ export default function PaginaRecomendaciones() {
                 </div>
                 <div className="flex justify-end gap-3 pt-2 border-t border-estilo">
                   <Boton variante="secundario" onClick={() => setAprobarRec(null)} deshabilitado={creando}>Cancelar</Boton>
-                  <Boton variante="primario" icono={ShoppingCart} onClick={aprobarYCrear} cargando={creando}>
+                  <Boton variante="primario" onClick={aprobarYCrear} cargando={creando}>
                     Aprobar y crear orden de compra
                   </Boton>
                 </div>
@@ -345,11 +332,11 @@ export default function PaginaRecomendaciones() {
                 </div>
                 <div className="bg-fondo p-3 rounded-md border border-estilo text-sm">
                   <p className="text-secundario">Al confirmar se aprobará la recomendación y se creará la transferencia automáticamente en el módulo de Transferencias.</p>
-                  <p className="text-secundario mt-1">Nota: La transferencia se creará sin lote asignado. Deberás asignar el lote desde el módulo de Transferencias.</p>
+                  <p className="text-secundario mt-1">La transferencia se creará con asignación FEFO automática de lotes desde la droguería central.</p>
                 </div>
                 <div className="flex justify-end gap-3 pt-2 border-t border-estilo">
                   <Boton variante="secundario" onClick={() => setAprobarRec(null)} deshabilitado={creando}>Cancelar</Boton>
-                  <Boton variante="primario" icono={Truck} onClick={aprobarYCrear} cargando={creando}>
+                  <Boton variante="primario" onClick={aprobarYCrear} cargando={creando}>
                     Aprobar y crear transferencia
                   </Boton>
                 </div>

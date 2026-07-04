@@ -207,7 +207,7 @@ const CONFIG: Record<string, TipoConfig> = {
   },
   stock_historico: {
     columnas: [
-      { nombre: "codigo_producto", requerida: true, descripcion: "SKU del producto", ejemplo: "SKU-001" },
+      { nombre: "codigo_producto", requerida: true, descripcion: "SKU del producto", ejemplo: "SKU-000001" },
       { nombre: "codigo_botica", requerida: true, descripcion: "Código de la botica", ejemplo: "BOT-001" },
       { nombre: "fecha_snapshot", requerida: true, descripcion: "Fecha del snapshot semanal YYYY-MM-DD", ejemplo: "2024-01-01" },
       { nombre: "cantidad_disponible", requerida: true, descripcion: "Stock disponible al inicio de semana", ejemplo: "120" },
@@ -1234,6 +1234,16 @@ async function validarStockInicial(fila: Record<string, string>, supabase: any, 
     errores.push({ fila: 0, columna: "estrategia", valor: fila.estrategia, mensaje: "Estrategia debe ser: reemplazar, sumar, saltar" });
   }
 
+  const stockMinimo = fila.stock_minimo ? Number(fila.stock_minimo) : 0;
+  const stockMaximo = fila.stock_maximo ? Number(fila.stock_maximo) : null;
+
+  if (fila.stock_minimo && (Number.isNaN(stockMinimo) || stockMinimo < 0)) {
+    errores.push({ fila: 0, columna: "stock_minimo", valor: fila.stock_minimo, mensaje: "stock_minimo debe ser >= 0" });
+  }
+  if (fila.stock_maximo && (Number.isNaN(stockMaximo) || (stockMaximo as number) < stockMinimo)) {
+    errores.push({ fila: 0, columna: "stock_maximo", valor: fila.stock_maximo, mensaje: "stock_maximo debe ser >= stock_minimo" });
+  }
+
   if (errores.length > 0) return { valida: false, errores };
 
   return {
@@ -1245,6 +1255,8 @@ async function validarStockInicial(fila: Record<string, string>, supabase: any, 
       numero_lote: fila.numero_lote || null,
       fecha_vencimiento: fila.fecha_vencimiento || null,
       codigo_proveedor: fila.codigo_proveedor || null,
+      stock_minimo: Math.round(stockMinimo),
+      stock_maximo: stockMaximo === null ? null : Math.round(stockMaximo),
       estrategia: fila.estrategia || "reemplazar",
     },
   };
@@ -1761,6 +1773,8 @@ async function importarStockInicial(item: ItemValido, supabase: any, orgId: stri
     numero_lote: item.numero_lote || null,
     fecha_vencimiento: item.fecha_vencimiento || null,
     proveedor_id: proveedorId,
+    stock_minimo: item.stock_minimo || 0,
+    stock_maximo: item.stock_maximo || null,
   }];
 
   const { data: resultado, error: rpcError } = await supabase.rpc("procesar_stock_inicial", {

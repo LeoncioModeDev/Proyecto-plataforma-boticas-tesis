@@ -52,9 +52,15 @@ class DataService:
 
     def boticas(self, org_id: str) -> list[str]:
         if self.repo.disponible:
-            return [b["id"] for b in self.repo.seleccionar_todo("boticas", {"org_id": org_id, "activa": True})]
+            return [b["id"] for b in self.repo.seleccionar_todo("boticas", {"org_id": org_id, "activa": True, "tipo": "botica"})]
         df = self.features[self.features["org_id"] == org_id]
         return sorted(df["botica_id"].dropna().unique().tolist())
+
+    def drogueria_central(self, org_id: str) -> dict | None:
+        if self.repo.disponible:
+            filas = self.repo.seleccionar_todo("boticas", {"org_id": org_id, "activa": True, "tipo": "drogueria"}, orden="created_at", limite=1)
+            return filas[0] if filas else None
+        return None
 
     def serie(self, org_id: str, botica_id: str, producto_id: str) -> pd.DataFrame:
         if self.repo.disponible:
@@ -100,8 +106,18 @@ class DataService:
     def stock(self, org_id: str, ubicacion_id: str, producto_id: str) -> dict:
         if self.repo.disponible:
             filtros = {"org_id": org_id, "producto_id": producto_id}
+            ubicacion_tipo = "botica"
+            ubicacion_real_id = ubicacion_id
             if ubicacion_id:
-                filtros["ubicacion_id"] = ubicacion_id
+                boticas = self.repo.seleccionar("boticas", {"org_id": org_id, "id": ubicacion_id}, 1)
+                if boticas and boticas[0].get("tipo") == "drogueria":
+                    ubicacion_tipo = "drogueria"
+                    ubicacion_real_id = None
+            filtros["ubicacion_tipo"] = ubicacion_tipo
+            if ubicacion_real_id:
+                filtros["ubicacion_id"] = ubicacion_real_id
+            else:
+                filtros["ubicacion_id"] = None
             filas = self.repo.seleccionar("stock_ubicaciones", filtros, 1)
             if not filas:
                 return self._stock_vacio()
@@ -191,6 +207,40 @@ class DataService:
         rec["estado"] = estado
         rec["actualizado_en"] = datetime.now(timezone.utc).isoformat()
         return rec
+
+    def aprobar_recomendacion_operativa(self, recomendacion_id: str, usuario_id: str) -> dict | None:
+        if self.repo.disponible:
+            return self.repo.rpc("aprobar_recomendacion_operativa", {"p_recomendacion_id": recomendacion_id, "p_usuario_id": usuario_id})
+        rec = self.recomendaciones.get(recomendacion_id)
+        if not rec:
+            return None
+        rec["estado"] = "APROBADA"
+        rec["actualizado_en"] = datetime.now(timezone.utc).isoformat()
+        return {"exito": True, "estado": "confirmada"}
+
+    def generar_alertas_organizacion(self, org_id: str, usuario_id: str | None = None) -> dict | None:
+        if self.repo.disponible:
+            return self.repo.rpc("generar_alertas_organizacion", {"p_org_id": org_id, "p_usuario_id": usuario_id})
+        return {"exito": True, "alertas_evaluadas": 0}
+
+    def registrar_auditoria(self, org_id: str, usuario_id: str | None, accion: str, entidad: str, entidad_id: str | None, detalle: str, metadata: dict | None = None):
+        if not self.repo.disponible:
+            return None
+        return self.repo.insertar("auditoria", {
+            "org_id": org_id,
+            "usuario_id": usuario_id,
+            "accion": accion,
+            "entidad": entidad,
+            "entidad_id": entidad_id,
+            "nivel": "info",
+            "detalle": detalle,
+            "metadata_jsonb": metadata or {},
+        })
+
+    def resolver_alerta(self, alerta_id: str, usuario_id: str, comentario: str | None = None) -> dict | None:
+        if self.repo.disponible:
+            return self.repo.rpc("resolver_alerta", {"p_alerta_id": alerta_id, "p_usuario_id": usuario_id, "p_comentario": comentario})
+        return {"exito": True, "estado": "resuelta"}
 
     def guardar_predicciones(self, respuesta: dict):
         if not self.repo.disponible:
@@ -343,7 +393,11 @@ class DataService:
             "stock_comprometido": rec.get("stock_comprometido"),
             "stock_en_transito": rec.get("stock_en_transito"),
             "stock_por_recibir": rec.get("stock_por_recibir"),
+            "stock_libre": rec.get("stock_libre"),
+            "stock_considerado": rec.get("stock_considerado"),
+            "stock_proyectado": rec.get("stock_proyectado"),
             "stock_seguridad": rec.get("stock_seguridad"),
+            "metodo_stock_seguridad": rec.get("metodo_stock_seguridad"),
             "demanda_durante_lead_time": rec.get("demanda_durante_lead_time"),
             "cantidad_base": rec.get("cantidad_base"),
             "cantidad_minima_compra": rec.get("cantidad_minima_compra"),

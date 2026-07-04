@@ -4,6 +4,7 @@ import argparse
 import hashlib
 import json
 import re
+import shutil
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -157,7 +158,7 @@ def construir_mapeos(productos: pd.DataFrame, boticas: pd.DataFrame, proveedores
 
     return {
         "producto_id_a_codigo": {
-            fila.id: f"SKU-{i + 1:03d}" for i, fila in productos_ordenados.iterrows()
+            fila.id: f"SKU-{i + 1:06d}" for i, fila in productos_ordenados.iterrows()
         },
         "botica_id_a_codigo": {
             **({droguerias.iloc[0].id: "DROG-001"} if len(droguerias) else {}),
@@ -314,6 +315,8 @@ def construir_stock_inicial(stock: pd.DataFrame, proveedor_producto: pd.DataFram
             "fecha_vencimiento": "2028-12-31",
             "codigo_proveedor": mapeos["proveedor_id_a_codigo"][proveedor_id],
             "estrategia": "reemplazar",
+            "stock_minimo": int(max(0, fila.get("stock_minimo", 0))),
+            "stock_maximo": "" if pd.isna(fila.get("stock_maximo")) else int(max(0, fila.get("stock_maximo", 0))),
         })
     return pd.DataFrame(filas)
 
@@ -587,6 +590,11 @@ def generar(
         return validacion
 
     DIR_SALIDA.mkdir(parents=True, exist_ok=True)
+    if overwrite:
+        for subdir in [DIR_SALIDA / "stock_historico", DIR_SALIDA / "ventas_historicas"]:
+            if subdir.exists():
+                shutil.rmtree(subdir)
+
     for nombre, archivo in ARCHIVOS_CSV.items():
         escribir_csv(dataframes[nombre], DIR_SALIDA / archivo)
 
@@ -694,7 +702,8 @@ def main() -> int:
     parser.add_argument("--ventas-historicas", choices=MODOS_VENTAS.keys(), default="52w", help="Ventana de ventas historicas exportada al paquete Supabase")
     parser.add_argument("--stock-historico", choices=MODOS_STOCK.keys(), default="4w", help="Ventana de stock historico exportada al paquete Supabase")
     parser.add_argument("--tamano-lote", type=int, default=500, help="Maximo filas por tramo al dividir historicos")
-    parser.add_argument("--dividir-historicos", action="store_true", help="Divide stock_historico y ventas_historicas en subdirectorios con tramos")
+    parser.add_argument("--dividir-historicos", dest="dividir_historicos", action="store_true", default=True, help="Divide stock_historico y ventas_historicas en subdirectorios con tramos (default)")
+    parser.add_argument("--no-dividir-historicos", dest="dividir_historicos", action="store_false", help="Genera solo archivos consolidados y conserva tramos existentes")
     args = parser.parse_args()
 
     if args.tamano_lote <= 0:

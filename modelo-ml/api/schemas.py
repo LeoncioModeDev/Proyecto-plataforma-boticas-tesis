@@ -76,14 +76,14 @@ class MadurezResponse(BaseModel):
 
 class ReposicionRequest(BaseModel):
     botica_id: str
-    drogueria_id: str
+    drogueria_id: str | None = None
     producto_id: str
     horizonte_semanas: int = Field(12, ge=1, le=12)
     nivel_servicio: float = Field(0.90, ge=0.80, le=0.99)
 
 
 class CompraRequest(BaseModel):
-    almacen_id: str
+    almacen_id: str | None = None
     producto_id: str
     proveedor_id: str | None = None
     horizonte_semanas: int = Field(12, ge=1, le=12)
@@ -151,3 +151,7 @@ class AprobarRechazarResponse(BaseModel):
     estado: str
     mensaje: str
     datos_para_plataforma: dict[str, Any]
+
+
+class ResolverAlertaRequest(BaseModel):
+    comentario: str | None = None

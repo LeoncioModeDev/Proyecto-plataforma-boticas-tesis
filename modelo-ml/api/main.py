@@ -21,6 +21,7 @@ from .schemas import (
     RecomendacionResponse,
     ReentrenamientoRequest,
     ReposicionRequest,
+    ResolverAlertaRequest,
 )
 from .security import obtener_org_id, obtener_perfil_autenticado
 from .services.data_service import data_service
@@ -89,14 +90,16 @@ def madurez_serie(botica_id: str, producto_id: str, org_id: str = Depends(obtene
 
 
 @app.post("/api/v1/predicciones", response_model=PrediccionResponse, tags=["Predicciones"])
-def prediccion_individual(datos: PrediccionRequest, org_id: str = Depends(obtener_org_id)):
-    return prediction_service.predecir(
-        org_id,
+def prediccion_individual(datos: PrediccionRequest, perfil: dict = Depends(obtener_perfil_autenticado)):
+    respuesta = prediction_service.predecir(
+        perfil["org_id"],
         datos.botica_id,
         datos.producto_id,
         datos.horizonte,
         datos.demanda_inicial_manual,
     )
+    data_service.registrar_auditoria(perfil["org_id"], perfil["id"], "GENERAR_PREDICCION", "predicciones_ml", None, "Predicción ML generada", {"botica_id": datos.botica_id, "producto_id": datos.producto_id, "horizonte": datos.horizonte})
+    return respuesta
 
 
 @app.post("/api/v1/predicciones/botica", tags=["Predicciones"])
@@ -148,13 +151,17 @@ def consultar_recomendaciones(org_id: str = Depends(obtener_org_id)):
 
 
 @app.post("/api/v1/recomendaciones/reposicion", response_model=RecomendacionResponse, tags=["Recomendaciones"])
-def recomendar_reposicion(datos: ReposicionRequest, org_id: str = Depends(obtener_org_id)):
-    return recommendation_service.recomendar_reposicion(org_id, datos)
+def recomendar_reposicion(datos: ReposicionRequest, perfil: dict = Depends(obtener_perfil_autenticado)):
+    rec = recommendation_service.recomendar_reposicion(perfil["org_id"], datos)
+    data_service.registrar_auditoria(perfil["org_id"], perfil["id"], "GENERAR_RECOMENDACION_REPOSICION", "recomendaciones_ml", rec.get("recomendacion_id"), "Recomendación de reposición generada", rec)
+    return rec
 
 
 @app.post("/api/v1/recomendaciones/compra", response_model=RecomendacionResponse, tags=["Recomendaciones"])
-def recomendar_compra(datos: CompraRequest, org_id: str = Depends(obtener_org_id)):
-    return recommendation_service.recomendar_compra(org_id, datos)
+def recomendar_compra(datos: CompraRequest, perfil: dict = Depends(obtener_perfil_autenticado)):
+    rec = recommendation_service.recomendar_compra(perfil["org_id"], datos)
+    data_service.registrar_auditoria(perfil["org_id"], perfil["id"], "GENERAR_RECOMENDACION_COMPRA", "recomendaciones_ml", rec.get("recomendacion_id"), "Recomendación de compra generada", rec)
+    return rec
 
 
 @app.post("/api/v1/recomendaciones/reposicion/masiva", tags=["Recomendaciones"])
@@ -176,11 +183,11 @@ def recomendar_compra_masiva(datos: CompraRequest, org_id: str = Depends(obtener
 
 
 @app.post("/api/v1/recomendaciones/{recomendacion_id}/aprobar", response_model=AprobarRechazarResponse, tags=["Recomendaciones"])
-def aprobar_recomendacion(recomendacion_id: str, org_id: str = Depends(obtener_org_id)):
-    rec = recommendation_service.cambiar_estado(recomendacion_id, "APROBADA")
-    if not rec or rec.get("org_id") != org_id:
+def aprobar_recomendacion(recomendacion_id: str, perfil: dict = Depends(obtener_perfil_autenticado)):
+    rec = data_service.aprobar_recomendacion_operativa(recomendacion_id, perfil["id"])
+    if not rec:
         error_http(404, "RECOMENDACION_NO_ENCONTRADA", "No existe recomendación para la organización.")
-    return {"recomendacion_id": recomendacion_id, "estado": "APROBADA", "mensaje": "Recomendación aprobada; la plataforma debe crear la orden o transferencia.", "datos_para_plataforma": rec}
+    return {"recomendacion_id": recomendacion_id, "estado": "CONFIRMADA", "mensaje": "Recomendación aprobada y operación creada.", "datos_para_plataforma": rec}
 
 
 @app.post("/api/v1/recomendaciones/{recomendacion_id}/rechazar", response_model=AprobarRechazarResponse, tags=["Recomendaciones"])
@@ -189,6 +196,19 @@ def rechazar_recomendacion(recomendacion_id: str, org_id: str = Depends(obtener_
     if not rec or rec.get("org_id") != org_id:
         error_http(404, "RECOMENDACION_NO_ENCONTRADA", "No existe recomendación para la organización.")
     return {"recomendacion_id": recomendacion_id, "estado": "RECHAZADA", "mensaje": "Recomendación rechazada.", "datos_para_plataforma": rec}
+
+
+@app.post("/api/v1/alertas/evaluar", tags=["Alertas"])
+def evaluar_alertas(perfil: dict = Depends(obtener_perfil_autenticado)):
+    return data_service.generar_alertas_organizacion(perfil["org_id"], perfil["id"])
+
+
+@app.post("/api/v1/alertas/{alerta_id}/resolver", tags=["Alertas"])
+def resolver_alerta(alerta_id: str, datos: ResolverAlertaRequest, perfil: dict = Depends(obtener_perfil_autenticado)):
+    resultado = data_service.resolver_alerta(alerta_id, perfil["id"], datos.comentario)
+    if not resultado:
+        error_http(404, "ALERTA_NO_ENCONTRADA", "No existe alerta para resolver.")
+    return resultado
 
 
 @app.post("/api/v1/modelos/reentrenar", status_code=status.HTTP_202_ACCEPTED, response_model=EstadoReentrenamiento, tags=["Reentrenamiento"])

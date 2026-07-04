@@ -27,7 +27,10 @@ class SupabaseRepository:
             return []
         query = self.client.table(tabla).select("*")
         for columna, valor in (filtros or {}).items():
-            query = query.eq(columna, valor)
+            if valor is None:
+                query = query.is_(columna, "null")
+            else:
+                query = query.eq(columna, valor)
         if limite:
             query = query.limit(limite)
         respuesta = query.execute()
@@ -76,6 +79,12 @@ class SupabaseRepository:
             query = query.eq(columna, valor)
         respuesta = query.execute()
         return respuesta.data or []
+
+    def rpc(self, nombre: str, params: dict[str, Any] | None = None) -> Any:
+        if not self.client:
+            return None
+        respuesta = self.client.rpc(nombre, params or {}).execute()
+        return respuesta.data
 
     def usuario_por_jwt(self, jwt: str) -> dict | None:
         if not self.client:

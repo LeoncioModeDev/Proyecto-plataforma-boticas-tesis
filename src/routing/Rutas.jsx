@@ -63,9 +63,6 @@ import PaginaLotesBotica from '@/pages/pharmacy-portal/PaginaLotesBotica'
 import PaginaMovimientosBotica from '@/pages/pharmacy-portal/PaginaMovimientosBotica'
 import PaginaDashboardBotica from '@/pages/pharmacy-portal/PaginaDashboardBotica'
 import PaginaTransferenciasBotica from '@/pages/pharmacy-portal/PaginaTransferenciasBotica'
-import PaginaAlertasBotica from '@/pages/pharmacy-portal/PaginaAlertasBotica'
-import PaginaMLBotica from '@/pages/pharmacy-portal/PaginaMLBotica'
-import PaginaRecomendacionesBotica from '@/pages/pharmacy-portal/PaginaRecomendacionesBotica'
 
 // Portal Operaciones
 import PaginaDashboardOperaciones from '@/pages/operations-portal/PaginaDashboardOperaciones'
@@ -83,8 +80,6 @@ import PaginaVerProveedorOperaciones from '@/pages/central-portal/suppliers-modu
 import PaginaOrdenesCompraOperaciones from '@/pages/operations-portal/suppliers-module/PaginaOrdenesCompra'
 import PaginaNuevaOrdenCompraOperaciones from '@/pages/operations-portal/suppliers-module/PaginaNuevaOrdenCompra'
 import PaginaAlertasOperaciones from '@/pages/operations-portal/PaginaAlertas'
-import PaginaPrediccionesOperaciones from '@/pages/operations-portal/ml-module/PaginaPredicciones'
-import PaginaAlertasDemandaOperaciones from '@/pages/operations-portal/ml-module/PaginaAlertasDemanda'
 // Reused from Central Portal for Operations
 import FormularioProductoOperaciones from '@/pages/central-portal/inventory-module/catalog/FormularioProducto'
 import DetalleProductoOperaciones from '@/pages/central-portal/inventory-module/catalog/DetalleProducto'
@@ -221,9 +216,6 @@ export default function Rutas() {
         <Route path="/botica/movimientos" element={<PaginaMovimientosBotica />} />
         <Route path="/botica/dashboard" element={<PaginaDashboardBotica />} />
         <Route path="/botica/transferencias" element={<PaginaTransferenciasBotica />} />
-        <Route path="/botica/alertas" element={<PaginaAlertasBotica />} />
-        <Route path="/botica/ml" element={<PaginaMLBotica />} />
-        <Route path="/botica/recomendaciones" element={<PaginaRecomendacionesBotica />} />
       </Route>
 
       {/* Portal Operaciones (solo OPERADOR) */}
@@ -264,8 +256,6 @@ export default function Rutas() {
         <Route path="/operaciones/recepciones/:id" element={<DetalleRecepcionOperaciones />} />
         <Route path="/operaciones/administracion/ventas-historicas" element={<PaginaVentasHistoricas />} />
         <Route path="/operaciones/alertas" element={<PaginaAlertasOperaciones />} />
-        <Route path="/operaciones/ml/predicciones" element={<PaginaPrediccionesOperaciones />} />
-        <Route path="/operaciones/ml/alertas-demanda" element={<PaginaAlertasDemandaOperaciones />} />
       </Route>
 
       {/* Panel ML (solo ADMIN) */}

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Boxes, AlertTriangle, XCircle, TrendingUp, ClipboardList, Truck, Edit, List, Package, Settings } from 'lucide-react'
+import { Boxes, AlertTriangle, XCircle, TrendingUp, ClipboardList, Truck, Edit, List, Package, Settings, Lock, Unlock } from 'lucide-react'
 import TarjetaMetrica from '@/components/charts/TarjetaMetrica'
 import Tabla from '@/components/common/Tabla'
 
@@ -26,7 +26,6 @@ export default function PaginaStock() {
   const esAdminCentral = usuario?.rol === ROLES.ADMIN_CENTRAL
 
   useEffect(() => {
-    setCargando(true)
     obtenerStockPorUbicacion()
       .then(data => {
         setDatos(data.map(s => ({ ...s, estadoAlerta: clasificarAlerta(s) })))
@@ -45,6 +44,8 @@ export default function PaginaStock() {
   if (filtroEstado) filtrados = filtrados.filter(s => s.estadoAlerta === filtroEstado)
 
   const totalStock = filtrados.reduce((a, s) => a + s.stockDisponible, 0)
+  const totalComprometido = filtrados.reduce((a, s) => a + (s.stockComprometido || 0), 0)
+  const totalLibre = filtrados.reduce((a, s) => a + (s.stockLibre || 0), 0)
   const totalPorRecibir = filtrados.reduce((a, s) => a + (s.stockPorRecibir || 0), 0)
   const totalEnTransito = filtrados.reduce((a, s) => a + (s.stockEnTransito || 0), 0)
   const bajoStock = filtrados.filter(s => s.estadoAlerta === 'bajo').length
@@ -69,6 +70,12 @@ export default function PaginaStock() {
         {r.stockDisponible === 0 && <XCircle className="h-4 w-4 text-estado-critico" />}
         {r.stockDisponible > 0 && r.stockDisponible < r.stockMinimo && <AlertTriangle className="h-4 w-4 text-estado-advertencia" />}
       </span>
+    )},
+    { campo: 'stockComprometido', encabezado: 'Comprometido', render: (r) => (
+      <span className={r.stockComprometido > 0 ? 'text-estado-advertencia font-medium' : 'text-secundario'}>{r.stockComprometido ?? 0}</span>
+    )},
+    { campo: 'stockLibre', encabezado: 'Stock Libre', render: (r) => (
+      <span className={r.stockLibre <= 0 ? 'text-estado-critico font-semibold' : 'text-principal font-medium'}>{r.stockLibre ?? 0}</span>
     )},
     { campo: 'stockPorRecibir', encabezado: 'Stock Por Recibir', render: (r) => (
       <span className={r.stockPorRecibir > 0 ? 'text-marca-principal font-medium' : 'text-secundario'}>{r.stockPorRecibir ?? 0}</span>
@@ -101,8 +108,10 @@ export default function PaginaStock() {
   return (
     <div className="space-y-6">
       <h1 className="text-h1 text-principal">Stock y Existencias</h1>
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
         <TarjetaMetrica etiqueta="Stock Disponible" valor={formatearNumero(totalStock)} icono={Boxes} />
+        <TarjetaMetrica etiqueta="Stock Libre" valor={formatearNumero(totalLibre)} icono={Unlock} />
+        <TarjetaMetrica etiqueta="Comprometido" valor={formatearNumero(totalComprometido)} icono={Lock} />
         <TarjetaMetrica etiqueta="Por Recibir" valor={formatearNumero(totalPorRecibir)} icono={ClipboardList} />
         <TarjetaMetrica etiqueta="En Tránsito" valor={formatearNumero(totalEnTransito)} icono={Truck} />
         <TarjetaMetrica etiqueta="Bajo Stock" valor={bajoStock} icono={AlertTriangle} />

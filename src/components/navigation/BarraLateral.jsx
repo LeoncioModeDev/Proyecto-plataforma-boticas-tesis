@@ -25,6 +25,7 @@ import {
   UserPlus,
   DollarSign,
   History,
+  Tags,
 } from "lucide-react";
 import { cn } from "@/utilities/cn";
 import useAutenticacion from "@/state/useAutenticacion";
@@ -45,6 +46,7 @@ const itemsAdminCentral = [
       ruta: "/central/inventario",
       subItems: [
         { etiqueta: "Productos", ruta: "/central/inventario/catalogo", icono: Package },
+        { etiqueta: "Categorías terapéuticas", ruta: "/central/inventario/categorias-terapeuticas", icono: Tags },
         { etiqueta: "Stock actual", ruta: "/central/inventario/stock", icono: Boxes },
         { etiqueta: "Lotes", ruta: "/central/inventario/lotes", icono: CalendarClock },
         { etiqueta: "Movimientos", ruta: "/central/inventario/movimientos", icono: ArrowLeftRight },
@@ -276,24 +278,6 @@ const itemsNavegacion = {
       ],
     },
     { etiqueta: "Alertas", ruta: "/operaciones/alertas", icono: Bell },
-    {
-      tipo: "modulo",
-      etiqueta: "Machine Learning",
-      icono: BrainCircuit,
-      ruta: "/operaciones/ml/predicciones",
-      subItems: [
-        {
-          etiqueta: "Predicciones",
-          ruta: "/operaciones/ml/predicciones",
-          icono: BrainCircuit,
-        },
-        {
-          etiqueta: "Alertas Demanda",
-          ruta: "/operaciones/ml/alertas-demanda",
-          icono: Bell,
-        },
-      ],
-    },
   ],
   [ROLES.VISOR_BOTICA]: [
     {
@@ -302,9 +286,6 @@ const itemsNavegacion = {
       icono: LayoutDashboard,
     },
     { etiqueta: "Stock actual", ruta: "/botica/stock", icono: Boxes },
-    { etiqueta: "Precios importados", ruta: "/botica/precios", icono: DollarSign },
-    { etiqueta: "Stock histórico importados", ruta: "/botica/stock-historico", icono: History },
-    { etiqueta: "Ventas históricas", ruta: "/botica/ventas-historicas", icono: BarChart3 },
     { etiqueta: "Lotes", ruta: "/botica/lotes", icono: CalendarClock },
     {
       etiqueta: "Movimientos",
@@ -315,13 +296,6 @@ const itemsNavegacion = {
       etiqueta: "Transferencias",
       ruta: "/botica/transferencias",
       icono: Truck,
-    },
-    { etiqueta: "Alertas", ruta: "/botica/alertas", icono: Bell },
-    { etiqueta: "Pronóstico ML", ruta: "/botica/ml", icono: BrainCircuit },
-    {
-      etiqueta: "Recomendaciones",
-      ruta: "/botica/recomendaciones",
-      icono: Lightbulb,
     },
   ],
 };

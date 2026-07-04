@@ -8,7 +8,7 @@ import Modal from '@/components/common/Modal'
 import ModalConfirmar from '@/components/common/ModalConfirmar'
 import TarjetaMetrica from '@/components/charts/TarjetaMetrica'
 import { ESTADOS_TRANSFERENCIA, ETIQUETAS_TRANSFERENCIA, COLORES_TRANSFERENCIA, ICONOS_ESTADO_TRANSFERENCIA } from '@/constants/transferencias'
-import { obtenerTransferencias, enviarTransferencia, cancelarTransferencia, confirmarDevolucionOrigen } from '@/services/supabase/transferencias'
+import { obtenerTransferencias, aprobarTransferencia, enviarTransferencia, cancelarTransferencia, confirmarDevolucionOrigen } from '@/services/supabase/transferencias'
 import { formatearFechaCorta } from '@/utilities/formatearFecha'
 
 const MAPEO_COLORES = {
@@ -23,6 +23,7 @@ const MAPEO_COLORES = {
 const OPCIONES_ESTADO = [
   { valor: '', etiqueta: 'Todas' },
   { valor: ESTADOS_TRANSFERENCIA.CREADA, etiqueta: ETIQUETAS_TRANSFERENCIA[ESTADOS_TRANSFERENCIA.CREADA] },
+  { valor: ESTADOS_TRANSFERENCIA.APROBADA, etiqueta: ETIQUETAS_TRANSFERENCIA[ESTADOS_TRANSFERENCIA.APROBADA] },
   { valor: ESTADOS_TRANSFERENCIA.EN_TRANSITO, etiqueta: ETIQUETAS_TRANSFERENCIA[ESTADOS_TRANSFERENCIA.EN_TRANSITO] },
   { valor: ESTADOS_TRANSFERENCIA.RECIBIDA, etiqueta: ETIQUETAS_TRANSFERENCIA[ESTADOS_TRANSFERENCIA.RECIBIDA] },
   { valor: ESTADOS_TRANSFERENCIA.CANCELADA, etiqueta: ETIQUETAS_TRANSFERENCIA[ESTADOS_TRANSFERENCIA.CANCELADA] },
@@ -39,6 +40,7 @@ export default function PaginaTransferencias() {
   const [error, setError] = useState(null)
   const [fefoModal, setFefoModal] = useState(null)
   const [accionModal, setAccionModal] = useState(null)
+  const [confirmarAprobacion, setConfirmarAprobacion] = useState(null)
   const [confirmarEnvio, setConfirmarEnvio] = useState(null)
   const [confirmarDevolucion, setConfirmarDevolucion] = useState(null)
 
@@ -90,6 +92,17 @@ export default function PaginaTransferencias() {
       cantidadTotal,
       origenNombre: t.origen?.nombre || (t.origenTipo === 'drogueria' ? 'Droguería Central' : t.origenId),
       destinoNombre: t.destino?.nombre || t.destinoId,
+    }
+  }
+
+  async function handleAprobarConfirmado() {
+    if (!confirmarAprobacion) return
+    try {
+      await aprobarTransferencia(confirmarAprobacion)
+      setConfirmarAprobacion(null)
+      await cargarTransferencias()
+    } catch (e) {
+      setError(e.message)
     }
   }
 
@@ -218,8 +231,14 @@ export default function PaginaTransferencias() {
         <div className="flex gap-1">
           {r.estado === ESTADOS_TRANSFERENCIA.CREADA && (
             <>
-              <Boton variante="icono" icono={ArrowRight} className="text-marca-principal hover:bg-marca-claro" onClick={() => setConfirmarEnvio(r.id)} title="Enviar" />
+              <Boton variante="icono" icono={CheckCircle} className="text-estado-exito hover:bg-verde-claro" onClick={() => setConfirmarAprobacion(r.id)} title="Aprobar" />
               <Boton variante="icono" icono={X} className="text-estado-critico hover:bg-rojo-claro" onClick={() => setAccionModal({ tipo: 'cancelar', id: r.id })} title="Cancelar" />
+            </>
+          )}
+          {r.estado === ESTADOS_TRANSFERENCIA.APROBADA && (
+            <>
+              <Boton variante="icono" icono={ArrowRight} className="text-marca-principal hover:bg-marca-claro" onClick={() => setConfirmarEnvio(r.id)} title="Despachar" />
+              <Boton variante="icono" icono={X} className="text-estado-critico hover:bg-rojo-claro" onClick={() => setAccionModal({ tipo: 'cancelar', id: r.id })} title="Cancelar y liberar comprometido" />
             </>
           )}
           {r.estado === ESTADOS_TRANSFERENCIA.PENDIENTE_DEVOLUCION && (
@@ -233,6 +252,7 @@ export default function PaginaTransferencias() {
   const estadisticas = {
     total: datos.length,
     creadas: datos.filter(t => t.estado === ESTADOS_TRANSFERENCIA.CREADA).length,
+    aprobadas: datos.filter(t => t.estado === ESTADOS_TRANSFERENCIA.APROBADA).length,
     enTransito: datos.filter(t => t.estado === ESTADOS_TRANSFERENCIA.EN_TRANSITO).length,
     recibidas: datos.filter(t => t.estado === ESTADOS_TRANSFERENCIA.RECIBIDA).length,
     canceladas: datos.filter(t => t.estado === ESTADOS_TRANSFERENCIA.CANCELADA).length,
@@ -262,9 +282,10 @@ export default function PaginaTransferencias() {
         </div>
       )}
 
-      <div className="grid grid-cols-2 md:grid-cols-7 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
         <TarjetaMetrica etiqueta="Total" valor={estadisticas.total} icono={Truck} />
         <TarjetaMetrica etiqueta="Creadas" valor={estadisticas.creadas} icono={Clock} />
+        <TarjetaMetrica etiqueta="Aprobadas" valor={estadisticas.aprobadas} icono={CheckCircle} />
         <TarjetaMetrica etiqueta="En Tránsito" valor={estadisticas.enTransito} icono={ArrowRight} />
         <TarjetaMetrica etiqueta="Recibidas" valor={estadisticas.recibidas} icono={CheckCircle} />
         <TarjetaMetrica etiqueta="Pend. Devolución" valor={estadisticas.pendientesDevolucion} icono={RotateCcw} />
@@ -348,12 +369,21 @@ export default function PaginaTransferencias() {
       </Modal>
 
       <ModalConfirmar
+        abierto={!!confirmarAprobacion}
+        alCerrar={() => setConfirmarAprobacion(null)}
+        alConfirmar={handleAprobarConfirmado}
+        titulo="Aprobar transferencia"
+        mensaje="Al aprobar, el stock quedará comprometido en la ubicación origen, pero todavía no se descontarán lotes ni stock disponible."
+        etiquetaBoton="Aprobar"
+      />
+
+      <ModalConfirmar
         abierto={!!confirmarEnvio}
         alCerrar={() => setConfirmarEnvio(null)}
         alConfirmar={handleEnviarConfirmado}
-        titulo="Confirmar envío de transferencia"
-        mensaje="Al enviar, el stock será descontado de la ubicación origen y pasará a stock en tránsito en la botica destino."
-        etiquetaBoton="Confirmar envío"
+        titulo="Despachar transferencia"
+        mensaje="Al despachar, se descontarán lotes y stock disponible del origen, se liberará el stock comprometido y la cantidad pasará a tránsito en destino."
+        etiquetaBoton="Despachar"
       />
 
       <ModalConfirmar

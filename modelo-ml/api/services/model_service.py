@@ -92,6 +92,7 @@ class ModelService:
             "mejor_modelo_evaluado": "SARIMA + XGBoost",
             "modelo_exportado": self.artefacto.get("tipo_modelo"),
             "fecha_carga": self.cargado_en,
+            "fecha_entrenamiento": self.artefacto.get("fecha_entrenamiento") or self.metricas.get("fecha_entrenamiento") or self.metricas.get("split", {}).get("train_fin"),
             "mae": hibrido.get("mae"),
             "rmse": hibrido.get("rmse"),
             "mape": hibrido.get("mape"),
@@ -102,10 +103,23 @@ class ModelService:
             },
             "series_sarima": series.get("sarima", 0),
             "series_fallback": series.get("fallback", 0),
+            "total_predicciones": int(len(self.predicciones)) if not self.predicciones.empty else 0,
+            "ultima_inferencia": self._ultima_fecha(self.inferencias),
+            "errores_recientes": [],
             "modo": "SUPABASE" if config.modo_supabase else "LOCAL",
             "modelo_pickle_cargado": not bool(self.error_carga),
             "error_carga": self.error_carga,
         }
+
+    def _ultima_fecha(self, df: pd.DataFrame) -> str | None:
+        if df.empty:
+            return None
+        for columna in ("created_at", "fecha_pred", "fecha_generacion"):
+            if columna in df.columns:
+                serie = pd.to_datetime(df[columna], errors="coerce").dropna()
+                if not serie.empty:
+                    return serie.max().isoformat()
+        return None
 
 
 model_service = ModelService()

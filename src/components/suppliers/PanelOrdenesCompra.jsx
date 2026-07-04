@@ -84,6 +84,20 @@ export default function PanelOrdenesCompra({ ordenes, onNueva, onActualizar, esA
       campo: 'cantidadProductos', encabezado: 'Productos', render: (r) => <span>{(r.items || []).length}</span>,
     },
     {
+      campo: 'cantidades', encabezado: 'Cantidades', render: (r) => {
+        const solicitada = (r.items || []).reduce((s, i) => s + (i.cantidad || 0), 0)
+        const recibida = (r.items || []).reduce((s, i) => s + (i.cantidadRecibida || 0), 0)
+        const pendiente = (r.items || []).reduce((s, i) => s + (i.cantidadPendiente ?? Math.max((i.cantidad || 0) - (i.cantidadRecibida || 0), 0)), 0)
+        return (
+          <div className="text-xs leading-5">
+            <div><span className="text-secundario">Solicitada:</span> <span className="font-medium text-principal">{solicitada}</span></div>
+            <div><span className="text-secundario">Recibida:</span> <span className="font-medium text-principal">{recibida}</span></div>
+            <div><span className="text-secundario">Pendiente:</span> <span className={pendiente > 0 ? 'font-medium text-estado-advertencia' : 'font-medium text-estado-exito'}>{pendiente}</span></div>
+          </div>
+        )
+      },
+    },
+    {
       campo: 'totalEstimado', encabezado: 'Total Est.', render: (r) => {
         const total = (r.items || []).reduce((s, i) => s + i.cantidad * i.precioUnitario, 0)
         return <span className="font-semibold">S/ {total.toFixed(2)}</span>
@@ -236,7 +250,10 @@ export default function PanelOrdenesCompra({ ordenes, onNueva, onActualizar, esA
                     {(detalleOC.items || []).map((item, idx) => (
                       <tr key={idx}>
                         <td className="px-3 py-2 text-principal">{item.productoNombre}</td>
-                        <td className="px-3 py-2 text-right">{item.cantidad}</td>
+                        <td className="px-3 py-2 text-right">
+                          <div>{item.cantidad}</div>
+                          <div className="text-xs text-secundario">Rec. {item.cantidadRecibida || 0} · Pend. {item.cantidadPendiente ?? Math.max((item.cantidad || 0) - (item.cantidadRecibida || 0), 0)}</div>
+                        </td>
                         <td className="px-3 py-2 text-right">S/ {item.precioUnitario.toFixed(2)}</td>
                         <td className="px-3 py-2 text-right font-medium">S/ {(item.cantidad * item.precioUnitario).toFixed(2)}</td>
                       </tr>

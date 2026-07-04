@@ -9,6 +9,12 @@ function componerMensaje(alerta) {
     case 'vencimiento': return `${nombre} próximo a vencer en ${botica}`
     case 'sobrestock': return `${nombre} con sobrestock en ${botica}`
     case 'prediccion': return `Predicción: ${nombre} en ${botica}`
+    case 'stock_critico': return `${nombre} en nivel crítico en ${botica}`
+    case 'stock_bajo': return `${nombre} bajo mínimo en ${botica}`
+    case 'retraso_recepcion': return `Recepción retrasada de ${nombre}`
+    case 'retraso_transferencia': return `Transferencia retrasada de ${nombre} hacia ${botica}`
+    case 'riesgo_desabastecimiento': return `Riesgo de desabastecimiento: ${nombre} en ${botica}`
+    case 'riesgo_stock_seguridad': return `Riesgo bajo stock de seguridad: ${nombre} en ${botica}`
     default: return `Alerta de ${nombre} en ${botica}`
   }
 }
@@ -30,8 +36,17 @@ const useAlertas = create((set, get) => ({
         boticaId: a.boticaId,
         urgencia: a.urgencia,
         resuelta: a.resuelta,
+        mensajeOriginal: a.mensaje,
+        condicionHash: a.condicionHash,
+        referenciaTipo: a.referenciaTipo,
+        referenciaId: a.referenciaId,
+        stockActual: a.stockActual,
+        stockProyectado: a.stockProyectado,
+        cantidadRecomendada: a.cantidadRecomendada,
+        fechaVencimiento: a.fechaVencimiento,
+        metadata: a.metadata,
         fechaCreacion: a.generadoEn,
-        mensaje: componerMensaje(a),
+        mensaje: a.mensaje || componerMensaje(a),
         leida: false,
       }))
       set({ alertas: mapeadas, cargando: false })

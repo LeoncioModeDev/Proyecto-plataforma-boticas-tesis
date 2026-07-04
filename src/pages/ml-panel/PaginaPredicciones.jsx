@@ -40,7 +40,7 @@ export default function PaginaPredicciones() {
         setProductoId(productosData[0]?.id || '')
         setIndicadoresDatos({
           seriesDisponibles: new Set((ventasData.datos || []).map(v => `${v.botica_id}-${v.producto_id}`)).size,
-          semanasHistoricas: new Set((ventasData.datos || []).map(v => v.fecha_venta?.slice(0, 7)).filter(Boolean)).size,
+          semanasHistoricas: null,
           categorias: new Set(productosData.map(p => p.categoriaTerapeuticaId || p.categoriaTerapeuticaNombre || p.clasificacion).filter(Boolean)).size,
           productosSinCategoria: productosData.filter(p => !p.categoriaTerapeuticaId && !p.categoriaTerapeuticaNombre && !p.clasificacion).length,
           boticasConVentas: new Set((ventasData.datos || []).map(v => v.botica_id).filter(Boolean)).size,
@@ -96,12 +96,34 @@ export default function PaginaPredicciones() {
     { campo: 'semana', encabezado: 'Semana' },
     { campo: 'periodo_inicio', encabezado: 'Fecha inicial' },
     { campo: 'periodo_fin', encabezado: 'Fecha final' },
-    { campo: 'cantidad_predicha', encabezado: 'Demanda estimada', render: r => Number(r.cantidad_predicha).toFixed(2) },
-    { campo: 'intervalo_inf', encabezado: 'Intervalo inferior', render: r => Number(r.intervalo_inf).toFixed(2) },
-    { campo: 'intervalo_sup', encabezado: 'Intervalo superior', render: r => Number(r.intervalo_sup).toFixed(2) },
+    {
+      campo: 'cantidad_predicha',
+      encabezado: 'Demanda estimada',
+      render: r => (
+        <span title={`Exacto: ${Number(r.cantidad_predicha).toFixed(2)} | SARIMA: ${r.prediccion_sarima ?? '-'} | XGBoost: ${r.prediccion_xgboost ?? '-'} | alpha: ${r.alpha ?? '-'} | método: ${r.metodo_aplicado ?? '-'}`}>
+          {Math.ceil(Number(r.cantidad_predicha))} unidades
+        </span>
+      ),
+    },
+    {
+      campo: 'rango_esperado',
+      encabezado: 'Rango esperado',
+      render: r => (
+        <span title={`Inferior exacto: ${Number(r.intervalo_inf).toFixed(2)} | Superior exacto: ${Number(r.intervalo_sup).toFixed(2)}`}>
+          Entre {Math.floor(Number(r.intervalo_inf))} y {Math.ceil(Number(r.intervalo_sup))} unidades
+        </span>
+      ),
+    },
+    { campo: 'estrategia', encabezado: 'Estrategia' },
+    { campo: 'nivelMadurez', encabezado: 'Nivel de madurez' },
   ]
 
-  const filas = resultado?.predicciones?.map((p, index) => ({ ...p, semana: index + 1 })) || []
+  const filas = resultado?.predicciones?.map((p, index) => ({
+    ...p,
+    semana: index + 1,
+    estrategia: resultado.estrategia_utilizada,
+    nivelMadurez: resultado.nivel_madurez,
+  })) || []
 
   return (
     <div className="space-y-6">
@@ -128,9 +150,9 @@ export default function PaginaPredicciones() {
 
       <div className="grid gap-3 md:grid-cols-3">
         <div><p className="text-etiqueta text-secundario">Series disponibles</p><p className="font-semibold text-principal">{indicadoresDatos?.seriesDisponibles ?? '-'}</p></div>
-        <div><p className="text-etiqueta text-secundario">Semanas históricas</p><p className="font-semibold text-principal">{indicadoresDatos?.semanasHistoricas ?? '-'}</p></div>
+        <div><p className="text-etiqueta text-secundario">Semanas históricas</p><p className="font-semibold text-principal">{madurez?.semanas_historial ?? 'Sin calcular'}</p></div>
         <div><p className="text-etiqueta text-secundario">Boticas con ventas</p><p className="font-semibold text-principal">{indicadoresDatos?.boticasConVentas ?? '-'}</p></div>
-        <div><p className="text-etiqueta text-secundario">Semanas de historial</p><p className="font-semibold text-principal">{madurez?.semanas_historial ?? 'Sin calcular'}</p></div>
+        <div><p className="text-etiqueta text-secundario">Fuente de madurez</p><p className="font-semibold text-principal">Backend ML</p></div>
         <div><p className="text-etiqueta text-secundario">Nivel de madurez</p><p className="font-semibold text-principal">{madurez?.nivel_madurez || 'Sin calcular'}</p></div>
         <div><p className="text-etiqueta text-secundario">Estrategia estimada</p><p className="font-semibold text-principal">{madurez?.estrategia_disponible || 'Sin calcular'}</p></div>
       </div>

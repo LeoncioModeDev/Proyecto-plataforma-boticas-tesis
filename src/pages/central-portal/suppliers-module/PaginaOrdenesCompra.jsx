@@ -23,7 +23,22 @@ export default function PaginaOrdenesCompra() {
     }
   }
 
-  useEffect(() => { cargar() }, [])
+  useEffect(() => {
+    let activo = true
+
+    listarOrdenes()
+      .then(data => {
+        if (activo) setOrdenes(data)
+      })
+      .catch(e => {
+        console.error('Error cargando órdenes:', e)
+      })
+      .finally(() => {
+        if (activo) setCargando(false)
+      })
+
+    return () => { activo = false }
+  }, [])
 
   if (cargando) {
     return (

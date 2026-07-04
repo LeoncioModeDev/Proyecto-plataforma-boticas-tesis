@@ -14,7 +14,7 @@ const TRANSICIONES_VALIDAS: Record<string, string[]> = {
   pendiente:            ["aprobada", "rechazada"],
   aprobada:             ["por_recibir", "cancelada"],
   por_recibir:          ["recibida", "recibida_parcial", "recibida_con_observacion", "en_devolucion", "cancelada"],
-  recibida_parcial:     ["recibida", "recibida_con_observacion", "en_devolucion"],
+  recibida_parcial:     ["recibida", "recibida_con_observacion", "en_devolucion", "cancelada"],
   recibida:             [],
   recibida_con_observacion: [],
   en_devolucion:        [],
@@ -126,7 +126,15 @@ async function listarOC(supabase: any, perfil: PerfilUsuario, url: URL) {
         id, razon_social,
         monedas!moneda_id(id, codigo, simbolo)
       ),
-      ordenes_compra_items(*, productos(id, nombre_comercial))
+      ordenes_compra_items(*, productos(id, nombre_comercial)),
+      recepciones_orden(
+        id,
+        resultado,
+        fecha_recepcion,
+        observacion,
+        registrado_por,
+        recepcion_items(*, productos(id, nombre_comercial), lotes(id, numero_lote, fecha_vencimiento))
+      )
     `)
     .eq("org_id", perfil.org_id)
     .order("created_at", { ascending: false });
@@ -344,16 +352,12 @@ async function aprobarOC(supabase: any, perfil: PerfilUsuario, id: string) {
     return json({ error: `No se puede aprobar una orden en estado ${oc.estado}` }, 400);
   }
 
-  const { error: errUpd } = await supabase
-    .from("ordenes_compra")
-    .update({
-      estado: "aprobada",
-      aprobado_por: perfil.id,
-      fecha_aprobacion: new Date().toISOString(),
-    })
-    .eq("id", id);
+  const { error: errRpc } = await supabase.rpc("aprobar_orden_compra", {
+    p_orden_compra_id: id,
+    p_usuario_id: perfil.id,
+  });
 
-  if (errUpd) return json({ error: errUpd.message }, 400);
+  if (errRpc) return json({ error: errRpc.message }, 400);
 
   return json({ exito: true, estado: "aprobada" });
 }
@@ -371,15 +375,12 @@ async function marcarPorRecibir(supabase: any, perfil: PerfilUsuario, id: string
     return json({ error: `No se puede marcar como por_recibir una orden en estado ${oc.estado}` }, 400);
   }
 
-  const { error: errUpd } = await supabase
-    .from("ordenes_compra")
-    .update({ estado: "por_recibir" })
-    .eq("id", id);
+  const { error: errRpc } = await supabase.rpc("marcar_orden_por_recibir", {
+    p_orden_compra_id: id,
+    p_usuario_id: perfil.id,
+  });
 
-  if (errUpd) return json({ error: errUpd.message }, 400);
-
-  const { error: errStock } = await incrementarStockPorRecibir(supabase, perfil.org_id, id);
-  if (errStock) return json({ error: errStock.message }, 400);
+  if (errRpc) return json({ error: errRpc.message }, 400);
 
   return json({ exito: true, estado: "por_recibir" });
 }
@@ -397,15 +398,11 @@ async function rechazarOC(supabase: any, perfil: PerfilUsuario, id: string, body
     return json({ error: `No se puede rechazar una orden en estado ${oc.estado}` }, 400);
   }
 
-  const { error } = await supabase
-    .from("ordenes_compra")
-    .update({
-      estado: "rechazada",
-      rechazado_por: perfil.id,
-      fecha_rechazo: new Date().toISOString(),
-      motivo_rechazo: body.motivo || null,
-    })
-    .eq("id", id);
+  const { error } = await supabase.rpc("rechazar_orden_compra", {
+    p_orden_compra_id: id,
+    p_usuario_id: perfil.id,
+    p_motivo: body.motivo || null,
+  });
 
   if (error) return json({ error: error.message }, 400);
   return json({ exito: true, estado: "rechazada" });
@@ -424,21 +421,13 @@ async function cancelarOC(supabase: any, perfil: PerfilUsuario, id: string, body
     return json({ error: `No se puede cancelar una orden en estado ${oc.estado}` }, 400);
   }
 
-  const { error } = await supabase
-    .from("ordenes_compra")
-    .update({
-      estado: "cancelada",
-      cancelado_por: perfil.id,
-      fecha_cancelacion: new Date().toISOString(),
-      motivo_cancelacion: body.motivo || null,
-    })
-    .eq("id", id);
+  const { error } = await supabase.rpc("cancelar_orden_compra", {
+    p_orden_compra_id: id,
+    p_usuario_id: perfil.id,
+    p_motivo: body.motivo || null,
+  });
 
   if (error) return json({ error: error.message }, 400);
-
-  if (oc.estado === "por_recibir") {
-    await revertirStockPorRecibir(supabase, perfil.org_id, id);
-  }
 
   return json({ exito: true, estado: "cancelada" });
 }
@@ -466,63 +455,7 @@ async function registrarRecepcion(supabase: any, perfil: PerfilUsuario, id: stri
       return json({ error: `No se puede recibir una orden en estado ${oc.estado}` }, 400);
     }
 
-    const { data: ocItems, error: errItems } = await supabase
-      .from("ordenes_compra_items")
-      .select("*")
-      .eq("orden_compra_id", id);
-    if (errItems) return json({ error: errItems.message }, 400);
-    const todosItems = ocItems || [];
-
-    // Obtener cantidades ya recibidas (solo recepciones aceptadas)
-    const { data: allRecs } = await supabase
-      .from("recepciones_orden")
-      .select("id, resultado")
-      .eq("orden_compra_id", id);
-    const prevIds = (allRecs || [])
-      .filter(r => r.resultado !== "en_devolucion")
-      .map(r => r.id);
-
-    let recepcionesPrevias: any[] = [];
-    if (prevIds.length > 0) {
-      const { data: r } = await supabase
-        .from("recepcion_items")
-        .select("producto_id, cantidad_recibida")
-        .in("recepcion_id", prevIds);
-      recepcionesPrevias = r || [];
-    }
-
-    const recibidoPrevio: Record<string, number> = {};
-    for (const r of recepcionesPrevias) {
-      recibidoPrevio[r.producto_id] = (recibidoPrevio[r.producto_id] || 0) + r.cantidad_recibida;
-    }
-
-    // CASO: Devolución total
-    if (resultado === "en_devolucion") {
-      if (!motivo_rechazo) return json({ error: "motivo_rechazo es requerido para devolución" }, 400);
-
-      // Revertir stock_por_recibir: quitar solo el saldo pendiente
-      const revertError = await revertirStockPorRecibir(supabase, perfil.org_id, id);
-      if (revertError?.error) return json({ error: revertError.error }, 400);
-
-      const { data: recepcion, error: errRec } = await supabase
-        .from("recepciones_orden")
-        .insert({
-          orden_compra_id: id,
-          resultado: "en_devolucion",
-          motivo_rechazo,
-          registrado_por: perfil.id,
-        })
-        .select("id")
-        .single();
-      if (errRec) return json({ error: errRec.message }, 400);
-
-      await supabase.from("ordenes_compra").update({ estado: "en_devolucion" }).eq("id", id);
-
-      return json({ exito: true, recepcion_id: recepcion.id, numero_recepcion: numRec });
-    }
-
-    // CASO: Recepción aceptada
-    if (!itemsRecibidos || !itemsRecibidos.length) {
+    if (resultado !== "en_devolucion" && (!itemsRecibidos || !itemsRecibidos.length)) {
       return json({ error: "Se requiere al menos un item en la recepción" }, 400);
     }
 
@@ -530,164 +463,18 @@ async function registrarRecepcion(supabase: any, perfil: PerfilUsuario, id: stri
       return json({ error: "La observación es obligatoria para recibida con observación" }, 400);
     }
 
-    const hoy = new Date().toISOString().split("T")[0];
-
-    // Validar cantidades
-    for (const item of itemsRecibidos) {
-      const { producto_id, cantidad_recibida, fecha_vencimiento } = item;
-      if (cantidad_recibida <= 0) {
-        return json({ error: `cantidad_recibida debe ser mayor a 0 para producto ${producto_id}` }, 400);
-      }
-      if (fecha_vencimiento && fecha_vencimiento < hoy) {
-        return json({ error: `La fecha de vencimiento del producto ${producto_id} no puede ser anterior a hoy` }, 400);
-      }
-      const itemOC = todosItems.find((i: any) => i.producto_id === producto_id);
-      if (!itemOC) return json({ error: `Producto ${producto_id} no está en la orden` }, 400);
-      const pendiente = itemOC.cantidad - (recibidoPrevio[producto_id] || 0);
-      if (cantidad_recibida > pendiente) {
-        return json({
-          error: `Producto ${producto_id}: recibido ${cantidad_recibida} excede el pendiente ${pendiente}`
-        }, 400);
-      }
-      if (resultado === "recibida_parcial" && cantidad_recibida >= pendiente) {
-        return json({
-          error: `Producto ${producto_id}: en recepción parcial la cantidad recibida (${cantidad_recibida}) debe ser menor al pendiente (${pendiente})`
-        }, 400);
-      }
-      if (["recibida", "recibida_con_observacion"].includes(resultado) && cantidad_recibida !== pendiente) {
-        return json({
-          error: `Producto ${producto_id}: en ${resultado} la cantidad recibida debe ser igual al pendiente (${pendiente})`
-        }, 400);
-      }
-    }
-
-    // Crear cabecera de recepción
-    const { data: numRec, error: errNum } = await supabase.rpc("generar_numero_recepcion", {
-      p_org_id: perfil.org_id,
+    const { data: resultadoRpc, error: errRpc } = await supabase.rpc("registrar_recepcion_orden_compra", {
+      p_orden_compra_id: id,
+      p_usuario_id: perfil.id,
+      p_resultado: resultado,
+      p_items: itemsRecibidos || [],
+      p_observacion: observacion || null,
+      p_motivo_rechazo: motivo_rechazo || null,
     });
-    if (errNum || !numRec) {
-      return json({ error: "Error al generar número de recepción: " + (errNum?.message || "respuesta vacía") }, 500);
-    }
 
-    const { data: recepcion, error: errRec } = await supabase
-      .from("recepciones_orden")
-      .insert({
-        orden_compra_id: id,
-        org_id: perfil.org_id,
-        numero_recepcion: numRec,
-        resultado,
-        observacion: observacion || null,
-        registrado_por: perfil.id,
-      })
-      .select("id")
-      .single();
-    if (errRec) return json({ error: errRec.message }, 400);
+    if (errRpc) return json({ error: errRpc.message }, 400);
 
-    let algunPendiente = false;
-
-    for (const item of itemsRecibidos) {
-      const { producto_id, numero_lote, fecha_vencimiento, cantidad_recibida } = item;
-      const itemOC = todosItems.find((i: any) => i.producto_id === producto_id);
-      if (!itemOC) continue;
-
-      const pendiente = itemOC.cantidad - (recibidoPrevio[producto_id] || 0);
-
-      // Crear o actualizar lote
-      let loteId: string | null = null;
-      if (numero_lote && fecha_vencimiento && cantidad_recibida > 0) {
-        const { data: loteExistente } = await supabase
-          .from("lotes")
-          .select("id, cantidad")
-          .eq("producto_id", producto_id)
-          .eq("numero_lote", numero_lote)
-          .eq("ubicacion_tipo", "drogueria")
-          .is("ubicacion_id", null)
-          .maybeSingle();
-
-        if (loteExistente) {
-          const { data: loteUpd } = await supabase
-            .from("lotes")
-            .update({ cantidad: loteExistente.cantidad + cantidad_recibida })
-            .eq("id", loteExistente.id)
-            .select("id")
-            .single();
-          loteId = loteUpd?.id;
-        } else {
-          const { data: loteNuevo } = await supabase
-            .from("lotes")
-            .insert({
-              producto_id,
-              ubicacion_tipo: "drogueria",
-              ubicacion_id: null,
-              numero_lote,
-              fecha_vencimiento,
-              cantidad: cantidad_recibida,
-              proveedor_id: oc.proveedor_id,
-              org_id: perfil.org_id,
-            })
-            .select("id")
-            .single();
-          loteId = loteNuevo?.id;
-        }
-      }
-
-      // Crear recepcion_item
-      const { error: errItem } = await supabase
-        .from("recepcion_items")
-        .insert({
-          recepcion_id: recepcion.id,
-          producto_id,
-          lote_id: loteId,
-          cantidad_solicitada: pendiente,
-          cantidad_recibida,
-          cantidad_devuelta: 0,
-        });
-      if (errItem) {
-        await supabase.from("recepciones_orden").delete().eq("id", recepcion.id);
-        return json({ error: errItem.message }, 400);
-      }
-
-      // Crear movimiento de entrada
-      if (cantidad_recibida > 0) {
-        const { error: errMov } = await supabase
-          .from("movimientos_inventario")
-          .insert({
-            producto_id,
-            lote_id: loteId,
-            ubicacion_tipo: "drogueria",
-            ubicacion_id: null,
-            tipo_movimiento: "entrada",
-            cantidad: cantidad_recibida,
-            motivo: `Recepción OC ${id}`,
-            usuario_id: perfil.id,
-            org_id: perfil.org_id,
-          });
-        if (errMov) {
-          await supabase.from("recepciones_orden").delete().eq("id", recepcion.id);
-          return json({ error: errMov.message }, 400);
-        }
-      }
-
-      // Determinar pendiente
-      const nuevoTotal = (recibidoPrevio[producto_id] || 0) + cantidad_recibida;
-      if (nuevoTotal < itemOC.cantidad) {
-        algunPendiente = true;
-      }
-    }
-
-    // Derivar estado de la OC
-    let nuevoEstado: string;
-    if (resultado === "recibida_con_observacion") {
-      nuevoEstado = "recibida_con_observacion";
-    } else if (algunPendiente) {
-      nuevoEstado = "recibida_parcial";
-    } else {
-      nuevoEstado = "recibida";
-    }
-
-    await actualizarEstadoOC(supabase, id, nuevoEstado, perfil.id);
-
-    return json({ exito: true, recepcion_id: recepcion.id, numero_recepcion: numRec });
+    return json(resultadoRpc);
   } catch (e) {
     console.error("Error en registrarRecepcion:", e);
     const mensaje = e instanceof Error ? e.message : String(e);
@@ -957,6 +744,7 @@ function normalizarOC(r: any) {
     creadoPor: r.creado_por,
     fechaEstimadaEntrega: r.fecha_estimada_entrega,
     fechaRealEntrega: r.fecha_real_entrega,
+    fechaPrimeraRecepcion: r.fecha_primera_recepcion,
     observaciones: r.observaciones,
     aprobadoPor: r.aprobado_por,
     fechaAprobacion: r.fecha_aprobacion,
@@ -967,13 +755,22 @@ function normalizarOC(r: any) {
     canceladoPor: r.cancelado_por,
     fechaCancelacion: r.fecha_cancelacion,
     motivoCancelacion: r.motivo_cancelacion,
-    items: (r.ordenes_compra_items || []).map((i: any) => ({
-      id: i.id,
-      productoId: i.producto_id,
-      productoNombre: i.productos?.nombre_comercial || "",
-      cantidad: i.cantidad,
-      precioUnitario: i.precio_unitario,
-    })),
+    items: (r.ordenes_compra_items || []).map((i: any) => {
+      const recibido = (r.recepciones_orden || [])
+        .filter((rec: any) => rec.resultado !== "en_devolucion")
+        .flatMap((rec: any) => rec.recepcion_items || [])
+        .filter((ri: any) => ri.producto_id === i.producto_id)
+        .reduce((sum: number, ri: any) => sum + (ri.cantidad_recibida || 0), 0);
+      return {
+        id: i.id,
+        productoId: i.producto_id,
+        productoNombre: i.productos?.nombre_comercial || "",
+        cantidad: i.cantidad,
+        cantidadRecibida: recibido,
+        cantidadPendiente: Math.max(i.cantidad - recibido, 0),
+        precioUnitario: i.precio_unitario,
+      };
+    }),
     recepciones: (r.recepciones_orden || []).map((rec: any) => ({
       id: rec.id,
       fechaRecepcion: rec.fecha_recepcion,
