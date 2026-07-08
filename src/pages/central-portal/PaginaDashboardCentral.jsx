@@ -60,10 +60,24 @@ export default function PaginaDashboardCentral() {
   const transferenciasEnTransito = transferencias.filter(t => t.estado === 'en_transito').length
 
   const ordenesCompletadas = ordenes.filter(o => o.estado === 'recibida' || o.estado === 'recibida_parcial').length
-  const fillRate = ordenes.length > 0 ? Math.round((ordenesCompletadas / ordenes.length) * 100) : null
+  const stockConCobertura = stock.filter(s => Number(s.cantidadDisponible || 0) >= Number(s.stockMinimo || 0)).length
+  const fillRate = ordenes.length > 0
+    ? Math.round((ordenesCompletadas / ordenes.length) * 100)
+    : (stock.length > 0 ? Math.round((stockConCobertura / stock.length) * 100) : null)
 
-  const sobrestockCount = stock.filter(s => (s.cantidadDisponible || 0) > 500).length
+  const sobrestockCount = stock.filter(s => s.stockMaximo && Number(s.cantidadDisponible || 0) > Number(s.stockMaximo)).length
   const tasaSobrestock = stock.length > 0 ? Math.round((sobrestockCount / stock.length) * 100) : null
+
+  const datosKPI = predicciones.slice(0, 12).map((p, i) => {
+    const confianza = Number(p.confianza ?? 0)
+    const confianzaPorcentaje = confianza <= 1 ? confianza * 100 : confianza
+    return {
+      mes: p.periodoInicio?.substring(0, 7) || `P-${i + 1}`,
+      mape: confianzaPorcentaje ? Math.max(0, Math.round(100 - confianzaPorcentaje)) : null,
+      fillRate,
+      tasaSobrestock,
+    }
+  }).reverse()
 
   const datosTendencia = (() => {
     const agrupado = {}
@@ -129,12 +143,7 @@ export default function PaginaDashboardCentral() {
       </Tarjeta>
       <Tarjeta titulo="Tendencia de KPIs" descripcion="Evolución mensual de MAPE, Fill Rate y Tasa de Sobrestock">
         {predicciones.length > 0 ? (
-          <GraficaLinea datos={predicciones.slice(0, 12).map((p, i) => ({
-            mes: `P-${i + 1}`,
-            mape: p.confianza ? (100 - p.confianza) : null,
-            fillRate: null,
-            tasaSobrestock: null,
-          }))} lineas={[
+            <GraficaLinea datos={datosKPI} lineas={[
             { clave: 'mape', etiqueta: 'MAPE (%)', color: '#107C41' },
             { clave: 'fillRate', etiqueta: 'Fill Rate (%)', color: '#0078D4' },
             { clave: 'tasaSobrestock', etiqueta: 'Sobrestock (%)', color: '#C239B3' },
@@ -147,15 +156,15 @@ export default function PaginaDashboardCentral() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {predicciones.slice(0, 6).map(pred => (
             <div key={pred.id} className="p-4 bg-fondo border border-estilo rounded-lg">
-              <p className="text-sm font-semibold text-principal">{pred.nombreProducto || 'Producto'}</p>
-              <p className="text-xs text-secundario">{pred.nombreBotica || pred.botica || '—'}</p>
-              <div className="mt-3">
-                <p className="text-lg sm:text-h2 text-marca-principal">{pred.cantidad_pronosticada ?? pred.demanda_estimada ?? '—'} uds</p>
+                <p className="text-sm font-semibold text-principal">{pred.nombreProducto || pred.productoId || 'Producto'}</p>
+                <p className="text-xs text-secundario">{pred.nombreBotica || pred.boticaId || '—'}</p>
+                <div className="mt-3">
+                <p className="text-lg sm:text-h2 text-marca-principal">{pred.cantidadPredicha ?? '—'} uds</p>
                 <p className="text-xs text-secundario">
-                  {(pred.intervalo_inf || pred.intervalo_sup) ? `Rango: ${pred.intervalo_inf ?? '?'} — ${pred.intervalo_sup ?? '?'}` : `Confianza: ${pred.confianza ?? '—'}%`}
+                  {(pred.intervaloInf || pred.intervaloSup) ? `Rango: ${pred.intervaloInf ?? '?'} - ${pred.intervaloSup ?? '?'}` : `Confianza: ${pred.confianza ?? '—'}%`}
                 </p>
               </div>
-              {pred.producto_id && <div className="mt-2"><Insignia color="verde">ID: {pred.producto_id}</Insignia></div>}
+              {pred.productoId && <div className="mt-2"><Insignia color="verde">ID: {pred.productoId}</Insignia></div>}
             </div>
           ))}
           {predicciones.length === 0 && <p className="text-secundario text-sm col-span-full text-center py-8">Sin predicciones disponibles</p>}

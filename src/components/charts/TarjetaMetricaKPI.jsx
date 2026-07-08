@@ -12,20 +12,22 @@ export default function TarjetaMetricaKPI({
   className,
 }) {
   const tieneMeta = meta !== undefined && meta !== null
+  const valorNumerico = typeof valor === 'number' ? valor : Number(valor)
+  const puedeEvaluarMeta = tieneMeta && Number.isFinite(valorNumerico)
 
   let estado = 'neutro'
   let IconoEstado = null
 
-  if (tieneMeta && tipo === 'modelo') {
-    const mapeCumplido = valor <= meta
+  if (puedeEvaluarMeta && tipo === 'modelo') {
+    const mapeCumplido = valorNumerico <= meta
     estado = mapeCumplido ? 'exito' : 'advertencia'
     IconoEstado = mapeCumplido ? CheckCircle : AlertCircle
-  } else if (tieneMeta && tipo === 'fillRate') {
-    const fillRateCumplido = valor >= meta
+  } else if (puedeEvaluarMeta && tipo === 'fillRate') {
+    const fillRateCumplido = valorNumerico >= meta
     estado = fillRateCumplido ? 'exito' : 'advertencia'
     IconoEstado = fillRateCumplido ? CheckCircle : AlertCircle
-  } else if (tieneMeta && tipo === 'sobrestock') {
-    const sobrestockMejorado = valor <= meta
+  } else if (puedeEvaluarMeta && tipo === 'sobrestock') {
+    const sobrestockMejorado = valorNumerico <= meta
     estado = sobrestockMejorado ? 'exito' : 'advertencia'
     IconoEstado = sobrestockMejorado ? CheckCircle : AlertCircle
   }

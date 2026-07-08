@@ -63,7 +63,7 @@ def estado_modelo():
 
 @app.get("/api/v1/modelos/metricas", tags=["Modelos"])
 def metricas_modelo():
-    return model_service.metricas
+    return model_service.metricas or model_service.artefacto.get("metricas", {})
 
 
 @app.get("/api/v1/modelos/drift", tags=["Modelos"])

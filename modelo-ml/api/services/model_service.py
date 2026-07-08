@@ -84,7 +84,18 @@ class ModelService:
     def estado(self) -> dict:
         metricas_globales = self.metricas.get("metricas_globales", [])
         hibrido = next((m for m in metricas_globales if m.get("modelo") == "SARIMA + XGBoost"), {})
+        if not hibrido:
+            metricas_artefacto = self.artefacto.get("metricas", {}) if isinstance(self.artefacto, dict) else {}
+            hibrido = (
+                metricas_artefacto.get("hibrido")
+                or metricas_artefacto.get("modelos", {}).get("hibrido")
+                or self.metricas.get("modelos", {}).get("hibrido")
+                or {}
+            )
         series = self.metricas.get("series", {})
+        mape = hibrido.get("mape") or hibrido.get("MAPE") or hibrido.get("macro_mape_hibrido")
+        rmse = hibrido.get("rmse") or hibrido.get("RMSE")
+        mae = hibrido.get("mae") or hibrido.get("MAE")
         return {
             "modelo_version_id": self.modelo_version_id,
             "version": self.version,
@@ -93,9 +104,9 @@ class ModelService:
             "modelo_exportado": self.artefacto.get("tipo_modelo"),
             "fecha_carga": self.cargado_en,
             "fecha_entrenamiento": self.artefacto.get("fecha_entrenamiento") or self.metricas.get("fecha_entrenamiento") or self.metricas.get("split", {}).get("train_fin"),
-            "mae": hibrido.get("mae"),
-            "rmse": hibrido.get("rmse"),
-            "mape": hibrido.get("mape"),
+            "mae": mae,
+            "rmse": rmse,
+            "mape": mape,
             "psi": self.drift.get("psi_max"),
             "estado_drift": {
                 "requiere_retraining": self.drift.get("requiere_retraining", False),
