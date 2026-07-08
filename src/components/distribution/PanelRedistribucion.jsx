@@ -403,7 +403,7 @@ export default function PanelRedistribucion() {
       <Modal abierto={!!modalPropuesta} alCerrar={() => setModalPropuesta(null)} titulo="Detalle de Propuesta" tamano="lg">
         {modalPropuesta && (
           <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="p-3 bg-fondo rounded-md">
                 <p className="text-xs text-secundario mb-1">Producto</p>
                 <p className="text-sm font-medium text-principal">{modalPropuesta.productoNombre}</p>
@@ -438,7 +438,7 @@ export default function PanelRedistribucion() {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="p-3 bg-fondo rounded-md">
                 <p className="text-xs text-secundario mb-1">Excedente en origen</p>
                 <p className="text-lg font-bold text-azul">{modalPropuesta.excedente} uds</p>
@@ -472,7 +472,7 @@ export default function PanelRedistribucion() {
               <p className="text-sm text-principal">{modalPropuesta.regla}</p>
             </div>
 
-            <div className="flex justify-end gap-3 pt-3 border-t border-estilo">
+            <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-3 border-t border-estilo">
               <Boton variante="secundario" icono={XCircle} onClick={() => rechazarPropuesta(modalPropuesta.id)}>Descartar propuesta</Boton>
               <Boton variante="primario" icono={CheckCircle} onClick={() => aceptarPropuesta(modalPropuesta)} disabled={propuestasAceptadas.has(modalPropuesta.id)} cargando={procesando === modalPropuesta.id}>
                 Crear redistribución

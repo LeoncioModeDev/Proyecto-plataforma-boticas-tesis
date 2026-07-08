@@ -140,7 +140,7 @@ export default function CrearOrganizacion() {
   const estiloSelect = 'w-full px-3 py-2.5 text-sm bg-fondo border border-estilo rounded-md focus:outline-none focus:border-marca-principal focus:ring-1 focus:ring-marca-principal transition-colors'
 
   return (
-    <div className="max-w-2xl space-y-6">
+    <div className="max-w-2xl space-y-6 mx-auto lg:mx-0">
       <div>
         <h1 className="text-h1 text-principal">Crear Nueva Organización</h1>
         <p className="text-cuerpo text-secundario mt-1">Registra un nuevo cliente en la plataforma</p>
@@ -166,7 +166,7 @@ export default function CrearOrganizacion() {
                 className={estiloInput} placeholder="Nombre legal de la organización" />
               {errores.orgNombre && <p className="text-xs text-estado-critico mt-1">{errores.orgNombre}</p>}
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="text-sm font-medium text-principal">Tipo de Identificación *</label>
                 <select value={formulario.orgTipoIdentificacion} onChange={(e) => actualizar('orgTipoIdentificacion', e.target.value)}
@@ -181,7 +181,7 @@ export default function CrearOrganizacion() {
                 {errores.orgNumeroIdentificacion && <p className="text-xs text-estado-critico mt-1">{errores.orgNumeroIdentificacion}</p>}
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="text-sm font-medium text-principal">País de Origen *</label>
                 <select value={formulario.orgPais} onChange={(e) => actualizar('orgPais', e.target.value)}
@@ -224,7 +224,7 @@ export default function CrearOrganizacion() {
               />
               {errores.drogueriaUbigeo && <p className="text-xs text-estado-critico mt-1">{errores.drogueriaUbigeo}</p>}
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="text-sm font-medium text-principal">Dirección</label>
                 <input type="text" value={formulario.drogueriaDireccion} onChange={(e) => actualizar('drogueriaDireccion', e.target.value)}
@@ -277,10 +277,10 @@ export default function CrearOrganizacion() {
                   <Mail className="h-4 w-4 text-marca-principal" />
                   <span className="text-secundario">Correo institucional generado:</span>
                 </div>
-                <p className="text-sm font-mono text-principal font-medium pl-6">
+                <p className="text-sm font-mono text-principal font-medium sm:pl-6 break-all">
                   {emailGenerado || '—'}
                 </p>
-                <p className="text-xs text-secundario pl-6">
+                <p className="text-xs text-secundario sm:pl-6">
                   El correo se construye automáticamente en el servidor. La contraseña ingresada quedará configurada para este administrador.
                 </p>
               </div>

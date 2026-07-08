@@ -141,7 +141,7 @@ export default function PaginaStock() {
           Inventario consolidado de toda la red de boticas
         </p>
       </div>
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
         <TarjetaMetrica etiqueta="Stock Disponible" valor={formatearNumero(totalStock)} icono={Boxes} />
         <TarjetaMetrica etiqueta="Por Recibir" valor={formatearNumero(totalPorRecibir)} icono={ClipboardList} />
         <TarjetaMetrica etiqueta="En Tránsito" valor={formatearNumero(totalEnTransito)} icono={Truck} />

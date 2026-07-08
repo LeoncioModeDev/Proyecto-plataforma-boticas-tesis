@@ -58,7 +58,7 @@ export default function PaginaAjustes() {
   if (error) {
     return (
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="text-h1 text-principal">Ajustes y Mermas</h1>
             <p className="text-secundario mt-1">Registro de ajustes de inventario en toda la red</p>
@@ -73,7 +73,7 @@ export default function PaginaAjustes() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-h1 text-principal">Ajustes y Mermas</h1>
           <p className="text-secundario mt-1">Registro de ajustes de inventario en toda la red</p>

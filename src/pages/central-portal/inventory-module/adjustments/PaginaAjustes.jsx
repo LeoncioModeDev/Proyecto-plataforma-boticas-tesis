@@ -58,7 +58,7 @@ export default function PaginaAjustes() {
   if (error) {
     return (
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <h1 className="text-h1 text-principal">Ajustes y Mermas</h1>
         </div>
         <div className="bg-estado-error/10 border border-estado-error/30 rounded-lg p-4 text-estado-error">
@@ -70,7 +70,7 @@ export default function PaginaAjustes() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="text-h1 text-principal">Ajustes y Mermas</h1>
         <Boton variante="primario" icono={Plus} onClick={() => navegar('/central/inventario/ajustes/nuevo')}>
           Nuevo ajuste

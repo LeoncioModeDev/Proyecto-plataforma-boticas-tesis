@@ -572,7 +572,7 @@ export default function PaginaImportacionDatos() {
           {validacion && !esMulti && (
             <Tarjeta titulo="Resultado de Validación">
               <div className="space-y-4">
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                   <div className="p-4 bg-fondo rounded-lg text-center">
                     <p className="text-2xl font-bold text-principal">{validacion.resumen?.total_filas || validacion.resumen?.total || 0}</p>
                     <p className="text-xs text-secundario mt-1">Total Filas</p>
@@ -621,7 +621,7 @@ export default function PaginaImportacionDatos() {
                   </div>
                 )}
 
-                <div className="flex justify-end gap-3 pt-2">
+                <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-2">
                   <Boton
                     variante="primario"
                     icono={CheckCircle2}
@@ -650,9 +650,9 @@ export default function PaginaImportacionDatos() {
                     />
                     {resultadoImportacion.exito && (
                       <div className="flex flex-wrap gap-2">
-                        <Link to="/central/inventario/precios" className="px-3 py-2 text-sm rounded-md border border-estilo bg-fondo-secundario text-principal hover:bg-fondo">Ver precios importados</Link>
+                        <Link to="/central/administracion/precios" className="px-3 py-2 text-sm rounded-md border border-estilo bg-fondo-secundario text-principal hover:bg-fondo">Ver precios importados</Link>
                         <Link to="/central/administracion/ventas-historicas" className="px-3 py-2 text-sm rounded-md border border-estilo bg-fondo-secundario text-principal hover:bg-fondo">Ver ventas historicas</Link>
-                        <Link to="/central/inventario/stock-historico" className="px-3 py-2 text-sm rounded-md border border-estilo bg-fondo-secundario text-principal hover:bg-fondo">Ver stock historico</Link>
+                        <Link to="/central/administracion/stock-historico" className="px-3 py-2 text-sm rounded-md border border-estilo bg-fondo-secundario text-principal hover:bg-fondo">Ver stock historico</Link>
                         <Link to="/central/inventario/stock" className="px-3 py-2 text-sm rounded-md border border-estilo bg-fondo-secundario text-principal hover:bg-fondo">Ver stock actual</Link>
                       </div>
                     )}

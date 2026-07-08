@@ -36,13 +36,13 @@ export default function Modal({ abierto, alCerrar, titulo, children, tamano = 'm
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-3 sm:p-4"
       onClick={manejarClicOverlay}
     >
       <div
         ref={refContenido}
         className={cn(
-          'bg-fondo-secundario rounded-lg shadow-estilo-lg w-full max-h-[90vh] flex flex-col',
+          'bg-fondo-secundario rounded-lg shadow-estilo-lg w-[calc(100vw-1.5rem)] sm:w-full max-h-[90vh] flex flex-col',
           tamanos[tamano],
           className
         )}

@@ -42,7 +42,7 @@ export default function PaginaAlertas() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-h1 text-principal">Alertas de Inventario</h1>
           <p className="text-secundario mt-1">Alertas operativas de toda la red de boticas</p>
@@ -54,13 +54,13 @@ export default function PaginaAlertas() {
         )}
       </div>
 
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <TarjetaMetrica etiqueta="No Leídas" valor={noLeidas} icono={Bell} />
         <TarjetaMetrica etiqueta="Alta Urgencia" valor={datos.filter(a => a.urgencia === 'alta').length} icono={AlertTriangle} />
       </div>
 
       <div className="flex gap-4">
-        <select value={filtroUrgencia} onChange={e => setFiltroUrgencia(e.target.value)} className="px-3 py-2 text-cuerpo bg-fondo border border-estilo rounded-md">
+        <select value={filtroUrgencia} onChange={e => setFiltroUrgencia(e.target.value)} className="w-full sm:w-auto px-3 py-2 text-cuerpo bg-fondo border border-estilo rounded-md">
           <option value="">Todas las urgencias</option>
           <option value="alta">Alta</option>
           <option value="media">Media</option>

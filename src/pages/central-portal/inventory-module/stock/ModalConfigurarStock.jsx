@@ -53,7 +53,7 @@ export default function ModalConfigurarStock({ abierto, alCerrar, producto, onAc
             placeholder="Sin límite"
           />
         </div>
-        <div className="flex justify-end gap-3 pt-4 border-t border-estilo">
+        <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-4 border-t border-estilo">
           <Boton variante="secundario" onClick={alCerrar}>Cancelar</Boton>
           <Boton variante="primario" onClick={manejarGuardar} cargando={guardando}>Guardar</Boton>
         </div>

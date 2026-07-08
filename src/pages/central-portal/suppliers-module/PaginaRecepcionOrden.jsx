@@ -154,7 +154,7 @@ export default function PaginaRecepcionOrden() {
 
   return (
     <div className="space-y-6 max-w-3xl">
-      <div className="flex items-center gap-4">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
         <Boton variante="texto" icono={ArrowLeft} onClick={() => navegar(-1)}>Volver</Boton>
         <h1 className="text-h1 text-principal">Registrar Recepción</h1>
       </div>
@@ -227,7 +227,7 @@ export default function PaginaRecepcionOrden() {
                       </span>
                     </div>
 
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                       <div className="flex flex-col gap-1">
                         <label className="text-xs text-secundario">N° Lote *</label>
                         <input
@@ -298,7 +298,7 @@ export default function PaginaRecepcionOrden() {
             </>
           )}
 
-          <div className="flex justify-end gap-3 pt-4 border-t border-estilo">
+          <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-4 border-t border-estilo">
             <Boton variante="secundario" onClick={() => navegar(-1)}>Cancelar</Boton>
             <Boton type="submit" variante="primario" icono={Save} disabled={enviando}>
               {enviando ? 'Registrando...' : 'Registrar Recepción'}

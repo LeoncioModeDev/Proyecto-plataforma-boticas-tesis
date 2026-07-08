@@ -310,7 +310,7 @@ export default function PaginaUsuarios() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-h1 text-principal">Gestión de Usuarios</h1>
           <p className="text-cuerpo text-secundario mt-1">Administración de usuarios, roles y permisos de acceso</p>
@@ -492,7 +492,7 @@ export default function PaginaUsuarios() {
             <label htmlFor="activo" className="text-sm text-principal">Usuario activo</label>
           </div>
 
-          <div className="flex justify-end gap-3 pt-4 border-t border-estilo">
+          <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-4 border-t border-estilo">
             <Boton variante="secundario" onClick={() => setModalAbierto(false)}>Cancelar</Boton>
             <Boton variante="primario" onClick={guardarUsuario} deshabilitado={enviando}>
               {enviando ? 'Guardando…' : editando ? 'Actualizar Usuario' : 'Crear Usuario'}
@@ -504,7 +504,7 @@ export default function PaginaUsuarios() {
       <Modal abierto={!!confirmarDesactivar} alCerrar={() => setConfirmarDesactivar(null)} titulo="Confirmar">
         <div className="space-y-4">
           <p className="text-cuerpo text-secundario">¿Está seguro de que desea desactivar este usuario? No podrá acceder al sistema hasta que sea activado nuevamente.</p>
-          <div className="flex justify-end gap-3 pt-4 border-t border-estilo">
+          <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-4 border-t border-estilo">
             <Boton variante="secundario" onClick={() => setConfirmarDesactivar(null)}>Cancelar</Boton>
             <Boton variante="peligro" onClick={() => ejecutarToggle(confirmarDesactivar)} deshabilitado={desactivando}>
               {desactivando ? 'Desactivando…' : 'Desactivar'}

@@ -98,7 +98,7 @@ export default function PaginaVistaValidacion({
       {error && <Alerta tipo="error" titulo="No fue posible cargar la vista" mensaje={error} />}
 
       <div className="flex flex-wrap gap-4">
-          <CampoBusqueda valor={busqueda} alCambiar={valor => actualizarFiltro(setBusqueda, valor)} placeholder={placeholderBusqueda} className="min-w-72" />
+          <CampoBusqueda valor={busqueda} alCambiar={valor => actualizarFiltro(setBusqueda, valor)} placeholder={placeholderBusqueda} className="w-full sm:w-72" />
           <select value={boticaId} onChange={e => actualizarFiltro(setBoticaId, e.target.value)} className="px-3 py-2 text-cuerpo bg-fondo border border-estilo rounded-md">
             <option value="">Todas las boticas</option>
             {opciones.boticas.map(botica => <option key={botica.id} value={botica.id}>{botica.nombre}</option>)}

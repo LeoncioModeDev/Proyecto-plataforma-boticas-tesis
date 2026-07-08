@@ -121,14 +121,14 @@ export default function PaginaRecepciones() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-h1 text-principal">Recepciones</h1>
           <p className="text-secundario mt-1">Histórico de recepciones de productos</p>
         </div>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
         <TarjetaMetrica etiqueta="Total Recepciones" valor={estadisticas.total} icono={ClipboardList} />
         <TarjetaMetrica etiqueta="Recibidas" valor={estadisticas.recibidas} icono={CheckCircle} />
         <TarjetaMetrica etiqueta="Con Observación" valor={estadisticas.conObservacion} icono={AlertTriangle} />

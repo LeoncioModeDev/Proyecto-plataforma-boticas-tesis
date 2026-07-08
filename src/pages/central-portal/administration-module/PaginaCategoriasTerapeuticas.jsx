@@ -130,7 +130,7 @@ export default function PaginaCategoriasTerapeuticas() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-h1 text-principal">Categorías terapéuticas</h1>
           <p className="text-secundario mt-1">{categorias.length} categorías encontradas</p>
@@ -142,7 +142,7 @@ export default function PaginaCategoriasTerapeuticas() {
       {exito && <Alerta tipo="exito" titulo={exito} onClose={() => setExito(null)} />}
 
       <div className="flex gap-4">
-        <div className="relative min-w-72">
+        <div className="relative w-full sm:w-72">
           <Search className="h-4 w-4 text-secundario absolute left-3 top-3" />
           <input
             value={busqueda}
@@ -174,7 +174,7 @@ export default function PaginaCategoriasTerapeuticas() {
             <label className="text-sm font-medium text-principal">Descripción</label>
             <textarea value={form.descripcion} onChange={(e) => setForm({ ...form, descripcion: e.target.value })} className="w-full mt-1 px-3 py-2 bg-fondo border border-estilo rounded-md min-h-24" />
           </div>
-          <div className="flex justify-end gap-3 pt-3 border-t border-estilo">
+          <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-3 border-t border-estilo">
             <Boton variante="secundario" onClick={() => setModal(null)}>Cancelar</Boton>
             <Boton tipo="submit" variante="primario" cargando={guardando}>Guardar</Boton>
           </div>

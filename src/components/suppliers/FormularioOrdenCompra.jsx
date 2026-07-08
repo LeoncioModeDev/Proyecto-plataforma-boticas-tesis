@@ -289,7 +289,7 @@ export default function FormularioOrdenCompra({ onGuardar, redirectPath, ordenEx
             />
           </div>
 
-          <div className="flex justify-end gap-3 pt-4 border-t border-estilo">
+          <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-4 border-t border-estilo">
             <Boton variante="secundario" onClick={() => navegar(-1)}>Cancelar</Boton>
             <Boton type="submit" variante="primario" icono={Save} disabled={!esValido}>
               {ordenExistente ? 'Guardar Cambios' : 'Crear Orden de Compra'}

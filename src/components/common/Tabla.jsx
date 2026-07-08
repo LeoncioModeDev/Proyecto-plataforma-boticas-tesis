@@ -55,12 +55,12 @@ export default function Tabla({
             valor={filtroGlobal}
             alCambiar={setFiltroGlobal}
             placeholder="Buscar en tabla..."
-            className="max-w-xs sm:max-w-sm"
+            className="w-full sm:max-w-sm"
           />
         </div>
       )}
 
-      <div className="border border-estilo rounded-lg overflow-hidden">
+      <div className="border border-estilo rounded-lg overflow-hidden max-w-full">
         <div className="overflow-x-auto">
           <table className="w-full min-w-max">
             <thead>

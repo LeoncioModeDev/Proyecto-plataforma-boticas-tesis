@@ -244,7 +244,7 @@ export default function PaginaTransferenciasBotica() {
                   )
                 })}
               </div>
-              <div className="mt-3 grid grid-cols-2 gap-4 text-xs text-secundario">
+              <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs text-secundario">
                 <div>
                   <span className="block">Fecha de envío: {r.fechaDespacho ? formatearFechaHora(r.fechaDespacho) : 'No enviado'}</span>
                 </div>
@@ -299,7 +299,7 @@ export default function PaginaTransferenciasBotica() {
               ))}
             </div>
 
-            <div className="flex justify-end gap-3 pt-3 border-t border-estilo">
+            <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-3 border-t border-estilo">
               <Boton variante="secundario" onClick={() => setModalConfirmar(null)}>Cancelar</Boton>
               <Boton variante="primario" icono={PackageCheck} onClick={() => handleRecibir(modalConfirmar)} cargando={accionando}>
                 Confirmar Recepción
@@ -336,7 +336,7 @@ export default function PaginaTransferenciasBotica() {
               />
             </div>
 
-            <div className="flex justify-end gap-3 pt-3 border-t border-estilo">
+            <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-3 border-t border-estilo">
               <Boton variante="secundario" onClick={() => { setModalRechazar(null); setMotivoRechazo('') }}>Volver</Boton>
               <Boton variante="peligro" icono={X} onClick={() => handleRechazar(modalRechazar)} disabled={!motivoRechazo.trim()} cargando={accionando}>
                 Rechazar Transferencia

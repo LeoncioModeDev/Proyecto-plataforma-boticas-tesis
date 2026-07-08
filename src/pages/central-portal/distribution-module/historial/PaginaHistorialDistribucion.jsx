@@ -128,7 +128,7 @@ export default function PaginaHistorialDistribucion() {
         />
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4">
         <TarjetaMetrica etiqueta="Total" valor={historial.length} icono={FileText} />
         <TarjetaMetrica etiqueta="Recibidas" valor={historial.filter(t => t.estado === ESTADOS_TRANSFERENCIA.RECIBIDA).length} icono={PackageCheck} />
         <TarjetaMetrica etiqueta="En Tránsito" valor={historial.filter(t => t.estado === ESTADOS_TRANSFERENCIA.EN_TRANSITO).length} icono={Truck} />

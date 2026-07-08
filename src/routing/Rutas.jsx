@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Routes, Route, Navigate, Outlet } from 'react-router-dom'
 
 import useAutenticacion from '@/state/useAutenticacion'
@@ -96,6 +97,7 @@ import DetalleRecepcionOperaciones from '@/pages/central-portal/suppliers-module
 
 // Panel ML
 import PaginaPredicciones from '@/pages/ml-panel/PaginaPredicciones'
+import PaginaHistorialPredicciones from '@/pages/ml-panel/PaginaHistorialPredicciones'
 import PaginaAlertas from '@/pages/ml-panel/PaginaAlertas'
 import PaginaRecomendaciones from '@/pages/ml-panel/PaginaRecomendaciones'
 import PaginaMonitoreoML from '@/pages/ml-panel/PaginaMonitoreoML'
@@ -105,12 +107,21 @@ import PaginaStockHistorico from '@/pages/shared/validation-module/PaginaStockHi
 
 function LayoutPrincipal() {
   const { colapsada } = useBarraLateral()
+  const [menuMovilAbierto, setMenuMovilAbierto] = useState(false)
 
   return (
-    <div className="min-h-screen bg-fondo transition-colors">
-      <BarraLateral />
-      <BarraSuperior />
-      <main className={`mt-14 p-4 lg:p-8 transition-all duration-200 ${colapsada ? 'ml-16' : 'ml-56 lg:ml-60'}`}>
+    <div className="min-h-screen bg-fondo transition-colors overflow-x-hidden">
+      <div className="hidden lg:block">
+        <BarraLateral />
+      </div>
+      {menuMovilAbierto && (
+        <div className="lg:hidden">
+          <div className="fixed inset-0 z-40 bg-black/45" onClick={() => setMenuMovilAbierto(false)} />
+          <BarraLateral movil alCerrarMovil={() => setMenuMovilAbierto(false)} />
+        </div>
+      )}
+      <BarraSuperior onAbrirMenuMovil={() => setMenuMovilAbierto(true)} />
+      <main className={`mt-14 p-4 sm:p-6 lg:p-8 transition-all duration-200 min-w-0 ${colapsada ? 'lg:ml-16' : 'lg:ml-60'}`}>
         <Outlet />
       </main>
     </div>
@@ -163,8 +174,8 @@ export default function Rutas() {
         <Route path="/central/inventario/catalogo/:id" element={<DetalleProducto />} />
         <Route path="/central/inventario/catalogo/:id/editar" element={<FormularioProducto />} />
         <Route path="/central/inventario/stock" element={<PaginaStock />} />
-        <Route path="/central/inventario/precios" element={<PaginaPrecios />} />
-        <Route path="/central/inventario/stock-historico" element={<PaginaStockHistorico />} />
+        <Route path="/central/inventario/precios" element={<Navigate to="/central/administracion/precios" replace />} />
+        <Route path="/central/inventario/stock-historico" element={<Navigate to="/central/administracion/stock-historico" replace />} />
         <Route path="/central/inventario/categorias-terapeuticas" element={<PaginaCategoriasTerapeuticas />} />
         <Route path="/central/inventario/lotes" element={<PaginaLotes />} />
 
@@ -198,6 +209,8 @@ export default function Rutas() {
         <Route path="/central/administracion/configuracion-avanzada" element={<PaginaConfiguracionAvanzada />} />
         <Route path="/central/administracion/categorias-terapeuticas" element={<Navigate to="/central/inventario/categorias-terapeuticas" replace />} />
         <Route path="/central/administracion/importacion-datos" element={<PaginaImportacionDatos />} />
+        <Route path="/central/administracion/precios" element={<PaginaPrecios />} />
+        <Route path="/central/administracion/stock-historico" element={<PaginaStockHistorico />} />
         <Route path="/central/administracion/ventas-historicas" element={<PaginaVentasHistoricas />} />
         <Route path="/central/administracion/auditoria" element={<PaginaAuditoria />} />
       </Route>
@@ -230,8 +243,8 @@ export default function Rutas() {
         <Route path="/operaciones/inventario/catalogo/:id" element={<DetalleProductoOperaciones />} />
         <Route path="/operaciones/inventario/catalogo/:id/editar" element={<FormularioProductoOperaciones />} />
         <Route path="/operaciones/inventario/stock" element={<PaginaStockOperaciones />} />
-        <Route path="/operaciones/inventario/precios" element={<PaginaPrecios />} />
-        <Route path="/operaciones/inventario/stock-historico" element={<PaginaStockHistorico />} />
+        <Route path="/operaciones/inventario/precios" element={<Navigate to="/operaciones/administracion/precios" replace />} />
+        <Route path="/operaciones/inventario/stock-historico" element={<Navigate to="/operaciones/administracion/stock-historico" replace />} />
         <Route path="/operaciones/inventario/lotes" element={<PaginaLotesOperaciones />} />
 
         <Route path="/operaciones/inventario/movimientos" element={<PaginaMovimientosOperaciones />} />
@@ -255,6 +268,8 @@ export default function Rutas() {
         <Route path="/operaciones/recepciones" element={<PaginaRecepcionesOperaciones />} />
         <Route path="/operaciones/recepciones/:id" element={<DetalleRecepcionOperaciones />} />
         <Route path="/operaciones/administracion/ventas-historicas" element={<PaginaVentasHistoricas />} />
+        <Route path="/operaciones/administracion/precios" element={<PaginaPrecios />} />
+        <Route path="/operaciones/administracion/stock-historico" element={<PaginaStockHistorico />} />
         <Route path="/operaciones/alertas" element={<PaginaAlertasOperaciones />} />
       </Route>
 
@@ -265,6 +280,7 @@ export default function Rutas() {
         </RutaProtegida>
       }>
         <Route path="/ml/predicciones" element={<PaginaPredicciones />} />
+        <Route path="/ml/historial-predicciones" element={<PaginaHistorialPredicciones />} />
         <Route path="/ml/alertas" element={<PaginaAlertas />} />
         <Route path="/ml/recomendaciones" element={<PaginaRecomendaciones />} />
         <Route path="/ml/monitoreo" element={<PaginaMonitoreoML />} />

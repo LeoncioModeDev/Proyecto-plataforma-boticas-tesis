@@ -42,7 +42,7 @@ export default function CampoSeleccionMultiple({
             className="w-full pl-9 pr-3 py-2 text-sm bg-fondo-secundario border border-estilo rounded-md focus:outline-none focus:border-marca-principal focus:ring-1 focus:ring-marca-principal"
           />
         </div>
-        <div className="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-40 overflow-y-auto">
           {filtrados.length > 0 ? filtrados.map(op => (
             <label key={op.valor} className="flex items-center gap-2 text-sm cursor-pointer select-none py-1 px-1 rounded hover:bg-marca-claro">
               <input

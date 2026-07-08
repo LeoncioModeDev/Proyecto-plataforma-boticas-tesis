@@ -163,7 +163,7 @@ export default function PaginaAuditoria() {
           placeholder="Buscar por usuario, acción, entidad..."
           value={busqueda}
           onChange={e => setBusqueda(e.target.value)}
-          className="min-w-72 px-3 py-2 border border-estilo rounded-md text-cuerpo bg-fondo"
+          className="w-full sm:w-72 px-3 py-2 border border-estilo rounded-md text-cuerpo bg-fondo"
         />
         <select
           value={filtroNivel}
@@ -217,7 +217,7 @@ export default function PaginaAuditoria() {
       <Modal abierto={!!detalleAbierto} alCerrar={() => setDetalleAbierto(null)} titulo="Detalle del Registro" tamano="md">
         {detalleAbierto && (
           <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="p-3 bg-fondo rounded-md">
                 <p className="text-xs text-secundario mb-1">Fecha y Hora</p>
                 <p className="text-sm font-medium text-principal">{formatearFechaHora(detalleAbierto.createdAt)}</p>

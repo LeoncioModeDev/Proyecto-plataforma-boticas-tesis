@@ -87,7 +87,7 @@ export default function FormularioBotica({ boticaEditar, alGuardar }) {
 
   return (
     <div className="space-y-6 max-w-3xl">
-      <div className="flex items-center gap-4">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
         <Boton variante="texto" icono={ArrowLeft} onClick={() => navegar('/central/administracion/boticas')}>Volver</Boton>
         <h1 className="text-h1 text-principal">{esEdicion ? 'Editar Botica' : 'Nueva Botica'}</h1>
       </div>
@@ -187,7 +187,7 @@ export default function FormularioBotica({ boticaEditar, alGuardar }) {
             </div>
           </div>
 
-          <div className="flex justify-end gap-3 pt-4 border-t border-estilo">
+          <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-4 border-t border-estilo">
             <Boton variante="secundario" onClick={() => navegar('/central/administracion/boticas')}>Cancelar</Boton>
             <Boton tipo="submit" variante="primario" icono={Save} deshabilitado={enviando}>
               {enviando ? 'Guardando…' : esEdicion ? 'Actualizar Botica' : 'Crear Botica'}

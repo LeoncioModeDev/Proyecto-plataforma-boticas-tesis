@@ -65,7 +65,7 @@ export default function PaginaAlertasDemanda() {
         <p className="text-secundario mt-1">Alertas generadas por el modelo ML sobre patrones de demanda</p>
       </div>
 
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <TarjetaMetrica etiqueta="Alertas Activas" valor={alertas.length} icono={BrainCircuit} />
         <TarjetaMetrica etiqueta="Alta Dispersión" valor={alertasAltas} icono={AlertTriangle} />
       </div>

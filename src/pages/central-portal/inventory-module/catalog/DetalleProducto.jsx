@@ -117,7 +117,7 @@ export default function DetalleProducto() {
     <div className="space-y-6 max-w-4xl">
       {error && <Alerta tipo="error" titulo={error} className="mb-4" />}
       {exito && <Alerta tipo="exito" titulo={exito} className="mb-4" />}
-      <div className="flex items-center gap-4">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
         <Boton variante="texto" icono={ArrowLeft} onClick={() => navegar('/central/inventario/catalogo')}>Volver</Boton>
         <h1 className="text-h1 text-principal">{producto.nombreComercial}</h1>
         <Insignia color={COLORES_ESTADO[producto.estado]}>{ETIQUETAS_ESTADO[producto.estado]}</Insignia>
@@ -127,7 +127,7 @@ export default function DetalleProducto() {
         </div>
       </div>
       <Tarjeta titulo="Información del Producto">
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-y-4 gap-x-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-y-4 gap-x-8">
           {[
             ['Principios Activos', infoPrincipios.length > 0 ? infoPrincipios.map((p, i) => (
               <div key={i} className="mb-1">
@@ -178,7 +178,7 @@ export default function DetalleProducto() {
                 <option key={p.id} value={p.id}>{p.razonSocial}</option>
               ))}
             </select>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label className="text-xs text-secundario">Lead time (días)</label>
                 <input type="number" min="1" value={nuevoProvProd.leadTimeEspecifico} onChange={e => setNuevoProvProd({ ...nuevoProvProd, leadTimeEspecifico: e.target.value })} className="w-full px-3 py-2 text-sm bg-fondo border border-estilo rounded-md" />
@@ -188,7 +188,7 @@ export default function DetalleProducto() {
                 <input type="number" min="0.01" step="0.01" value={nuevoProvProd.precioCompraReferencial} onChange={e => setNuevoProvProd({ ...nuevoProvProd, precioCompraReferencial: e.target.value })} className="w-full px-3 py-2 text-sm bg-fondo border border-estilo rounded-md" />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label className="text-xs text-secundario">Cantidad mínima de compra</label>
                 <input type="number" min="1" value={nuevoProvProd.cantidadMinimaCompra} onChange={e => setNuevoProvProd({ ...nuevoProvProd, cantidadMinimaCompra: e.target.value })} className="w-full px-3 py-2 text-sm bg-fondo border border-estilo rounded-md" />
@@ -200,7 +200,7 @@ export default function DetalleProducto() {
             </div>
             <Boton variante="secundario" onClick={agregarProveedorProducto} className="w-full">Agregar</Boton>
           </div>
-          <div className="flex justify-end gap-3 pt-4 border-t border-estilo">
+          <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-4 border-t border-estilo">
             <Boton variante="secundario" onClick={() => setModalProveedores(null)}>Cancelar</Boton>
             <Boton variante="primario" onClick={guardarConfigProveedores}>Guardar configuración</Boton>
           </div>

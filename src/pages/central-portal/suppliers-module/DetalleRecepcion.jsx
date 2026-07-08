@@ -74,13 +74,13 @@ export default function DetalleRecepcion() {
 
   return (
     <div className="space-y-6 max-w-4xl">
-      <div className="flex items-center gap-4">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
         <Boton variante="texto" icono={ArrowLeft} onClick={() => navegar('/central/proveedores/recepciones')}>Volver</Boton>
         <h1 className="text-h1 text-principal">Detalle de Recepción</h1>
       </div>
 
       <Tarjeta>
-        <div className="grid grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           <div className="space-y-3">
             <div>
               <p className="text-sm text-secundario">Recepción</p>

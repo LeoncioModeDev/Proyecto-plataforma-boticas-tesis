@@ -73,7 +73,7 @@ export default function PaginaDetalleOrganizacion() {
 
   return (
     <div className="max-w-3xl space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <button
           onClick={() => navegar('/admin-saas/organizaciones')}
           className="inline-flex items-center gap-1.5 text-sm text-secundario hover:text-principal transition-colors"

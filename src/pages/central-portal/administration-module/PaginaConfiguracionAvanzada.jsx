@@ -134,7 +134,7 @@ export default function PaginaConfiguracionAvanzada() {
           </div>
         ) : modelo ? (
           <div className="space-y-5">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
               <MetricaIcono icono={Cpu} label="Versión">{modelo.version}</MetricaIcono>
               <MetricaIcono icono={BrainCircuit} label="Algoritmo">{NOMBRES_ALGORITMO[modelo.algoritmo] || modelo.algoritmo}</MetricaIcono>
               <MetricaIcono icono={CalendarClock} label="Entrenamiento">{formatearFechaCorta(modelo.fecha_entrenamiento)}</MetricaIcono>

@@ -82,18 +82,22 @@ class ModelService:
         return self.artefacto.get("version", config.model_version)
 
     def estado(self) -> dict:
-        metricas_globales = self.metricas.get("metricas_globales", [])
-        hibrido = next((m for m in metricas_globales if m.get("modelo") == "SARIMA + XGBoost"), {})
+        metricas = self.metricas or (self.artefacto.get("metricas", {}) if isinstance(self.artefacto, dict) else {})
+        metricas_globales = metricas.get("metricas_globales", [])
+        hibrido = next((
+            m for m in metricas_globales
+            if str(m.get("modelo", "")).replace("_", " ").lower() in {"sarima + xgboost", "sarima xgboost"}
+        ), {})
         if not hibrido:
             metricas_artefacto = self.artefacto.get("metricas", {}) if isinstance(self.artefacto, dict) else {}
             hibrido = (
                 metricas_artefacto.get("hibrido")
                 or metricas_artefacto.get("modelos", {}).get("hibrido")
-                or self.metricas.get("modelos", {}).get("hibrido")
+                or metricas.get("modelos", {}).get("hibrido")
                 or {}
             )
-        series = self.metricas.get("series", {})
-        mape = hibrido.get("mape") or hibrido.get("MAPE") or hibrido.get("macro_mape_hibrido")
+        series = metricas.get("series", {})
+        mape = metricas.get("macro_mape_hibrido") or hibrido.get("mape") or hibrido.get("MAPE")
         rmse = hibrido.get("rmse") or hibrido.get("RMSE")
         mae = hibrido.get("mae") or hibrido.get("MAE")
         return {
@@ -103,7 +107,7 @@ class ModelService:
             "mejor_modelo_evaluado": "SARIMA + XGBoost",
             "modelo_exportado": self.artefacto.get("tipo_modelo"),
             "fecha_carga": self.cargado_en,
-            "fecha_entrenamiento": self.artefacto.get("fecha_entrenamiento") or self.metricas.get("fecha_entrenamiento") or self.metricas.get("split", {}).get("train_fin"),
+            "fecha_entrenamiento": self.artefacto.get("fecha_entrenamiento") or metricas.get("fecha_entrenamiento") or metricas.get("split", {}).get("train_fin"),
             "mae": mae,
             "rmse": rmse,
             "mape": mape,

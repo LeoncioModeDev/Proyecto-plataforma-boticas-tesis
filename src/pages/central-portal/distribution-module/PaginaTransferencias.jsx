@@ -264,7 +264,7 @@ export default function PaginaTransferencias() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="text-h1 text-principal">Transferencias</h1>
         <Boton variante="primario" icono={Plus} onClick={() => navegar('/central/distribucion/transferencias/nueva')}>
           Nueva Transferencia
@@ -282,7 +282,7 @@ export default function PaginaTransferencias() {
         </div>
       )}
 
-      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
         <TarjetaMetrica etiqueta="Total" valor={estadisticas.total} icono={Truck} />
         <TarjetaMetrica etiqueta="Creadas" valor={estadisticas.creadas} icono={Clock} />
         <TarjetaMetrica etiqueta="Aprobadas" valor={estadisticas.aprobadas} icono={CheckCircle} />
@@ -361,7 +361,7 @@ export default function PaginaTransferencias() {
       <Modal abierto={accionModal?.tipo === 'cancelar'} alCerrar={() => setAccionModal(null)} titulo="Cancelar Transferencia" tamano="sm">
         <div className="space-y-4">
           <p className="text-sm text-principal">¿Estás seguro de cancelar esta transferencia? Esta acción no se puede deshacer.</p>
-          <div className="flex justify-end gap-3">
+          <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3">
             <Boton variante="secundario" onClick={() => setAccionModal(null)}>Volver</Boton>
             <Boton variante="peligro" onClick={() => handleCancelar(accionModal.id)}>Cancelar Transferencia</Boton>
           </div>

@@ -150,7 +150,7 @@ export default function PanelOrdenesCompra({ ordenes, onNueva, onActualizar, esA
 
       {error && <Alerta tipo="error" titulo="Error" mensaje={error} />}
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
         <TarjetaMetrica etiqueta="Pendientes" valor={estadisticas.pendientes} icono={Clock} />
         <TarjetaMetrica etiqueta="Aprobadas" valor={estadisticas.aprobadas} icono={CheckCircle} />
         <TarjetaMetrica etiqueta="Recibidas" valor={estadisticas.recibidas} icono={ClipboardList} />
@@ -183,7 +183,7 @@ export default function PanelOrdenesCompra({ ordenes, onNueva, onActualizar, esA
       <Modal abierto={!!detalleOC} alCerrar={() => setDetalleOC(null)} titulo={`Orden de Compra ${detalleOC?.id?.slice(0, 8)}`} tamano="lg">
         {detalleOC && (
           <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="p-3 bg-fondo rounded-md">
                 <p className="text-xs text-secundario mb-1">Proveedor</p>
                 <p className="text-sm font-medium text-principal">{detalleOC.proveedorNombre}</p>

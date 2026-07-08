@@ -135,17 +135,17 @@ export default function PaginaPredicciones() {
       {!estadoML.cargando && !estadoML.disponible && <Alerta tipo="error" titulo="API ML no disponible" mensaje={estadoML.error} />}
       {error && <Alerta tipo="error" titulo="No fue posible completar la operación" mensaje={error} alCerrar={() => setError(null)} />}
 
-      <div className="flex flex-wrap gap-4">
-        <select value={boticaId} onChange={e => setBoticaId(e.target.value)} className="px-3 py-2 text-cuerpo bg-fondo border border-estilo rounded-md">
+      <div className="grid grid-cols-1 gap-3 sm:flex sm:flex-wrap sm:gap-4">
+        <select value={boticaId} onChange={e => setBoticaId(e.target.value)} className="w-full sm:w-auto px-3 py-2 text-cuerpo bg-fondo border border-estilo rounded-md">
           {boticas.map(b => <option key={b.id} value={b.id}>{b.nombre}</option>)}
         </select>
-        <select value={productoId} onChange={e => setProductoId(e.target.value)} className="px-3 py-2 text-cuerpo bg-fondo border border-estilo rounded-md min-w-72">
+        <select value={productoId} onChange={e => setProductoId(e.target.value)} className="w-full sm:w-72 px-3 py-2 text-cuerpo bg-fondo border border-estilo rounded-md">
           {productos.map(p => <option key={p.id} value={p.id}>{p.nombreComercial}</option>)}
         </select>
-        <select value={horizonte} onChange={e => setHorizonte(e.target.value)} className="px-3 py-2 text-cuerpo bg-fondo border border-estilo rounded-md">
+        <select value={horizonte} onChange={e => setHorizonte(e.target.value)} className="w-full sm:w-auto px-3 py-2 text-cuerpo bg-fondo border border-estilo rounded-md">
           {HORIZONTES.map(h => <option key={h} value={h}>{h} semanas</option>)}
         </select>
-        <Boton onClick={generar} cargando={cargando} deshabilitado={!boticaId || !productoId || !estadoML.disponible}>Generar predicción</Boton>
+        <Boton className="w-full sm:w-auto" onClick={generar} cargando={cargando} deshabilitado={!boticaId || !productoId || !estadoML.disponible}>Generar predicción</Boton>
       </div>
 
       <div className="grid gap-3 md:grid-cols-3">

@@ -108,8 +108,8 @@ export default function PaginaEditarOrganizacion() {
   const estiloSelect = 'w-full px-3 py-2.5 text-sm bg-fondo border border-estilo rounded-md focus:outline-none focus:border-marca-principal focus:ring-1 focus:ring-marca-principal transition-colors'
 
   return (
-    <div className="max-w-2xl space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="max-w-2xl space-y-6 mx-auto lg:mx-0">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <button
           onClick={() => navegar(`/admin-saas/organizaciones/${id}`)}
           className="inline-flex items-center gap-1.5 text-sm text-secundario hover:text-principal transition-colors"
@@ -174,7 +174,7 @@ export default function PaginaEditarOrganizacion() {
                 placeholder="Droguería Central"
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="text-sm font-medium text-principal">
                   <MapPin className="h-3.5 w-3.5 inline mr-1 text-secundario" />
@@ -205,7 +205,7 @@ export default function PaginaEditarOrganizacion() {
           </div>
         </Tarjeta>
 
-        <div className="flex justify-end gap-3">
+        <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3">
           <Boton
             variante="secundario"
             onClick={() => navegar(`/admin-saas/organizaciones/${id}`)}

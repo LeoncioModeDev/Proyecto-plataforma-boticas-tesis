@@ -1,47 +1,49 @@
 import { supabase } from './cliente'
 
-const VISTA = 'vw_stock_historico_importado'
+const EDGE_FN_URL = import.meta.env.VITE_SUPABASE_URL
+  ? `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/stock-historico`
+  : null
 
-function aplicarFiltros(query, filtros = {}) {
-  if (filtros.boticaId) query = query.eq('botica_id', filtros.boticaId)
-  if (filtros.productoId) query = query.eq('producto_id', filtros.productoId)
-  if (filtros.categoria) query = query.eq('categoria_terapeutica', filtros.categoria)
-  if (filtros.stockout !== undefined && filtros.stockout !== '') query = query.eq('stockout_flag', filtros.stockout ? 1 : 0)
-  if (filtros.fechaDesde) query = query.gte('fecha_snapshot', filtros.fechaDesde)
-  if (filtros.fechaHasta) query = query.lte('fecha_snapshot', filtros.fechaHasta)
-  if (filtros.busqueda) {
-    const termino = filtros.busqueda.replaceAll(',', ' ').trim()
-    if (termino) query = query.or(`codigo_producto.ilike.%${termino}%,producto.ilike.%${termino}%`)
+async function llamarEdgeFunction(params = {}) {
+  if (!EDGE_FN_URL) throw new Error('VITE_SUPABASE_URL no configurado')
+
+  const { data: { session } } = await supabase.auth.getSession()
+  if (!session) throw new Error('No hay sesión activa')
+
+  const qs = new URLSearchParams()
+  Object.entries(params).forEach(([key, val]) => {
+    if (val !== undefined && val !== null && val !== '') qs.set(key, String(val))
+  })
+  const queryString = qs.toString()
+
+  const res = await fetch(`${EDGE_FN_URL}${queryString ? `?${queryString}` : ''}`, {
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${session.access_token}`,
+      'Content-Type': 'application/json',
+    },
+  })
+
+  const data = await res.json()
+  if (!res.ok) {
+    throw new Error(data.error || `Error ${res.status}`)
   }
-  return query
-}
-
-function aplicarPaginacion(query, filtros = {}) {
-  const pagina = Math.max(Number(filtros.pagina || 1), 1)
-  const limite = Math.max(Number(filtros.limite || 20), 1)
-  const desde = (pagina - 1) * limite
-  return query.range(desde, desde + limite - 1)
-}
-
-function calcularResumen(datos) {
-  return {
-    snapshots: datos.length,
-    productos: new Set(datos.map(item => item.producto_id).filter(Boolean)).size,
-    boticas: new Set(datos.map(item => item.botica_id).filter(Boolean)).size,
-    semanasConStockout: datos.filter(item => Number(item.stockout_flag) === 1).length,
-    demandaInsatisfechaTotal: datos.reduce((acc, item) => acc + Number(item.demanda_insatisfecha || 0), 0),
-  }
+  return data
 }
 
 export async function listarStockHistoricoImportado(filtros = {}) {
-  const ordenCampo = filtros.ordenCampo || 'fecha_snapshot'
-  const ascendente = filtros.ascendente === true
-  let query = supabase.from(VISTA).select('*', { count: 'exact' })
-  query = aplicarFiltros(query, filtros)
-  query = aplicarPaginacion(query.order(ordenCampo, { ascending: ascendente }).order('producto', { ascending: true }), filtros)
-
-  const { data, count, error } = await query
-  if (error) throw new Error('Error al cargar stock historico importado: ' + error.message)
-  const datos = data || []
-  return { datos, total: count || 0, resumen: calcularResumen(datos) }
+  const { datos, total, resumen } = await llamarEdgeFunction({
+    pagina: filtros.pagina,
+    limite: filtros.limite,
+    busqueda: filtros.busqueda,
+    boticaId: filtros.boticaId,
+    productoId: filtros.productoId,
+    categoria: filtros.categoria,
+    stockout: filtros.stockout,
+    fechaDesde: filtros.fechaDesde,
+    fechaHasta: filtros.fechaHasta,
+    ordenCampo: filtros.ordenCampo,
+    ascendente: filtros.ascendente,
+  })
+  return { datos, total, resumen }
 }

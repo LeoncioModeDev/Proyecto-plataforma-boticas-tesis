@@ -77,7 +77,7 @@ export default function PaginaDashboardBotica() {
         <p className="text-secundario mt-1">Panel de gestión local</p>
       </div>
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <TarjetaMetrica etiqueta="Stock Actual" valor={stockTotal} icono={Boxes} />
         <TarjetaMetrica etiqueta="Productos Bajo Mínimo" valor={bajoMinimo} icono={AlertTriangle} />
         <TarjetaMetrica etiqueta="Próximos a Vencer" valor={lotesPorVencer} icono={CalendarClock} />

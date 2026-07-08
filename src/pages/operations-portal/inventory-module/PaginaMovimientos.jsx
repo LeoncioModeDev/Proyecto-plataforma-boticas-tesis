@@ -44,7 +44,7 @@ export default function PaginaMovimientos() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-h1 text-principal">Kardex - Movimientos de Inventario</h1>
           <p className="text-secundario mt-1">Historial de movimientos generados automáticamente por órdenes de compra, transferencias, ajustes y mermas. Solo consulta.</p>

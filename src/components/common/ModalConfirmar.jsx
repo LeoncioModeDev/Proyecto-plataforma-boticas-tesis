@@ -39,7 +39,7 @@ export default function ModalConfirmar({ abierto, alCerrar, alConfirmar, titulo,
           </div>
         )}
 
-        <div className="flex justify-end gap-3 pt-3 border-t border-estilo">
+        <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-3 border-t border-estilo">
           <Boton variante="secundario" onClick={handleCerrar}>Cancelar</Boton>
           <Boton variante="primario" onClick={handleConfirmar} disabled={requiereMotivo && !motivo.trim()}>
             {etiquetaBoton || 'Confirmar'}

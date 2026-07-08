@@ -207,20 +207,20 @@ export default function PaginaRecomendaciones() {
       {error && <Alerta tipo="error" titulo="No fue posible completar la operación" mensaje={error} alCerrar={() => setError(null)} />}
       {exito && <Alerta tipo="exito" titulo={exito} alCerrar={() => setExito(null)} />}
 
-      <div className="flex flex-wrap gap-4">
-          <select value={boticaId} onChange={e => setBoticaId(e.target.value)} className="px-3 py-2 text-cuerpo bg-fondo border border-estilo rounded-md">
+      <div className="grid grid-cols-1 gap-3 sm:flex sm:flex-wrap sm:gap-4">
+          <select value={boticaId} onChange={e => setBoticaId(e.target.value)} className="w-full sm:w-auto px-3 py-2 text-cuerpo bg-fondo border border-estilo rounded-md">
             {boticas.filter(b => b.tipo === 'botica').map(b => <option key={b.id} value={b.id}>{b.nombre}</option>)}
           </select>
-          <select value={productoId} onChange={e => setProductoId(e.target.value)} className="px-3 py-2 text-cuerpo bg-fondo border border-estilo rounded-md min-w-72">
+          <select value={productoId} onChange={e => setProductoId(e.target.value)} className="w-full sm:w-72 px-3 py-2 text-cuerpo bg-fondo border border-estilo rounded-md">
             {productos.map(p => <option key={p.id} value={p.id}>{p.nombreComercial}</option>)}
           </select>
-          <select value={tipo} onChange={e => setTipo(e.target.value)} className="px-3 py-2 text-cuerpo bg-fondo border border-estilo rounded-md">
+          <select value={tipo} onChange={e => setTipo(e.target.value)} className="w-full sm:w-auto px-3 py-2 text-cuerpo bg-fondo border border-estilo rounded-md">
             <option value="TODOS">Todos los tipos</option>
             <option value="COMPRA">COMPRA</option>
             <option value="REPOSICION_INTERNA">REPOSICION_INTERNA</option>
           </select>
-          <Boton onClick={generar} cargando={cargando} deshabilitado={!estadoML.disponible || !boticaId || !productoId || tipo === 'TODOS'}>Generar</Boton>
-          <select value={estadoFiltro} onChange={e => setEstadoFiltro(e.target.value)} className="px-3 py-2 text-cuerpo bg-fondo border border-estilo rounded-md">
+          <Boton className="w-full sm:w-auto" onClick={generar} cargando={cargando} deshabilitado={!estadoML.disponible || !boticaId || !productoId || tipo === 'TODOS'}>Generar</Boton>
+          <select value={estadoFiltro} onChange={e => setEstadoFiltro(e.target.value)} className="w-full sm:w-auto px-3 py-2 text-cuerpo bg-fondo border border-estilo rounded-md">
             <option value="TODOS">Todos los estados</option>
             <option value="PENDIENTE">Pendiente</option>
             <option value="CONFIRMADA">Aprobada</option>
@@ -299,7 +299,7 @@ export default function PaginaRecomendaciones() {
                 <div className="bg-fondo p-3 rounded-md border border-estilo text-sm">
                   <p className="text-secundario">Al confirmar se aprobará la recomendación y se creará la orden de compra automáticamente en el módulo de Órdenes de Compra.</p>
                 </div>
-                <div className="flex justify-end gap-3 pt-2 border-t border-estilo">
+                <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-2 border-t border-estilo">
                   <Boton variante="secundario" onClick={() => setAprobarRec(null)} deshabilitado={creando}>Cancelar</Boton>
                   <Boton variante="primario" onClick={aprobarYCrear} cargando={creando}>
                     Aprobar y crear orden de compra
@@ -334,7 +334,7 @@ export default function PaginaRecomendaciones() {
                   <p className="text-secundario">Al confirmar se aprobará la recomendación y se creará la transferencia automáticamente en el módulo de Transferencias.</p>
                   <p className="text-secundario mt-1">La transferencia se creará con asignación FEFO automática de lotes desde la droguería central.</p>
                 </div>
-                <div className="flex justify-end gap-3 pt-2 border-t border-estilo">
+                <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-2 border-t border-estilo">
                   <Boton variante="secundario" onClick={() => setAprobarRec(null)} deshabilitado={creando}>Cancelar</Boton>
                   <Boton variante="primario" onClick={aprobarYCrear} cargando={creando}>
                     Aprobar y crear transferencia

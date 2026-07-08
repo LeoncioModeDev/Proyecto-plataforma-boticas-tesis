@@ -25,6 +25,9 @@ const NOMBRES_RUTA = {
   auditoria: 'Auditoría',
   'configuracion-avanzada': 'Config. Avanzada',
   'importacion-datos': 'Importación de Datos',
+  precios: 'Precios Importados',
+  'stock-historico': 'Stock Histórico Importado',
+  'ventas-historicas': 'Ventas Históricas',
   botica: 'Portal Botica',
   ml: 'Panel ML',
   predicciones: 'Predicciones',
@@ -59,7 +62,7 @@ export default function MigaDePan() {
   }
 
   return (
-    <nav className="flex items-center gap-1 text-xs sm:text-sm text-secundario overflow-hidden">
+    <nav className="flex min-w-0 items-center gap-1 text-xs sm:text-sm text-secundario overflow-hidden">
       {segmentos.map((segmento, i) => {
         const ruta = '/' + segmentos.slice(0, i + 1).join('/')
         const esUltimo = i === segmentos.length - 1
@@ -78,10 +81,10 @@ export default function MigaDePan() {
         }
 
         return (
-          <span key={ruta} className="flex items-center gap-0.5 sm:gap-1 whitespace-nowrap">
+          <span key={ruta} className="flex min-w-0 items-center gap-0.5 sm:gap-1 whitespace-nowrap">
             {i > 0 && <ChevronRight className="h-3 w-3 text-secundario" />}
             {esUltimo ? (
-              <span className="text-principal font-medium">{nombre}</span>
+              <span className="text-principal font-medium truncate max-w-[42vw] sm:max-w-none">{nombre}</span>
             ) : (
               <Link to={ruta} className="text-secundario hover:text-marca-principal transition-colors">
                 {nombre}

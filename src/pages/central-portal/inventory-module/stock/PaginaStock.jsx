@@ -108,7 +108,7 @@ export default function PaginaStock() {
   return (
     <div className="space-y-6">
       <h1 className="text-h1 text-principal">Stock y Existencias</h1>
-      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
         <TarjetaMetrica etiqueta="Stock Disponible" valor={formatearNumero(totalStock)} icono={Boxes} />
         <TarjetaMetrica etiqueta="Stock Libre" valor={formatearNumero(totalLibre)} icono={Unlock} />
         <TarjetaMetrica etiqueta="Comprometido" valor={formatearNumero(totalComprometido)} icono={Lock} />

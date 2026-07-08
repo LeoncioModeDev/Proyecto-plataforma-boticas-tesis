@@ -128,12 +128,12 @@ const itemsAdminCentral = [
         },
         {
           etiqueta: "Precios importados",
-          ruta: "/central/inventario/precios",
+          ruta: "/central/administracion/precios",
           icono: DollarSign,
         },
         {
-          etiqueta: "Stock histórico importados",
-          ruta: "/central/inventario/stock-historico",
+          etiqueta: "Stock histórico importado",
+          ruta: "/central/administracion/stock-historico",
           icono: History,
         },
         {
@@ -158,6 +158,11 @@ const itemsAdminCentral = [
           etiqueta: "Predicciones",
           ruta: "/ml/predicciones",
           icono: BrainCircuit,
+        },
+        {
+          etiqueta: "Historial",
+          ruta: "/ml/historial-predicciones",
+          icono: History,
         },
         { etiqueta: "Alertas ML", ruta: "/ml/alertas", icono: Bell },
         {
@@ -262,12 +267,12 @@ const itemsNavegacion = {
       subItems: [
         {
           etiqueta: "Precios importados",
-          ruta: "/operaciones/inventario/precios",
+          ruta: "/operaciones/administracion/precios",
           icono: DollarSign,
         },
         {
-          etiqueta: "Stock histórico importados",
-          ruta: "/operaciones/inventario/stock-historico",
+          etiqueta: "Stock histórico importado",
+          ruta: "/operaciones/administracion/stock-historico",
           icono: History,
         },
         {
@@ -300,14 +305,14 @@ const itemsNavegacion = {
   ],
 };
 
-function ItemModulo({ item, colapsada }) {
+function ItemModulo({ item, colapsada, movil = false, alNavegar }) {
   const tieneSubActivo = item.subItems?.some((sub) =>
     location.pathname.startsWith(sub.ruta),
   );
   const [expandido, setExpandido] = useState(() => tieneSubActivo);
   const estaActivo = location.pathname.startsWith(item.ruta);
 
-  if (colapsada) {
+  if (colapsada && !movil) {
     return (
       <NavLink
         to={item.ruta}
@@ -356,6 +361,7 @@ function ItemModulo({ item, colapsada }) {
                 key={sub.ruta}
                 to={sub.ruta}
                 end={hayHermanoActivo}
+                onClick={alNavegar}
                 className={({ isActive }) =>
                   cn(
                     "flex items-center gap-2.5 px-3 py-1.5 rounded-md text-sm transition-all",
@@ -376,7 +382,7 @@ function ItemModulo({ item, colapsada }) {
   );
 }
 
-export default function BarraLateral() {
+export default function BarraLateral({ movil = false, alCerrarMovil }) {
   const { usuario, cerrarSesion } = useAutenticacion();
   const { colapsada, setColapsada } = useBarraLateral();
   const navegar = useNavigate();
@@ -401,14 +407,15 @@ export default function BarraLateral() {
     <aside
       className={cn(
         "fixed left-0 top-0 h-screen bg-fondo-secundario border-r border-estilo flex flex-col z-40 transition-all duration-200",
-        colapsada ? "w-16" : "w-60",
+        movil ? "z-50 w-[min(19rem,85vw)]" : "z-40",
+        !movil && (colapsada ? "w-16" : "w-60"),
       )}
     >
       <div className="flex items-center gap-3 px-4 h-14 border-b border-estilo shrink-0">
         <div className="w-8 h-8 bg-marca-principal rounded-lg flex items-center justify-center shrink-0">
           <span className="text-white font-bold text-sm">B</span>
         </div>
-        {!colapsada && (
+        {(!colapsada || movil) && (
           <span className="font-semibold text-principal text-cuerpo truncate">
             {nombrePortal}
           </span>
@@ -418,7 +425,7 @@ export default function BarraLateral() {
       <nav className="flex-1 overflow-y-auto py-3 px-2 space-y-1">
         {items.map((item, i) => {
           if (item.tipo === "separador") {
-            return !colapsada ? (
+            return (!colapsada || movil) ? (
               <p
                 key={i}
                 className="px-3 pt-3 pb-1.5 text-etiqueta text-secundario uppercase tracking-wider font-semibold text-[11px]"
@@ -432,7 +439,7 @@ export default function BarraLateral() {
 
           if (item.tipo === "modulo") {
             return (
-              <ItemModulo key={item.ruta} item={item} colapsada={colapsada} />
+              <ItemModulo key={item.ruta} item={item} colapsada={colapsada} movil={movil} alNavegar={alCerrarMovil} />
             );
           }
 
@@ -449,17 +456,18 @@ export default function BarraLateral() {
                     : "text-secundario hover:text-principal hover:bg-fondo",
                 )
               }
-              title={colapsada ? item.etiqueta : undefined}
+              title={colapsada && !movil ? item.etiqueta : undefined}
+              onClick={alCerrarMovil}
             >
               <Icono className="h-[18px] w-[18px] shrink-0" />
-              {!colapsada && <span className="truncate">{item.etiqueta}</span>}
+              {(!colapsada || movil) && <span className="truncate">{item.etiqueta}</span>}
             </NavLink>
           );
         })}
       </nav>
 
       <div className="border-t border-estilo p-3">
-        {!colapsada && (
+        {(!colapsada || movil) && (
           <div className="mb-2 px-1">
             <p className="text-cuerpo font-medium text-principal truncate">
               {usuario.nombre}
@@ -475,11 +483,11 @@ export default function BarraLateral() {
           title="Cerrar sesión"
         >
           <LogOut className="h-[18px] w-[18px] shrink-0" />
-          {!colapsada && <span className="truncate">Cerrar sesión</span>}
+          {(!colapsada || movil) && <span className="truncate">Cerrar sesión</span>}
         </button>
       </div>
 
-      <button
+      {!movil && <button
         onClick={() => setColapsada(!colapsada)}
         className="absolute -right-3 top-14 w-6 h-6 bg-fondo-secundario border border-estilo rounded-full flex items-center justify-center shadow-md hover:bg-fondo z-50 transition-colors"
       >
@@ -488,7 +496,7 @@ export default function BarraLateral() {
         ) : (
           <ChevronLeft className="h-3 w-3" />
         )}
-      </button>
+      </button>}
     </aside>
   );
 }

@@ -1,4 +1,4 @@
-import { User, LogOut, LayoutDashboard, Building2 } from 'lucide-react'
+import { Menu, User, LogOut, LayoutDashboard, Building2 } from 'lucide-react'
 import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import useAutenticacion from '@/state/useAutenticacion'
@@ -7,7 +7,7 @@ import MigaDePan from './MigaDePan'
 import ControlesInterfaz from '@/components/common/ControlesInterfaz'
 import { obtenerPortal } from '@/utilities/permisos'
 
-export default function BarraSuperior() {
+export default function BarraSuperior({ onAbrirMenuMovil }) {
   const { usuario, cerrarSesion } = useAutenticacion()
   const { colapsada } = useBarraLateral()
   const navegar = useNavigate()
@@ -31,13 +31,21 @@ export default function BarraSuperior() {
   const IconoPortal = PORTAL_ICONOS[portal] || LayoutDashboard
 
   return (
-    <header className={`fixed top-0 right-0 h-14 bg-fondo-secundario border-b border-estilo flex items-center justify-between px-4 lg:px-6 z-30 transition-all duration-200 ${colapsada ? 'left-16' : 'left-56 lg:left-60'}`}>
-      <div className="flex items-center gap-3">
+    <header className={`fixed top-0 right-0 left-0 h-14 bg-fondo-secundario border-b border-estilo flex items-center justify-between px-3 sm:px-4 lg:px-6 z-30 transition-all duration-200 ${colapsada ? 'lg:left-16' : 'lg:left-60'}`}>
+      <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+        <button
+          type="button"
+          onClick={onAbrirMenuMovil}
+          className="lg:hidden p-2 -ml-1 rounded-md hover:bg-fondo text-principal transition-colors"
+          aria-label="Abrir menú"
+        >
+          <Menu className="h-5 w-5" />
+        </button>
         <IconoPortal className="h-4 w-4 text-marca-principal hidden sm:block" />
         <MigaDePan />
       </div>
 
-      <div className="flex items-center gap-2 lg:gap-3">
+      <div className="flex items-center gap-1 sm:gap-2 lg:gap-3 shrink-0">
         <ControlesInterfaz />
 
         <div className="relative" ref={refMenu}>

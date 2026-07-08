@@ -59,7 +59,7 @@ export default function FormularioProveedor({ proveedorEditar, alGuardar }) {
 
   return (
     <div className="space-y-6 max-w-3xl">
-      <div className="flex items-center gap-4">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
         <Boton variante="texto" icono={ArrowLeft} onClick={() => navegar('/central/proveedores')}>Volver</Boton>
         <h1 className="text-h1 text-neutro-negro">{esEdicion ? 'Editar Proveedor' : 'Nuevo Proveedor'}</h1>
       </div>
@@ -77,7 +77,7 @@ export default function FormularioProveedor({ proveedorEditar, alGuardar }) {
           </div>
 
           <div className="border-b border-neutro-gris-borde pb-4 mb-4">
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-4">
               <h2 className="text-cuerpo font-semibold text-principal">Contactos</h2>
               <Boton variante="texto" icono={Plus} onClick={() => append(defaultContacto)} type="button" className="text-marca-principal text-sm">
                 Agregar contacto
@@ -132,7 +132,7 @@ export default function FormularioProveedor({ proveedorEditar, alGuardar }) {
             ))}
           </div>
 
-          <div className="flex justify-end gap-3 pt-4 border-t border-neutro-gris-borde">
+          <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-4 border-t border-neutro-gris-borde">
             <Boton variante="secundario" onClick={() => navegar('/central/proveedores')}>Cancelar</Boton>
             <Boton tipo="submit" variante="primario" icono={Save} cargando={isSubmitting}>
               {esEdicion ? 'Actualizar' : 'Crear'} Proveedor

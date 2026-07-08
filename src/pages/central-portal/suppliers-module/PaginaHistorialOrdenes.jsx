@@ -75,7 +75,7 @@ export default function PaginaHistorialOrdenes() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-h1 text-principal">Historial de Órdenes de Compra</h1>
           <p className="text-secundario mt-1">Trazabilidad completa de todas lasórdenes registradas</p>
@@ -85,7 +85,7 @@ export default function PaginaHistorialOrdenes() {
         </Boton>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4">
         <TarjetaMetrica etiqueta="Total" valor={ordenes.length} icono={FileText} />
         <TarjetaMetrica etiqueta="Aprobadas" valor={ordenes.filter(o => o.estado === 'aprobada').length} icono={PackageCheck} />
         <TarjetaMetrica etiqueta="Recibidas" valor={ordenes.filter(o => o.estado === 'recibida').length} icono={Truck} />
@@ -119,7 +119,7 @@ export default function PaginaHistorialOrdenes() {
       <Modal abierto={!!detalleOC} alCerrar={() => setDetalleOC(null)} titulo={`Orden ${detalleOC?.id}`} tamano="lg">
         {detalleOC && (
           <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="p-3 bg-fondo rounded-md">
                 <p className="text-xs text-secundario mb-1">Proveedor</p>
                 <p className="text-sm font-medium text-principal">{detalleOC.proveedorNombre}</p>

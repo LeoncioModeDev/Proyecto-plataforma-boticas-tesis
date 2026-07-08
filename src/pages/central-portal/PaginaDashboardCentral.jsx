@@ -97,7 +97,7 @@ export default function PaginaDashboardCentral() {
         <h1 className="text-xl sm:text-h1 text-principal font-semibold">Dashboard</h1>
         <p className="text-sm sm:text-secundario text-secundario mt-1">Resumen general del sistema de inventario</p>
       </div>
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         <TarjetaMetrica etiqueta="Stock Total" valor={formatearNumero(stockTotal)} icono={Boxes} />
         <TarjetaMetrica etiqueta="Productos Activos" valor={productosActivos} icono={Package} />
         <TarjetaMetrica etiqueta="Alertas Activas" valor={alertasActivas} icono={AlertTriangle} />

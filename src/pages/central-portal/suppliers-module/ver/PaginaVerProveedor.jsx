@@ -50,7 +50,7 @@ export default function PaginaVerProveedor() {
   return (
     <div className="space-y-6 max-w-4xl">
       {error && <Alerta tipo="error" titulo={error} className="mb-4" />}
-      <div className="flex items-center gap-4">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
         <Boton variante="texto" icono={ArrowLeft} onClick={() => navegar('/central/proveedores')}>Volver</Boton>
         <h1 className="text-h1 text-principal">{proveedor.razonSocial}</h1>
         <Insignia color={proveedor.activo ? 'verde' : 'gris'}>{proveedor.activo ? 'Activo' : 'Inactivo'}</Insignia>
@@ -60,7 +60,7 @@ export default function PaginaVerProveedor() {
       </div>
 
       <Tarjeta titulo="Información del Proveedor">
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-y-4 gap-x-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-y-4 gap-x-8">
           <div>
             <p className="text-etiqueta text-secundario">Razón Social</p>
             <p className="text-cuerpo text-principal mt-0.5">{proveedor.razonSocial}</p>

@@ -90,7 +90,7 @@ export default function PaginaDashboardOperaciones() {
         <p className="text-sm sm:text-secundario text-secundario mt-1">Visión global de la red de boticas</p>
       </div>
 
-      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 sm:gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 sm:gap-6">
         <TarjetaMetrica etiqueta="Stock Total Red" valor={formatearNumero(stockTotal)} icono={Boxes} />
         <TarjetaMetrica etiqueta="Productos Activos" valor={productosActivos} icono={Package} />
         <TarjetaMetrica etiqueta="Productos Críticos" valor={productosCriticos} icono={AlertTriangle} />
