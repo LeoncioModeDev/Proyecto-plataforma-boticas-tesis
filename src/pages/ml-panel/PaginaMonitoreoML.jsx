@@ -4,26 +4,45 @@ import Tarjeta from '@/components/common/Tarjeta'
 import TarjetaMetrica from '@/components/charts/TarjetaMetrica'
 import GraficaLinea from '@/components/charts/GraficaLinea'
 import Insignia from '@/components/common/Insignia'
-import { obtenerEstadoModelo, obtenerMetricasModelo } from '@/services/ml-model/modelosML'
+import { obtenerDriftModelo, obtenerEstadoModelo, obtenerMetricasModelo } from '@/services/ml-model/modelosML'
 import { formatearFechaRelativa } from '@/utilities/formatearFecha'
+
+const formatearDecimal = (valor) => valor == null || !Number.isFinite(Number(valor)) ? '—' : Number(valor).toFixed(2)
+
+function obtenerMetricasHibridas(metricas = {}) {
+  const metricasGlobales = metricas.metricas_globales || []
+  const hibrido = metricasGlobales.find(m => {
+    const modelo = String(m.modelo || '').replace(/_/g, ' ').toLowerCase()
+    return modelo.includes('sarima') && modelo.includes('xgboost')
+  }) || {}
+
+  return {
+    mape: metricas.macro_mape_hibrido ?? hibrido.MAPE ?? hibrido.mape ?? null,
+    rmse: hibrido.RMSE ?? hibrido.rmse ?? null,
+    mae: hibrido.MAE ?? hibrido.mae ?? null,
+  }
+}
 
 export default function PaginaMonitoreoML() {
   const [cargando, setCargando] = useState(true)
   const [error, setError] = useState(null)
   const [estado, setEstado] = useState(null)
   const [metricas, setMetricas] = useState(null)
+  const [driftModelo, setDriftModelo] = useState(null)
 
   useEffect(() => {
     async function cargar() {
       try {
         setCargando(true)
         setError(null)
-        const [estadoData, metricasData] = await Promise.all([
+        const [estadoData, metricasData, driftData] = await Promise.all([
           obtenerEstadoModelo(),
           obtenerMetricasModelo(),
+          obtenerDriftModelo(),
         ])
         setEstado(estadoData)
         setMetricas(metricasData)
+        setDriftModelo(driftData)
       } catch (err) {
         setError(err.message)
       } finally {
@@ -51,11 +70,12 @@ export default function PaginaMonitoreoML() {
     )
   }
 
-  const mape = estado?.mape ?? metricas?.mape
-  const rmse = estado?.rmse ?? metricas?.rmse
-  const mae = estado?.mae ?? metricas?.mae
+  const metricasHibridas = obtenerMetricasHibridas(metricas || {})
+  const mape = estado?.mape ?? metricasHibridas.mape
+  const rmse = estado?.rmse ?? metricasHibridas.rmse
+  const mae = estado?.mae ?? metricasHibridas.mae
   const psi = estado?.psi
-  const drift = estado?.estado_drift || {}
+  const drift = driftModelo || estado?.estado_drift || {}
   const version = estado?.version || '—'
   const modo = estado?.modo || '—'
   const fechaCarga = estado?.fecha_carga
@@ -67,7 +87,7 @@ export default function PaginaMonitoreoML() {
 
   const historialDrift = psi != null
     ? [
-        { semana: 'Actual', psi: typeof psi === 'number' ? psi : 0, estado: drift.alerta_critica ? 'critico' : 'estable' },
+        { semana: 'Actual', psi: Number.isFinite(Number(psi)) ? Number(Number(psi).toFixed(2)) : 0, estado: drift.alerta_critica ? 'critico' : 'estable' },
       ]
     : []
 
@@ -83,9 +103,9 @@ export default function PaginaMonitoreoML() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <TarjetaMetrica etiqueta="MAPE Actual" valor={mape != null ? `${mape}%` : '—'} variacion={mape != null ? -2.1 : null} icono={Brain} />
-        <TarjetaMetrica etiqueta="RMSE" valor={rmse != null ? `${rmse} uds` : '—'} icono={Activity} />
-        <TarjetaMetrica etiqueta="MAE" valor={mae != null ? `${mae} uds` : '—'} icono={Activity} />
+        <TarjetaMetrica etiqueta="MAPE Actual" valor={mape != null ? `${formatearDecimal(mape)}%` : '—'} variacion={mape != null ? -2.1 : null} icono={Brain} />
+        <TarjetaMetrica etiqueta="RMSE" valor={rmse != null ? `${formatearDecimal(rmse)} uds` : '—'} icono={Activity} />
+        <TarjetaMetrica etiqueta="MAE" valor={mae != null ? `${formatearDecimal(mae)} uds` : '—'} icono={Activity} />
         <TarjetaMetrica etiqueta="PSI (Drift)" valor={psi != null ? psi.toFixed(2) : '—'} variacion={ultimoDrift.estado === 'critico' ? 100 : null} icono={AlertTriangle} />
       </div>
 
@@ -93,7 +113,7 @@ export default function PaginaMonitoreoML() {
         <Tarjeta titulo="Tendencia MAPE" descripcion="Evolución del error del modelo en holdout">
           {mape != null ? (
             <GraficaLinea
-              datos={[{ mes: 'Actual', mape }]}
+              datos={[{ mes: 'Actual', mape: Number(Number(mape).toFixed(2)) }]}
               lineas={[{ clave: 'mape', etiqueta: 'MAPE (%)', color: '#107C41' }]}
               altura={220}
             />

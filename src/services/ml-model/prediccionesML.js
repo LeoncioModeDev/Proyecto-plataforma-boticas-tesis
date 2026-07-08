@@ -20,6 +20,14 @@ export function generarPrediccionesBotica(payload, options = {}) {
   })
 }
 
+export function generarPrediccionesOrganizacion(payload, options = {}) {
+  return mlFetch('/predicciones/organizacion', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+    signal: options.signal,
+  })
+}
+
 export function obtenerPrediccionesML({ boticaId, productoId }, options = {}) {
   if (!boticaId || !productoId) return Promise.resolve({ predicciones: [] })
   return mlFetch(`/predicciones/${boticaId}/${productoId}`, { method: 'GET', signal: options.signal })

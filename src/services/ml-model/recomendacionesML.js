@@ -20,6 +20,22 @@ export function generarRecomendacionReposicion(payload, options = {}) {
   })
 }
 
+export function generarRecomendacionesReposicionMasiva(payload, options = {}) {
+  return mlFetch('/recomendaciones/reposicion/masiva', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+    signal: options.signal,
+  })
+}
+
+export function generarRecomendacionesCompraMasiva(payload, options = {}) {
+  return mlFetch('/recomendaciones/compra/masiva', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+    signal: options.signal,
+  })
+}
+
 export function aprobarRecomendacion(id, options = {}) {
   return mlFetch(`/recomendaciones/${id}/aprobar`, { method: 'POST', signal: options.signal })
 }

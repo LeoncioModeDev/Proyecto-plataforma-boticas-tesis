@@ -26,7 +26,9 @@ export async function mlFetch(path, options = {}) {
     data: { session },
   } = await supabase.auth.getSession()
 
-  if (!session?.access_token) {
+  const esHealth = path === '/health'
+
+  if (!session?.access_token && !esHealth) {
     throw new Error('No existe una sesión activa.')
   }
 
@@ -36,12 +38,12 @@ export async function mlFetch(path, options = {}) {
       ...options,
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${session.access_token}`,
+        ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}),
         ...options.headers,
       },
     })
   } catch {
-    throw new Error('API ML no disponible. Verifica que FastAPI esté ejecutándose en localhost:8000.')
+    throw new Error(`API ML no disponible. Verifica la URL configurada: ${BASE_URL}.`)
   }
 
   const data = await response.json().catch(() => null)

@@ -4,6 +4,7 @@ import { cn } from '@/utilities/cn'
 export default function TarjetaMetricaKPI({
   etiqueta,
   valor,
+  valorEvaluacion,
   meta,
   unidad = '%',
   descripcion,
@@ -11,25 +12,45 @@ export default function TarjetaMetricaKPI({
   tipo = 'modelo',
   className,
 }) {
-  const tieneMeta = meta !== undefined && meta !== null
-  const valorNumerico = typeof valor === 'number' ? valor : Number(valor)
+  const metasPorTipo = {
+    fillRate: 85,
+    disponibilidad: 85,
+    tasaSobrestock: 10,
+  }
+  const operadoresMeta = {
+    modelo: '≤',
+    fillRate: '≥',
+    disponibilidad: '≥',
+    tasaSobrestock: '≤',
+  }
+  const metaEvaluacion = meta ?? metasPorTipo[tipo]
+  const tieneMeta = metaEvaluacion !== undefined && metaEvaluacion !== null
+  const valorNumerico = valorEvaluacion !== undefined
+    ? Number(valorEvaluacion)
+    : (typeof valor === 'number' ? valor : Number(valor))
   const puedeEvaluarMeta = tieneMeta && Number.isFinite(valorNumerico)
+  const unidadMeta = unidad || (typeof valor === 'string' && valor.includes('%') ? '%' : '')
+  const operadorMeta = operadoresMeta[tipo] || ''
 
   let estado = 'neutro'
   let IconoEstado = null
 
   if (puedeEvaluarMeta && tipo === 'modelo') {
-    const mapeCumplido = valorNumerico <= meta
+    const mapeCumplido = valorNumerico <= metaEvaluacion
     estado = mapeCumplido ? 'exito' : 'advertencia'
     IconoEstado = mapeCumplido ? CheckCircle : AlertCircle
   } else if (puedeEvaluarMeta && tipo === 'fillRate') {
-    const fillRateCumplido = valorNumerico >= meta
+    const fillRateCumplido = valorNumerico >= metaEvaluacion
     estado = fillRateCumplido ? 'exito' : 'advertencia'
     IconoEstado = fillRateCumplido ? CheckCircle : AlertCircle
-  } else if (puedeEvaluarMeta && tipo === 'sobrestock') {
-    const sobrestockMejorado = valorNumerico <= meta
-    estado = sobrestockMejorado ? 'exito' : 'advertencia'
-    IconoEstado = sobrestockMejorado ? CheckCircle : AlertCircle
+  } else if (puedeEvaluarMeta && tipo === 'disponibilidad') {
+    const disponibilidadCumplida = valorNumerico >= metaEvaluacion
+    estado = disponibilidadCumplida ? 'exito' : 'advertencia'
+    IconoEstado = disponibilidadCumplida ? CheckCircle : AlertCircle
+  } else if (puedeEvaluarMeta && tipo === 'tasaSobrestock') {
+    const sobrestockControlado = valorNumerico <= metaEvaluacion
+    estado = sobrestockControlado ? 'exito' : 'advertencia'
+    IconoEstado = sobrestockControlado ? CheckCircle : AlertCircle
   }
 
   const coloresEstado = {
@@ -50,13 +71,13 @@ export default function TarjetaMetricaKPI({
           </div>
           <div className="flex items-baseline gap-1.5 mt-1">
             <p className="text-xl sm:text-h1 text-principal font-semibold">{valor}</p>
-            <span className="text-sm text-secundario">{unidad}</span>
+            {unidad && <span className="text-sm text-secundario">{unidad}</span>}
           </div>
           {tieneMeta && (
             <div className="flex items-center gap-1 mt-1.5">
               <Target className="h-3.5 w-3.5 text-secundario" />
               <span className="text-xs text-secundario">
-                Meta: {meta}{unidad}
+                Meta: {operadorMeta ? `${operadorMeta} ` : ''}{metaEvaluacion}{unidadMeta}
               </span>
             </div>
           )}

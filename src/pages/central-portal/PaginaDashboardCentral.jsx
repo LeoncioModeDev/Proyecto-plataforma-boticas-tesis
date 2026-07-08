@@ -9,45 +9,144 @@ import Insignia from '@/components/common/Insignia'
 import { obtenerStockPorUbicacion } from '@/services/supabase/stock'
 import { obtenerProductos } from '@/services/supabase/productos'
 import { obtenerAlertas } from '@/services/supabase/alertas'
-import { obtenerMovimientos } from '@/services/supabase/movimientos'
+
 import { obtenerTransferencias } from '@/services/supabase/transferencias'
-import { listarOrdenes } from '@/services/supabase/ordenesCompra'
-import { obtenerEstadoModelo } from '@/services/ml-model/modelosML'
+import { obtenerEstadoModelo, obtenerMetricasModelo } from '@/services/ml-model/modelosML'
 import { obtenerPredicciones } from '@/services/supabase/predicciones'
+import { listarVentasHistoricasImportadas } from '@/services/supabase/ventasHistoricas'
+import { listarStockHistoricoImportado } from '@/services/supabase/stockHistorico'
 import { formatearFechaRelativa } from '@/utilities/formatearFecha'
 import { formatearNumero } from '@/utilities/formatearMoneda'
+
+const formatearPorcentaje = (valor) => valor == null ? 'N/D' : `${Number(valor).toFixed(2)}%`
+const formatearDecimal = (valor) => valor == null || !Number.isFinite(Number(valor)) ? '—' : Number(valor).toFixed(2)
+
+function obtenerMetricasHibridas(metricas = {}) {
+  const metricasGlobales = metricas.metricas_globales || []
+  const hibrido = metricasGlobales.find(m => {
+    const modelo = String(m.modelo || '').replace(/_/g, ' ').toLowerCase()
+    return modelo.includes('sarima') && modelo.includes('xgboost')
+  }) || {}
+
+  return {
+    mape: metricas.macro_mape_hibrido ?? hibrido.MAPE ?? hibrido.mape ?? null,
+    rmse: hibrido.RMSE ?? hibrido.rmse ?? null,
+    mae: hibrido.MAE ?? hibrido.mae ?? null,
+  }
+}
+
+function combinarEstadoYMetricas(estado = {}, metricas = {}) {
+  const metricasHibridas = obtenerMetricasHibridas(metricas)
+  return {
+    ...estado,
+    mape: estado.mape ?? metricasHibridas.mape,
+    rmse: estado.rmse ?? metricasHibridas.rmse,
+    mae: estado.mae ?? metricasHibridas.mae,
+  }
+}
+
+function obtenerUltimaFechaComunHistorica(ventasHistoricas, stockHistorico) {
+  const fechasVentas = new Set(ventasHistoricas.map(venta => venta.fecha_venta).filter(Boolean))
+  const fechasStock = stockHistorico.map(item => item.fecha_snapshot).filter(Boolean)
+  return fechasStock
+    .filter(fecha => fechasVentas.has(fecha))
+    .sort((a, b) => b.localeCompare(a))[0] || null
+}
+
+async function listarTodasLasPaginas(listar, filtros = {}) {
+  const limite = 1000
+  let pagina = 1
+  let datos = []
+  let total
+
+  do {
+    const respuesta = await listar({ ...filtros, pagina, limite })
+    const paginaDatos = respuesta?.datos || []
+    datos = datos.concat(paginaDatos)
+    total = respuesta?.total ?? datos.length
+    pagina += 1
+    if (paginaDatos.length === 0) break
+  } while (datos.length < total)
+
+  return datos
+}
+
+async function cargarHistoricosRecientesOE3() {
+  const stockReciente = await listarStockHistoricoImportado({
+    limite: 1000,
+    ordenCampo: 'fecha_snapshot',
+    ascendente: false,
+  })
+  const stockDatos = stockReciente?.datos || []
+  const fechasStock = [...new Set(stockDatos.map(item => item.fecha_snapshot).filter(Boolean))].sort()
+
+  if (fechasStock.length === 0) return { ventas: [], stock: [] }
+
+  const ventas = await listarTodasLasPaginas(listarVentasHistoricasImportadas, {
+    fechaDesde: fechasStock[0],
+    fechaHasta: fechasStock[fechasStock.length - 1],
+    ordenCampo: 'fecha_venta',
+    ascendente: true,
+  })
+
+  return { ventas, stock: stockDatos }
+}
 
 export default function PaginaDashboardCentral() {
   const [stock, setStock] = useState([])
   const [productos, setProductos] = useState([])
   const [alertas, setAlertas] = useState([])
-  const [movimientos, setMovimientos] = useState([])
   const [transferencias, setTransferencias] = useState([])
-  const [ordenes, setOrdenes] = useState([])
   const [estadoModelo, setEstadoModelo] = useState(null)
   const [predicciones, setPredicciones] = useState([])
+  const [ventasHistoricas, setVentasHistoricas] = useState([])
+  const [stockHistorico, setStockHistorico] = useState([])
   const [cargando, setCargando] = useState(true)
+  const [cargandoFillRate, setCargandoFillRate] = useState(true)
 
   useEffect(() => {
+    let cancelado = false
+
     Promise.allSettled([
       obtenerStockPorUbicacion(),
       obtenerProductos({ activos: true }),
       obtenerAlertas({ soloNoResueltas: true }),
-      obtenerMovimientos(),
       obtenerTransferencias(),
-      listarOrdenes(),
-      obtenerEstadoModelo().catch(() => null),
       obtenerPredicciones({ activos: true }).catch(() => []),
     ]).then((resultados) => {
+      if (cancelado) return
       if (resultados[0].status === 'fulfilled') setStock(resultados[0].value)
       if (resultados[1].status === 'fulfilled') setProductos(resultados[1].value)
       if (resultados[2].status === 'fulfilled') setAlertas(resultados[2].value)
-      if (resultados[3].status === 'fulfilled') setMovimientos(resultados[3].value)
-      if (resultados[4].status === 'fulfilled') setTransferencias(resultados[4].value)
-      if (resultados[5].status === 'fulfilled') setOrdenes(resultados[5].value)
-      if (resultados[6].status === 'fulfilled') setEstadoModelo(resultados[6].value)
-      if (resultados[7].status === 'fulfilled') setPredicciones(resultados[7].value)
-    }).finally(() => setCargando(false))
+      if (resultados[3].status === 'fulfilled') setTransferencias(resultados[3].value)
+      if (resultados[4].status === 'fulfilled') setPredicciones(resultados[4].value)
+    }).finally(() => {
+      if (!cancelado) setCargando(false)
+    })
+
+    // El estado del modelo y los historicos pueden tardar; no deben bloquear el dashboard inicial.
+    Promise.allSettled([obtenerEstadoModelo(), obtenerMetricasModelo()])
+      .then(([estadoResultado, metricasResultado]) => {
+        if (cancelado) return
+        const estado = estadoResultado.status === 'fulfilled' ? estadoResultado.value : {}
+        const metricas = metricasResultado.status === 'fulfilled' ? metricasResultado.value : {}
+        setEstadoModelo(combinarEstadoYMetricas(estado, metricas))
+      })
+      .catch(() => { if (!cancelado) setEstadoModelo(null) })
+
+    cargarHistoricosRecientesOE3().then(({ ventas, stock }) => {
+      if (cancelado) return
+      setVentasHistoricas(ventas)
+      setStockHistorico(stock)
+    }).catch(() => {
+      if (cancelado) return
+      setVentasHistoricas([])
+      setStockHistorico([])
+    }).finally(() => {
+      if (!cancelado) setCargandoFillRate(false)
+    })
+
+    return () => { cancelado = true }
   }, [])
 
   if (cargando) {
@@ -59,36 +158,56 @@ export default function PaginaDashboardCentral() {
   const alertasActivas = alertas.length
   const transferenciasEnTransito = transferencias.filter(t => t.estado === 'en_transito').length
 
-  const ordenesCompletadas = ordenes.filter(o => o.estado === 'recibida' || o.estado === 'recibida_parcial').length
-  const stockConCobertura = stock.filter(s => Number(s.cantidadDisponible || 0) >= Number(s.stockMinimo || 0)).length
-  const fillRate = ordenes.length > 0
-    ? Math.round((ordenesCompletadas / ordenes.length) * 100)
-    : (stock.length > 0 ? Math.round((stockConCobertura / stock.length) * 100) : null)
+  const fechaMetricasOE3 = obtenerUltimaFechaComunHistorica(ventasHistoricas, stockHistorico)
+  const ventasOE3 = fechaMetricasOE3 ? ventasHistoricas.filter(venta => venta.fecha_venta === fechaMetricasOE3) : []
+  const stockOE3 = fechaMetricasOE3 ? stockHistorico.filter(item => item.fecha_snapshot === fechaMetricasOE3) : []
 
-  const sobrestockCount = stock.filter(s => s.stockMaximo && Number(s.cantidadDisponible || 0) > Number(s.stockMaximo)).length
-  const tasaSobrestock = stock.length > 0 ? Math.round((sobrestockCount / stock.length) * 100) : null
+  const demandaAtendida = ventasOE3.reduce((acc, venta) => acc + Number(venta.cantidad || 0), 0)
+  const tieneDemandaInsatisfecha = stockOE3.some(item => Object.prototype.hasOwnProperty.call(item, 'demanda_insatisfecha'))
+  const demandaInsatisfecha = stockOE3.reduce((acc, item) => acc + Number(item.demanda_insatisfecha || 0), 0)
+  const demandaTotal = demandaAtendida + demandaInsatisfecha
+  // Fill Rate OE3 = demanda atendida / demanda total del ultimo periodo historico comun; no es disponibilidad de stock.
+  const fillRate = tieneDemandaInsatisfecha && demandaTotal > 0 ? (demandaAtendida / demandaTotal) * 100 : null
 
-  const datosKPI = predicciones.slice(0, 12).map((p, i) => {
-    const confianza = Number(p.confianza ?? 0)
-    const confianzaPorcentaje = confianza <= 1 ? confianza * 100 : confianza
-    return {
-      mes: p.periodoInicio?.substring(0, 7) || `P-${i + 1}`,
-      mape: confianzaPorcentaje ? Math.max(0, Math.round(100 - confianzaPorcentaje)) : null,
-      fillRate,
-      tasaSobrestock,
-    }
-  }).reverse()
+  const stockEvaluableSobrestock = stockOE3.filter(s => Number(s.stock_maximo) > 0)
+  const sobrestockCount = stockEvaluableSobrestock.filter(s => Number(s.cantidad_disponible || 0) > Number(s.stock_maximo)).length
+  // Tasa de sobrestock OE3 = snapshot historico sobre stock maximo / SKU-botica evaluables.
+  const tasaSobrestock = stockEvaluableSobrestock.length > 0 ? (sobrestockCount / stockEvaluableSobrestock.length) * 100 : null
+
+  const datosKPI = (() => {
+    const fechasVentas = new Set(ventasHistoricas.map(venta => venta.fecha_venta).filter(Boolean))
+    const fechasComunes = [...new Set(stockHistorico.map(item => item.fecha_snapshot).filter(Boolean))]
+      .filter(fecha => fechasVentas.has(fecha))
+      .sort()
+      .slice(-8)
+
+    return fechasComunes.map(fecha => {
+      const ventasFecha = ventasHistoricas.filter(venta => venta.fecha_venta === fecha)
+      const stockFecha = stockHistorico.filter(item => item.fecha_snapshot === fecha)
+      const ventasTotal = ventasFecha.reduce((acc, venta) => acc + Number(venta.cantidad || 0), 0)
+      const demandaNoAtendida = stockFecha.reduce((acc, item) => acc + Number(item.demanda_insatisfecha || 0), 0)
+      const demandaFecha = ventasTotal + demandaNoAtendida
+      const evaluables = stockFecha.filter(item => Number(item.stock_maximo) > 0)
+      const sobrestock = evaluables.filter(item => Number(item.cantidad_disponible || 0) > Number(item.stock_maximo)).length
+
+      return {
+        mes: fecha,
+        mape: estadoModelo?.mape != null ? Number(Number(estadoModelo.mape).toFixed(2)) : null,
+        fillRate: demandaFecha > 0 ? Number(((ventasTotal / demandaFecha) * 100).toFixed(2)) : null,
+        tasaSobrestock: evaluables.length > 0 ? Number(((sobrestock / evaluables.length) * 100).toFixed(2)) : null,
+      }
+    })
+  })()
 
   const datosTendencia = (() => {
     const agrupado = {}
-    movimientos.forEach(m => {
-      const mes = m.createdAt?.substring(0, 7)
-      if (!mes) return
-      if (!agrupado[mes]) agrupado[mes] = { mes, stock: 0 }
-      if (m.tipo === 'entrada') agrupado[mes].stock += m.cantidad
-      if (m.tipo === 'salida') agrupado[mes].stock -= Math.abs(m.cantidad)
+    stockHistorico.forEach(item => {
+      const fecha = item.fecha_snapshot
+      if (!fecha) return
+      if (!agrupado[fecha]) agrupado[fecha] = { mes: fecha, stock: 0 }
+      agrupado[fecha].stock += Number(item.cantidad_disponible || 0)
     })
-    return Object.values(agrupado).sort((a, b) => a.mes.localeCompare(b.mes)).slice(-7)
+    return Object.values(agrupado).sort((a, b) => a.mes.localeCompare(b.mes))
   })()
 
   return (
@@ -130,19 +249,19 @@ export default function PaginaDashboardCentral() {
       </div>
       <Tarjeta titulo="Métricas del Modelo ML" descripcion="Precisión del modelo predictivo">
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <TarjetaMetricaKPI etiqueta="MAPE" valor={estadoModelo?.mape ?? '—'} meta={20} unidad="%" descripcion="Error porcentual absoluto medio del modelo" icono={Brain} tipo="modelo" />
-          <TarjetaMetricaKPI etiqueta="RMSE" valor={estadoModelo?.rmse ?? '—'} unidad="uds" descripcion="Raíz del error cuadrático medio" icono={Brain} tipo="modelo" />
-          <TarjetaMetricaKPI etiqueta="MAE" valor={estadoModelo?.mae ?? '—'} unidad="uds" descripcion="Error absoluto medio" icono={Brain} tipo="modelo" />
+          <TarjetaMetricaKPI etiqueta="MAPE" valor={formatearDecimal(estadoModelo?.mape)} valorEvaluacion={estadoModelo?.mape} meta={20} unidad="%" descripcion="Error porcentual absoluto medio del modelo" icono={Brain} tipo="modelo" />
+          <TarjetaMetricaKPI etiqueta="RMSE" valor={formatearDecimal(estadoModelo?.rmse)} unidad="uds" descripcion="Raíz del error cuadrático medio" icono={Brain} tipo="modelo" />
+          <TarjetaMetricaKPI etiqueta="MAE" valor={formatearDecimal(estadoModelo?.mae)} unidad="uds" descripcion="Error absoluto medio" icono={Brain} tipo="modelo" />
         </div>
       </Tarjeta>
-      <Tarjeta titulo="Métricas de Negocio" descripcion="Indicadores de Fill Rate y Sobrestock">
+      <Tarjeta titulo="Métricas de Negocio" descripcion="Indicadores operativos OE3 de demanda y sobrestock">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <TarjetaMetricaKPI etiqueta="Fill Rate" valor={fillRate ?? '—'} meta={90} unidad="%" descripcion="Órdenes de compra recibidas vs. totales" icono={PackageCheck} tipo="fillRate" />
-          <TarjetaMetricaKPI etiqueta="Tasa de Sobrestock" valor={tasaSobrestock ?? '—'} meta={10} unidad="%" descripcion="Productos con stock excesivo sobre el total" icono={AlertOctagon} tipo="sobrestock" />
+          <TarjetaMetricaKPI etiqueta="Fill Rate" valor={cargandoFillRate ? 'Cargando...' : formatearPorcentaje(fillRate)} valorEvaluacion={fillRate} meta={85} unidad="" descripcion="Demanda atendida / demanda total" icono={PackageCheck} tipo="fillRate" />
+          <TarjetaMetricaKPI etiqueta="Tasa de Sobrestock" valor={cargandoFillRate ? 'Cargando...' : formatearPorcentaje(tasaSobrestock)} valorEvaluacion={tasaSobrestock} meta={10} unidad="" descripcion="SKU-botica sobre stock máximo" icono={AlertOctagon} tipo="tasaSobrestock" />
         </div>
       </Tarjeta>
-      <Tarjeta titulo="Tendencia de KPIs" descripcion="Evolución mensual de MAPE, Fill Rate y Tasa de Sobrestock">
-        {predicciones.length > 0 ? (
+      <Tarjeta titulo="Tendencia de KPIs" descripcion="Evolución mensual de MAPE, Fill Rate y sobrestock">
+        {datosKPI.length > 0 ? (
             <GraficaLinea datos={datosKPI} lineas={[
             { clave: 'mape', etiqueta: 'MAPE (%)', color: '#107C41' },
             { clave: 'fillRate', etiqueta: 'Fill Rate (%)', color: '#0078D4' },
@@ -161,10 +280,15 @@ export default function PaginaDashboardCentral() {
                 <div className="mt-3">
                 <p className="text-lg sm:text-h2 text-marca-principal">{pred.cantidadPredicha ?? '—'} uds</p>
                 <p className="text-xs text-secundario">
-                  {(pred.intervaloInf || pred.intervaloSup) ? `Rango: ${pred.intervaloInf ?? '?'} - ${pred.intervaloSup ?? '?'}` : `Confianza: ${pred.confianza ?? '—'}%`}
+                  {(pred.intervaloInf || pred.intervaloSup)
+                    ? `Rango esperado: ${formatearDecimal(pred.intervaloInf)} - ${formatearDecimal(pred.intervaloSup)} uds`
+                    : `Confianza: ${formatearPorcentaje(pred.confianza != null && Number(pred.confianza) <= 1 ? Number(pred.confianza) * 100 : pred.confianza)}`}
                 </p>
               </div>
-              {pred.productoId && <div className="mt-2"><Insignia color="verde">ID: {pred.productoId}</Insignia></div>}
+              <div className="mt-2 flex flex-wrap gap-2">
+                <Insignia color="verde">Producto: {pred.codigoProducto || pred.nombreProducto || 'Sin identificar'}</Insignia>
+                <Insignia color="azul">Botica: {pred.nombreBotica || 'No especificada'}</Insignia>
+              </div>
             </div>
           ))}
           {predicciones.length === 0 && <p className="text-secundario text-sm col-span-full text-center py-8">Sin predicciones disponibles</p>}
