@@ -1,9 +1,12 @@
 import { useState, useEffect } from 'react'
-import { Info, AlertTriangle, XCircle, Search, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Info, AlertTriangle, XCircle } from 'lucide-react'
 import Tabla from '@/components/common/Tabla'
 import Insignia from '@/components/common/Insignia'
 import Modal from '@/components/common/Modal'
-import Boton from '@/components/common/Boton'
+import CampoBusqueda from '@/components/common/CampoBusqueda'
+import BarraFiltros from '@/components/common/BarraFiltros'
+import SelectFiltro from '@/components/common/SelectFiltro'
+import Paginacion from '@/components/common/Paginacion'
 import { listarAuditoria } from '@/services/supabase/auditoria'
 import { formatearFechaHora } from '@/utilities/formatearFecha'
 
@@ -20,6 +23,8 @@ const OPCIONES_NIVEL = [
 ]
 
 const ACCIONES_AUDITORIA = [
+  'CREAR_ORGANIZACION',
+  'EDITAR_ORGANIZACION',
   'CREAR_BOTICA',
   'EDITAR_BOTICA',
   'ACTIVAR_BOTICA',
@@ -28,6 +33,34 @@ const ACCIONES_AUDITORIA = [
   'EDITAR_USUARIO',
   'ACTIVAR_USUARIO',
   'DESACTIVAR_USUARIO',
+  'CREAR_PRODUCTO',
+  'EDITAR_PRODUCTO',
+  'CONFIGURAR_STOCK',
+  'CREAR_TRANSFERENCIA',
+  'CREAR_REDISTRIBUCION',
+  'APROBAR_TRANSFERENCIA',
+  'ENVIAR_TRANSFERENCIA',
+  'RECIBIR_TRANSFERENCIA',
+  'CANCELAR_TRANSFERENCIA',
+  'RECHAZAR_TRANSFERENCIA',
+  'CONFIRMAR_DEVOLUCION_ORIGEN',
+  'MARCAR_OC_POR_RECIBIR',
+  'REGISTRAR_RECEPCION_OC',
+  'REGISTRAR_AJUSTE_INVENTARIO',
+  'REGISTRAR_MERMA',
+  'PROCESAR_STOCK_INICIAL',
+  'VALIDAR_IMPORTACION',
+  'IMPORTAR_DATOS',
+  'EDITAR_CONFIGURACION',
+  'CREAR_CATEGORIA_TERAPEUTICA',
+  'EDITAR_CATEGORIA_TERAPEUTICA',
+  'ACTIVAR_CATEGORIA_TERAPEUTICA',
+  'DESACTIVAR_CATEGORIA_TERAPEUTICA',
+  'APROBAR_RECOMENDACION_ML',
+]
+
+const ENTIDADES_AUDITORIA = [
+  'organizaciones', 'boticas', 'usuarios', 'productos', 'stock_ubicaciones', 'transferencias', 'ordenes_compra', 'recepciones_orden', 'movimientos_inventario', 'importaciones_datos', 'configuracion_organizacion', 'categorias_terapeuticas', 'recomendaciones_ml'
 ]
 
 const ETIQUETAS_NIVEL_AUDITORIA = {
@@ -48,6 +81,9 @@ export default function PaginaAuditoria() {
   const [error, setError] = useState(null)
   const [filtroNivel, setFiltroNivel] = useState('')
   const [filtroAccion, setFiltroAccion] = useState('')
+  const [filtroEntidad, setFiltroEntidad] = useState('')
+  const [fechaHoraDesde, setFechaHoraDesde] = useState('')
+  const [fechaHoraHasta, setFechaHoraHasta] = useState('')
   const [busqueda, setBusqueda] = useState('')
   const [detalleAbierto, setDetalleAbierto] = useState(null)
   const [pagina, setPagina] = useState(1)
@@ -61,7 +97,10 @@ export default function PaginaAuditoria() {
       const filtros = { pagina: paginaActual, limite: 50 }
       if (filtroNivel) filtros.nivel = filtroNivel
       if (filtroAccion) filtros.accion = filtroAccion
+      if (filtroEntidad) filtros.entidad = filtroEntidad
       if (busqueda) filtros.busqueda = busqueda
+      if (fechaHoraDesde) filtros.fechaDesde = new Date(fechaHoraDesde).toISOString()
+      if (fechaHoraHasta) filtros.fechaHasta = new Date(fechaHoraHasta).toISOString()
 
       const resultado = await listarAuditoria(filtros)
       setRegistros(resultado.datos)
@@ -77,7 +116,7 @@ export default function PaginaAuditoria() {
   useEffect(() => {
     setPagina(1)
     cargarRegistros(1)
-  }, [filtroNivel, filtroAccion, busqueda])
+  }, [filtroNivel, filtroAccion, filtroEntidad, busqueda, fechaHoraDesde, fechaHoraHasta])
 
   useEffect(() => {
     cargarRegistros(pagina)
@@ -140,12 +179,21 @@ export default function PaginaAuditoria() {
       encabezado: 'Detalle',
       render: (r) => (
         <div className="flex items-center gap-2">
-          <span className="text-sm text-secundario line-clamp-1 max-w-[200px]">{r.detalle}</span>
-          <Boton variante="icono" icono={Search} onClick={() => setDetalleAbierto(r)} title="Ver detalle" className="text-marca-principal hover:bg-marca-claro shrink-0" />
+          <span className="text-sm text-secundario truncate max-w-[240px]">{r.detalle}</span>
         </div>
       ),
     },
   ]
+
+  const limpiarFiltros = () => {
+    setBusqueda('')
+    setFiltroNivel('')
+    setFiltroAccion('')
+    setFiltroEntidad('')
+    setFechaHoraDesde('')
+    setFechaHoraHasta('')
+    setPagina(1)
+  }
 
   if (cargando) return <div className="flex items-center justify-center py-20"><p className="text-secundario">Cargando registros...</p></div>
   if (error) return <div className="flex items-center justify-center h-64"><p className="text-estado-critico">Error: {error}</p></div>
@@ -157,62 +205,18 @@ export default function PaginaAuditoria() {
         <p className="text-secundario mt-1">{total} registros encontrados</p>
       </div>
 
-      <div className="flex flex-wrap gap-4">
-        <input
-          type="text"
-          placeholder="Buscar por usuario, acción, entidad..."
-          value={busqueda}
-          onChange={e => setBusqueda(e.target.value)}
-          className="w-full sm:w-72 px-3 py-2 border border-estilo rounded-md text-cuerpo bg-fondo"
-        />
-        <select
-          value={filtroNivel}
-          onChange={e => setFiltroNivel(e.target.value)}
-          className="px-3 py-2 border border-estilo rounded-md text-cuerpo bg-fondo"
-        >
-          <option value="">Todos los niveles</option>
-          {OPCIONES_NIVEL.map(op => (
-            <option key={op.valor} value={op.valor}>{op.etiqueta}</option>
-          ))}
-        </select>
-        <select
-          value={filtroAccion}
-          onChange={e => setFiltroAccion(e.target.value)}
-          className="px-3 py-2 border border-estilo rounded-md text-cuerpo bg-fondo"
-        >
-          <option value="">Todas las acciones</option>
-          {ACCIONES_AUDITORIA.map(a => (
-            <option key={a} value={a}>{a}</option>
-          ))}
-        </select>
-      </div>
+      <BarraFiltros alLimpiar={limpiarFiltros}>
+        <CampoBusqueda valor={busqueda} alCambiar={setBusqueda} placeholder="Buscar por usuario, acción, entidad..." className="w-full sm:w-80" />
+        <SelectFiltro valor={filtroAccion} alCambiar={setFiltroAccion} opciones={ACCIONES_AUDITORIA.map(a => ({ valor: a, etiqueta: a }))} placeholder="Todas las acciones" />
+        <SelectFiltro valor={filtroEntidad} alCambiar={setFiltroEntidad} opciones={ENTIDADES_AUDITORIA.map(e => ({ valor: e, etiqueta: e }))} placeholder="Todas las entidades" />
+        <SelectFiltro valor={filtroNivel} alCambiar={setFiltroNivel} opciones={OPCIONES_NIVEL} placeholder="Todos los niveles" />
+        <label className="flex flex-col gap-1 text-xs text-secundario">Fecha/hora inicial<input type="datetime-local" value={fechaHoraDesde} onChange={e => setFechaHoraDesde(e.target.value)} className="px-3 py-2 text-sm bg-fondo border border-estilo rounded-md text-principal" /></label>
+        <label className="flex flex-col gap-1 text-xs text-secundario">Fecha/hora final<input type="datetime-local" value={fechaHoraHasta} onChange={e => setFechaHoraHasta(e.target.value)} className="px-3 py-2 text-sm bg-fondo border border-estilo rounded-md text-principal" /></label>
+      </BarraFiltros>
 
-      <Tabla columnas={columnas} datos={registros} busqueda={false} />
+      <Tabla columnas={columnas} datos={registros} busqueda={false} paginacion={false} alClickFila={setDetalleAbierto} />
 
-      {totalPaginas > 1 && (
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-2 text-sm text-secundario">
-          <span>{total} registros en total</span>
-          <div className="flex items-center gap-2">
-            <span>Página {pagina} de {totalPaginas}</span>
-            <div className="flex items-center gap-1">
-              <button
-                onClick={() => setPagina(p => p - 1)}
-                disabled={pagina <= 1}
-                className="p-1.5 rounded hover:bg-fondo disabled:opacity-30 disabled:cursor-not-allowed"
-              >
-                <ChevronLeft className="h-4 w-4" />
-              </button>
-              <button
-                onClick={() => setPagina(p => p + 1)}
-                disabled={pagina >= totalPaginas}
-                className="p-1.5 rounded hover:bg-fondo disabled:opacity-30 disabled:cursor-not-allowed"
-              >
-                <ChevronRight className="h-4 w-4" />
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <Paginacion pagina={pagina} totalPaginas={totalPaginas} total={total} alCambiar={setPagina} />
 
       <Modal abierto={!!detalleAbierto} alCerrar={() => setDetalleAbierto(null)} titulo="Detalle del Registro" tamano="md">
         {detalleAbierto && (

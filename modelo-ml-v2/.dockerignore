@@ -1,0 +1,16 @@
+.git
+.gitignore
+.gcloudignore
+.env
+.venv
+.venv*
+__pycache__
+*.pyc
+.pytest_cache
+.ipynb_checkpoints
+reports/
+tests/
+data/importacion_plataforma/
+data/importacion_plataforma_incremental_20260620/
+modelos/v1.0.0/
+tests_legacy/

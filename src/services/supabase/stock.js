@@ -26,20 +26,20 @@ const MAPEAR_STOCK = (item) => ({
   productoId: item.producto_id,
   ubicacionTipo: item.ubicacion_tipo,
   ubicacionId: item.ubicacion_id,
-  cantidadDisponible: item.cantidad_disponible,
+  stockFisico: item.stock_fisico ?? 0,
   stockMinimo: item.stock_minimo,
   stockMaximo: item.stock_maximo ?? null,
   stockComprometido: item.stock_comprometido ?? 0,
   stockReservado: item.stock_comprometido ?? 0,
-  stockLibre: (item.cantidad_disponible ?? 0) - (item.stock_comprometido ?? 0),
+  stockDisponible: Math.max((item.stock_fisico ?? 0) - (item.stock_comprometido ?? 0), 0),
   stockPorRecibir: item.stock_por_recibir ?? 0,
   stockEnTransito: item.stock_en_transito ?? 0,
-  updatedAt: item.updated_at,
+  updatedAt: item.modified_at,
   nombreProducto: item.productos?.nombre_comercial || item.producto_id,
   codigoProducto: item.productos?.codigo_interno || null,
   nombreUbicacion: item.boticas?.nombre || item.ubicacion_id || 'Droguería Central',
-  stockDisponible: item.cantidad_disponible,
-  ultimaActualizacion: item.updated_at,
+  cantidadDisponible: Math.max((item.stock_fisico ?? 0) - (item.stock_comprometido ?? 0), 0),
+  ultimaActualizacion: item.modified_at,
 })
 
 const SELECCION = `
@@ -47,13 +47,13 @@ const SELECCION = `
   producto_id,
   ubicacion_tipo,
   ubicacion_id,
-  cantidad_disponible,
+  stock_fisico,
   stock_minimo,
   stock_maximo,
   stock_comprometido,
   stock_por_recibir,
   stock_en_transito,
-  updated_at,
+  modified_at,
   productos:producto_id (nombre_comercial, codigo_interno),
   boticas:ubicacion_id (nombre)
 `
@@ -81,6 +81,17 @@ export async function obtenerStockProducto(productoId) {
 
   if (error) throw new Error('Error al cargar stock del producto: ' + error.message)
   return (data || []).map(MAPEAR_STOCK)
+}
+
+export async function obtenerStockPorId(id) {
+  const { data, error } = await supabase
+    .from('stock_ubicaciones')
+    .select(SELECCION)
+    .eq('id', id)
+    .single()
+
+  if (error) throw new Error('Error al cargar detalle de stock: ' + error.message)
+  return MAPEAR_STOCK(data)
 }
 
 export async function actualizarStockConfig(productoId, { ubicacionTipo, ubicacionId, stockMinimo, stockMaximo }) {

@@ -1,0 +1,15 @@
+codigo,nombre,descripcion,activo
+CAT-001,Analgésico,Categoria terapeutica utilizada por el modelo oficial V4,true
+CAT-002,Antibiótico,Categoria terapeutica utilizada por el modelo oficial V4,true
+CAT-003,Antidiabético,Categoria terapeutica utilizada por el modelo oficial V4,true
+CAT-004,Antifúngico,Categoria terapeutica utilizada por el modelo oficial V4,true
+CAT-005,Antihipertensivo,Categoria terapeutica utilizada por el modelo oficial V4,true
+CAT-006,Antihistamínico,Categoria terapeutica utilizada por el modelo oficial V4,true
+CAT-007,Antiinflamatorio,Categoria terapeutica utilizada por el modelo oficial V4,true
+CAT-008,Antiulceroso,Categoria terapeutica utilizada por el modelo oficial V4,true
+CAT-009,Antivertiginoso,Categoria terapeutica utilizada por el modelo oficial V4,true
+CAT-010,Broncodilatador,Categoria terapeutica utilizada por el modelo oficial V4,true
+CAT-011,Corticosteroide,Categoria terapeutica utilizada por el modelo oficial V4,true
+CAT-012,Hipolipemiante,Categoria terapeutica utilizada por el modelo oficial V4,true
+CAT-013,Suplemento,Categoria terapeutica utilizada por el modelo oficial V4,true
+CAT-014,Vitamina,Categoria terapeutica utilizada por el modelo oficial V4,true

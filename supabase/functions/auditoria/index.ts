@@ -62,6 +62,8 @@ async function listarAuditoria(supabase: any, perfil: PerfilUsuario, url: URL) {
   const entidad = url.searchParams.get("entidad") || null;
   const nivel = url.searchParams.get("nivel") || null;
   const busqueda = url.searchParams.get("busqueda") || null;
+  const fechaDesde = url.searchParams.get("fechaDesde") || null;
+  const fechaHasta = url.searchParams.get("fechaHasta") || null;
   const pagina = parseInt(url.searchParams.get("pagina") || "1");
   const limite = parseInt(url.searchParams.get("limite") || "50");
   const offset = (pagina - 1) * limite;
@@ -79,6 +81,8 @@ async function listarAuditoria(supabase: any, perfil: PerfilUsuario, url: URL) {
   if (accion) query = query.eq("accion", accion);
   if (entidad) query = query.eq("entidad", entidad);
   if (nivel) query = query.eq("nivel", nivel);
+  if (fechaDesde) query = query.gte("created_at", fechaDesde);
+  if (fechaHasta) query = query.lte("created_at", fechaHasta);
   if (busqueda) {
     query = query.or(
       `detalle.ilike.%${busqueda}%,accion.ilike.%${busqueda}%,entidad.ilike.%${busqueda}%`,

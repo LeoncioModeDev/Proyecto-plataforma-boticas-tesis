@@ -74,7 +74,7 @@ export default function PaginaConfiguracionAvanzada() {
     <div className="space-y-6 max-w-4xl">
       <div>
         <h1 className="text-h1 text-principal">Configuración Avanzada</h1>
-        <p className="text-cuerpo text-secundario mt-1">Parámetros del pipeline de Machine Learning — solo lectura</p>
+        <p className="text-cuerpo text-secundario mt-1">Parámetros del pipeline predictivo — solo lectura</p>
       </div>
 
       <Tarjeta titulo="Pipeline ML" icono={BrainCircuit}>
@@ -169,7 +169,7 @@ export default function PaginaConfiguracionAvanzada() {
             <Cpu className="h-10 w-10 text-secundario mb-3" />
             <p className="text-cuerpo text-principal font-medium">Sin modelo en producción</p>
             <p className="text-etiqueta text-secundario mt-1 max-w-md">
-              No hay un modelo ML activo desplegado. Los resultados de predicción no estarán disponibles hasta que se entrene y promocione un modelo.
+              No hay un modelo predictivo activo desplegado. Los resultados de predicción no estarán disponibles hasta que se entrene y promocione un modelo.
             </p>
           </div>
         )}

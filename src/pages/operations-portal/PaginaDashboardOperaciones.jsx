@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Package, AlertTriangle, Boxes, Truck, Building, TrendingUp } from 'lucide-react'
+import { Package, AlertTriangle, Boxes, Truck, Building } from 'lucide-react'
 import Tarjeta from '@/components/common/Tarjeta'
 import TarjetaMetrica from '@/components/charts/TarjetaMetrica'
 import GraficaLinea from '@/components/charts/GraficaLinea'
@@ -14,12 +14,33 @@ import { formatearFechaRelativa } from '@/utilities/formatearFecha'
 import { formatearNumero } from '@/utilities/formatearMoneda'
 import { ESTADOS_TRANSFERENCIA, ETIQUETAS_TRANSFERENCIA, COLORES_TRANSFERENCIA } from '@/constants/transferencias'
 
+const TIPOS_ALERTA_OPERATIVA = new Set(['riesgo_desabastecimiento', 'stock_bajo', 'stock_critico', 'quiebre', 'sobrestock'])
+
 const MAPEO_COLORES = {
   amarillo: 'amarillo',
   azul: 'azul',
   verde: 'verde',
   rojo: 'rojo',
   naranja: 'naranja',
+}
+
+function etiquetaAlerta(tipo) {
+  const etiquetas = {
+    riesgo_desabastecimiento: 'Riesgo de desabastecimiento',
+    stock_bajo: 'Stock bajo',
+    stock_critico: 'Stock crítico',
+    quiebre: 'Sin stock',
+    sobrestock: 'Sobrestock',
+  }
+  return etiquetas[tipo] || tipo
+}
+
+function prioridadUrgencia(valor) {
+  const v = String(valor || '').toLowerCase()
+  if (v === 'critica' || v === 'alta') return 3
+  if (v === 'media') return 2
+  if (v === 'baja') return 1
+  return 0
 }
 
 export default function PaginaDashboardOperaciones() {
@@ -56,7 +77,6 @@ export default function PaginaDashboardOperaciones() {
   const stockTotal = stock.reduce((acc, s) => acc + s.cantidadDisponible, 0)
   const productosActivos = productos.length
   const productosCriticos = stock.filter(s => s.cantidadDisponible < s.stockMinimo).length
-  const alertasPendientes = alertas.length
   const transferenciasActivas = transferencias.filter(t => t.estado === ESTADOS_TRANSFERENCIA.EN_TRANSITO).length
   const totalBoticas = boticas.length
 
@@ -82,6 +102,10 @@ export default function PaginaDashboardOperaciones() {
     })
     return Object.values(agrupado).sort((a, b) => a.mes.localeCompare(b.mes)).slice(-6)
   })()
+
+  const alertasOperativas = alertas
+    .filter(a => TIPOS_ALERTA_OPERATIVA.has(a.tipo))
+    .sort((a, b) => prioridadUrgencia(b.urgencia) - prioridadUrgencia(a.urgencia))
 
   return (
     <div className="space-y-6 sm:space-y-8">
@@ -115,18 +139,18 @@ export default function PaginaDashboardOperaciones() {
 
         <Tarjeta titulo="Alertas Pendientes">
           <div className="space-y-3">
-            {alertas.slice(0, 5).map(a => (
+            {alertasOperativas.slice(0, 5).map(a => (
               <div key={a.id} className="flex items-start gap-3 p-3 bg-fondo rounded-md">
                 <Insignia color={a.urgencia === 'alta' ? 'rojo' : a.urgencia === 'media' ? 'amarillo' : 'gris'}>
-                  {a.tipo}
+                  {etiquetaAlerta(a.tipo)}
                 </Insignia>
                 <div className="flex-1 min-w-0">
                   <p className="text-xs text-principal line-clamp-2">{a.nombreProducto} - {a.nombreBotica}</p>
-                  <p className="text-xs text-secundario mt-1">{formatearFechaRelativa(a.generadoEn)}</p>
+                  <p className="text-xs text-secundario mt-1">Urgencia: {a.urgencia || '—'} · {formatearFechaRelativa(a.generadoEn)}</p>
                 </div>
               </div>
             ))}
-            {alertas.length === 0 && <p className="text-secundario text-sm text-center py-4">No hay alertas pendientes</p>}
+            {alertasOperativas.length === 0 && <p className="text-secundario text-sm text-center py-4">No hay alertas operativas pendientes</p>}
           </div>
         </Tarjeta>
       </div>

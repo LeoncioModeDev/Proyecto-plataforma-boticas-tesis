@@ -5,6 +5,7 @@ import useAutenticacion from '@/state/useAutenticacion'
 import useBarraLateral from '@/state/useBarraLateral'
 import MigaDePan from './MigaDePan'
 import ControlesInterfaz from '@/components/common/ControlesInterfaz'
+import ModalConfirmar from '@/components/common/ModalConfirmar'
 import { obtenerPortal } from '@/utilities/permisos'
 
 export default function BarraSuperior({ onAbrirMenuMovil }) {
@@ -12,6 +13,7 @@ export default function BarraSuperior({ onAbrirMenuMovil }) {
   const { colapsada } = useBarraLateral()
   const navegar = useNavigate()
   const [menuAbierto, setMenuAbierto] = useState(false)
+  const [confirmarSalida, setConfirmarSalida] = useState(false)
   const refMenu = useRef(null)
 
   useEffect(() => {
@@ -30,7 +32,13 @@ export default function BarraSuperior({ onAbrirMenuMovil }) {
   }
   const IconoPortal = PORTAL_ICONOS[portal] || LayoutDashboard
 
+  const manejarCerrarSesion = () => {
+    cerrarSesion()
+    navegar('/iniciar-sesion')
+  }
+
   return (
+    <>
     <header className={`fixed top-0 right-0 left-0 h-14 bg-fondo-secundario border-b border-estilo flex items-center justify-between px-3 sm:px-4 lg:px-6 z-30 transition-all duration-200 ${colapsada ? 'lg:left-16' : 'lg:left-60'}`}>
       <div className="flex items-center gap-2 sm:gap-3 min-w-0">
         <button
@@ -65,7 +73,7 @@ export default function BarraSuperior({ onAbrirMenuMovil }) {
                 <p className="text-etiqueta text-secundario">{usuario?.email}</p>
               </div>
               <button
-                onClick={() => { cerrarSesion(); navegar('/iniciar-sesion'); }}
+                onClick={() => { setMenuAbierto(false); setConfirmarSalida(true); }}
                 className="flex items-center gap-2 w-full px-4 py-2.5 text-cuerpo text-secundario hover:bg-fondo transition-colors"
               >
                 <LogOut className="h-4 w-4" />
@@ -76,5 +84,14 @@ export default function BarraSuperior({ onAbrirMenuMovil }) {
         </div>
       </div>
     </header>
+    <ModalConfirmar
+      abierto={confirmarSalida}
+      alCerrar={() => setConfirmarSalida(false)}
+      alConfirmar={manejarCerrarSesion}
+      titulo="Cerrar sesión"
+      mensaje="¿Seguro que deseas cerrar la sesión actual?"
+      etiquetaBoton="Cerrar sesión"
+    />
+    </>
   )
 }

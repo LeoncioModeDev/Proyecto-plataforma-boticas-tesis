@@ -1,6 +1,10 @@
 ﻿import { useState, useEffect } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import Tabla from '@/components/common/Tabla'
 import Insignia from '@/components/common/Insignia'
+import CampoBusqueda from '@/components/common/CampoBusqueda'
+import BarraFiltros from '@/components/common/BarraFiltros'
+import SelectFiltro from '@/components/common/SelectFiltro'
 import useConfiguracion from '@/state/useConfiguracion'
 import useAutenticacion from '@/state/useAutenticacion'
 import { obtenerLotesActivos } from '@/services/supabase/lotes'
@@ -9,10 +13,13 @@ import { formatearFechaCorta, diasRestantes } from '@/utilities/formatearFecha'
 import { filtrarPorBotica } from '@/utilities/permisos'
 
 export default function PaginaLotesBotica() {
+  const [searchParams] = useSearchParams()
   const { usuario } = useAutenticacion()
   const [datos, setDatos] = useState([])
   const [cargando, setCargando] = useState(true)
   const [error, setError] = useState(null)
+  const [busqueda, setBusqueda] = useState('')
+  const [filtroVencimiento, setFiltroVencimiento] = useState('')
   const [filtroStock, setFiltroStock] = useState('con_stock')
   const alertaDias = useConfiguracion(s => s.config?.alertaVencimientoDias ?? 30)
 
@@ -30,6 +37,16 @@ export default function PaginaLotesBotica() {
   }, [usuario])
 
   const datosFiltrados = datos.filter(l => {
+    const productoId = searchParams.get('productoId')
+    const ubicacionId = searchParams.get('ubicacionId')
+    if (productoId && l.productoId !== productoId) return false
+    if (ubicacionId && l.ubicacionId !== ubicacionId) return false
+    if (busqueda.trim() && ![l.numeroLote, l.codigoProducto, l.nombreProducto].some(valor => (valor || '').toLowerCase().includes(busqueda.trim().toLowerCase()))) return false
+    if (filtroVencimiento) {
+      const dias = diasRestantes(l.fechaVencimiento)
+      const estado = dias < 0 ? 'vencido' : dias <= alertaDias ? 'proximo' : 'vigente'
+      if (estado !== filtroVencimiento) return false
+    }
     if (filtroStock === 'con_stock') return l.cantidad > 0
     if (filtroStock === 'agotados') return l.cantidad === 0
     return true
@@ -63,17 +80,13 @@ export default function PaginaLotesBotica() {
     <div className="space-y-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="text-h1 text-principal">Lotes de mi Botica</h1>
-        <select
-          value={filtroStock}
-          onChange={e => setFiltroStock(e.target.value)}
-          className="px-3 py-2 text-cuerpo bg-fondo border border-estilo rounded-md"
-        >
-          <option value="con_stock">Con stock</option>
-          <option value="agotados">Agotados</option>
-          <option value="todos">Todos</option>
-        </select>
       </div>
-      <Tabla columnas={columnas} datos={datosFiltrados} />
+      <BarraFiltros alLimpiar={() => { setBusqueda(''); setFiltroVencimiento(''); setFiltroStock('con_stock') }}>
+        <CampoBusqueda valor={busqueda} alCambiar={setBusqueda} placeholder="Buscar lote..." className="w-full sm:w-72" />
+        <SelectFiltro valor={filtroVencimiento} alCambiar={setFiltroVencimiento} opciones={[{ valor: 'vencido', etiqueta: 'Vencido' }, { valor: 'proximo', etiqueta: 'Próx. vencer' }, { valor: 'vigente', etiqueta: 'Vigente' }]} placeholder="Estado de vencimiento" />
+        <SelectFiltro valor={filtroStock} alCambiar={setFiltroStock} opciones={[{ valor: 'con_stock', etiqueta: 'Con stock' }, { valor: 'agotados', etiqueta: 'Agotados' }, { valor: 'todos', etiqueta: 'Todos' }]} placeholder="Con stock" />
+      </BarraFiltros>
+      <Tabla columnas={columnas} datos={datosFiltrados} busqueda={false} />
     </div>
   )
 }

@@ -32,8 +32,8 @@ const columnas = [
 export default function PaginaPrecios() {
   return (
     <PaginaVistaValidacion
-      titulo="Precios importados"
-      descripcion="Validacion de precios de venta y costo cargados por botica y producto. No incluye precio referencial de proveedor."
+      titulo="Precios"
+      descripcion="Validación de precios de venta y costo cargados por botica y producto. No incluye precio referencial de proveedor."
       columnas={columnas}
       cargarDatos={listarPreciosImportados}
       filtrosExtra={[

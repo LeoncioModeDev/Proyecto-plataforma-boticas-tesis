@@ -18,6 +18,7 @@ export default function Tabla({
   tamanoPagina = 10,
   alClickFila,
   renderFilaExpandida,
+  mensajeVacio = 'No se encontraron resultados',
 }) {
   const [filtroGlobal, setFiltroGlobal] = useState('')
   const [ordenamiento, setOrdenamiento] = useState([])
@@ -85,8 +86,8 @@ export default function Tabla({
             <tbody>
               {tabla.getRowModel().rows.length === 0 ? (
                 <tr>
-                  <td colSpan={columnas.length} className="px-4 py-8 text-center text-secundario text-secundario">
-                    No se encontraron resultados
+                  <td colSpan={columnas.length} className="px-4 py-8 text-center text-secundario">
+                    {mensajeVacio}
                   </td>
                 </tr>
               ) : (
@@ -99,7 +100,7 @@ export default function Tabla({
                       style={{ minHeight: '44px' }}
                     >
                       {fila.getVisibleCells().map(celda => (
-                        <td key={celda.id} className="px-3 sm:px-4 py-3 text-xs sm:text-sm text-principal">
+                        <td key={celda.id} className="px-3 sm:px-4 py-2.5 text-xs sm:text-sm text-principal align-middle">
                           {flexRender(celda.column.columnDef.cell, celda.getContext())}
                         </td>
                       ))}

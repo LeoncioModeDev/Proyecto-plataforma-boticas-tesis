@@ -56,6 +56,36 @@ export async function obtenerLotesActivos(productoId, ubicacionTipo, ubicacionId
   return (data || []).map(MAPEAR_LOTE)
 }
 
+export async function obtenerLotesDisponiblesParaTransferencia(productoId, ubicacionTipo, ubicacionId) {
+  const lotes = await obtenerLotesActivos(productoId, ubicacionTipo, ubicacionTipo === 'drogueria' ? null : ubicacionId)
+
+  if (!productoId) return []
+
+  let stockQuery = supabase
+    .from('stock_ubicaciones')
+    .select('stock_fisico, stock_comprometido')
+    .eq('producto_id', productoId)
+    .eq('ubicacion_tipo', ubicacionTipo)
+
+  if (ubicacionTipo === 'drogueria') {
+    stockQuery = stockQuery.is('ubicacion_id', null)
+  } else if (ubicacionId) {
+    stockQuery = stockQuery.eq('ubicacion_id', ubicacionId)
+  }
+
+  const { data: stock, error } = await stockQuery.maybeSingle()
+  if (error) throw new Error('Error al calcular stock disponible: ' + error.message)
+
+  const stockDisponible = Math.max((stock?.stock_fisico ?? 0) - (stock?.stock_comprometido ?? 0), 0)
+  let restanteDisponible = stockDisponible
+
+  return lotes.map(lote => {
+    const disponible = Math.max(Math.min(lote.cantidad, restanteDisponible), 0)
+    restanteDisponible = Math.max(restanteDisponible - disponible, 0)
+    return { ...lote, cantidadFisica: lote.cantidad, cantidad: disponible, stockDisponibleProducto: stockDisponible }
+  }).filter(lote => lote.cantidad > 0)
+}
+
 export async function crearLote(datos) {
   const { data, error } = await supabase
     .from('lotes')

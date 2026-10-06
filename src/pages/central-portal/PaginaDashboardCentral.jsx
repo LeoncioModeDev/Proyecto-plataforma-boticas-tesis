@@ -9,9 +9,11 @@ import Insignia from '@/components/common/Insignia'
 import { obtenerStockPorUbicacion } from '@/services/supabase/stock'
 import { obtenerProductos } from '@/services/supabase/productos'
 import { obtenerAlertas } from '@/services/supabase/alertas'
+import { listarBoticas } from '@/services/supabase/boticas'
 
 import { obtenerTransferencias } from '@/services/supabase/transferencias'
 import { obtenerEstadoModelo, obtenerMetricasModelo } from '@/services/ml-model/modelosML'
+import { obtenerRecomendaciones } from '@/services/ml-model/recomendacionesML'
 import { obtenerPredicciones } from '@/services/supabase/predicciones'
 import { listarVentasHistoricasImportadas } from '@/services/supabase/ventasHistoricas'
 import { listarStockHistoricoImportado } from '@/services/supabase/stockHistorico'
@@ -20,6 +22,58 @@ import { formatearNumero } from '@/utilities/formatearMoneda'
 
 const formatearPorcentaje = (valor) => valor == null ? 'N/D' : `${Number(valor).toFixed(2)}%`
 const formatearDecimal = (valor) => valor == null || !Number.isFinite(Number(valor)) ? '—' : Number(valor).toFixed(2)
+
+function etiquetaMadurez(valor) {
+  const etiquetas = {
+    MODELO_COMPLETO: 'Modelo completo',
+    PREDICCION_LIMITADA: 'Predicción limitada',
+    HISTORIAL_INTERMEDIO: 'Historial intermedio',
+    HISTORIAL_INICIAL: 'Historial inicial',
+    SIN_DATOS: 'Sin datos suficientes',
+  }
+  return etiquetas[valor] || valor || 'Madurez no disponible'
+}
+
+function etiquetaEstrategia(valor) {
+  const etiquetas = {
+    HIBRIDO_SARIMA_XGBOOST_ADAPTATIVO: 'SARIMA + XGBoost híbrido',
+    XGBOOST_GLOBAL_CON_FEATURES_OFICIALES: 'XGBoost global',
+    XGBOOST_GLOBAL_CON_FALLBACK_MADURO: 'XGBoost global',
+    FALLBACK_OPERATIVO: 'Fallback operativo',
+  }
+  return etiquetas[valor] || valor || 'Estrategia no disponible'
+}
+
+function agruparPredicciones(predicciones, nombresProducto = {}, nombresBotica = {}) {
+  const grupos = new Map()
+  predicciones.forEach(pred => {
+    const clave = [pred.generadoEn, pred.boticaId, pred.productoId, pred.modeloVersionId].join('|')
+    const actual = grupos.get(clave) || { ...pred, demandaTotal: 0, semanas: 0 }
+    actual.demandaTotal += Number(pred.cantidadPredicha || 0)
+    actual.semanas += 1
+    actual.nombreProducto = nombresProducto[pred.productoId] || pred.nombreProducto || 'Producto sin nombre'
+    actual.nombreBotica = nombresBotica[pred.boticaId] || pred.nombreBotica || 'Botica sin nombre'
+    grupos.set(clave, actual)
+  })
+  return [...grupos.values()].sort((a, b) => String(b.generadoEn || '').localeCompare(String(a.generadoEn || '')))
+}
+
+function resumenRecomendacionesPendientes(recomendaciones = []) {
+  const pendientes = recomendaciones.filter(r => String(r.estado || '').toLowerCase() === 'pendiente')
+  return {
+    total: pendientes.length,
+    reposiciones: pendientes.filter(r => String(r.tipo_recomendacion || r.tipo || '').includes('REPOSICION')).length,
+    compras: pendientes.filter(r => String(r.tipo_recomendacion || r.tipo || '').includes('COMPRA')).length,
+  }
+}
+
+function prioridadUrgencia(valor) {
+  const v = String(valor || '').toLowerCase()
+  if (v === 'critica' || v === 'alta') return 3
+  if (v === 'media') return 2
+  if (v === 'baja') return 1
+  return 0
+}
 
 function obtenerMetricasHibridas(metricas = {}) {
   const metricasGlobales = metricas.metricas_globales || []
@@ -95,10 +149,12 @@ async function cargarHistoricosRecientesOE3() {
 export default function PaginaDashboardCentral() {
   const [stock, setStock] = useState([])
   const [productos, setProductos] = useState([])
+  const [boticas, setBoticas] = useState([])
   const [alertas, setAlertas] = useState([])
   const [transferencias, setTransferencias] = useState([])
   const [estadoModelo, setEstadoModelo] = useState(null)
   const [predicciones, setPredicciones] = useState([])
+  const [recomendaciones, setRecomendaciones] = useState([])
   const [ventasHistoricas, setVentasHistoricas] = useState([])
   const [stockHistorico, setStockHistorico] = useState([])
   const [cargando, setCargando] = useState(true)
@@ -110,16 +166,20 @@ export default function PaginaDashboardCentral() {
     Promise.allSettled([
       obtenerStockPorUbicacion(),
       obtenerProductos({ activos: true }),
+      listarBoticas({ activas: true }),
       obtenerAlertas({ soloNoResueltas: true }),
       obtenerTransferencias(),
       obtenerPredicciones({ activos: true }).catch(() => []),
+      obtenerRecomendaciones().catch(() => ({ recomendaciones: [] })),
     ]).then((resultados) => {
       if (cancelado) return
       if (resultados[0].status === 'fulfilled') setStock(resultados[0].value)
       if (resultados[1].status === 'fulfilled') setProductos(resultados[1].value)
-      if (resultados[2].status === 'fulfilled') setAlertas(resultados[2].value)
-      if (resultados[3].status === 'fulfilled') setTransferencias(resultados[3].value)
-      if (resultados[4].status === 'fulfilled') setPredicciones(resultados[4].value)
+      if (resultados[2].status === 'fulfilled') setBoticas(resultados[2].value)
+      if (resultados[3].status === 'fulfilled') setAlertas(resultados[3].value)
+      if (resultados[4].status === 'fulfilled') setTransferencias(resultados[4].value)
+      if (resultados[5].status === 'fulfilled') setPredicciones(resultados[5].value)
+      if (resultados[6].status === 'fulfilled') setRecomendaciones(resultados[6].value?.recomendaciones || [])
     }).finally(() => {
       if (!cancelado) setCargando(false)
     })
@@ -199,6 +259,14 @@ export default function PaginaDashboardCentral() {
     })
   })()
 
+  const nombresProducto = Object.fromEntries(productos.map(p => [p.id, p.nombreComercial || p.nombre || p.id]))
+  const nombresBotica = Object.fromEntries(boticas.map(b => [b.id, b.nombre || b.id]))
+  const prediccionesDestacadas = agruparPredicciones(predicciones, nombresProducto, nombresBotica)
+  const recomendacionesPendientes = resumenRecomendacionesPendientes(recomendaciones)
+  const alertasPriorizadas = [...alertas]
+    .filter(a => ['riesgo_desabastecimiento', 'stock_bajo', 'sobrestock', 'vencimiento'].includes(a.tipo))
+    .sort((a, b) => prioridadUrgencia(b.urgencia) - prioridadUrgencia(a.urgencia))
+
   const datosTendencia = (() => {
     const agrupado = {}
     stockHistorico.forEach(item => {
@@ -232,7 +300,7 @@ export default function PaginaDashboardCentral() {
         </Tarjeta>
         <Tarjeta titulo="Alertas Recientes">
           <div className="space-y-3">
-            {alertas.slice(0, 5).map(alerta => (
+            {alertasPriorizadas.slice(0, 5).map(alerta => (
               <div key={alerta.id} className="flex items-start gap-3 p-3 bg-fondo rounded-md">
                 <Insignia color={alerta.urgencia === 'alta' ? 'rojo' : alerta.urgencia === 'media' ? 'amarillo' : 'gris'}>
                   {alerta.tipo}
@@ -243,13 +311,34 @@ export default function PaginaDashboardCentral() {
                 </div>
               </div>
             ))}
-            {alertas.length === 0 && <p className="text-secundario text-sm text-center py-4">Sin alertas activas</p>}
+            {alertasPriorizadas.length === 0 && <p className="text-secundario text-sm text-center py-4">No existen alertas activas.</p>}
+            {alertasPriorizadas.length > 0 && <a href="/ml/alertas" className="block text-sm text-marca-principal hover:underline text-center pt-2">Ver alertas</a>}
           </div>
         </Tarjeta>
       </div>
-      <Tarjeta titulo="Métricas del Modelo ML" descripcion="Precisión del modelo predictivo">
+      <Tarjeta titulo="Recomendaciones pendientes" descripcion="Decisiones operativas sugeridas por el modelo y el inventario">
+        {recomendacionesPendientes.total > 0 ? (
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 flex-1">
+              <div className="p-3 bg-fondo border border-estilo rounded-lg"><p className="text-etiqueta text-secundario">Total pendientes</p><p className="text-h3 text-principal">{recomendacionesPendientes.total}</p></div>
+              <div className="p-3 bg-fondo border border-estilo rounded-lg"><p className="text-etiqueta text-secundario">Reposiciones</p><p className="text-h3 text-principal">{recomendacionesPendientes.reposiciones}</p></div>
+              <div className="p-3 bg-fondo border border-estilo rounded-lg"><p className="text-etiqueta text-secundario">Compras</p><p className="text-h3 text-principal">{recomendacionesPendientes.compras}</p></div>
+            </div>
+            <a href="/ml/recomendaciones" className="text-sm font-medium text-marca-principal hover:underline">Ver recomendaciones</a>
+          </div>
+        ) : (
+          <p className="text-secundario text-sm text-center py-4">No existen recomendaciones pendientes.</p>
+        )}
+      </Tarjeta>
+      <Tarjeta titulo="Modelo predictivo" descripcion="Estado del modelo de pronostico semanal de demanda">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+          <div className="p-3 bg-fondo border border-estilo rounded-lg"><p className="text-etiqueta text-secundario">Estado</p><p className="font-semibold text-principal">{estadoModelo?.modelo_pickle_cargado ? 'Activo' : 'No disponible'}</p></div>
+          <div className="p-3 bg-fondo border border-estilo rounded-lg"><p className="text-etiqueta text-secundario">Version</p><p className="font-mono text-xs text-principal break-all">{estadoModelo?.version || '—'}</p></div>
+          <div className="p-3 bg-fondo border border-estilo rounded-lg"><p className="text-etiqueta text-secundario">Entrenamiento</p><p className="font-semibold text-principal">{estadoModelo?.fecha_entrenamiento ? formatearFechaRelativa(estadoModelo.fecha_entrenamiento) : '—'}</p></div>
+        </div>
+        <p className="text-sm text-secundario mb-4">Metricas historicas de evaluacion del modelo. No representan el error especifico de una prediccion individual.</p>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <TarjetaMetricaKPI etiqueta="MAPE" valor={formatearDecimal(estadoModelo?.mape)} valorEvaluacion={estadoModelo?.mape} meta={20} unidad="%" descripcion="Error porcentual absoluto medio del modelo" icono={Brain} tipo="modelo" />
+          <TarjetaMetricaKPI etiqueta="Macro-MAPE" valor={formatearDecimal(estadoModelo?.mape)} valorEvaluacion={estadoModelo?.mape} meta={20} unidad="%" descripcion="Evaluacion historica del modelo hibrido" icono={Brain} tipo="modelo" />
           <TarjetaMetricaKPI etiqueta="RMSE" valor={formatearDecimal(estadoModelo?.rmse)} unidad="uds" descripcion="Raíz del error cuadrático medio" icono={Brain} tipo="modelo" />
           <TarjetaMetricaKPI etiqueta="MAE" valor={formatearDecimal(estadoModelo?.mae)} unidad="uds" descripcion="Error absoluto medio" icono={Brain} tipo="modelo" />
         </div>
@@ -271,23 +360,20 @@ export default function PaginaDashboardCentral() {
           <p className="text-secundario text-sm text-center py-8">Sin datos históricos de KPIs disponibles</p>
         )}
       </Tarjeta>
-      <Tarjeta titulo="Predicciones Destacadas" descripcion="Pronósticos generados por el modelo ML">
+      <Tarjeta titulo="Predicciones Destacadas" descripcion="Resumen de pronosticos persistidos; no ejecuta predicciones en vivo">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {predicciones.slice(0, 6).map(pred => (
-            <div key={pred.id} className="p-4 bg-fondo border border-estilo rounded-lg">
-                <p className="text-sm font-semibold text-principal">{pred.nombreProducto || pred.productoId || 'Producto'}</p>
-                <p className="text-xs text-secundario">{pred.nombreBotica || pred.boticaId || '—'}</p>
+          {prediccionesDestacadas.slice(0, 6).map(pred => (
+            <div key={`${pred.generadoEn}-${pred.boticaId}-${pred.productoId}`} className="p-4 bg-fondo border border-estilo rounded-lg">
+                <p className="text-sm font-semibold text-principal">{pred.nombreProducto}</p>
+                <p className="text-xs text-secundario">{pred.nombreBotica}</p>
                 <div className="mt-3">
-                <p className="text-lg sm:text-h2 text-marca-principal">{pred.cantidadPredicha ?? '—'} uds</p>
-                <p className="text-xs text-secundario">
-                  {(pred.intervaloInf || pred.intervaloSup)
-                    ? `Rango esperado: ${formatearDecimal(pred.intervaloInf)} - ${formatearDecimal(pred.intervaloSup)} uds`
-                    : `Confianza: ${formatearPorcentaje(pred.confianza != null && Number(pred.confianza) <= 1 ? Number(pred.confianza) * 100 : pred.confianza)}`}
-                </p>
+                <p className="text-lg sm:text-h2 text-marca-principal">{formatearDecimal(pred.demandaTotal)} unidades</p>
+                <p className="text-xs text-secundario">Pronóstico para {pred.semanas} semanas · Promedio {formatearDecimal(pred.demandaTotal / Math.max(1, pred.semanas))} uds/semana</p>
+                <p className="text-xs text-secundario mt-1">Generado {pred.generadoEn ? formatearFechaRelativa(pred.generadoEn) : 'sin fecha'}</p>
               </div>
               <div className="mt-2 flex flex-wrap gap-2">
-                <Insignia color="verde">Producto: {pred.codigoProducto || pred.nombreProducto || 'Sin identificar'}</Insignia>
-                <Insignia color="azul">Botica: {pred.nombreBotica || 'No especificada'}</Insignia>
+                <Insignia color="verde">{etiquetaEstrategia(pred.estrategia)}</Insignia>
+                <Insignia color="azul">{etiquetaMadurez(pred.nivelMadurez)}</Insignia>
               </div>
             </div>
           ))}

@@ -1,0 +1,7 @@
+id,org_id,botica_id,drogueria_id,nombre,email,rol,telefono,ultimo_acceso,avatar,activo,created_at
+0d9940f2-76c4-5e87-a97d-216880c71427,e8aeb018-f679-5670-b210-de4f62ff2111,,ca6716fb-c442-57c7-805d-4f3ef69a467f,Ana Torres,operador.drogueria@dyrfarma.pe,operador_drogueria,999000001,,,True,2023-01-15T10:00:00
+bd7900b6-7e41-5758-bd07-79cf1281f04d,e8aeb018-f679-5670-b210-de4f62ff2111,26f7241d-a84e-5e4a-a43d-33eea1e54eea,,Luis Ramos,visor.botica1@dyrfarma.pe,visor_botica,999000002,,,True,2023-01-15T10:00:00
+ffa3d5d9-c5b3-5016-ae96-8541460e995e,e8aeb018-f679-5670-b210-de4f62ff2111,43616d97-2221-569d-82eb-bcc14bcd6344,,María Salazar,visor.botica2@dyrfarma.pe,visor_botica,999000003,,,True,2023-01-15T10:00:00
+e30b8bdd-480b-585e-a14a-b12e660e1993,e8aeb018-f679-5670-b210-de4f62ff2111,d6f21f11-7533-52dd-a4dc-2fb8e260c02c,,Carlos Vega,visor.botica3@dyrfarma.pe,visor_botica,999000004,,,True,2023-01-15T10:00:00
+a819263e-9abe-5a5d-9256-2faf9ce24267,e8aeb018-f679-5670-b210-de4f62ff2111,8ecedccf-c230-516b-bbc2-108f7a6fbe63,,Rosa Medina,visor.botica4@dyrfarma.pe,visor_botica,999000005,,,True,2023-01-15T10:00:00
+8514edc9-29e6-5811-9b82-e49f416ddd09,e8aeb018-f679-5670-b210-de4f62ff2111,7fb983e8-6848-5425-97a2-14da72722d0f,,Jorge Paredes,visor.botica5@dyrfarma.pe,visor_botica,999000006,,,True,2023-01-15T10:00:00

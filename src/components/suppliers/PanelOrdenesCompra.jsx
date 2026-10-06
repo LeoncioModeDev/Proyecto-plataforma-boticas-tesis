@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ClipboardList, Clock, CheckCircle, XCircle, Ban, Truck, Eye, ThumbsUp, ThumbsDown } from 'lucide-react'
+import { ClipboardList, Clock, CheckCircle, XCircle, Ban, Truck, ThumbsUp, ThumbsDown } from 'lucide-react'
 import Boton from '@/components/common/Boton'
 import Tabla from '@/components/common/Tabla'
 import Insignia from '@/components/common/Insignia'
@@ -8,6 +8,9 @@ import TarjetaMetrica from '@/components/charts/TarjetaMetrica'
 import Modal from '@/components/common/Modal'
 import ModalConfirmar from '@/components/common/ModalConfirmar'
 import Alerta from '@/components/common/Alerta'
+import CampoBusqueda from '@/components/common/CampoBusqueda'
+import BarraFiltros from '@/components/common/BarraFiltros'
+import SelectFiltro from '@/components/common/SelectFiltro'
 import { ESTADOS_OC, aprobarOrden, marcarPorRecibir, rechazarOrden, cancelarOrden } from '@/services/supabase/ordenesCompra'
 import { formatearFechaCorta } from '@/utilities/formatearFecha'
 import useAutenticacion from '@/state/useAutenticacion'
@@ -41,6 +44,12 @@ export default function PanelOrdenesCompra({ ordenes, onNueva, onActualizar, esA
     ordenes.forEach(o => { mapa[o.proveedorId] = o.proveedorNombre })
     return Object.entries(mapa).map(([id, nombre]) => ({ valor: id, etiqueta: nombre })).sort((a, b) => a.etiqueta.localeCompare(b.etiqueta))
   }, [ordenes])
+
+  const limpiarFiltros = () => {
+    setBusqueda('')
+    setFiltroEstado('')
+    setFiltroProveedor('')
+  }
 
   const ejecutarAccion = async (id, accion, motivo) => {
     setError('')
@@ -112,24 +121,23 @@ export default function PanelOrdenesCompra({ ordenes, onNueva, onActualizar, esA
       campo: 'acciones', encabezado: '',
       render: (r) => (
         <div className="flex gap-1">
-          <Boton variante="icono" icono={Eye} onClick={() => setDetalleOC(r)} title="Ver detalle" className="text-secundario hover:bg-fondo" />
           {esAdmin && r.estado === 'pendiente' && (
             <>
-              <Boton variante="icono" icono={ThumbsUp} onClick={() => setConfirmarAccion({ id: r.id, accion: 'aprobar' })} title="Aprobar" className="text-marca-principal hover:bg-marca-claro" />
-              <Boton variante="icono" icono={ThumbsDown} onClick={() => setConfirmarAccion({ id: r.id, accion: 'rechazar', requiereMotivo: true })} title="Rechazar" className="text-estado-critico hover:bg-rojo-claro" />
+              <Boton variante="icono" icono={ThumbsUp} onClick={(e) => { e.stopPropagation(); setConfirmarAccion({ id: r.id, accion: 'aprobar' }) }} title="Aprobar" className="text-marca-principal hover:bg-marca-claro" />
+              <Boton variante="icono" icono={ThumbsDown} onClick={(e) => { e.stopPropagation(); setConfirmarAccion({ id: r.id, accion: 'rechazar', requiereMotivo: true }) }} title="Rechazar" className="text-estado-critico hover:bg-rojo-claro" />
             </>
           )}
           {!esAdmin && r.estado === 'pendiente' && (
             <span className="text-xs text-secundario italic px-2 self-center">Pendiente de aprobación por administrador</span>
           )}
           {(r.estado === 'aprobada' || r.estado === 'por_recibir') && (
-            <Boton variante="icono" icono={Ban} onClick={() => setConfirmarAccion({ id: r.id, accion: 'cancelar', requiereMotivo: true })} title="Cancelar" className="text-secundario hover:bg-fondo" />
+            <Boton variante="icono" icono={Ban} onClick={(e) => { e.stopPropagation(); setConfirmarAccion({ id: r.id, accion: 'cancelar', requiereMotivo: true }) }} title="Cancelar" className="text-secundario hover:bg-fondo" />
           )}
           {puedeMarcarPorRecibir(r.estado) && (
-            <Boton variante="icono" icono={Truck} onClick={() => setConfirmarAccion({ id: r.id, accion: 'marcar-por-recibir' })} title="Marcar como por recibir" className="text-marca-principal hover:bg-marca-claro" />
+            <Boton variante="icono" icono={Truck} onClick={(e) => { e.stopPropagation(); setConfirmarAccion({ id: r.id, accion: 'marcar-por-recibir' }) }} title="Marcar como por recibir" className="text-marca-principal hover:bg-marca-claro" />
           )}
           {puedeRecibir(r.estado) && (
-            <Boton variante="icono" icono={ClipboardList} onClick={() => navegar(`${rutaBase}/${r.id}/recibir`)} title="Registrar recepción" className="text-marca-principal hover:bg-marca-claro" />
+            <Boton variante="icono" icono={ClipboardList} onClick={(e) => { e.stopPropagation(); navegar(`${rutaBase}/${r.id}/recibir`) }} title="Registrar recepción" className="text-marca-principal hover:bg-marca-claro" />
           )}
         </div>
       ),
@@ -157,27 +165,13 @@ export default function PanelOrdenesCompra({ ordenes, onNueva, onActualizar, esA
         <TarjetaMetrica etiqueta="Rechazadas" valor={estadisticas.rechazadas} icono={XCircle} />
       </div>
 
-      <div className="flex flex-col sm:flex-row gap-4">
-        <input
-          type="text"
-          placeholder="Buscar por OC o proveedor..."
-          value={busqueda}
-          onChange={e => setBusqueda(e.target.value)}
-          className="flex-1 px-4 py-2 border border-estilo rounded-tarjeta text-cuerpo bg-fondo-secundario focus:outline-none focus:ring-2 focus:ring-marca-principal"
-        />
-        <select value={filtroEstado} onChange={e => setFiltroEstado(e.target.value)} className="px-4 py-2 border border-estilo rounded-tarjeta text-cuerpo bg-fondo-secundario">
-          <option value="">Todos los estados</option>
-          {Object.entries(ESTADOS_OC).map(([key, val]) => (
-            <option key={key} value={key}>{val.etiqueta}</option>
-          ))}
-        </select>
-        <select value={filtroProveedor} onChange={e => setFiltroProveedor(e.target.value)} className="px-4 py-2 border border-estilo rounded-tarjeta text-cuerpo bg-fondo-secundario">
-          <option value="">Todos los proveedores</option>
-          {proveedoresUnicos.map(p => <option key={p.valor} value={p.valor}>{p.etiqueta}</option>)}
-        </select>
-      </div>
+      <BarraFiltros alLimpiar={limpiarFiltros}>
+        <CampoBusqueda valor={busqueda} alCambiar={setBusqueda} placeholder="Buscar por OC o proveedor..." className="w-full sm:w-80" />
+        <SelectFiltro valor={filtroEstado} alCambiar={setFiltroEstado} opciones={Object.entries(ESTADOS_OC).map(([valor, cfg]) => ({ valor, etiqueta: cfg.etiqueta }))} placeholder="Todos los estados" />
+        <SelectFiltro valor={filtroProveedor} alCambiar={setFiltroProveedor} opciones={proveedoresUnicos} placeholder="Todos los proveedores" />
+      </BarraFiltros>
 
-      <Tabla columnas={columnas} datos={filtradas} />
+      <Tabla columnas={columnas} datos={filtradas} busqueda={false} alClickFila={setDetalleOC} />
 
       {/* Modal detalle */}
       <Modal abierto={!!detalleOC} alCerrar={() => setDetalleOC(null)} titulo={`Orden de Compra ${detalleOC?.id?.slice(0, 8)}`} tamano="lg">

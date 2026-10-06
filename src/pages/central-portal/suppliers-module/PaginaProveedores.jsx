@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Plus, Edit, ToggleLeft, ToggleRight, Package, Mail, Phone, Building, Star, Coins } from 'lucide-react'
+import { Plus, ToggleLeft, ToggleRight, Package, Mail, Phone, Building, Star, Coins } from 'lucide-react'
 import Boton from '@/components/common/Boton'
 import Tabla from '@/components/common/Tabla'
 
@@ -8,6 +8,9 @@ import Insignia from '@/components/common/Insignia'
 import Alerta from '@/components/common/Alerta'
 import Modal from '@/components/common/Modal'
 import TarjetaMetrica from '@/components/charts/TarjetaMetrica'
+import CampoBusqueda from '@/components/common/CampoBusqueda'
+import BarraFiltros from '@/components/common/BarraFiltros'
+import SelectFiltro from '@/components/common/SelectFiltro'
 import { listarProveedores, toggleProveedor } from '@/services/supabase/proveedores'
 
 const ESTADOS_PROVEEDOR = {
@@ -19,7 +22,7 @@ function obtenerContactoPrincipal(proveedor) {
   return proveedor.contactos?.find(c => c.principal) || proveedor.contactos?.[0]
 }
 
-const ColumnasProveedor = ({ onEditar, onToggleActivo }) => [
+const ColumnasProveedor = () => [
   { campo: 'codigoInterno', encabezado: 'Código', render: (r) => <span className="font-mono text-xs font-medium">{r.codigoInterno}</span> },
   {
     campo: 'razonSocial',
@@ -93,22 +96,6 @@ const ColumnasProveedor = ({ onEditar, onToggleActivo }) => [
     encabezado: 'Estado',
     render: (r) => <Insignia color={ESTADOS_PROVEEDOR[r.activo ? 'activo' : 'inactivo'].color}>{ESTADOS_PROVEEDOR[r.activo ? 'activo' : 'inactivo'].etiqueta}</Insignia>,
   },
-  {
-    campo: 'acciones',
-    encabezado: 'Acciones',
-    render: (r) => (
-      <div className="flex gap-1">
-        <Boton variante="icono" icono={Edit} onClick={(e) => { e.stopPropagation(); onEditar(r) }} title="Editar" className="text-marca-principal hover:bg-marca-claro" />
-        <Boton
-          variante="icono"
-          icono={r.activo ? ToggleRight : ToggleLeft}
-          onClick={(e) => { e.stopPropagation(); onToggleActivo(r.id) }}
-          title={r.activo ? 'Desactivar' : 'Activar'}
-          className={r.activo ? 'text-estado-critico hover:bg-rojo-claro' : 'text-marca-principal hover:bg-marca-claro'}
-        />
-      </div>
-    ),
-  },
 ]
 
 export default function PaginaProveedores() {
@@ -151,26 +138,6 @@ export default function PaginaProveedores() {
     inactivos: proveedores.filter(p => !p.activo).length,
   }
 
-  const manejarEditar = (proveedor) => {
-    navegar(`/central/proveedores/${proveedor.id}/editar`)
-  }
-
-  const manejarToggleActivo = async (id) => {
-    const proveedor = proveedores.find(p => p.id === id)
-    if (proveedor.activo) {
-      setConfirmarDesactivar(id)
-    } else {
-      try {
-        await toggleProveedor(id)
-        setProveedores(proveedores.map(p => p.id === id ? { ...p, activo: true } : p))
-        setExito('Proveedor activado correctamente')
-        setTimeout(() => setExito(null), 2000)
-      } catch (err) {
-        setError(err.message)
-      }
-    }
-  }
-
   const confirmarDesactivacion = async () => {
     try {
       await toggleProveedor(confirmarDesactivar)
@@ -184,7 +151,11 @@ export default function PaginaProveedores() {
     }
   }
 
-  const columnas = ColumnasProveedor({ onEditar: manejarEditar, onToggleActivo: manejarToggleActivo })
+  const columnas = ColumnasProveedor()
+  const limpiarFiltros = () => {
+    setBusqueda('')
+    setFiltroEstado('')
+  }
 
   if (cargando) return <div className="flex items-center justify-center py-20"><p className="text-secundario">Cargando proveedores...</p></div>
 
@@ -209,26 +180,12 @@ export default function PaginaProveedores() {
         <TarjetaMetrica etiqueta="Inactivos" valor={estadisticas.inactivos} icono={ToggleLeft} />
       </div>
 
-      <div className="flex flex-col sm:flex-row gap-4">
-        <input
-          type="text"
-          placeholder="Buscar por razón social o RUC..."
-          value={busqueda}
-          onChange={e => setBusqueda(e.target.value)}
-          className="flex-1 px-4 py-2 border border-estilo rounded-tarjeta text-cuerpo bg-fondo-secundario focus:outline-none focus:ring-2 focus:ring-marca-principal"
-        />
-        <select
-          value={filtroEstado}
-          onChange={e => setFiltroEstado(e.target.value)}
-          className="px-4 py-2 border border-estilo rounded-tarjeta text-cuerpo bg-fondo-secundario"
-        >
-          <option value="">Todos</option>
-          <option value="activo">Activos</option>
-          <option value="inactivo">Inactivos</option>
-        </select>
-      </div>
+      <BarraFiltros alLimpiar={limpiarFiltros}>
+        <CampoBusqueda valor={busqueda} alCambiar={setBusqueda} placeholder="Buscar por razón social o RUC..." className="w-full sm:w-80" />
+        <SelectFiltro valor={filtroEstado} alCambiar={setFiltroEstado} opciones={[{ valor: 'activo', etiqueta: 'Activos' }, { valor: 'inactivo', etiqueta: 'Inactivos' }]} placeholder="Todos los estados" />
+      </BarraFiltros>
 
-      <Tabla columnas={columnas} datos={filtrados} alClickFila={(p) => navegar(`/central/proveedores/${p.id}`)} />
+      <Tabla columnas={columnas} datos={filtrados} busqueda={false} alClickFila={(p) => navegar(`/central/proveedores/${p.id}`)} />
 
       <Modal abierto={!!confirmarDesactivar} alCerrar={() => setConfirmarDesactivar(null)} titulo="Confirmar Desactivación">
         <div className="space-y-4">

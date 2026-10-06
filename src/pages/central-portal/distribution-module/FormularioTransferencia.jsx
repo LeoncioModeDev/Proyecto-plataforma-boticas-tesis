@@ -11,7 +11,7 @@ import CampoTextoArea from '@/components/forms/CampoTextoArea'
 import { transferenciaEsquema } from '@/schemas/transferenciaEsquema'
 import { listarBoticas } from '@/services/supabase/boticas'
 import { obtenerProductos } from '@/services/supabase/productos'
-import { obtenerLotesActivos } from '@/services/supabase/lotes'
+import { obtenerLotesDisponiblesParaTransferencia } from '@/services/supabase/lotes'
 import { crearTransferencia } from '@/services/supabase/transferencias'
 
 let itemIdCounter = 0
@@ -62,7 +62,7 @@ export default function FormularioTransferencia() {
     itemsWatch.forEach((item) => {
       if (item.productoId && !lotesPorProducto[item.productoId] && !cargandoLotes[item.productoId] && drogueria) {
         setCargandoLotes(prev => ({ ...prev, [item.productoId]: true }))
-        obtenerLotesActivos(item.productoId, 'drogueria', drogueria.id)
+        obtenerLotesDisponiblesParaTransferencia(item.productoId, 'drogueria', null)
           .then(lotes => {
             setLotesPorProducto(prev => ({ ...prev, [item.productoId]: lotes }))
           })
@@ -95,7 +95,7 @@ export default function FormularioTransferencia() {
       const lotes = lotesPorProducto[item.productoId] || []
       const lote = lotes.find(l => l.id === item.loteId)
       if (lote && item.cantidad > lote.cantidad) {
-        setError(`La cantidad del lote ${lote.numeroLote} (${item.cantidad}) supera el disponible (${lote.cantidad} uds)`)
+        setError(`La cantidad del lote ${lote.numeroLote} (${item.cantidad}) supera el stock disponible (${lote.cantidad} uds)`)
         return
       }
     }
@@ -173,6 +173,11 @@ export default function FormularioTransferencia() {
                           onChange={(e) => {
                             setValue(`items.${index}.productoId`, e.target.value, { shouldValidate: true })
                             setValue(`items.${index}.loteId`, '', { shouldValidate: true })
+                            setLotesPorProducto(prev => {
+                              const siguiente = { ...prev }
+                              delete siguiente[e.target.value]
+                              return siguiente
+                            })
                           }}
                           className="w-full px-3 py-2 text-cuerpo bg-fondo border border-estilo rounded-md"
                         >
@@ -217,7 +222,7 @@ export default function FormularioTransferencia() {
                         </option>
                         {lotesDisponibles.map(l => (
                           <option key={l.id} value={l.id}>
-                            Lote {l.numeroLote} — Vence: {l.fechaVencimiento} — Disp: {l.cantidad} uds
+                            Lote {l.numeroLote} — Vence: {l.fechaVencimiento} — Disponible: {l.cantidad} uds
                           </option>
                         ))}
                       </select>

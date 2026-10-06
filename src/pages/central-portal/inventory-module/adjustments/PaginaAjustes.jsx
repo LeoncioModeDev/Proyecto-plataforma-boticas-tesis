@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { Plus } from 'lucide-react'
 import Boton from '@/components/common/Boton'
 import Tabla from '@/components/common/Tabla'
+import Modal from '@/components/common/Modal'
 
 import Insignia from '@/components/common/Insignia'
 import { obtenerAjustesYMermas } from '@/services/supabase/ajustes'
@@ -16,6 +17,7 @@ export default function PaginaAjustes() {
   const [datos, setDatos] = useState([])
   const [cargando, setCargando] = useState(true)
   const [error, setError] = useState(null)
+  const [detalle, setDetalle] = useState(null)
 
   useEffect(() => {
     setCargando(true)
@@ -49,7 +51,7 @@ export default function PaginaAjustes() {
     {
       campo: 'motivo',
       encabezado: 'Motivo',
-      render: (r) => <span className="text-etiqueta text-secundario max-w-[250px] line-clamp-2">{r.motivo}</span>,
+      render: (r) => <span className="block text-etiqueta text-secundario max-w-[250px] truncate">{r.motivo}</span>,
     },
   ]
 
@@ -76,7 +78,20 @@ export default function PaginaAjustes() {
           Nuevo ajuste
         </Boton>
       </div>
-      <Tabla columnas={columnas} datos={datos} />
+      <Tabla columnas={columnas} datos={datos} alClickFila={setDetalle} />
+      <Modal abierto={!!detalle} alCerrar={() => setDetalle(null)} titulo="Detalle de ajuste o merma" tamano="lg">
+        {detalle && (
+          <div className="grid gap-3 sm:grid-cols-2 text-sm">
+            <div><p className="text-etiqueta text-secundario">Producto</p><p className="font-medium text-principal">{detalle.nombreProducto}</p></div>
+            <div><p className="text-etiqueta text-secundario">Código</p><p className="font-mono text-principal">{detalle.codigoProducto || '-'}</p></div>
+            <div><p className="text-etiqueta text-secundario">Ubicación</p><p className="font-medium text-principal">{detalle.nombreUbicacion}</p></div>
+            <div><p className="text-etiqueta text-secundario">Fecha/hora</p><p className="font-medium text-principal">{formatearFechaHora(detalle.createdAt)}</p></div>
+            <div><p className="text-etiqueta text-secundario">Tipo</p><div className="flex gap-1.5"><Insignia color={COLORES_MOVIMIENTO[detalle.tipo]}>{ETIQUETAS_MOVIMIENTO[detalle.tipo]}</Insignia>{detalle.direccionAjuste && <Insignia color={COLORES_DIRECCION[detalle.direccionAjuste]}>{ETIQUETAS_DIRECCION[detalle.direccionAjuste]}</Insignia>}</div></div>
+            <div><p className="text-etiqueta text-secundario">Cantidad</p><p className="font-medium text-principal">{detalle.cantidad}</p></div>
+            <div className="sm:col-span-2"><p className="text-etiqueta text-secundario">Motivo</p><p className="font-medium text-principal whitespace-pre-wrap">{detalle.motivo || '-'}</p></div>
+          </div>
+        )}
+      </Modal>
     </div>
   )
 }

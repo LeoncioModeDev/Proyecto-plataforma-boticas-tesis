@@ -6,7 +6,11 @@ import Tabla from '@/components/common/Tabla'
 import Insignia from '@/components/common/Insignia'
 import Alerta from '@/components/common/Alerta'
 import Modal from '@/components/common/Modal'
+import CampoBusqueda from '@/components/common/CampoBusqueda'
+import BarraFiltros from '@/components/common/BarraFiltros'
+import SelectBusquedaFiltro from '@/components/common/SelectBusquedaFiltro'
 import { obtenerProductos } from '@/services/supabase/productos'
+import { obtenerOpcionesPrincipiosActivos } from '@/services/supabase/catalogo'
 import { listarProveedores } from '@/services/supabase/proveedores'
 import { listarPorProducto, guardarRelacion, eliminarRelacion } from '@/services/supabase/proveedorProducto'
 import { ETIQUETAS_CLASIFICACION, COLORES_CLASIFICACION } from '@/constants/clasificacionProducto'
@@ -31,14 +35,21 @@ export default function PaginaCatalogo() {
   const [modalProveedores, setModalProveedores] = useState(null)
   const [proveedoresProducto, setProveedoresProducto] = useState([])
   const [proveedoresDisponibles, setProveedoresDisponibles] = useState([])
+  const [busqueda, setBusqueda] = useState('')
+  const [filtroPrincipioActivo, setFiltroPrincipioActivo] = useState('')
+  const [principiosActivos, setPrincipiosActivos] = useState([])
   const [nuevoProvProd, setNuevoProvProd] = useState({ proveedorId: '', leadTimeEspecifico: '', precioCompraReferencial: '', cantidadMinimaCompra: '1', multiploEmpaque: '1' })
 
   const cargarDatos = useCallback(async () => {
     try {
       setCargando(true)
       setError(null)
-      const datos = await obtenerProductos()
+      const [datos, principiosData] = await Promise.all([
+        obtenerProductos(),
+        obtenerOpcionesPrincipiosActivos().catch(() => []),
+      ])
       setProductos(enriquecerProductos(datos))
+      setPrincipiosActivos(principiosData)
     } catch (err) {
       setError(err.message)
     } finally {
@@ -47,6 +58,20 @@ export default function PaginaCatalogo() {
   }, [])
 
   useEffect(() => { cargarDatos() }, [cargarDatos])
+
+  const productosFiltrados = productos.filter(p => {
+    const termino = busqueda.trim().toLowerCase()
+    const matchBusqueda = termino
+      ? [p.id, p.nombreComercial, p.principioActivoDisplay].some(valor => (valor || '').toLowerCase().includes(termino))
+      : true
+    const matchPrincipioActivo = filtroPrincipioActivo ? p.principiosActivos?.some(pa => pa.principioActivoId === filtroPrincipioActivo) : true
+    return matchBusqueda && matchPrincipioActivo
+  })
+
+  const limpiarFiltros = () => {
+    setBusqueda('')
+    setFiltroPrincipioActivo('')
+  }
 
   const abrirConfigurarProveedores = async (producto) => {
     try {
@@ -127,7 +152,7 @@ export default function PaginaCatalogo() {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-h1 text-principal">Catálogo de Productos</h1>
-          <p className="text-secundario mt-1">Gestión global del catálogo de la red</p>
+          <p className="text-secundario mt-1">{productosFiltrados.length} productos encontrados</p>
         </div>
         <Boton variante="primario" icono={Plus} onClick={() => navegar('/operaciones/inventario/catalogo/nuevo')}>Nuevo producto</Boton>
       </div>
@@ -135,7 +160,12 @@ export default function PaginaCatalogo() {
       {error && <Alerta tipo="error" titulo={error} className="mb-4" />}
       {exito && <Alerta tipo="exito" titulo={exito} className="mb-4" />}
 
-      <Tabla columnas={columnas} datos={productos} alClickFila={(p) => navegar(`/operaciones/inventario/catalogo/${p.id}`)} />
+      <BarraFiltros alLimpiar={limpiarFiltros}>
+        <CampoBusqueda valor={busqueda} alCambiar={setBusqueda} placeholder="Buscar producto..." className="w-full sm:w-72" />
+        <SelectBusquedaFiltro valor={filtroPrincipioActivo} alCambiar={setFiltroPrincipioActivo} opciones={principiosActivos} placeholder="Principio activo" />
+      </BarraFiltros>
+
+      <Tabla columnas={columnas} datos={productosFiltrados} busqueda={false} alClickFila={(p) => navegar(`/operaciones/inventario/catalogo/${p.id}`)} />
 
       <Modal abierto={!!modalProveedores} alCerrar={() => setModalProveedores(null)} titulo={`Configurar Lead Times — ${modalProveedores?.nombreComercial || ''}`}>
         <div className="space-y-4">

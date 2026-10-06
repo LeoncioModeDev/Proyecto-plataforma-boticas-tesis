@@ -20,6 +20,7 @@ import PaginaCatalogo from '@/pages/central-portal/inventory-module/catalog/Pagi
 import FormularioProducto from '@/pages/central-portal/inventory-module/catalog/FormularioProducto'
 import DetalleProducto from '@/pages/central-portal/inventory-module/catalog/DetalleProducto'
 import PaginaStock from '@/pages/central-portal/inventory-module/stock/PaginaStock'
+import DetalleStockActual from '@/pages/shared/inventory/DetalleStockActual'
 import PaginaLotes from '@/pages/central-portal/inventory-module/lots/PaginaLotes'
 import PaginaMovimientos from '@/pages/central-portal/inventory-module/movements/PaginaMovimientos'
 import PaginaAjustes from '@/pages/central-portal/inventory-module/adjustments/PaginaAjustes'
@@ -49,6 +50,8 @@ import PaginaConfiguracionGeneral from '@/pages/central-portal/administration-mo
 import PaginaConfiguracionAvanzada from '@/pages/central-portal/administration-module/PaginaConfiguracionAvanzada'
 import PaginaImportacionDatos from '@/pages/central-portal/administration-module/PaginaImportacionDatos'
 import PaginaCategoriasTerapeuticas from '@/pages/central-portal/administration-module/PaginaCategoriasTerapeuticas'
+import DetalleCategoriaTerapeutica from '@/pages/central-portal/administration-module/DetalleCategoriaTerapeutica'
+import FormularioCategoriaTerapeutica from '@/pages/central-portal/administration-module/FormularioCategoriaTerapeutica'
 import PaginaAuditoria from '@/pages/central-portal/administration-module/PaginaAuditoria'
 import PaginaNuevaBotica from '@/pages/central-portal/administration-module/new/PaginaNuevaBotica'
 import PaginaEditarBotica from '@/pages/central-portal/administration-module/edit/PaginaEditarBotica'
@@ -95,7 +98,7 @@ import PaginaRecepcionOrdenOperaciones from '@/pages/central-portal/suppliers-mo
 import PaginaRecepcionesOperaciones from '@/pages/central-portal/suppliers-module/PaginaRecepciones'
 import DetalleRecepcionOperaciones from '@/pages/central-portal/suppliers-module/DetalleRecepcion'
 
-// Panel ML
+// Panel de Predicciones
 import PaginaPredicciones from '@/pages/ml-panel/PaginaPredicciones'
 import PaginaHistorialPredicciones from '@/pages/ml-panel/PaginaHistorialPredicciones'
 import PaginaAlertas from '@/pages/ml-panel/PaginaAlertas'
@@ -104,6 +107,10 @@ import PaginaMonitoreoML from '@/pages/ml-panel/PaginaMonitoreoML'
 import PaginaPrecios from '@/pages/shared/validation-module/PaginaPrecios'
 import PaginaVentasHistoricas from '@/pages/shared/validation-module/PaginaVentasHistoricas'
 import PaginaStockHistorico from '@/pages/shared/validation-module/PaginaStockHistorico'
+import PaginaVentas from '@/pages/shared/sales-module/PaginaVentas'
+import PaginaRegistrarVenta from '@/pages/shared/sales-module/PaginaRegistrarVenta'
+import PaginaDemandaNoAtendida from '@/pages/shared/sales-module/PaginaDemandaNoAtendida'
+import PaginaReportesVentas from '@/pages/shared/sales-module/PaginaReportesVentas'
 
 function LayoutPrincipal() {
   const { colapsada } = useBarraLateral()
@@ -174,9 +181,10 @@ export default function Rutas() {
         <Route path="/central/inventario/catalogo/:id" element={<DetalleProducto />} />
         <Route path="/central/inventario/catalogo/:id/editar" element={<FormularioProducto />} />
         <Route path="/central/inventario/stock" element={<PaginaStock />} />
+        <Route path="/central/inventario/stock/:id" element={<DetalleStockActual />} />
         <Route path="/central/inventario/precios" element={<Navigate to="/central/administracion/precios" replace />} />
         <Route path="/central/inventario/stock-historico" element={<Navigate to="/central/administracion/stock-historico" replace />} />
-        <Route path="/central/inventario/categorias-terapeuticas" element={<PaginaCategoriasTerapeuticas />} />
+        <Route path="/central/inventario/categorias-terapeuticas" element={<Navigate to="/central/administracion/categorias-terapeuticas" replace />} />
         <Route path="/central/inventario/lotes" element={<PaginaLotes />} />
 
         <Route path="/central/inventario/movimientos" element={<PaginaMovimientos />} />
@@ -207,11 +215,17 @@ export default function Rutas() {
         <Route path="/central/administracion/boticas/:id" element={<PaginaEditarBotica />} />
         <Route path="/central/administracion/configuracion" element={<PaginaConfiguracionGeneral />} />
         <Route path="/central/administracion/configuracion-avanzada" element={<PaginaConfiguracionAvanzada />} />
-        <Route path="/central/administracion/categorias-terapeuticas" element={<Navigate to="/central/inventario/categorias-terapeuticas" replace />} />
+        <Route path="/central/administracion/categorias-terapeuticas" element={<PaginaCategoriasTerapeuticas />} />
+        <Route path="/central/administracion/categorias-terapeuticas/nueva" element={<FormularioCategoriaTerapeutica />} />
+        <Route path="/central/administracion/categorias-terapeuticas/:id" element={<DetalleCategoriaTerapeutica />} />
+        <Route path="/central/administracion/categorias-terapeuticas/:id/editar" element={<FormularioCategoriaTerapeutica />} />
         <Route path="/central/administracion/importacion-datos" element={<PaginaImportacionDatos />} />
         <Route path="/central/administracion/precios" element={<PaginaPrecios />} />
         <Route path="/central/administracion/stock-historico" element={<PaginaStockHistorico />} />
         <Route path="/central/administracion/ventas-historicas" element={<PaginaVentasHistoricas />} />
+        <Route path="/central/ventas" element={<PaginaVentas />} />
+        <Route path="/central/ventas/demanda-no-atendida" element={<PaginaDemandaNoAtendida />} />
+        <Route path="/central/ventas/reportes" element={<PaginaReportesVentas />} />
         <Route path="/central/administracion/auditoria" element={<PaginaAuditoria />} />
       </Route>
 
@@ -222,9 +236,12 @@ export default function Rutas() {
         </RutaProtegida>
       }>
         <Route path="/botica/stock" element={<PaginaStockBotica />} />
+        <Route path="/botica/stock/:id" element={<DetalleStockActual />} />
         <Route path="/botica/precios" element={<PaginaPrecios />} />
         <Route path="/botica/stock-historico" element={<PaginaStockHistorico />} />
         <Route path="/botica/ventas-historicas" element={<PaginaVentasHistoricas />} />
+        <Route path="/botica/ventas" element={<PaginaVentas />} />
+        <Route path="/botica/ventas/registrar" element={<PaginaRegistrarVenta />} />
         <Route path="/botica/lotes" element={<PaginaLotesBotica />} />
         <Route path="/botica/movimientos" element={<PaginaMovimientosBotica />} />
         <Route path="/botica/dashboard" element={<PaginaDashboardBotica />} />
@@ -243,6 +260,7 @@ export default function Rutas() {
         <Route path="/operaciones/inventario/catalogo/:id" element={<DetalleProductoOperaciones />} />
         <Route path="/operaciones/inventario/catalogo/:id/editar" element={<FormularioProductoOperaciones />} />
         <Route path="/operaciones/inventario/stock" element={<PaginaStockOperaciones />} />
+        <Route path="/operaciones/inventario/stock/:id" element={<DetalleStockActual />} />
         <Route path="/operaciones/inventario/precios" element={<Navigate to="/operaciones/administracion/precios" replace />} />
         <Route path="/operaciones/inventario/stock-historico" element={<Navigate to="/operaciones/administracion/stock-historico" replace />} />
         <Route path="/operaciones/inventario/lotes" element={<PaginaLotesOperaciones />} />
@@ -268,12 +286,14 @@ export default function Rutas() {
         <Route path="/operaciones/recepciones" element={<PaginaRecepcionesOperaciones />} />
         <Route path="/operaciones/recepciones/:id" element={<DetalleRecepcionOperaciones />} />
         <Route path="/operaciones/administracion/ventas-historicas" element={<PaginaVentasHistoricas />} />
+        <Route path="/operaciones/ventas" element={<PaginaVentas />} />
+        <Route path="/operaciones/ventas/demanda-no-atendida" element={<PaginaDemandaNoAtendida />} />
         <Route path="/operaciones/administracion/precios" element={<PaginaPrecios />} />
         <Route path="/operaciones/administracion/stock-historico" element={<PaginaStockHistorico />} />
         <Route path="/operaciones/alertas" element={<PaginaAlertasOperaciones />} />
       </Route>
 
-      {/* Panel ML (solo ADMIN) */}
+      {/* Panel de Predicciones (solo ADMIN) */}
       <Route element={
         <RutaProtegida rolesPermitidos={[ROLES.ADMIN_CENTRAL]}>
           <LayoutPrincipal />

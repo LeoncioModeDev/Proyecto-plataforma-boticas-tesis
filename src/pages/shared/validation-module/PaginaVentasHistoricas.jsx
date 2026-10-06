@@ -30,7 +30,7 @@ export default function PaginaVentasHistoricas() {
   return (
     <PaginaVistaValidacion
       titulo="Ventas historicas importadas"
-      descripcion="Validacion de ventas historicas cargadas para iniciar el sistema y alimentar el historial requerido por el modelo ML."
+      descripcion="Validacion de ventas historicas cargadas para iniciar el sistema y alimentar el historial requerido por el modelo predictivo."
       columnas={columnas}
       cargarDatos={listarVentasHistoricasImportadas}
       filtrosExtra={[

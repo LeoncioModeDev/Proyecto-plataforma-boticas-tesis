@@ -1,7 +1,8 @@
 import { mlFetch } from './clienteML'
 
 export function evaluarAlertas(options = {}) {
-  return mlFetch('/alertas/evaluar', { method: 'POST', signal: options.signal })
+  const body = options.filtros ? JSON.stringify(options.filtros) : undefined
+  return mlFetch('/alertas/evaluar', { method: 'POST', body, signal: options.signal })
 }
 
 export function resolverAlertaML(id, comentario = '', options = {}) {

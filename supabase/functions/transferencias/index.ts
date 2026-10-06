@@ -230,6 +230,21 @@ async function crearTransferencia(supabase, perfil, body) {
       if (item.cantidad > lote.cantidad) {
         return json({ error: `La cantidad solicitada (${item.cantidad}) supera la disponible (${lote.cantidad}) en el lote` }, 400);
       }
+
+      const { data: stock, error: errStock } = await supabase
+        .from("stock_ubicaciones")
+        .select("stock_fisico, stock_comprometido")
+        .eq("org_id", perfil.org_id)
+        .eq("producto_id", item.producto_id)
+        .eq("ubicacion_tipo", "botica")
+        .eq("ubicacion_id", origen_id)
+        .maybeSingle();
+
+      if (errStock) return json({ error: `Error al validar stock disponible: ${errStock.message}` }, 400);
+      const stockDisponible = Math.max((stock?.stock_fisico || 0) - (stock?.stock_comprometido || 0), 0);
+      if (item.cantidad > stockDisponible) {
+        return json({ error: `La cantidad solicitada (${item.cantidad}) supera el stock disponible (${stockDisponible}) del producto` }, 400);
+      }
     }
 
     const { data: trfNum, error: errTrf } = await supabase.rpc("generar_numero_transferencia", {
@@ -345,6 +360,21 @@ async function crearTransferencia(supabase, perfil, body) {
     if (lote.producto_id !== item.producto_id) return json({ error: `El producto no coincide con el lote seleccionado` }, 400);
     if (item.cantidad > lote.cantidad) {
       return json({ error: `La cantidad solicitada (${item.cantidad}) supera la disponible (${lote.cantidad}) en el lote` }, 400);
+    }
+
+    const { data: stock, error: errStock } = await supabase
+      .from("stock_ubicaciones")
+      .select("stock_fisico, stock_comprometido")
+      .eq("org_id", perfil.org_id)
+      .eq("producto_id", item.producto_id)
+      .eq("ubicacion_tipo", "drogueria")
+      .is("ubicacion_id", null)
+      .maybeSingle();
+
+    if (errStock) return json({ error: `Error al validar stock disponible: ${errStock.message}` }, 400);
+    const stockDisponible = Math.max((stock?.stock_fisico || 0) - (stock?.stock_comprometido || 0), 0);
+    if (item.cantidad > stockDisponible) {
+      return json({ error: `La cantidad solicitada (${item.cantidad}) supera el stock disponible (${stockDisponible}) del producto en droguería` }, 400);
     }
   }
 

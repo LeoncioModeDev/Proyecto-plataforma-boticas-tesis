@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react'
-import { FileText, PackageCheck, Truck, XCircle, Eye, Ban } from 'lucide-react'
+import { FileText, PackageCheck, Truck, XCircle, Ban } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import Boton from '@/components/common/Boton'
 import Tabla from '@/components/common/Tabla'
@@ -8,6 +8,9 @@ import Insignia from '@/components/common/Insignia'
 import TarjetaMetrica from '@/components/charts/TarjetaMetrica'
 import Modal from '@/components/common/Modal'
 import Alerta from '@/components/common/Alerta'
+import CampoBusqueda from '@/components/common/CampoBusqueda'
+import BarraFiltros from '@/components/common/BarraFiltros'
+import SelectFiltro from '@/components/common/SelectFiltro'
 import { listarOrdenes, ESTADOS_OC } from '@/services/supabase/ordenesCompra'
 import { formatearFechaCorta } from '@/utilities/formatearFecha'
 
@@ -56,6 +59,12 @@ export default function PaginaHistorialOrdenes() {
     [ordenes],
   )
 
+  const limpiarFiltros = () => {
+    setBusqueda('')
+    setFiltroEstado('')
+    setFiltroAnio('')
+  }
+
   const columnas = [
     { campo: 'numeroOrden', encabezado: 'N.º de Orden', render: (r) => <span className="font-mono text-xs text-principal">{r.numeroOrden}</span> },
     { campo: 'proveedorNombre', encabezado: 'Proveedor' },
@@ -66,9 +75,6 @@ export default function PaginaHistorialOrdenes() {
     }},
     { campo: 'items', encabezado: 'Productos', render: (r) => <span>{r.items?.length || 0}</span> },
     { campo: 'total', encabezado: 'Total', render: (r) => <span className="font-semibold">S/ {calcularTotal(r.items || []).toFixed(2)}</span> },
-    { campo: 'acciones', encabezado: '', render: (r) => (
-      <Boton variante="icono" icono={Eye} onClick={() => setDetalleOC(r)} title="Ver detalle" className="text-secundario hover:bg-fondo" />
-    )},
   ]
 
   if (cargando) return <div className="flex items-center justify-center py-20"><p className="text-secundario">Cargando órdenes...</p></div>
@@ -93,27 +99,16 @@ export default function PaginaHistorialOrdenes() {
         <TarjetaMetrica etiqueta="Canceladas" valor={ordenes.filter(o => o.estado === 'cancelada').length} icono={Ban} />
       </div>
 
-      <div className="flex flex-col sm:flex-row gap-4">
-        <input
-          type="text"
-          placeholder="Buscar por OC o proveedor..."
-          value={busqueda}
-          onChange={e => setBusqueda(e.target.value)}
-          className="flex-1 px-4 py-2 border border-estilo rounded-tarjeta text-cuerpo bg-fondo-secundario focus:outline-none focus:ring-2 focus:ring-marca-principal"
-        />
-        <select value={filtroEstado} onChange={e => setFiltroEstado(e.target.value)} className="px-4 py-2 border border-estilo rounded-tarjeta text-cuerpo bg-fondo-secundario">
-          {OPCIONES_ESTADO.map(op => <option key={op.valor} value={op.valor}>{op.etiqueta}</option>)}
-        </select>
-        <select value={filtroAnio} onChange={e => setFiltroAnio(e.target.value)} className="px-4 py-2 border border-estilo rounded-tarjeta text-cuerpo bg-fondo-secundario">
-          <option value="">Todos los años</option>
-          {anios.map(a => <option key={a} value={a}>{a}</option>)}
-        </select>
-      </div>
+      <BarraFiltros alLimpiar={limpiarFiltros}>
+        <CampoBusqueda valor={busqueda} alCambiar={setBusqueda} placeholder="Buscar por OC o proveedor..." className="w-full sm:w-80" />
+        <SelectFiltro valor={filtroEstado} alCambiar={setFiltroEstado} opciones={OPCIONES_ESTADO.filter(op => op.valor)} placeholder="Todos los estados" />
+        <SelectFiltro valor={filtroAnio} alCambiar={setFiltroAnio} opciones={anios.map(a => ({ valor: a, etiqueta: a }))} placeholder="Todos los años" />
+      </BarraFiltros>
 
       {errorMsg ? (
         <Alerta tipo="error" titulo="Error al cargar" mensaje={errorMsg} />
       ) : (
-        <Tabla columnas={columnas} datos={filtradas} />
+        <Tabla columnas={columnas} datos={filtradas} busqueda={false} alClickFila={setDetalleOC} />
       )}
 
       <Modal abierto={!!detalleOC} alCerrar={() => setDetalleOC(null)} titulo={`Orden ${detalleOC?.id}`} tamano="lg">

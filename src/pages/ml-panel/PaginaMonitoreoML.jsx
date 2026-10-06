@@ -64,7 +64,7 @@ export default function PaginaMonitoreoML() {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center">
         <AlertTriangle className="h-10 w-10 text-estado-critico mb-4" />
-        <p className="text-cuerpo text-estado-critico">Error al conectar con el modelo ML</p>
+        <p className="text-cuerpo text-estado-critico">Error al conectar con el servicio predictivo</p>
         <p className="text-sm text-secundario mt-1">{error}</p>
       </div>
     )
@@ -80,8 +80,10 @@ export default function PaginaMonitoreoML() {
   const modo = estado?.modo || '—'
   const fechaCarga = estado?.fecha_carga
   const fechaEntrenamiento = estado?.fecha_entrenamiento
-  const seriesSarima = estado?.series_sarima ?? 0
-  const seriesFallback = estado?.series_fallback ?? 0
+  const ordenesSarima = estado?.ordenes_sarima
+  const categoriasAdaptativas = estado?.categorias_adaptativas
+  const featuresXgboost = estado?.features_xgboost
+  const featuresHibrido = estado?.features_hibrido
   const totalPredicciones = estado?.total_predicciones ?? 0
   const ultimaInferencia = estado?.ultima_inferencia
 
@@ -98,27 +100,27 @@ export default function PaginaMonitoreoML() {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-h1 text-principal">Monitoreo del Modelo</h1>
-          <p className="text-cuerpo text-secundario">Drift, métricas de rendimiento y reentrenamiento del modelo ML</p>
+          <p className="text-cuerpo text-secundario">Estado, evaluacion historica y metadatos del modelo de demanda</p>
         </div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <TarjetaMetrica etiqueta="MAPE Actual" valor={mape != null ? `${formatearDecimal(mape)}%` : '—'} variacion={mape != null ? -2.1 : null} icono={Brain} />
+        <TarjetaMetrica etiqueta="Macro-MAPE historico" valor={mape != null ? `${formatearDecimal(mape)}%` : '—'} icono={Brain} />
         <TarjetaMetrica etiqueta="RMSE" valor={rmse != null ? `${formatearDecimal(rmse)} uds` : '—'} icono={Activity} />
         <TarjetaMetrica etiqueta="MAE" valor={mae != null ? `${formatearDecimal(mae)} uds` : '—'} icono={Activity} />
         <TarjetaMetrica etiqueta="PSI (Drift)" valor={psi != null ? psi.toFixed(2) : '—'} variacion={ultimoDrift.estado === 'critico' ? 100 : null} icono={AlertTriangle} />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Tarjeta titulo="Tendencia MAPE" descripcion="Evolución del error del modelo en holdout">
+        <Tarjeta titulo="Métricas históricas de evaluación" descripcion="Metricas obtenidas durante la evaluacion del modelo; no representan el error de una prediccion individual">
           {mape != null ? (
             <GraficaLinea
               datos={[{ mes: 'Actual', mape: Number(Number(mape).toFixed(2)) }]}
-              lineas={[{ clave: 'mape', etiqueta: 'MAPE (%)', color: '#107C41' }]}
+              lineas={[{ clave: 'mape', etiqueta: 'Macro-MAPE (%)', color: '#107C41' }]}
               altura={220}
             />
           ) : (
-            <p className="text-secundario text-sm py-8 text-center">Sin datos históricos de MAPE</p>
+            <p className="text-secundario text-sm py-8 text-center">No hay informacion disponible para esta metrica.</p>
           )}
         </Tarjeta>
 
@@ -149,12 +151,20 @@ export default function PaginaMonitoreoML() {
               <span className="text-sm text-principal">{estado?.modelo_pickle_cargado ? 'Sí' : 'No'}</span>
             </div>
             <div className="flex justify-between p-2 bg-fondo rounded-md">
-              <span className="text-sm text-principal">Series SARIMA</span>
-              <span className="text-sm text-principal">{seriesSarima}</span>
+              <span className="text-sm text-principal">Ordenes SARIMA</span>
+              <span className="text-sm text-principal">{ordenesSarima ?? '—'}</span>
             </div>
             <div className="flex justify-between p-2 bg-fondo rounded-md">
-              <span className="text-sm text-principal">Series Fallback</span>
-              <span className="text-sm text-principal">{seriesFallback}</span>
+              <span className="text-sm text-principal">Categorias adaptativas</span>
+              <span className="text-sm text-principal">{categoriasAdaptativas ?? '—'}</span>
+            </div>
+            <div className="flex justify-between p-2 bg-fondo rounded-md">
+              <span className="text-sm text-principal">Features XGBoost</span>
+              <span className="text-sm text-principal">{featuresXgboost ?? '—'}</span>
+            </div>
+            <div className="flex justify-between p-2 bg-fondo rounded-md">
+              <span className="text-sm text-principal">Features hibrido</span>
+              <span className="text-sm text-principal">{featuresHibrido ?? '—'}</span>
             </div>
             <div className="flex justify-between p-2 bg-fondo rounded-md">
               <span className="text-sm text-principal">Total predicciones cargadas</span>
@@ -193,7 +203,7 @@ export default function PaginaMonitoreoML() {
           )}
         </Tarjeta>
 
-        <Tarjeta titulo="Salud del Pipeline" descripcion="Estado general del modelo ML">
+        <Tarjeta titulo="Salud del Pipeline" descripcion="Estado general del servicio predictivo">
           <div className="space-y-3">
             <div className="flex items-center justify-between p-2 bg-fondo rounded-md">
               <div className="flex items-center gap-2">

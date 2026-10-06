@@ -550,7 +550,7 @@ async function actualizarEstadoOC(supabase: any, id: string, estado: string, usu
   await supabase.from("ordenes_compra").update(updates).eq("id", id);
 }
 
-async function incrementarStockPorRecibir(supabase: any, orgId: string, ordenCompraId: string) {
+async function incrementarStockPorRecibir(supabase: any, orgId: string, ordenCompraId: string, usuarioId?: string) {
   const { data: items } = await supabase
     .from("ordenes_compra_items")
     .select("producto_id, cantidad")
@@ -579,10 +579,13 @@ async function incrementarStockPorRecibir(supabase: any, orgId: string, ordenCom
           ubicacion_tipo: "drogueria",
           ubicacion_id: null,
           org_id: orgId,
-          cantidad_disponible: 0,
+          stock_fisico: 0,
           stock_por_recibir: item.cantidad,
           stock_en_transito: 0,
           stock_minimo: 0,
+          stock_comprometido: 0,
+          created_by: usuarioId || null,
+          modified_by: usuarioId || null,
         });
       if (error) return { error };
     }

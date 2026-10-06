@@ -1,14 +1,17 @@
 import { useState, useEffect, useCallback } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { Plus, Truck } from 'lucide-react'
+import { useNavigate, useSearchParams } from 'react-router-dom'
+import { Plus } from 'lucide-react'
 import Boton from '@/components/common/Boton'
 import Tabla from '@/components/common/Tabla'
 import Insignia from '@/components/common/Insignia'
 import Alerta from '@/components/common/Alerta'
-import Modal from '@/components/common/Modal'
+import CampoBusqueda from '@/components/common/CampoBusqueda'
+import BarraFiltros from '@/components/common/BarraFiltros'
+import SelectFiltro from '@/components/common/SelectFiltro'
+import SelectBusquedaFiltro from '@/components/common/SelectBusquedaFiltro'
 import { obtenerProductos } from '@/services/supabase/productos'
-import { listarProveedores } from '@/services/supabase/proveedores'
-import { listarPorProducto, guardarRelacion, eliminarRelacion } from '@/services/supabase/proveedorProducto'
+import { listarCategoriasTerapeuticas } from '@/services/supabase/categoriasTerapeuticas'
+import { obtenerOpcionesFormasFarmaceuticas, obtenerOpcionesPrincipiosActivos } from '@/services/supabase/catalogo'
 import { ETIQUETAS_CLASIFICACION, COLORES_CLASIFICACION, OPCIONES_CLASIFICACION } from '@/constants/clasificacionProducto'
 import { ETIQUETAS_ESTADO, COLORES_ESTADO } from '@/constants/estadoProducto'
 
@@ -25,88 +28,73 @@ function enriquecerProductos(productos) {
 
 export default function PaginaCatalogo() {
   const navegar = useNavigate()
+  const [parametrosBusqueda] = useSearchParams()
   const [productos, setProductos] = useState([])
   const [cargando, setCargando] = useState(true)
   const [error, setError] = useState(null)
+  const [busqueda, setBusqueda] = useState('')
+  const [filtroCategoria, setFiltroCategoria] = useState('')
+  const [filtroPrincipioActivo, setFiltroPrincipioActivo] = useState('')
+  const [filtroForma, setFiltroForma] = useState('')
   const [filtroClasificacion, setFiltroClasificacion] = useState('')
   const [filtroEstado, setFiltroEstado] = useState('')
-  const [exito, setExito] = useState(null)
-  const [modalProveedores, setModalProveedores] = useState(null)
-  const [proveedoresProducto, setProveedoresProducto] = useState([])
-  const [proveedoresDisponibles, setProveedoresDisponibles] = useState([])
-  const [nuevoProvProd, setNuevoProvProd] = useState({ proveedorId: '', leadTimeEspecifico: '', precioCompraReferencial: '', cantidadMinimaCompra: '1', multiploEmpaque: '1' })
+  const [categorias, setCategorias] = useState([])
+  const [principiosActivos, setPrincipiosActivos] = useState([])
+  const [formas, setFormas] = useState([])
 
   const cargarDatos = useCallback(async () => {
     try {
       setCargando(true)
       setError(null)
-      const datos = await obtenerProductos()
+      const [datos, categoriasData, formasData, principiosData] = await Promise.all([
+        obtenerProductos(),
+        listarCategoriasTerapeuticas({ activo: true }).catch(() => []),
+        obtenerOpcionesFormasFarmaceuticas().catch(() => []),
+        obtenerOpcionesPrincipiosActivos().catch(() => []),
+      ])
       setProductos(enriquecerProductos(datos))
+      setCategorias(categoriasData.map(c => ({ valor: c.id, etiqueta: c.nombre })))
+      setFormas(formasData)
+      setPrincipiosActivos(principiosData)
+
+      const productoIdInicial = parametrosBusqueda.get('productoId')
+      const productoInicial = datos.find(p => p.id === productoIdInicial)
+      if (productoInicial) {
+        setBusqueda(productoInicial.nombreComercial || productoInicial.codigoInterno || '')
+        setFiltroCategoria(productoInicial.categoriaTerapeuticaId || '')
+        setFiltroForma(productoInicial.formaFarmaceuticaId || '')
+        setFiltroClasificacion(productoInicial.clasificacion || '')
+      }
     } catch (err) {
       setError(err.message)
     } finally {
       setCargando(false)
     }
-  }, [])
+  }, [parametrosBusqueda])
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { cargarDatos() }, [cargarDatos])
 
   const datosFiltrados = productos.filter(p => {
+    const termino = busqueda.trim().toLowerCase()
+    const matchBusqueda = termino
+      ? [p.codigoInterno, p.nombreComercial, p.principioActivoDisplay].some(valor => (valor || '').toLowerCase().includes(termino))
+      : true
+    const matchCategoria = filtroCategoria ? p.categoriaTerapeuticaId === filtroCategoria : true
+    const matchPrincipioActivo = filtroPrincipioActivo ? p.principiosActivos?.some(pa => pa.principioActivoId === filtroPrincipioActivo) : true
+    const matchForma = filtroForma ? p.formaFarmaceuticaId === filtroForma : true
     const matchClasificacion = filtroClasificacion ? p.clasificacion === filtroClasificacion : true
     const matchEstado = filtroEstado ? p.estado === filtroEstado : true
-    return matchClasificacion && matchEstado
+    return matchBusqueda && matchCategoria && matchPrincipioActivo && matchForma && matchClasificacion && matchEstado
   })
 
-  const abrirConfigurarProveedores = async (producto) => {
-    try {
-      const existentes = await listarPorProducto(producto.id)
-      setProveedoresProducto(existentes)
-
-      const provs = await listarProveedores({ activos: true })
-      setProveedoresDisponibles(provs)
-
-      setModalProveedores(producto)
-    } catch (err) {
-      setError(err.message)
-    }
-  }
-
-  const agregarProveedorProducto = async () => {
-    if (!nuevoProvProd.proveedorId || !nuevoProvProd.leadTimeEspecifico || !nuevoProvProd.precioCompraReferencial) return
-    if (Number(nuevoProvProd.leadTimeEspecifico) < 1) { setError('El lead time debe ser mayor a 0 días'); return }
-    if (Number(nuevoProvProd.precioCompraReferencial) <= 0) { setError('El precio de compra debe ser mayor a 0'); return }
-    if (Number(nuevoProvProd.cantidadMinimaCompra) < 1) { setError('La cantidad mínima debe ser mayor a 0'); return }
-    if (Number(nuevoProvProd.multiploEmpaque) < 1) { setError('El múltiplo de empaque debe ser mayor a 0'); return }
-    try {
-      await guardarRelacion({
-        proveedorId: nuevoProvProd.proveedorId,
-        productoId: modalProveedores.id,
-        leadTimeEspecifico: Number(nuevoProvProd.leadTimeEspecifico),
-        precioCompraReferencial: Number(nuevoProvProd.precioCompraReferencial),
-        cantidadMinimaCompra: Number(nuevoProvProd.cantidadMinimaCompra),
-        multiploEmpaque: Number(nuevoProvProd.multiploEmpaque),
-      })
-      const actualizados = await listarPorProducto(modalProveedores.id)
-      setProveedoresProducto(actualizados)
-      setNuevoProvProd({ proveedorId: '', leadTimeEspecifico: '', precioCompraReferencial: '', cantidadMinimaCompra: '1', multiploEmpaque: '1' })
-    } catch (err) {
-      setError(err.message)
-    }
-  }
-
-  const eliminarProveedorProducto = async (id) => {
-    try {
-      await eliminarRelacion(id)
-      setProveedoresProducto(proveedoresProducto.filter(r => r.id !== id))
-    } catch (err) {
-      setError(err.message)
-    }
-  }
-
-  const guardarConfigProveedores = () => {
-    setExito('Proveedores configurados correctamente')
-    setModalProveedores(null)
-    setTimeout(() => setExito(null), 2000)
+  const limpiarFiltros = () => {
+    setBusqueda('')
+    setFiltroCategoria('')
+    setFiltroPrincipioActivo('')
+    setFiltroForma('')
+    setFiltroClasificacion('')
+    setFiltroEstado('')
   }
 
   const columnas = [
@@ -119,15 +107,6 @@ export default function PaginaCatalogo() {
     { campo: 'presentacionDisplay', encabezado: 'Presentación' },
     { campo: 'clasificacion', encabezado: 'Clasificación', render: (r) => <Insignia color={COLORES_CLASIFICACION[r.clasificacion]}>{ETIQUETAS_CLASIFICACION[r.clasificacion]}</Insignia> },
     { campo: 'estado', encabezado: 'Estado', render: (r) => <Insignia color={COLORES_ESTADO[r.estado]}>{ETIQUETAS_ESTADO[r.estado]}</Insignia> },
-    {
-      campo: 'acciones',
-      encabezado: 'Acciones',
-      render: (r) => (
-        <div className="flex gap-1">
-          <Boton variante="icono" icono={Truck} onClick={() => abrirConfigurarProveedores(r)} title="Configurar Lead Times" className="text-marca-principal hover:bg-marca-claro" />
-        </div>
-      ),
-    },
   ]
 
   if (cargando) {
@@ -145,80 +124,16 @@ export default function PaginaCatalogo() {
       </div>
 
       {error && <Alerta tipo="error" titulo={error} className="mb-4" />}
-      {exito && <Alerta tipo="exito" titulo={exito} className="mb-4" />}
 
-      <div className="flex gap-4">
-        <select value={filtroClasificacion} onChange={e => setFiltroClasificacion(e.target.value)} className="px-3 py-2 text-cuerpo bg-fondo border border-estilo rounded-md">
-          <option value="">Todas las clasificaciones</option>
-          {OPCIONES_CLASIFICACION.map(o => <option key={o.valor} value={o.valor}>{o.etiqueta}</option>)}
-        </select>
-        <select value={filtroEstado} onChange={e => setFiltroEstado(e.target.value)} className="px-3 py-2 text-cuerpo bg-fondo border border-estilo rounded-md">
-          <option value="">Todos los estados</option>
-          <option value="activo">Activo</option>
-          <option value="inactivo">Inactivo</option>
-          <option value="descontinuado">Descontinuado</option>
-        </select>
-      </div>
-      <Tabla columnas={columnas} datos={datosFiltrados} alClickFila={(p) => navegar(`/central/inventario/catalogo/${p.id}`)} />
-
-      <Modal abierto={!!modalProveedores} alCerrar={() => setModalProveedores(null)} titulo={`Configurar Lead Times — ${modalProveedores?.nombreComercial || ''}`}>
-        <div className="space-y-4">
-          {proveedoresProducto.filter(r => r.activo !== false).length === 0 ? (
-            <p className="text-secundario">Sin proveedores asociados</p>
-          ) : (
-            <div className="divide-y divide-estilo max-h-60 overflow-y-auto">
-              {proveedoresProducto.filter(r => r.activo !== false).map(r => (
-                <div key={r.id} className="flex items-center justify-between py-2">
-                  <div>
-                    <p className="text-sm font-medium">{r.proveedorNombre || r.proveedorId}</p>
-                    <p className="text-xs text-secundario">Lead time: {r.leadTimeEspecifico} días | S/ {r.precioCompraReferencial}</p>
-                    <p className="text-xs text-secundario">Compra mínima: {r.cantidadMinimaCompra} unidades | Múltiplo de empaque: {r.multiploEmpaque} unidades</p>
-                  </div>
-                  <Boton variante="texto" onClick={() => eliminarProveedorProducto(r.id)} className="text-estado-critico text-sm">Eliminar</Boton>
-                </div>
-              ))}
-            </div>
-          )}
-          <div className="border-t border-estilo pt-4 space-y-3">
-            <p className="text-sm font-medium">Agregar proveedor</p>
-            <select
-              value={nuevoProvProd.proveedorId}
-              onChange={e => setNuevoProvProd({ ...nuevoProvProd, proveedorId: e.target.value })}
-              className="w-full px-3 py-2 text-sm bg-fondo border border-estilo rounded-md"
-            >
-              <option value="">Seleccionar proveedor...</option>
-              {proveedoresDisponibles.map(p => (
-                <option key={p.id} value={p.id}>{p.razonSocial}</option>
-              ))}
-            </select>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div>
-                <label className="text-xs text-secundario">Lead time (días)</label>
-                <input type="number" min="1" value={nuevoProvProd.leadTimeEspecifico} onChange={e => setNuevoProvProd({ ...nuevoProvProd, leadTimeEspecifico: e.target.value })} className="w-full px-3 py-2 text-sm bg-fondo border border-estilo rounded-md" />
-              </div>
-              <div>
-                <label className="text-xs text-secundario">Precio compra (S/)</label>
-                <input type="number" min="0.01" step="0.01" value={nuevoProvProd.precioCompraReferencial} onChange={e => setNuevoProvProd({ ...nuevoProvProd, precioCompraReferencial: e.target.value })} className="w-full px-3 py-2 text-sm bg-fondo border border-estilo rounded-md" />
-              </div>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div>
-                <label className="text-xs text-secundario">Cantidad mínima de compra</label>
-                <input type="number" min="1" value={nuevoProvProd.cantidadMinimaCompra} onChange={e => setNuevoProvProd({ ...nuevoProvProd, cantidadMinimaCompra: e.target.value })} className="w-full px-3 py-2 text-sm bg-fondo border border-estilo rounded-md" />
-              </div>
-              <div>
-                <label className="text-xs text-secundario">Múltiplo de empaque</label>
-                <input type="number" min="1" value={nuevoProvProd.multiploEmpaque} onChange={e => setNuevoProvProd({ ...nuevoProvProd, multiploEmpaque: e.target.value })} className="w-full px-3 py-2 text-sm bg-fondo border border-estilo rounded-md" />
-              </div>
-            </div>
-            <Boton variante="secundario" onClick={agregarProveedorProducto} className="w-full">Agregar</Boton>
-          </div>
-          <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-4 border-t border-estilo">
-            <Boton variante="secundario" onClick={() => setModalProveedores(null)}>Cancelar</Boton>
-            <Boton variante="primario" onClick={guardarConfigProveedores}>Guardar configuración</Boton>
-          </div>
-        </div>
-      </Modal>
+      <BarraFiltros alLimpiar={limpiarFiltros}>
+        <CampoBusqueda valor={busqueda} alCambiar={setBusqueda} placeholder="Buscar producto..." className="w-full sm:w-72" />
+        <SelectBusquedaFiltro valor={filtroCategoria} alCambiar={setFiltroCategoria} opciones={categorias} placeholder="Categoría terapéutica" />
+        <SelectBusquedaFiltro valor={filtroPrincipioActivo} alCambiar={setFiltroPrincipioActivo} opciones={principiosActivos} placeholder="Principio activo" />
+        <SelectBusquedaFiltro valor={filtroForma} alCambiar={setFiltroForma} opciones={formas} placeholder="Forma farmacéutica" />
+        <SelectFiltro valor={filtroClasificacion} alCambiar={setFiltroClasificacion} opciones={OPCIONES_CLASIFICACION} placeholder="Todas las clasificaciones" />
+        <SelectFiltro valor={filtroEstado} alCambiar={setFiltroEstado} opciones={[{ valor: 'activo', etiqueta: 'Activo' }, { valor: 'inactivo', etiqueta: 'Inactivo' }, { valor: 'descontinuado', etiqueta: 'Descontinuado' }]} placeholder="Todos los estados" />
+      </BarraFiltros>
+      <Tabla columnas={columnas} datos={datosFiltrados} busqueda={false} alClickFila={(p) => navegar(`/central/inventario/catalogo/${p.id}`)} />
     </div>
   )
 }

@@ -1,0 +1,12 @@
+{
+  "alertas_generadas": 47,
+  "recomendaciones_generadas": 150,
+  "cantidad_recomendada_negativa": 0,
+  "stock_seguridad_negativo": 0,
+  "costo_estimado_negativo": 0,
+  "stock_proyectado_no_finito": 0,
+  "proveedor_id_valido": true,
+  "producto_id_valido": true,
+  "botica_id_valido": true,
+  "org_id_valido": true
+}

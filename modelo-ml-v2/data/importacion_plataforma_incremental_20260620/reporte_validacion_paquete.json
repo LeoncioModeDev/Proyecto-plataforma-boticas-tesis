@@ -1,0 +1,20 @@
+{
+  "valido": true,
+  "errores": [],
+  "duplicados": {
+    "boticas": 0,
+    "precios": 0,
+    "stock_inicial": 0,
+    "stock_historico": 0,
+    "ventas_historicas": 0
+  },
+  "conteos": {
+    "boticas": 17,
+    "precios": 510,
+    "stock_inicial": 510,
+    "stock_historico": 30480,
+    "ventas_historicas": 29500
+  },
+  "fecha_corte_solicitada": "2026-06-20",
+  "fecha_ultima_semana_generada": "2026-06-15"
+}

@@ -62,7 +62,7 @@ export default function PaginaAlertasDemanda() {
     <div className="space-y-6">
       <div>
         <h1 className="text-h1 text-principal">Alertas de Demanda</h1>
-        <p className="text-secundario mt-1">Alertas generadas por el modelo ML sobre patrones de demanda</p>
+        <p className="text-secundario mt-1">Alertas generadas por el modelo predictivo sobre patrones de demanda</p>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">

@@ -81,6 +81,8 @@ export default function FormularioAjuste() {
   )
 
   useEffect(() => {
+    setValue('loteId', '')
+
     if (!productoId || !ubicacionId) {
       setLotes([])
       return
@@ -102,7 +104,7 @@ export default function FormularioAjuste() {
         setLotes([])
         setCargandoLotes(false)
       })
-  }, [productoId, ubicacionId, ubicaciones])
+  }, [productoId, ubicacionId, ubicaciones, setValue])
 
   useEffect(() => {
     if (!ubicacionId) return

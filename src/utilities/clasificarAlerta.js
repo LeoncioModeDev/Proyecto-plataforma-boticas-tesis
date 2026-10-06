@@ -1,5 +1,5 @@
 export function clasificarAlerta(registro) {
-  const disponible = registro.cantidadDisponible ?? registro.stockDisponible ?? 0
+  const disponible = registro.stockDisponible ?? registro.cantidadDisponible ?? 0
   const minimo = registro.stockMinimo ?? 0
   const maximo = registro.stockMaximo ?? null
 

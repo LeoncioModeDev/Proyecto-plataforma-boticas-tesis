@@ -1,11 +1,13 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Eye, ClipboardList, CheckCircle, AlertTriangle, XCircle } from 'lucide-react'
+import { ClipboardList, CheckCircle, AlertTriangle, XCircle } from 'lucide-react'
 import Tabla from '@/components/common/Tabla'
 import TarjetaMetrica from '@/components/charts/TarjetaMetrica'
 import Insignia from '@/components/common/Insignia'
-import Boton from '@/components/common/Boton'
 import Alerta from '@/components/common/Alerta'
+import CampoBusqueda from '@/components/common/CampoBusqueda'
+import BarraFiltros from '@/components/common/BarraFiltros'
+import SelectFiltro from '@/components/common/SelectFiltro'
 import { listarRecepciones } from '@/services/supabase/ordenesCompra'
 import { supabase } from '@/services/supabase/cliente'
 import useAutenticacion from '@/state/useAutenticacion'
@@ -32,6 +34,7 @@ export default function PaginaRecepciones() {
   const [cargando, setCargando] = useState(true)
   const [error, setError] = useState(null)
   const [proveedores, setProveedores] = useState([])
+  const [busqueda, setBusqueda] = useState('')
   const [filtroProveedor, setFiltroProveedor] = useState('')
   const [filtroResultado, setFiltroResultado] = useState('')
   const [filtroDesde, setFiltroDesde] = useState('')
@@ -83,6 +86,20 @@ export default function PaginaRecepciones() {
     devoluciones: recepciones.filter(r => r.resultado === 'en_devolucion').length,
   }), [recepciones])
 
+  const recepcionesFiltradas = useMemo(() => {
+    if (!busqueda.trim()) return recepciones
+    const termino = busqueda.trim().toLowerCase()
+    return recepciones.filter(r => [r.numeroRecepcion, r.ordenNumero, r.proveedorNombre, r.registradoPorNombre].some(valor => (valor || '').toLowerCase().includes(termino)))
+  }, [recepciones, busqueda])
+
+  const limpiarFiltros = () => {
+    setBusqueda('')
+    setFiltroProveedor('')
+    setFiltroResultado('')
+    setFiltroDesde('')
+    setFiltroHasta('')
+  }
+
   const columnas = [
     { campo: 'numeroRecepcion', encabezado: 'N.º de Recepción', render: (r) => <span className="font-mono text-xs font-medium text-principal">{r.numeroRecepcion}</span> },
     { campo: 'fechaRecepcion', encabezado: 'Fecha', render: (r) => <span className="text-etiqueta text-secundario">{formatearFechaRelativa(r.fechaRecepcion)}</span> },
@@ -95,20 +112,6 @@ export default function PaginaRecepciones() {
     },
     { campo: 'totalProductos', encabezado: 'Productos' },
     { campo: 'totalRecibido', encabezado: 'Total recibido' },
-    {
-      campo: 'acciones', encabezado: '',
-      render: (r) => (
-        <div className="flex gap-1">
-          <Boton
-            variante="icono"
-            icono={Eye}
-            onClick={() => navegar(`/central/proveedores/recepciones/${r.id}`)}
-            title="Ver detalle"
-            className="text-secundario hover:bg-fondo"
-          />
-        </div>
-      ),
-    },
   ]
 
   if (cargando) {
@@ -135,47 +138,20 @@ export default function PaginaRecepciones() {
         <TarjetaMetrica etiqueta="En Devolución" valor={estadisticas.devoluciones} icono={XCircle} />
       </div>
 
-      <div className="flex flex-wrap gap-4">
-        <select
-          value={filtroProveedor}
-          onChange={e => setFiltroProveedor(e.target.value)}
-          className="px-4 py-2 border border-estilo rounded-tarjeta text-cuerpo bg-fondo-secundario"
-        >
-          <option value="">Todos los proveedores</option>
-          {proveedores.map(p => (
-            <option key={p.id} value={p.id}>{p.razon_social}</option>
-          ))}
-        </select>
-        <select
-          value={filtroResultado}
-          onChange={e => setFiltroResultado(e.target.value)}
-          className="px-4 py-2 border border-estilo rounded-tarjeta text-cuerpo bg-fondo-secundario"
-        >
-          <option value="">Todos los resultados</option>
-          {Object.entries(ETIQUETAS_RESULTADO).map(([valor, etiqueta]) => (
-            <option key={valor} value={valor}>{etiqueta}</option>
-          ))}
-        </select>
-        <input
-          type="date"
-          value={filtroDesde}
-          onChange={e => setFiltroDesde(e.target.value)}
-          className="px-4 py-2 border border-estilo rounded-tarjeta text-cuerpo bg-fondo-secundario"
-          placeholder="Fecha desde"
-        />
-        <input
-          type="date"
-          value={filtroHasta}
-          onChange={e => setFiltroHasta(e.target.value)}
-          className="px-4 py-2 border border-estilo rounded-tarjeta text-cuerpo bg-fondo-secundario"
-          placeholder="Fecha hasta"
-        />
-      </div>
+      <BarraFiltros alLimpiar={limpiarFiltros}>
+        <CampoBusqueda valor={busqueda} alCambiar={setBusqueda} placeholder="Buscar recepción..." className="w-full sm:w-80" />
+        <SelectFiltro valor={filtroProveedor} alCambiar={setFiltroProveedor} opciones={proveedores.map(p => ({ valor: p.id, etiqueta: p.razon_social }))} placeholder="Todos los proveedores" />
+        <SelectFiltro valor={filtroResultado} alCambiar={setFiltroResultado} opciones={Object.entries(ETIQUETAS_RESULTADO).map(([valor, etiqueta]) => ({ valor, etiqueta }))} placeholder="Todos los resultados" />
+        <label className="flex flex-col gap-1 text-xs text-secundario">Desde<input type="date" value={filtroDesde} onChange={e => setFiltroDesde(e.target.value)} className="px-3 py-2 text-sm bg-fondo border border-estilo rounded-md text-principal" /></label>
+        <label className="flex flex-col gap-1 text-xs text-secundario">Hasta<input type="date" value={filtroHasta} onChange={e => setFiltroHasta(e.target.value)} className="px-3 py-2 text-sm bg-fondo border border-estilo rounded-md text-principal" /></label>
+      </BarraFiltros>
 
       <Tabla
         columnas={columnas}
-        datos={recepciones}
+        datos={recepcionesFiltradas}
         mensajeVacio="No se encontraron recepciones"
+        busqueda={false}
+        alClickFila={(r) => navegar(`/central/proveedores/recepciones/${r.id}`)}
       />
     </div>
   )

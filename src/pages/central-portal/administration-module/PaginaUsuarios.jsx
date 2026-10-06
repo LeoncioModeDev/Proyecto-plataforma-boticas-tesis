@@ -6,6 +6,9 @@ import Insignia from '@/components/common/Insignia'
 import Alerta from '@/components/common/Alerta'
 import Modal from '@/components/common/Modal'
 import TarjetaMetrica from '@/components/charts/TarjetaMetrica'
+import CampoBusqueda from '@/components/common/CampoBusqueda'
+import BarraFiltros from '@/components/common/BarraFiltros'
+import SelectFiltro from '@/components/common/SelectFiltro'
 import { listarUsuarios, crearUsuario, actualizarUsuario, toggleUsuario } from '@/services/supabase/usuarios'
 import { listarBoticas } from '@/services/supabase/boticas'
 import { ETIQUETAS_ROLES } from '@/constants/roles'
@@ -65,6 +68,7 @@ export default function PaginaUsuarios() {
   const [busqueda, setBusqueda] = useState('')
   const [exito, setExito] = useState(null)
   const [confirmarDesactivar, setConfirmarDesactivar] = useState(null)
+  const [detalleUsuario, setDetalleUsuario] = useState(null)
   const [modalAbierto, setModalAbierto] = useState(false)
   const [editando, setEditando] = useState(null)
   const [formulario, setFormulario] = useState(formularioVacio())
@@ -117,6 +121,12 @@ export default function PaginaUsuarios() {
     } else {
       ejecutarToggle(id)
     }
+  }
+
+  const limpiarFiltros = () => {
+    setBusqueda('')
+    setFiltroRol('')
+    setFiltroEstado('')
   }
 
   const ejecutarToggle = async (id) => {
@@ -285,23 +295,6 @@ export default function PaginaUsuarios() {
         </div>
       ) : <span className="text-secundario text-sm">Nunca</span>,
     },
-    {
-      campo: 'acciones',
-      encabezado: 'Acciones',
-      render: (r) => (
-        <div className="flex gap-1">
-          <Boton variante="icono" icono={Edit} onClick={() => abrirModalEditar(r)} title="Editar" className="text-marca-principal hover:bg-marca-claro" />
-          <Boton
-            variante="icono"
-            icono={r.activo ? ToggleRight : ToggleLeft}
-            onClick={() => manejarToggleActivo(r.id)}
-            title={r.activo ? 'Desactivar' : 'Activar'}
-            className={r.activo ? 'text-estado-critico hover:bg-rojo-claro' : 'text-marca-principal hover:bg-marca-claro'}
-            deshabilitado={desactivando && confirmarDesactivar === r.id}
-          />
-        </div>
-      ),
-    },
   ]
 
   if (cargando) {
@@ -328,36 +321,32 @@ export default function PaginaUsuarios() {
         <TarjetaMetrica etiqueta="Visores" valor={estadisticas.visores} icono={MapPin} />
       </div>
 
-      <div className="flex flex-col sm:flex-row gap-4">
-        <input
-          type="text"
-          placeholder="Buscar por nombre o email..."
-          value={busqueda}
-          onChange={e => setBusqueda(e.target.value)}
-          className="flex-1 px-4 py-2 border border-estilo rounded-tarjeta text-cuerpo bg-fondo-secundario focus:outline-none focus:ring-2 focus:ring-marca-principal"
-        />
-        <select
-          value={filtroRol}
-          onChange={e => setFiltroRol(e.target.value)}
-          className="px-4 py-2 border border-estilo rounded-tarjeta text-cuerpo bg-fondo-secundario"
-        >
-          <option value="">Todos los roles</option>
-          <option value="admin_central">Admin Central</option>
-          <option value="operador_drogueria">Operador de Botica</option>
-          <option value="visor_botica">Visor Local de Botica</option>
-        </select>
-        <select
-          value={filtroEstado}
-          onChange={e => setFiltroEstado(e.target.value)}
-          className="px-4 py-2 border border-estilo rounded-tarjeta text-cuerpo bg-fondo-secundario"
-        >
-          <option value="">Todos los estados</option>
-          <option value="activo">Activos</option>
-          <option value="inactivo">Inactivos</option>
-        </select>
-      </div>
+      <BarraFiltros alLimpiar={limpiarFiltros}>
+        <CampoBusqueda valor={busqueda} alCambiar={setBusqueda} placeholder="Buscar por nombre o email..." className="w-full sm:w-80" />
+        <SelectFiltro valor={filtroRol} alCambiar={setFiltroRol} opciones={[{ valor: 'admin_central', etiqueta: 'Admin Central' }, { valor: 'operador_drogueria', etiqueta: 'Operador de Droguería' }, { valor: 'visor_botica', etiqueta: 'Visor de Botica' }]} placeholder="Todos los roles" />
+        <SelectFiltro valor={filtroEstado} alCambiar={setFiltroEstado} opciones={[{ valor: 'activo', etiqueta: 'Activos' }, { valor: 'inactivo', etiqueta: 'Inactivos' }]} placeholder="Todos los estados" />
+      </BarraFiltros>
 
-      <Tabla columnas={columnas} datos={filtrados} />
+      <Tabla columnas={columnas} datos={filtrados} busqueda={false} alClickFila={setDetalleUsuario} />
+
+      <Modal abierto={!!detalleUsuario} alCerrar={() => setDetalleUsuario(null)} titulo="Detalle de usuario" tamano="md">
+        {detalleUsuario && (
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+              <div><p className="text-etiqueta text-secundario">Nombre</p><p className="font-medium text-principal">{detalleUsuario.nombre}</p></div>
+              <div><p className="text-etiqueta text-secundario">Email</p><p className="font-medium text-principal">{detalleUsuario.email}</p></div>
+              <div><p className="text-etiqueta text-secundario">Rol</p><Insignia color={COLORES_ROL[detalleUsuario.rol] || 'gris'}>{ETIQUETAS_ROLES[detalleUsuario.rol]}</Insignia></div>
+              <div><p className="text-etiqueta text-secundario">Estado</p><Insignia color={ESTADOS_USUARIO[detalleUsuario.activo ? 'activo' : 'inactivo'].color}>{ESTADOS_USUARIO[detalleUsuario.activo ? 'activo' : 'inactivo'].etiqueta}</Insignia></div>
+              <div><p className="text-etiqueta text-secundario">Botica asignada</p><p className="font-medium text-principal">{detalleUsuario.boticaNombre || '—'}</p></div>
+              <div><p className="text-etiqueta text-secundario">Último acceso</p><p className="font-medium text-principal">{detalleUsuario.ultimoAcceso ? formatearFechaRelativa(detalleUsuario.ultimoAcceso) : 'Nunca'}</p></div>
+            </div>
+            <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-3 border-t border-estilo">
+              <Boton variante="secundario" icono={detalleUsuario.activo ? ToggleRight : ToggleLeft} onClick={() => { setDetalleUsuario(null); manejarToggleActivo(detalleUsuario.id) }} deshabilitado={desactivando}>{detalleUsuario.activo ? 'Desactivar' : 'Activar'}</Boton>
+              <Boton variante="primario" icono={Edit} onClick={() => { setDetalleUsuario(null); abrirModalEditar(detalleUsuario) }}>Editar</Boton>
+            </div>
+          </div>
+        )}
+      </Modal>
 
       <Modal abierto={modalAbierto} alCerrar={() => setModalAbierto(false)} titulo={editando ? 'Editar Usuario' : 'Nuevo Usuario'} tamano="md">
         <div className="space-y-5">

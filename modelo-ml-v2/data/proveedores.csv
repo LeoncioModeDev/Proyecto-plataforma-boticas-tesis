@@ -1,0 +1,6 @@
+id,org_id,razon_social,tipo_identificacion,numero_identificacion,pais_origen,contacto,activo,created_at
+76d6c9f4-5d7d-53c0-bb1f-2a577383765a,e8aeb018-f679-5670-b210-de4f62ff2111,Distribuidora Drokasa S.A.,ruc,20100123456,PE,,True,2023-01-15T10:00:00
+41cb90d0-d91a-57c2-b138-831be351479f,e8aeb018-f679-5670-b210-de4f62ff2111,Quicornac Distribuciones S.A.C.,ruc,20100789012,PE,,True,2023-01-15T10:00:00
+ab4a547f-e75d-5601-8171-00da4efa4b57,e8aeb018-f679-5670-b210-de4f62ff2111,Albis Pharma Perú S.A.,ruc,20100345678,PE,,True,2023-01-15T10:00:00
+c6617891-56ff-5690-89a4-1ece06685ff5,e8aeb018-f679-5670-b210-de4f62ff2111,Farmacéutica Internacional S.A.,ruc,20100901234,PE,,True,2023-01-15T10:00:00
+a6f6d890-1609-53fc-b4a6-5733ccc9d078,e8aeb018-f679-5670-b210-de4f62ff2111,Laboratorios Roche del Perú,ruc,20100567890,PE,,True,2023-01-15T10:00:00

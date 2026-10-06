@@ -7,6 +7,9 @@ import Insignia from '@/components/common/Insignia'
 import Alerta from '@/components/common/Alerta'
 import Modal from '@/components/common/Modal'
 import TarjetaMetrica from '@/components/charts/TarjetaMetrica'
+import CampoBusqueda from '@/components/common/CampoBusqueda'
+import BarraFiltros from '@/components/common/BarraFiltros'
+import SelectFiltro from '@/components/common/SelectFiltro'
 import { listarBoticas, toggleBotica } from '@/services/supabase/boticas'
 
 const ESTADOS_BOTICA = {
@@ -34,6 +37,7 @@ export default function PaginaBoticas() {
   const [busqueda, setBusqueda] = useState('')
   const [exito, setExito] = useState(null)
   const [confirmarDesactivar, setConfirmarDesactivar] = useState(null)
+  const [detalleBotica, setDetalleBotica] = useState(null)
   const [desactivando, setDesactivando] = useState(false)
 
   const cargarBoticas = async () => {
@@ -91,6 +95,12 @@ export default function PaginaBoticas() {
     }
   }
 
+  const limpiarFiltros = () => {
+    setBusqueda('')
+    setFiltroTipo('')
+    setFiltroEstado('')
+  }
+
   const columnas = [
     { campo: 'codigoInterno', encabezado: 'Código', render: (r) => <span className="font-mono text-xs font-medium">{r.codigoInterno}</span> },
     {
@@ -131,23 +141,6 @@ export default function PaginaBoticas() {
       encabezado: 'Estado',
       render: (r) => <Insignia color={ESTADOS_BOTICA[r.activa ? 'activa' : 'inactiva'].color}>{ESTADOS_BOTICA[r.activa ? 'activa' : 'inactiva'].etiqueta}</Insignia>,
     },
-    {
-      campo: 'acciones',
-      encabezado: 'Acciones',
-      render: (r) => (
-        <div className="flex gap-1">
-          <Boton variante="icono" icono={Edit} onClick={() => navegar(`/central/administracion/boticas/${r.id}`)} title="Editar" className="text-marca-principal hover:bg-marca-claro" />
-          <Boton
-            variante="icono"
-            icono={r.activa ? ToggleRight : ToggleLeft}
-            onClick={() => manejarToggleActivo(r.id)}
-            title={r.activa ? 'Desactivar' : 'Activar'}
-            className={r.activa ? 'text-estado-critico hover:bg-rojo-claro' : 'text-marca-principal hover:bg-marca-claro'}
-            deshabilitado={desactivando && confirmarDesactivar === r.id}
-          />
-        </div>
-      ),
-    },
   ]
 
   if (cargando) {
@@ -174,35 +167,32 @@ export default function PaginaBoticas() {
         <TarjetaMetrica etiqueta="Inactivas" valor={estadisticas.inactivas} icono={ToggleLeft} />
       </div>
 
-      <div className="flex flex-col sm:flex-row gap-4">
-        <input
-          type="text"
-          placeholder="Buscar por nombre..."
-          value={busqueda}
-          onChange={e => setBusqueda(e.target.value)}
-          className="flex-1 px-4 py-2 border border-estilo rounded-tarjeta text-cuerpo bg-fondo-secundario focus:outline-none focus:ring-2 focus:ring-marca-principal"
-        />
-        <select
-          value={filtroTipo}
-          onChange={e => setFiltroTipo(e.target.value)}
-          className="px-4 py-2 border border-estilo rounded-tarjeta text-cuerpo bg-fondo-secundario"
-        >
-          <option value="">Todos los tipos</option>
-          <option value="drogueria">Droguería</option>
-          <option value="botica">Botica</option>
-        </select>
-        <select
-          value={filtroEstado}
-          onChange={e => setFiltroEstado(e.target.value)}
-          className="px-4 py-2 border border-estilo rounded-tarjeta text-cuerpo bg-fondo-secundario"
-        >
-          <option value="">Todos los estados</option>
-          <option value="activa">Activas</option>
-          <option value="inactiva">Inactivas</option>
-        </select>
-      </div>
+      <BarraFiltros alLimpiar={limpiarFiltros}>
+        <CampoBusqueda valor={busqueda} alCambiar={setBusqueda} placeholder="Buscar por nombre..." className="w-full sm:w-80" />
+        <SelectFiltro valor={filtroTipo} alCambiar={setFiltroTipo} opciones={[{ valor: 'drogueria', etiqueta: 'Droguería' }, { valor: 'botica', etiqueta: 'Botica' }]} placeholder="Todos los tipos" />
+        <SelectFiltro valor={filtroEstado} alCambiar={setFiltroEstado} opciones={[{ valor: 'activa', etiqueta: 'Activas' }, { valor: 'inactiva', etiqueta: 'Inactivas' }]} placeholder="Todos los estados" />
+      </BarraFiltros>
 
-      <Tabla columnas={columnas} datos={filtrados} />
+      <Tabla columnas={columnas} datos={filtrados} busqueda={false} alClickFila={setDetalleBotica} />
+
+      <Modal abierto={!!detalleBotica} alCerrar={() => setDetalleBotica(null)} titulo="Detalle de ubicación" tamano="md">
+        {detalleBotica && (
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+              <div><p className="text-etiqueta text-secundario">Nombre</p><p className="font-medium text-principal">{detalleBotica.nombre}</p></div>
+              <div><p className="text-etiqueta text-secundario">Código</p><p className="font-mono text-principal">{detalleBotica.codigoInterno}</p></div>
+              <div><p className="text-etiqueta text-secundario">Tipo</p><Insignia color={COLORES_TIPO[detalleBotica.tipo] || 'gris'}>{ETIQUETAS_TIPO[detalleBotica.tipo]}</Insignia></div>
+              <div><p className="text-etiqueta text-secundario">Estado</p><Insignia color={ESTADOS_BOTICA[detalleBotica.activa ? 'activa' : 'inactiva'].color}>{ESTADOS_BOTICA[detalleBotica.activa ? 'activa' : 'inactiva'].etiqueta}</Insignia></div>
+              <div className="sm:col-span-2"><p className="text-etiqueta text-secundario">Dirección</p><p className="font-medium text-principal">{detalleBotica.direccion || '—'}</p></div>
+              <div><p className="text-etiqueta text-secundario">Teléfono</p><p className="font-medium text-principal">{detalleBotica.telefono || '—'}</p></div>
+            </div>
+            <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-3 border-t border-estilo">
+              <Boton variante="secundario" icono={detalleBotica.activa ? ToggleRight : ToggleLeft} onClick={() => { setDetalleBotica(null); manejarToggleActivo(detalleBotica.id) }} deshabilitado={desactivando}>{detalleBotica.activa ? 'Desactivar' : 'Activar'}</Boton>
+              <Boton variante="primario" icono={Edit} onClick={() => navegar(`/central/administracion/boticas/${detalleBotica.id}`)}>Editar</Boton>
+            </div>
+          </div>
+        )}
+      </Modal>
 
       <Modal abierto={!!confirmarDesactivar} alCerrar={() => setConfirmarDesactivar(null)} titulo="Confirmar">
         <div className="space-y-4">

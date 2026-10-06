@@ -11,7 +11,6 @@ import {
   BarChart3,
   Truck,
   Users,
-  BrainCircuit,
   Bell,
   Lightbulb,
   LogOut,
@@ -23,15 +22,18 @@ import {
   Building2,
   Activity,
   UserPlus,
-  DollarSign,
+  Receipt,
+  ShoppingCart,
   History,
   Tags,
+  AlertTriangle,
 } from "lucide-react";
 import { cn } from "@/utilities/cn";
 import useAutenticacion from "@/state/useAutenticacion";
 import useBarraLateral from "@/state/useBarraLateral";
 import { ROLES, ETIQUETAS_ROLES } from "@/constants/roles";
 import { obtenerPortal } from "@/utilities/permisos";
+import ModalConfirmar from "@/components/common/ModalConfirmar";
 
 const itemsAdminCentral = [
     {
@@ -46,8 +48,8 @@ const itemsAdminCentral = [
       ruta: "/central/inventario",
       subItems: [
         { etiqueta: "Productos", ruta: "/central/inventario/catalogo", icono: Package },
-        { etiqueta: "Categorías terapéuticas", ruta: "/central/inventario/categorias-terapeuticas", icono: Tags },
         { etiqueta: "Stock actual", ruta: "/central/inventario/stock", icono: Boxes },
+        { etiqueta: "Stock histórico", ruta: "/central/administracion/stock-historico", icono: History },
         { etiqueta: "Lotes", ruta: "/central/inventario/lotes", icono: CalendarClock },
         { etiqueta: "Movimientos", ruta: "/central/inventario/movimientos", icono: ArrowLeftRight },
         { etiqueta: "Ajustes", ruta: "/central/inventario/ajustes", icono: ClipboardList },
@@ -79,7 +81,20 @@ const itemsAdminCentral = [
     },
     {
       tipo: "modulo",
-      etiqueta: "Proveedores",
+      etiqueta: "Ventas",
+      icono: ShoppingCart,
+      ruta: "/central/ventas",
+      subItems: [
+        { etiqueta: "Ventas", ruta: "/central/ventas", icono: Receipt },
+        { etiqueta: "Precios", ruta: "/central/administracion/precios", icono: Tags },
+        { etiqueta: "Ventas históricas", ruta: "/central/administracion/ventas-historicas", icono: BarChart3 },
+        { etiqueta: "Demanda no atendida", ruta: "/central/ventas/demanda-no-atendida", icono: AlertTriangle },
+        { etiqueta: "Reportes de ventas", ruta: "/central/ventas/reportes", icono: FileBarChart },
+      ],
+    },
+    {
+      tipo: "modulo",
+      etiqueta: "Compras",
       icono: Users,
       ruta: "/central/proveedores",
       subItems: [
@@ -126,21 +141,7 @@ const itemsAdminCentral = [
           ruta: "/central/administracion/importacion-datos",
           icono: FileBarChart,
         },
-        {
-          etiqueta: "Precios importados",
-          ruta: "/central/administracion/precios",
-          icono: DollarSign,
-        },
-        {
-          etiqueta: "Stock histórico importado",
-          ruta: "/central/administracion/stock-historico",
-          icono: History,
-        },
-        {
-          etiqueta: "Ventas históricas",
-          ruta: "/central/administracion/ventas-historicas",
-          icono: BarChart3,
-        },
+        { etiqueta: "Categorías terapéuticas", ruta: "/central/administracion/categorias-terapeuticas", icono: Tags },
         {
           etiqueta: "Auditoría",
           ruta: "/central/administracion/auditoria",
@@ -150,23 +151,23 @@ const itemsAdminCentral = [
     },
     {
       tipo: "modulo",
-      etiqueta: "Machine Learning",
-      icono: BrainCircuit,
+      etiqueta: "Predicciones",
+      icono: BarChart3,
       ruta: "/ml/predicciones",
       subItems: [
         {
-          etiqueta: "Predicciones",
+          etiqueta: "Pronóstico de demanda",
           ruta: "/ml/predicciones",
-          icono: BrainCircuit,
+          icono: Activity,
         },
         {
           etiqueta: "Historial",
           ruta: "/ml/historial-predicciones",
           icono: History,
         },
-        { etiqueta: "Alertas ML", ruta: "/ml/alertas", icono: Bell },
+        { etiqueta: "Alertas predictivas", ruta: "/ml/alertas", icono: Bell },
         {
-          etiqueta: "Recomendaciones",
+          etiqueta: "Recomendaciones predictivas",
           ruta: "/ml/recomendaciones",
           icono: Lightbulb,
         },
@@ -212,6 +213,7 @@ const itemsNavegacion = {
       subItems: [
         { etiqueta: "Productos", ruta: "/operaciones/inventario/catalogo", icono: Package },
         { etiqueta: "Stock actual", ruta: "/operaciones/inventario/stock", icono: Boxes },
+        { etiqueta: "Stock histórico", ruta: "/operaciones/administracion/stock-historico", icono: History },
         { etiqueta: "Lotes", ruta: "/operaciones/inventario/lotes", icono: CalendarClock },
         { etiqueta: "Movimientos", ruta: "/operaciones/inventario/movimientos", icono: ArrowLeftRight },
         { etiqueta: "Ajustes", ruta: "/operaciones/inventario/ajustes", icono: ClipboardList },
@@ -238,7 +240,19 @@ const itemsNavegacion = {
     },
     {
       tipo: "modulo",
-      etiqueta: "Proveedores",
+      etiqueta: "Ventas",
+      icono: ShoppingCart,
+      ruta: "/operaciones/ventas",
+      subItems: [
+        { etiqueta: "Ventas", ruta: "/operaciones/ventas", icono: Receipt },
+        { etiqueta: "Precios", ruta: "/operaciones/administracion/precios", icono: Tags },
+        { etiqueta: "Ventas históricas", ruta: "/operaciones/administracion/ventas-historicas", icono: BarChart3 },
+        { etiqueta: "Demanda no atendida", ruta: "/operaciones/ventas/demanda-no-atendida", icono: AlertTriangle },
+      ],
+    },
+    {
+      tipo: "modulo",
+      etiqueta: "Compras",
       icono: Users,
       ruta: "/operaciones/proveedores",
       subItems: [
@@ -256,29 +270,6 @@ const itemsNavegacion = {
           etiqueta: "Recepciones",
           ruta: "/operaciones/recepciones",
           icono: Package,
-        },
-      ],
-    },
-    {
-      tipo: "modulo",
-      etiqueta: "Administración",
-      icono: Settings,
-      ruta: "/operaciones/administracion/ventas-historicas",
-      subItems: [
-        {
-          etiqueta: "Precios importados",
-          ruta: "/operaciones/administracion/precios",
-          icono: DollarSign,
-        },
-        {
-          etiqueta: "Stock histórico importado",
-          ruta: "/operaciones/administracion/stock-historico",
-          icono: History,
-        },
-        {
-          etiqueta: "Ventas históricas",
-          ruta: "/operaciones/administracion/ventas-historicas",
-          icono: BarChart3,
         },
       ],
     },
@@ -302,6 +293,8 @@ const itemsNavegacion = {
       ruta: "/botica/transferencias",
       icono: Truck,
     },
+    { etiqueta: "Registrar venta", ruta: "/botica/ventas/registrar", icono: ClipboardList },
+    { etiqueta: "Ventas", ruta: "/botica/ventas", icono: Receipt },
   ],
 };
 
@@ -386,6 +379,7 @@ export default function BarraLateral({ movil = false, alCerrarMovil }) {
   const { usuario, cerrarSesion } = useAutenticacion();
   const { colapsada, setColapsada } = useBarraLateral();
   const navegar = useNavigate();
+  const [confirmarSalida, setConfirmarSalida] = useState(false);
 
   if (!usuario) return null;
 
@@ -404,6 +398,7 @@ export default function BarraLateral({ movil = false, alCerrarMovil }) {
   };
 
   return (
+    <>
     <aside
       className={cn(
         "fixed left-0 top-0 h-screen bg-fondo-secundario border-r border-estilo flex flex-col z-40 transition-all duration-200",
@@ -448,6 +443,7 @@ export default function BarraLateral({ movil = false, alCerrarMovil }) {
             <NavLink
               key={item.ruta}
               to={item.ruta}
+              end={item.ruta === "/botica/ventas"}
               className={({ isActive }) =>
                 cn(
                   "flex items-center gap-3 px-3 py-2 rounded-md text-cuerpo transition-all mb-0.5",
@@ -478,7 +474,7 @@ export default function BarraLateral({ movil = false, alCerrarMovil }) {
           </div>
         )}
         <button
-          onClick={manejarCerrarSesion}
+          onClick={() => setConfirmarSalida(true)}
           className="flex items-center gap-3 w-full px-3 py-2 rounded-md text-cuerpo text-secundario hover:bg-fondo transition-colors"
           title="Cerrar sesión"
         >
@@ -498,5 +494,14 @@ export default function BarraLateral({ movil = false, alCerrarMovil }) {
         )}
       </button>}
     </aside>
+    <ModalConfirmar
+      abierto={confirmarSalida}
+      alCerrar={() => setConfirmarSalida(false)}
+      alConfirmar={manejarCerrarSesion}
+      titulo="Cerrar sesión"
+      mensaje="¿Seguro que deseas cerrar la sesión actual?"
+      etiquetaBoton="Cerrar sesión"
+    />
+    </>
   );
 }

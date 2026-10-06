@@ -1,12 +1,12 @@
 import { useParams, useNavigate } from 'react-router-dom'
 import { useState, useEffect } from 'react'
-import { ArrowLeft, Edit, Building, Mail, Phone, Star } from 'lucide-react'
+import { ArrowLeft, Edit, Building, Mail, Phone, Star, ToggleLeft, ToggleRight } from 'lucide-react'
 import Boton from '@/components/common/Boton'
 import Tarjeta from '@/components/common/Tarjeta'
 import Insignia from '@/components/common/Insignia'
 import SinDatos from '@/components/common/SinDatos'
 import Alerta from '@/components/common/Alerta'
-import { obtenerProveedor } from '@/services/supabase/proveedores'
+import { obtenerProveedor, toggleProveedor } from '@/services/supabase/proveedores'
 
 const ETIQUETAS_IDENTIFICACION = {
   ruc: 'RUC',
@@ -21,6 +21,7 @@ export default function PaginaVerProveedor() {
   const [proveedor, setProveedor] = useState(null)
   const [cargando, setCargando] = useState(true)
   const [error, setError] = useState(null)
+  const [guardando, setGuardando] = useState(false)
 
   useEffect(() => {
     async function cargar() {
@@ -47,6 +48,18 @@ export default function PaginaVerProveedor() {
     return <SinDatos titulo="Proveedor no encontrado" descripcion={error || 'El proveedor solicitado no existe.'} textoAccion="Volver a proveedores" alAccionar={() => navegar('/central/proveedores')} />
   }
 
+  const cambiarEstado = async () => {
+    try {
+      setGuardando(true)
+      await toggleProveedor(proveedor.id)
+      setProveedor({ ...proveedor, activo: !proveedor.activo })
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setGuardando(false)
+    }
+  }
+
   return (
     <div className="space-y-6 max-w-4xl">
       {error && <Alerta tipo="error" titulo={error} className="mb-4" />}
@@ -54,7 +67,8 @@ export default function PaginaVerProveedor() {
         <Boton variante="texto" icono={ArrowLeft} onClick={() => navegar('/central/proveedores')}>Volver</Boton>
         <h1 className="text-h1 text-principal">{proveedor.razonSocial}</h1>
         <Insignia color={proveedor.activo ? 'verde' : 'gris'}>{proveedor.activo ? 'Activo' : 'Inactivo'}</Insignia>
-        <div className="ml-auto">
+        <div className="sm:ml-auto flex flex-wrap gap-2">
+          <Boton variante="secundario" icono={proveedor.activo ? ToggleRight : ToggleLeft} onClick={cambiarEstado} deshabilitado={guardando}>{proveedor.activo ? 'Desactivar' : 'Activar'}</Boton>
           <Boton variante="primario" icono={Edit} onClick={() => navegar(`/central/proveedores/${proveedor.id}/editar`)}>Editar</Boton>
         </div>
       </div>

@@ -42,6 +42,8 @@ export async function listarAuditoria(filtros = {}) {
   if (filtros.entidad) params.set('entidad', filtros.entidad)
   if (filtros.nivel) params.set('nivel', filtros.nivel)
   if (filtros.busqueda) params.set('busqueda', filtros.busqueda)
+  if (filtros.fechaDesde) params.set('fechaDesde', filtros.fechaDesde)
+  if (filtros.fechaHasta) params.set('fechaHasta', filtros.fechaHasta)
   if (filtros.pagina) params.set('pagina', filtros.pagina)
   if (filtros.limite) params.set('limite', filtros.limite)
 

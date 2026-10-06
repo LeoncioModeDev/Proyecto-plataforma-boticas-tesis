@@ -56,7 +56,7 @@ export default function Modal({ abierto, alCerrar, titulo, children, tamano = 'm
             <X className="h-5 w-5" />
           </button>
         </div>
-        <div className="p-4 sm:p-6 overflow-y-auto">{children}</div>
+        <div className="px-4 pb-4 pt-2 sm:px-6 sm:pb-6 sm:pt-3 overflow-y-auto">{children}</div>
       </div>
     </div>
   )

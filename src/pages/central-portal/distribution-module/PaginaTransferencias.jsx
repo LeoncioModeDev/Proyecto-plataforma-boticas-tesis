@@ -7,6 +7,9 @@ import Insignia from '@/components/common/Insignia'
 import Modal from '@/components/common/Modal'
 import ModalConfirmar from '@/components/common/ModalConfirmar'
 import TarjetaMetrica from '@/components/charts/TarjetaMetrica'
+import CampoBusqueda from '@/components/common/CampoBusqueda'
+import BarraFiltros from '@/components/common/BarraFiltros'
+import SelectFiltro from '@/components/common/SelectFiltro'
 import { ESTADOS_TRANSFERENCIA, ETIQUETAS_TRANSFERENCIA, COLORES_TRANSFERENCIA, ICONOS_ESTADO_TRANSFERENCIA } from '@/constants/transferencias'
 import { obtenerTransferencias, aprobarTransferencia, enviarTransferencia, cancelarTransferencia, confirmarDevolucionOrigen } from '@/services/supabase/transferencias'
 import { formatearFechaCorta } from '@/utilities/formatearFecha'
@@ -34,7 +37,11 @@ const OPCIONES_ESTADO = [
 
 export default function PaginaTransferencias() {
   const navegar = useNavigate()
+  const [busqueda, setBusqueda] = useState('')
   const [filtroEstado, setFiltroEstado] = useState('')
+  const [filtroOrigen, setFiltroOrigen] = useState('')
+  const [filtroDestino, setFiltroDestino] = useState('')
+  const [filtroTipo, setFiltroTipo] = useState('')
   const [transferencias, setTransferencias] = useState([])
   const [cargando, setCargando] = useState(true)
   const [error, setError] = useState(null)
@@ -62,9 +69,25 @@ export default function PaginaTransferencias() {
 
   const datos = useMemo(() => transferencias.map(enriquecerTransferencia), [transferencias])
 
-  const filtradas = filtroEstado
-    ? datos.filter(t => t.estado === filtroEstado)
-    : datos
+  const filtradas = datos.filter(t => {
+    const termino = busqueda.trim().toLowerCase()
+    if (termino && ![t.numeroTransferencia, t.origenNombre, t.destinoNombre].some(valor => (valor || '').toLowerCase().includes(termino))) return false
+    if (filtroEstado && t.estado !== filtroEstado) return false
+    if (filtroOrigen && t.origenNombre !== filtroOrigen) return false
+    if (filtroDestino && t.destinoNombre !== filtroDestino) return false
+    if (filtroTipo && t.tipoTransferencia !== filtroTipo) return false
+    return true
+  })
+
+  const opcionesOrigen = [...new Set(datos.map(t => t.origenNombre).filter(Boolean))].sort().map(nombre => ({ valor: nombre, etiqueta: nombre }))
+  const opcionesDestino = [...new Set(datos.map(t => t.destinoNombre).filter(Boolean))].sort().map(nombre => ({ valor: nombre, etiqueta: nombre }))
+  const limpiarFiltros = () => {
+    setBusqueda('')
+    setFiltroEstado('')
+    setFiltroOrigen('')
+    setFiltroDestino('')
+    setFiltroTipo('')
+  }
 
   function enriquecerTransferencia(t) {
     const productosList = t.items.map(item => ({
@@ -282,7 +305,7 @@ export default function PaginaTransferencias() {
         </div>
       )}
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <TarjetaMetrica etiqueta="Total" valor={estadisticas.total} icono={Truck} />
         <TarjetaMetrica etiqueta="Creadas" valor={estadisticas.creadas} icono={Clock} />
         <TarjetaMetrica etiqueta="Aprobadas" valor={estadisticas.aprobadas} icono={CheckCircle} />
@@ -293,13 +316,15 @@ export default function PaginaTransferencias() {
         <TarjetaMetrica etiqueta="Canceladas" valor={estadisticas.canceladas} icono={XCircle} />
       </div>
 
-      <div className="flex gap-4">
-        <select value={filtroEstado} onChange={e => setFiltroEstado(e.target.value)} className="px-3 py-2 text-cuerpo bg-fondo border border-estilo rounded-md">
-          {OPCIONES_ESTADO.map(o => <option key={o.valor} value={o.valor}>{o.etiqueta}</option>)}
-        </select>
-      </div>
+      <BarraFiltros alLimpiar={limpiarFiltros}>
+        <CampoBusqueda valor={busqueda} alCambiar={setBusqueda} placeholder="Buscar transferencia..." className="w-full sm:w-72" />
+        <SelectFiltro valor={filtroEstado} alCambiar={setFiltroEstado} opciones={OPCIONES_ESTADO.filter(o => o.valor)} placeholder="Todos los estados" />
+        <SelectFiltro valor={filtroOrigen} alCambiar={setFiltroOrigen} opciones={opcionesOrigen} placeholder="Todos los orígenes" />
+        <SelectFiltro valor={filtroDestino} alCambiar={setFiltroDestino} opciones={opcionesDestino} placeholder="Todos los destinos" />
+        <SelectFiltro valor={filtroTipo} alCambiar={setFiltroTipo} opciones={[{ valor: 'transferencia_central', etiqueta: 'Transferencia' }, { valor: 'redistribucion', etiqueta: 'Redistribución' }]} placeholder="Todos los tipos" />
+      </BarraFiltros>
 
-      <Tabla columnas={columnas} datos={filtradas} />
+      <Tabla columnas={columnas} datos={filtradas} busqueda={false} />
 
       <Modal abierto={!!fefoModal} alCerrar={() => setFefoModal(null)} titulo={`Lotes FEFO — ${fefoModal?.id?.toUpperCase()}`} tamano="lg">
         {fefoModal && (

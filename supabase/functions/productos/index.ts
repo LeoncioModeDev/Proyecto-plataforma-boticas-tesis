@@ -350,7 +350,8 @@ async function actualizarStockConfig(supabase: any, perfil: PerfilUsuario, produ
     const updates: Record<string, unknown> = {};
     if (stock_minimo !== undefined) updates.stock_minimo = stock_minimo;
     if (stock_maximo !== undefined) updates.stock_maximo = stock_maximo;
-    updates.updated_at = new Date().toISOString();
+    updates.modified_at = new Date().toISOString();
+    updates.modified_by = perfil.id;
 
     const { data: anterior } = await supabase
       .from("stock_ubicaciones")
@@ -387,12 +388,14 @@ async function actualizarStockConfig(supabase: any, perfil: PerfilUsuario, produ
       producto_id: productoId,
       ubicacion_tipo,
       ubicacion_id: ubicacion_id || null,
-      cantidad_disponible: 0,
+      stock_fisico: 0,
       stock_por_recibir: 0,
       stock_en_transito: 0,
       stock_minimo,
       stock_maximo,
       org_id: perfil.org_id,
+      created_by: perfil.id,
+      modified_by: perfil.id,
     })
     .select("id")
     .single();

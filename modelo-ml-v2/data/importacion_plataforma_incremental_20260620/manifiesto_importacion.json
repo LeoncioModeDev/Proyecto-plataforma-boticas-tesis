@@ -1,0 +1,3042 @@
+{
+  "version_paquete": "1.0.0-incremental",
+  "fuente": "dataset_sintetico_incremental_20260620",
+  "fecha_generacion": "2026-07-08T01:14:33.841967+00:00",
+  "carpeta_base_no_modificada": "data\\importacion_plataforma",
+  "fecha_corte_solicitada": "2026-06-20",
+  "fecha_ultima_semana_generada": "2026-06-15",
+  "boticas_nuevas": 17,
+  "boticas_totales_esperadas_post_importacion": 22,
+  "productos": 30,
+  "proveedores_existentes_reutilizados": 5,
+  "conteos": {
+    "boticas": 17,
+    "precios": 510,
+    "stock_inicial": 510,
+    "stock_historico": 30480,
+    "ventas_historicas": 29500
+  },
+  "historicos_divididos": true,
+  "archivos_stock_historico": [
+    {
+      "archivo": "stock_historico/stock_historico_001.csv",
+      "numero_tramo": 1,
+      "fila_desde": 1,
+      "fila_hasta": 200,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-05-12",
+      "fecha_maxima": "2025-05-12",
+      "sha256": "99b33554bcf05b94552d7884da0d880ff9f4e0ab91d4a054148bf2f734272355"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_002.csv",
+      "numero_tramo": 2,
+      "fila_desde": 201,
+      "fila_hasta": 400,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-05-12",
+      "fecha_maxima": "2025-05-12",
+      "sha256": "7430b0f50049bd8e078da5708b9342fd1810b1cdaa4b74712f424b684568694b"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_003.csv",
+      "numero_tramo": 3,
+      "fila_desde": 401,
+      "fila_hasta": 600,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-05-12",
+      "fecha_maxima": "2025-05-19",
+      "sha256": "abef047040759a101e506a4a542f503fd3f2f26ae5410adeeafcf56bc122692a"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_004.csv",
+      "numero_tramo": 4,
+      "fila_desde": 601,
+      "fila_hasta": 800,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-05-19",
+      "fecha_maxima": "2025-05-19",
+      "sha256": "b0c7bd1d415ce13f57d7ba7b91579cfd8071bc54d613e32964997a712d9f7047"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_005.csv",
+      "numero_tramo": 5,
+      "fila_desde": 801,
+      "fila_hasta": 1000,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-05-19",
+      "fecha_maxima": "2025-05-19",
+      "sha256": "b5baadb81e7654280d3f179cb5b3782ea2509d4aceb8e5c429b989c2952ef03c"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_006.csv",
+      "numero_tramo": 6,
+      "fila_desde": 1001,
+      "fila_hasta": 1200,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-05-19",
+      "fecha_maxima": "2025-05-26",
+      "sha256": "250d52292c53575a1e625121ea2afd709f2e7f7f47addc287acaccc1947e2cc1"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_007.csv",
+      "numero_tramo": 7,
+      "fila_desde": 1201,
+      "fila_hasta": 1400,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-05-26",
+      "fecha_maxima": "2025-05-26",
+      "sha256": "0e5a186ab8ff261657a967566cebe14ea5f52e58854f556582e0aabdee7ffbcc"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_008.csv",
+      "numero_tramo": 8,
+      "fila_desde": 1401,
+      "fila_hasta": 1600,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-05-26",
+      "fecha_maxima": "2025-06-02",
+      "sha256": "1adaad93ff0adfcbcb98cf54eceda15a03bb3a6aa187863d5e7aea426447af0c"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_009.csv",
+      "numero_tramo": 9,
+      "fila_desde": 1601,
+      "fila_hasta": 1800,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-06-02",
+      "fecha_maxima": "2025-06-02",
+      "sha256": "09b1c09ebe8ba83949a2df0d632bcd7d16149b472f435b0494810cb5977fe3ab"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_010.csv",
+      "numero_tramo": 10,
+      "fila_desde": 1801,
+      "fila_hasta": 2000,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-06-02",
+      "fecha_maxima": "2025-06-02",
+      "sha256": "877392089cff96d8a118c4ba122cc2e20b7deecf9dd4e70dd2bd334f5f07a2f1"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_011.csv",
+      "numero_tramo": 11,
+      "fila_desde": 2001,
+      "fila_hasta": 2200,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-06-02",
+      "fecha_maxima": "2025-06-09",
+      "sha256": "594489fcb5a2988ae2cb51bc2c37687eef77430da3bc9f45d01cdc475f06a47f"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_012.csv",
+      "numero_tramo": 12,
+      "fila_desde": 2201,
+      "fila_hasta": 2400,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-06-09",
+      "fecha_maxima": "2025-06-09",
+      "sha256": "6095357d14ab26220b5dedc77e64414280462b616f1baf3b17cee7fa4e573721"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_013.csv",
+      "numero_tramo": 13,
+      "fila_desde": 2401,
+      "fila_hasta": 2600,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-06-09",
+      "fecha_maxima": "2025-06-16",
+      "sha256": "4f09e377ff04cb4eba4e2d46003b190073f3eb2f1ca7d2880f8b4890828a0f87"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_014.csv",
+      "numero_tramo": 14,
+      "fila_desde": 2601,
+      "fila_hasta": 2800,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-06-16",
+      "fecha_maxima": "2025-06-16",
+      "sha256": "da6275dce55f94a1dd967fe0e9e5629a48e325194ef7cd3f9c6e8c08e1f2663d"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_015.csv",
+      "numero_tramo": 15,
+      "fila_desde": 2801,
+      "fila_hasta": 3000,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-06-16",
+      "fecha_maxima": "2025-06-16",
+      "sha256": "2741384bc642b29e8427b30f890d78991788dec834f97096cad29f7513709ea4"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_016.csv",
+      "numero_tramo": 16,
+      "fila_desde": 3001,
+      "fila_hasta": 3200,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-06-16",
+      "fecha_maxima": "2025-06-23",
+      "sha256": "9c28ca9422bd2a44e5e6e49a4a232b4677457530d58ed685a2e353c249a06e59"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_017.csv",
+      "numero_tramo": 17,
+      "fila_desde": 3201,
+      "fila_hasta": 3400,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-06-23",
+      "fecha_maxima": "2025-06-23",
+      "sha256": "38abf33b8036d3a10d6c766d1a1ca6d5bc776e8c112b2acdc66905135505a1e9"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_018.csv",
+      "numero_tramo": 18,
+      "fila_desde": 3401,
+      "fila_hasta": 3600,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-06-23",
+      "fecha_maxima": "2025-06-30",
+      "sha256": "888e2f50bc9257261cd7fde66f1daa6c905d39f0e070692bcb6a694d6cb1cb8e"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_019.csv",
+      "numero_tramo": 19,
+      "fila_desde": 3601,
+      "fila_hasta": 3800,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-06-30",
+      "fecha_maxima": "2025-06-30",
+      "sha256": "b78db90f7839ff3b8b6807516c6dbc7cbc85c17c8d93363194068d7b4d1a7608"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_020.csv",
+      "numero_tramo": 20,
+      "fila_desde": 3801,
+      "fila_hasta": 4000,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-06-30",
+      "fecha_maxima": "2025-06-30",
+      "sha256": "6147202cb5f9274d9bdf576595b097fd4b17112a4eba5de04664f3789c821c37"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_021.csv",
+      "numero_tramo": 21,
+      "fila_desde": 4001,
+      "fila_hasta": 4200,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-06-30",
+      "fecha_maxima": "2025-07-07",
+      "sha256": "3bf25b70c301fc92125b4663c5b0f54fc73cfe66cc6a6295e6f9658722b913be"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_022.csv",
+      "numero_tramo": 22,
+      "fila_desde": 4201,
+      "fila_hasta": 4400,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-07-07",
+      "fecha_maxima": "2025-07-07",
+      "sha256": "2631bb932925d46a60c0d54c8bf10882727a532078ea1eebd9a7fbd6eef832e1"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_023.csv",
+      "numero_tramo": 23,
+      "fila_desde": 4401,
+      "fila_hasta": 4600,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-07-07",
+      "fecha_maxima": "2025-07-14",
+      "sha256": "ba536227b4dd84c43f3a5c0824427473d4589548179a1c62dc2f14e7d62e838f"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_024.csv",
+      "numero_tramo": 24,
+      "fila_desde": 4601,
+      "fila_hasta": 4800,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-07-14",
+      "fecha_maxima": "2025-07-14",
+      "sha256": "de1d034a70e43caf4077e62c01d42325488ee26161e080f966473d26c44894d3"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_025.csv",
+      "numero_tramo": 25,
+      "fila_desde": 4801,
+      "fila_hasta": 5000,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-07-14",
+      "fecha_maxima": "2025-07-14",
+      "sha256": "45e133020e6822be61d73920ed58cc500b3ce74bdf5debc3000e26ec53c335a9"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_026.csv",
+      "numero_tramo": 26,
+      "fila_desde": 5001,
+      "fila_hasta": 5200,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-07-14",
+      "fecha_maxima": "2025-07-21",
+      "sha256": "7c1fb6d8bac059d38efd3b5eea321139da7d466bd153a0ec874ffde04a7d3784"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_027.csv",
+      "numero_tramo": 27,
+      "fila_desde": 5201,
+      "fila_hasta": 5400,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-07-21",
+      "fecha_maxima": "2025-07-21",
+      "sha256": "c581a6af297ef3a5980e61ab7ca69a4399f8f0221824e910b114ba05aad874ef"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_028.csv",
+      "numero_tramo": 28,
+      "fila_desde": 5401,
+      "fila_hasta": 5600,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-07-21",
+      "fecha_maxima": "2025-07-21",
+      "sha256": "e2b2df85894493b794c5c3c1810a8d4395686a74634c4bf92e19ee0dc4e3d5da"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_029.csv",
+      "numero_tramo": 29,
+      "fila_desde": 5601,
+      "fila_hasta": 5800,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-07-21",
+      "fecha_maxima": "2025-07-28",
+      "sha256": "67607fea28aa9ea3f61f32f8347062bb15f4ff56fda245ba18799081e952ae4e"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_030.csv",
+      "numero_tramo": 30,
+      "fila_desde": 5801,
+      "fila_hasta": 6000,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-07-28",
+      "fecha_maxima": "2025-07-28",
+      "sha256": "ce4e22a4b39ab117a670c5440aa0e1ee5bf468a4431e402c01cdb470981f0fd9"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_031.csv",
+      "numero_tramo": 31,
+      "fila_desde": 6001,
+      "fila_hasta": 6200,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-07-28",
+      "fecha_maxima": "2025-08-04",
+      "sha256": "a79f6fcca2dd4e4f9d22ba75ae2c689fcd46e0bce4024850836b9d2d327bfe0f"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_032.csv",
+      "numero_tramo": 32,
+      "fila_desde": 6201,
+      "fila_hasta": 6400,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-08-04",
+      "fecha_maxima": "2025-08-04",
+      "sha256": "0e420ee55a55409741569a8b130ad4923e5e123faab18361d688f9f6b9937ded"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_033.csv",
+      "numero_tramo": 33,
+      "fila_desde": 6401,
+      "fila_hasta": 6600,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-08-04",
+      "fecha_maxima": "2025-08-04",
+      "sha256": "31622b1b32d91a9eb9ae5b99794b51da78f4226e6cedf8f8ee3c91ade4947d0c"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_034.csv",
+      "numero_tramo": 34,
+      "fila_desde": 6601,
+      "fila_hasta": 6800,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-08-04",
+      "fecha_maxima": "2025-08-11",
+      "sha256": "5332cb4c4e542515a4521cc57bde344b05296574efba0dcd37d1d3cd462201b7"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_035.csv",
+      "numero_tramo": 35,
+      "fila_desde": 6801,
+      "fila_hasta": 7000,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-08-11",
+      "fecha_maxima": "2025-08-11",
+      "sha256": "9ee2bf37fa0fb24d2ced1095a8b8062bdb364b2f6966a7f54201b628ec4c11c6"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_036.csv",
+      "numero_tramo": 36,
+      "fila_desde": 7001,
+      "fila_hasta": 7200,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-08-11",
+      "fecha_maxima": "2025-08-18",
+      "sha256": "a34c371fddbcee61ef006dc32a94a4c130c356fd618662241db90631be1def66"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_037.csv",
+      "numero_tramo": 37,
+      "fila_desde": 7201,
+      "fila_hasta": 7400,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-08-18",
+      "fecha_maxima": "2025-08-18",
+      "sha256": "192760855ac28b67e603838df3ccaf8653bbac9d750313be10439c2754dc72e1"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_038.csv",
+      "numero_tramo": 38,
+      "fila_desde": 7401,
+      "fila_hasta": 7600,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-08-18",
+      "fecha_maxima": "2025-08-18",
+      "sha256": "a0f53ca23082fa38fb39bb674a4699ea6cd8dae82954e9e6034e2714a6e0b1c4"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_039.csv",
+      "numero_tramo": 39,
+      "fila_desde": 7601,
+      "fila_hasta": 7800,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-08-18",
+      "fecha_maxima": "2025-08-25",
+      "sha256": "c22b5f2b8680c0707856e1104502a32ae15741046f5cdbe4d94c33b93a884f58"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_040.csv",
+      "numero_tramo": 40,
+      "fila_desde": 7801,
+      "fila_hasta": 8000,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-08-25",
+      "fecha_maxima": "2025-08-25",
+      "sha256": "558063436aab292ff80757e6632c556d7f9152e40718d866cb149533ba00edbc"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_041.csv",
+      "numero_tramo": 41,
+      "fila_desde": 8001,
+      "fila_hasta": 8200,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-08-25",
+      "fecha_maxima": "2025-09-01",
+      "sha256": "e1fdf00ddde28cb0bb27d531e2b78498e448127c8a8fd9399028592be01a28ac"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_042.csv",
+      "numero_tramo": 42,
+      "fila_desde": 8201,
+      "fila_hasta": 8400,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-09-01",
+      "fecha_maxima": "2025-09-01",
+      "sha256": "5376556dbcfd68d03728592544cbf422010b59f887f4dd1217be749143c8f0dd"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_043.csv",
+      "numero_tramo": 43,
+      "fila_desde": 8401,
+      "fila_hasta": 8600,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-09-01",
+      "fecha_maxima": "2025-09-01",
+      "sha256": "a72335da5f0ad485f367b3f7ec494141a974a7d38a3b726104af8846ee5621eb"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_044.csv",
+      "numero_tramo": 44,
+      "fila_desde": 8601,
+      "fila_hasta": 8800,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-09-01",
+      "fecha_maxima": "2025-09-08",
+      "sha256": "9678ccf821f98321e2bb89ddc674d4f99f3d579d313f788b6ecfe738a765c69a"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_045.csv",
+      "numero_tramo": 45,
+      "fila_desde": 8801,
+      "fila_hasta": 9000,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-09-08",
+      "fecha_maxima": "2025-09-08",
+      "sha256": "fb3fd3782b3bad4b5a3ff523789ef4807cbe079df599fc44779c2c514f3b49aa"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_046.csv",
+      "numero_tramo": 46,
+      "fila_desde": 9001,
+      "fila_hasta": 9200,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-09-08",
+      "fecha_maxima": "2025-09-15",
+      "sha256": "ef0ac8529847f5d90bc1b0fa2e9a9e9d920301064add89fb7330aac4ca0cc0b4"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_047.csv",
+      "numero_tramo": 47,
+      "fila_desde": 9201,
+      "fila_hasta": 9400,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-09-15",
+      "fecha_maxima": "2025-09-15",
+      "sha256": "923bfcc0408df960c561fd2fa729e1373ffd58cce34fc2d4cff66286bd8ba971"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_048.csv",
+      "numero_tramo": 48,
+      "fila_desde": 9401,
+      "fila_hasta": 9600,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-09-15",
+      "fecha_maxima": "2025-09-15",
+      "sha256": "d659fcf882a882f1f41f067f0433242eb3e8bc3c7f34bccba5b0793e98bb9b4b"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_049.csv",
+      "numero_tramo": 49,
+      "fila_desde": 9601,
+      "fila_hasta": 9800,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-09-15",
+      "fecha_maxima": "2025-09-22",
+      "sha256": "3e48886af5076169c0ca8dea1b132ff2bde9c7b63b3c6560ac218c9745ff5dd3"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_050.csv",
+      "numero_tramo": 50,
+      "fila_desde": 9801,
+      "fila_hasta": 10000,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-09-22",
+      "fecha_maxima": "2025-09-22",
+      "sha256": "983a634f2ce066fdae80b7e6b2c85239f957a149f91a910e70e12db2bcf8dfdf"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_051.csv",
+      "numero_tramo": 51,
+      "fila_desde": 10001,
+      "fila_hasta": 10200,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-09-22",
+      "fecha_maxima": "2025-09-22",
+      "sha256": "b865506030b7f876bf15541024220dc4770886e425f62ca30e25c484082f4deb"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_052.csv",
+      "numero_tramo": 52,
+      "fila_desde": 10201,
+      "fila_hasta": 10400,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-09-29",
+      "fecha_maxima": "2025-09-29",
+      "sha256": "ddbfc5de24340a5194d0c38689d49cf51b7237395e11011628c7b88a48591246"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_053.csv",
+      "numero_tramo": 53,
+      "fila_desde": 10401,
+      "fila_hasta": 10600,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-09-29",
+      "fecha_maxima": "2025-09-29",
+      "sha256": "42035bab38bb955a0658d63f371df09b0cc42857a4e0e4e0c0ad3cc2622b7992"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_054.csv",
+      "numero_tramo": 54,
+      "fila_desde": 10601,
+      "fila_hasta": 10800,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-09-29",
+      "fecha_maxima": "2025-10-06",
+      "sha256": "ad1d362633f16fe838484cb1e1086aa0ca8baf696cd990db3b0efe84b0c037c6"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_055.csv",
+      "numero_tramo": 55,
+      "fila_desde": 10801,
+      "fila_hasta": 11000,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-10-06",
+      "fecha_maxima": "2025-10-06",
+      "sha256": "1cfba061cade40fe956c5cd4f8e42bda94df279a74da9c12caf1a5029373cd87"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_056.csv",
+      "numero_tramo": 56,
+      "fila_desde": 11001,
+      "fila_hasta": 11200,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-10-06",
+      "fecha_maxima": "2025-10-06",
+      "sha256": "72d61ce2eb7769390731cce3729ce7eb4497a4000502d3f086bfdb4a475d7353"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_057.csv",
+      "numero_tramo": 57,
+      "fila_desde": 11201,
+      "fila_hasta": 11400,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-10-06",
+      "fecha_maxima": "2025-10-13",
+      "sha256": "3f7ba1a02ea26f9cebd017096d3ad25bb5971c13443f7781fdba3b8a75493dbd"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_058.csv",
+      "numero_tramo": 58,
+      "fila_desde": 11401,
+      "fila_hasta": 11600,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-10-13",
+      "fecha_maxima": "2025-10-13",
+      "sha256": "0f3d67baec4dcd5e6b049da059c56fd428586561e57b40bce8cf3b273b7dd4cc"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_059.csv",
+      "numero_tramo": 59,
+      "fila_desde": 11601,
+      "fila_hasta": 11800,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-10-13",
+      "fecha_maxima": "2025-10-20",
+      "sha256": "985e78e32781cd18a1c5fcb7f2a31585bb8f20c40be5f7e2a2131c7d00134aa7"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_060.csv",
+      "numero_tramo": 60,
+      "fila_desde": 11801,
+      "fila_hasta": 12000,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-10-20",
+      "fecha_maxima": "2025-10-20",
+      "sha256": "4df08a5b73bfdc3ea85a746b077483ffdf9d828e81f58630b8f42dabb2634036"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_061.csv",
+      "numero_tramo": 61,
+      "fila_desde": 12001,
+      "fila_hasta": 12200,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-10-20",
+      "fecha_maxima": "2025-10-20",
+      "sha256": "b34502638335a9cd955aebbda61ea0cb974dd7e067a7443393722768070c669d"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_062.csv",
+      "numero_tramo": 62,
+      "fila_desde": 12201,
+      "fila_hasta": 12400,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-10-20",
+      "fecha_maxima": "2025-10-27",
+      "sha256": "a5d393ddc0e7d4153ad13ba0f7e4b5b072fc1381479f47bb825f3065d95a74c0"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_063.csv",
+      "numero_tramo": 63,
+      "fila_desde": 12401,
+      "fila_hasta": 12600,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-10-27",
+      "fecha_maxima": "2025-10-27",
+      "sha256": "5e7163c42b0564096aad079fa6054583d23084622167cbeb1ca2f2102fc5bdb7"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_064.csv",
+      "numero_tramo": 64,
+      "fila_desde": 12601,
+      "fila_hasta": 12800,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-10-27",
+      "fecha_maxima": "2025-11-03",
+      "sha256": "e31630dd93562ca504f148210c205b32100708880bbdf33953d5239325b11cc8"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_065.csv",
+      "numero_tramo": 65,
+      "fila_desde": 12801,
+      "fila_hasta": 13000,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-11-03",
+      "fecha_maxima": "2025-11-03",
+      "sha256": "2b2b7ecebf3a9c84f28db135a7f31507ab982dd8cc143b7bf05550a021386bfb"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_066.csv",
+      "numero_tramo": 66,
+      "fila_desde": 13001,
+      "fila_hasta": 13200,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-11-03",
+      "fecha_maxima": "2025-11-03",
+      "sha256": "a31042d97ecf300f2f2a345dafbdea22c6807f7648fdc92edd618f9bc8bbacdc"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_067.csv",
+      "numero_tramo": 67,
+      "fila_desde": 13201,
+      "fila_hasta": 13400,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-11-03",
+      "fecha_maxima": "2025-11-10",
+      "sha256": "efc3c0aa95d63f97edee4571051c3c00d0686f78f3aaae781f15a326c7705c24"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_068.csv",
+      "numero_tramo": 68,
+      "fila_desde": 13401,
+      "fila_hasta": 13600,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-11-10",
+      "fecha_maxima": "2025-11-10",
+      "sha256": "80d1612bbc3d8adc0dc826723539c43a2e8cd9369b758048da4730c3be0631f1"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_069.csv",
+      "numero_tramo": 69,
+      "fila_desde": 13601,
+      "fila_hasta": 13800,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-11-10",
+      "fecha_maxima": "2025-11-17",
+      "sha256": "872f9a9d0ae058d2cd102b21643d1aae52feb2847ec16f5b23babd0d28851c00"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_070.csv",
+      "numero_tramo": 70,
+      "fila_desde": 13801,
+      "fila_hasta": 14000,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-11-17",
+      "fecha_maxima": "2025-11-17",
+      "sha256": "b0404bb397162a7dc831f655ff743c80601c30f5dd0d3d95fc1c1f7098378335"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_071.csv",
+      "numero_tramo": 71,
+      "fila_desde": 14001,
+      "fila_hasta": 14200,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-11-17",
+      "fecha_maxima": "2025-11-17",
+      "sha256": "3a224886760fa5cff2d77cd3ab8c767531b50a2a741d0f6b1b8716af81c41855"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_072.csv",
+      "numero_tramo": 72,
+      "fila_desde": 14201,
+      "fila_hasta": 14400,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-11-17",
+      "fecha_maxima": "2025-11-24",
+      "sha256": "5cfc9a038785bb3fbb51af835205e7a8edd0c77a66035adcef0b7bd3d631f26c"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_073.csv",
+      "numero_tramo": 73,
+      "fila_desde": 14401,
+      "fila_hasta": 14600,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-11-24",
+      "fecha_maxima": "2025-11-24",
+      "sha256": "3a06bc3ad992932ee78b920e19ec6fc93254742f71a2267b3c3150a971eaba6e"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_074.csv",
+      "numero_tramo": 74,
+      "fila_desde": 14601,
+      "fila_hasta": 14800,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-11-24",
+      "fecha_maxima": "2025-12-01",
+      "sha256": "bee5984640c7298ba19dd9868e2e30e61a8214be40f65e4996fb06037fde85fb"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_075.csv",
+      "numero_tramo": 75,
+      "fila_desde": 14801,
+      "fila_hasta": 15000,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-12-01",
+      "fecha_maxima": "2025-12-01",
+      "sha256": "1c590d4bd580e0513cf8611b779b5505c4cf3e0b555b7d560a9e9795f215d172"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_076.csv",
+      "numero_tramo": 76,
+      "fila_desde": 15001,
+      "fila_hasta": 15200,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-12-01",
+      "fecha_maxima": "2025-12-01",
+      "sha256": "775d71470422253876cf60e3ec563301171d86e4ff44f6da0b85e707be688ece"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_077.csv",
+      "numero_tramo": 77,
+      "fila_desde": 15201,
+      "fila_hasta": 15400,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-12-01",
+      "fecha_maxima": "2025-12-08",
+      "sha256": "1f1c52ce0d61f222b7c9f0104ab7b16bc1a44d77581db3b8f9026a8e7255b8dc"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_078.csv",
+      "numero_tramo": 78,
+      "fila_desde": 15401,
+      "fila_hasta": 15600,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-12-08",
+      "fecha_maxima": "2025-12-08",
+      "sha256": "5f358a75cabc40fce57c7236e5009c6884981efec11e45d6e1a29739975ac2fa"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_079.csv",
+      "numero_tramo": 79,
+      "fila_desde": 15601,
+      "fila_hasta": 15800,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-12-08",
+      "fecha_maxima": "2025-12-08",
+      "sha256": "0ec7f335c48ea9c30397dac1bc0e6088e68c9d02d6abdd4dd6e6f8b57a5a55f0"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_080.csv",
+      "numero_tramo": 80,
+      "fila_desde": 15801,
+      "fila_hasta": 16000,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-12-08",
+      "fecha_maxima": "2025-12-15",
+      "sha256": "a1d78ff56729e337988abcabb27ef2d444ea8d89cc897b5c6ba3b39422108397"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_081.csv",
+      "numero_tramo": 81,
+      "fila_desde": 16001,
+      "fila_hasta": 16200,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-12-15",
+      "fecha_maxima": "2025-12-15",
+      "sha256": "adfe400c900969d4dd5404cbd5638525881fbd35f5cea7861be6040a94ac6d57"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_082.csv",
+      "numero_tramo": 82,
+      "fila_desde": 16201,
+      "fila_hasta": 16400,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-12-15",
+      "fecha_maxima": "2025-12-22",
+      "sha256": "929fddc1b9a2e8036c761bdbbd579582b598ab7e68db50c0b5fb30c711e98475"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_083.csv",
+      "numero_tramo": 83,
+      "fila_desde": 16401,
+      "fila_hasta": 16600,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-12-22",
+      "fecha_maxima": "2025-12-22",
+      "sha256": "8166ba5a051b17ac62374f24b0dbf38be33ecdfaa202d1280f51bbcaadb2e64e"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_084.csv",
+      "numero_tramo": 84,
+      "fila_desde": 16601,
+      "fila_hasta": 16800,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-12-22",
+      "fecha_maxima": "2025-12-22",
+      "sha256": "cfc4349f8674595da30442cc6d6911c3c329211a7618a1ce329cf16364b82a58"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_085.csv",
+      "numero_tramo": 85,
+      "fila_desde": 16801,
+      "fila_hasta": 17000,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-12-22",
+      "fecha_maxima": "2025-12-29",
+      "sha256": "8aeb7d1ac70701e59508d175bb3214ba35d1bfc92478ccf5d36a406d123ba42e"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_086.csv",
+      "numero_tramo": 86,
+      "fila_desde": 17001,
+      "fila_hasta": 17200,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-12-29",
+      "fecha_maxima": "2025-12-29",
+      "sha256": "7a837cc54633eb7da56d267086442887aada95b6137ee83b6e7bea6f2fb500cd"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_087.csv",
+      "numero_tramo": 87,
+      "fila_desde": 17201,
+      "fila_hasta": 17400,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-12-29",
+      "fecha_maxima": "2026-01-05",
+      "sha256": "ed010e07d8139ad61d5f69082bfde8624ecd2bc1e1869ac8b4538fd1552a10ba"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_088.csv",
+      "numero_tramo": 88,
+      "fila_desde": 17401,
+      "fila_hasta": 17600,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-01-05",
+      "fecha_maxima": "2026-01-05",
+      "sha256": "65ff814bb99d48ec0b175aed9c9b284c89b658229b963d403c1b74b6667ceaf0"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_089.csv",
+      "numero_tramo": 89,
+      "fila_desde": 17601,
+      "fila_hasta": 17800,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-01-05",
+      "fecha_maxima": "2026-01-05",
+      "sha256": "09dfb06ba5fe7ccc9df1a49abc3db72473c198ad94b51f63f4704e0428d202e9"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_090.csv",
+      "numero_tramo": 90,
+      "fila_desde": 17801,
+      "fila_hasta": 18000,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-01-05",
+      "fecha_maxima": "2026-01-12",
+      "sha256": "bdd0d11318bd5345d73bea576a45168bd4e45e104da92ba9cd25d8dfac158c26"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_091.csv",
+      "numero_tramo": 91,
+      "fila_desde": 18001,
+      "fila_hasta": 18200,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-01-12",
+      "fecha_maxima": "2026-01-12",
+      "sha256": "e4adf76143eb626c69c949caf876618c3125e5f66601e1d2fe755951169f2ea0"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_092.csv",
+      "numero_tramo": 92,
+      "fila_desde": 18201,
+      "fila_hasta": 18400,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-01-12",
+      "fecha_maxima": "2026-01-19",
+      "sha256": "ffb56ff0bca65e5ab281812c2a2261e710de6426350961990009e627e5dbf9e2"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_093.csv",
+      "numero_tramo": 93,
+      "fila_desde": 18401,
+      "fila_hasta": 18600,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-01-19",
+      "fecha_maxima": "2026-01-19",
+      "sha256": "18425e187f342399b3a6531056b93ddef620a57ed72d23bf521c89038b0e9062"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_094.csv",
+      "numero_tramo": 94,
+      "fila_desde": 18601,
+      "fila_hasta": 18800,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-01-19",
+      "fecha_maxima": "2026-01-19",
+      "sha256": "57d81a2a19a4717704b462751acb501bb7e9334787fe5d79a1cbcd623cd40763"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_095.csv",
+      "numero_tramo": 95,
+      "fila_desde": 18801,
+      "fila_hasta": 19000,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-01-19",
+      "fecha_maxima": "2026-01-26",
+      "sha256": "faf44aca817d36fd52d4444ff93134cfa71a91efc5b3791ac93703597296a3e9"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_096.csv",
+      "numero_tramo": 96,
+      "fila_desde": 19001,
+      "fila_hasta": 19200,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-01-26",
+      "fecha_maxima": "2026-01-26",
+      "sha256": "c364b01decd1c3069159030e83447d28640837fc9f8c44c821ecf7afc52f4996"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_097.csv",
+      "numero_tramo": 97,
+      "fila_desde": 19201,
+      "fila_hasta": 19400,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-01-26",
+      "fecha_maxima": "2026-02-02",
+      "sha256": "8d8a1f010c2a32ae9de0900a4703f1b41cd4be8096c6f39b670d89ccd00ce193"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_098.csv",
+      "numero_tramo": 98,
+      "fila_desde": 19401,
+      "fila_hasta": 19600,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-02-02",
+      "fecha_maxima": "2026-02-02",
+      "sha256": "2ee0c6cae82002acca8c836dac4af2bfcceb9ca6d2725675b2765d2d55421719"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_099.csv",
+      "numero_tramo": 99,
+      "fila_desde": 19601,
+      "fila_hasta": 19800,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-02-02",
+      "fecha_maxima": "2026-02-02",
+      "sha256": "ecf57dcddb7ef5ad3bf15b2dcb6a426d49536d5a2f4df9669485a2b5fd4deb26"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_100.csv",
+      "numero_tramo": 100,
+      "fila_desde": 19801,
+      "fila_hasta": 20000,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-02-02",
+      "fecha_maxima": "2026-02-09",
+      "sha256": "d719dff8103f5ba4fa2dadd98b6fa1819e549ded898474208a281bd5617c1d01"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_101.csv",
+      "numero_tramo": 101,
+      "fila_desde": 20001,
+      "fila_hasta": 20200,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-02-09",
+      "fecha_maxima": "2026-02-09",
+      "sha256": "4a0df4ec72b63b2422be9f2242513848905d9112ea62a79b41395784262761cc"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_102.csv",
+      "numero_tramo": 102,
+      "fila_desde": 20201,
+      "fila_hasta": 20400,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-02-09",
+      "fecha_maxima": "2026-02-09",
+      "sha256": "5462eca9c6d9211e0e34b0ee273611aefca4b060318c37ed532901dcd8e1cbde"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_103.csv",
+      "numero_tramo": 103,
+      "fila_desde": 20401,
+      "fila_hasta": 20600,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-02-16",
+      "fecha_maxima": "2026-02-16",
+      "sha256": "d5e4c0b7d14f6ba0ec2e9d3ec0b2f37ae61610a0cc1b4e49ecdb9fc7c9f882e7"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_104.csv",
+      "numero_tramo": 104,
+      "fila_desde": 20601,
+      "fila_hasta": 20800,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-02-16",
+      "fecha_maxima": "2026-02-16",
+      "sha256": "0783dea380c28ea7427507b858cc439bb1dfc3eb4e175999869a0b2c49ab5f29"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_105.csv",
+      "numero_tramo": 105,
+      "fila_desde": 20801,
+      "fila_hasta": 21000,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-02-16",
+      "fecha_maxima": "2026-02-23",
+      "sha256": "dd816163cde6d3b7778423dae1d6109c40405bf6fdb317fba4c207165aa33553"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_106.csv",
+      "numero_tramo": 106,
+      "fila_desde": 21001,
+      "fila_hasta": 21200,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-02-23",
+      "fecha_maxima": "2026-02-23",
+      "sha256": "34dfa0191c558b49a92bd6ec1ef28adf36a42666399ba4bbba90687b521adbd0"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_107.csv",
+      "numero_tramo": 107,
+      "fila_desde": 21201,
+      "fila_hasta": 21400,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-02-23",
+      "fecha_maxima": "2026-02-23",
+      "sha256": "f44a77e242b7645a575868106f53e8af3c065d44d5452b31d63b1fd2d19e3211"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_108.csv",
+      "numero_tramo": 108,
+      "fila_desde": 21401,
+      "fila_hasta": 21600,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-02-23",
+      "fecha_maxima": "2026-03-02",
+      "sha256": "e6ba051ba41978505916f4ad681409d6d5596fb8923cfa3b752fb351c1f7e322"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_109.csv",
+      "numero_tramo": 109,
+      "fila_desde": 21601,
+      "fila_hasta": 21800,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-03-02",
+      "fecha_maxima": "2026-03-02",
+      "sha256": "c6cf29cb6af93c2ca7dad0ed7de016bf4541d8ee9e7f672b1521cbe3a02fab67"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_110.csv",
+      "numero_tramo": 110,
+      "fila_desde": 21801,
+      "fila_hasta": 22000,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-03-02",
+      "fecha_maxima": "2026-03-09",
+      "sha256": "67dce2a78ce62062a2948a64203793ccd2a07fe9dda9db6fed4fedac9ef065ad"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_111.csv",
+      "numero_tramo": 111,
+      "fila_desde": 22001,
+      "fila_hasta": 22200,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-03-09",
+      "fecha_maxima": "2026-03-09",
+      "sha256": "84e8938a0b3f65d5025a4458f7dbd6dca11d81801a28ad085aaee86e7135e6a3"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_112.csv",
+      "numero_tramo": 112,
+      "fila_desde": 22201,
+      "fila_hasta": 22400,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-03-09",
+      "fecha_maxima": "2026-03-09",
+      "sha256": "e62d31612dc1fb08c491366c45ec4362d55c014262fa4b27609c9ad220476138"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_113.csv",
+      "numero_tramo": 113,
+      "fila_desde": 22401,
+      "fila_hasta": 22600,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-03-09",
+      "fecha_maxima": "2026-03-16",
+      "sha256": "bde759a5bc845369de30dfbc636b951a0d879d61469f772ff018b99ddec6c49c"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_114.csv",
+      "numero_tramo": 114,
+      "fila_desde": 22601,
+      "fila_hasta": 22800,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-03-16",
+      "fecha_maxima": "2026-03-16",
+      "sha256": "e59e7424c949693df4af37531d466e3e4812d4660c1019b9d4d325c66239fd88"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_115.csv",
+      "numero_tramo": 115,
+      "fila_desde": 22801,
+      "fila_hasta": 23000,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-03-16",
+      "fecha_maxima": "2026-03-23",
+      "sha256": "c93fcbe40e4b340226c6bf4bb43b0b64096ed6727d09499dfd50522d29f81d66"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_116.csv",
+      "numero_tramo": 116,
+      "fila_desde": 23001,
+      "fila_hasta": 23200,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-03-23",
+      "fecha_maxima": "2026-03-23",
+      "sha256": "655b7338992d1c103435fbc170193b51ec6bd259574690d71f76e8a30739fb5e"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_117.csv",
+      "numero_tramo": 117,
+      "fila_desde": 23201,
+      "fila_hasta": 23400,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-03-23",
+      "fecha_maxima": "2026-03-23",
+      "sha256": "9c064733dfafc4ae2c10da4ea36765512c5f05aa11c9500e3a96f2237214b64e"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_118.csv",
+      "numero_tramo": 118,
+      "fila_desde": 23401,
+      "fila_hasta": 23600,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-03-23",
+      "fecha_maxima": "2026-03-30",
+      "sha256": "c2f1a37a0ae0328b574d30d980163c9c2d9959781adb41741d5182e41a78c2e9"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_119.csv",
+      "numero_tramo": 119,
+      "fila_desde": 23601,
+      "fila_hasta": 23800,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-03-30",
+      "fecha_maxima": "2026-03-30",
+      "sha256": "f50961e67e098980ca74cd89c6bcb1cb6fd54dce78e1afd9ef19fd795f105bd9"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_120.csv",
+      "numero_tramo": 120,
+      "fila_desde": 23801,
+      "fila_hasta": 24000,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-03-30",
+      "fecha_maxima": "2026-04-06",
+      "sha256": "a7de38103dc65bc535a0b20b70390ccc3edc7875647d7e0b1929a72c237c09af"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_121.csv",
+      "numero_tramo": 121,
+      "fila_desde": 24001,
+      "fila_hasta": 24200,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-04-06",
+      "fecha_maxima": "2026-04-06",
+      "sha256": "37caf918ad4a515c5b405a7af75bb3fbaaabac78e1f46409b7defbaa3a51043a"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_122.csv",
+      "numero_tramo": 122,
+      "fila_desde": 24201,
+      "fila_hasta": 24400,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-04-06",
+      "fecha_maxima": "2026-04-06",
+      "sha256": "f6ddea1baa8dcc5e77291571c1fc3e77aec68c7e7cb2f2ad48e8ac6507e6fa83"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_123.csv",
+      "numero_tramo": 123,
+      "fila_desde": 24401,
+      "fila_hasta": 24600,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-04-06",
+      "fecha_maxima": "2026-04-13",
+      "sha256": "addb166f1023229f0f9a9f1781275175497e1d1e39bb652a82a5b8d097a148d5"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_124.csv",
+      "numero_tramo": 124,
+      "fila_desde": 24601,
+      "fila_hasta": 24800,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-04-13",
+      "fecha_maxima": "2026-04-13",
+      "sha256": "459dc824e4ef054d27fc9003d1ae0a18ecaf923b80e15c1954b6a9ce6d274638"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_125.csv",
+      "numero_tramo": 125,
+      "fila_desde": 24801,
+      "fila_hasta": 25000,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-04-13",
+      "fecha_maxima": "2026-04-20",
+      "sha256": "ba0af3779d9e73fc30e86328bd63688f1e1fa098f0fcd41e76597ced66c56333"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_126.csv",
+      "numero_tramo": 126,
+      "fila_desde": 25001,
+      "fila_hasta": 25200,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-04-20",
+      "fecha_maxima": "2026-04-20",
+      "sha256": "09279c9882d7776376ab25d4c971652929342adda9e9a65168d217ab6d1bfbef"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_127.csv",
+      "numero_tramo": 127,
+      "fila_desde": 25201,
+      "fila_hasta": 25400,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-04-20",
+      "fecha_maxima": "2026-04-20",
+      "sha256": "113f33a1aa4f0175f76a9dccdf5ec29e6a3cc9a1d9219bd6a801a8941423865a"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_128.csv",
+      "numero_tramo": 128,
+      "fila_desde": 25401,
+      "fila_hasta": 25600,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-04-20",
+      "fecha_maxima": "2026-04-27",
+      "sha256": "f911a5d597b121e2181e9eac20e387b4ee756926e31ba5e224eb1eb07b35a9b2"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_129.csv",
+      "numero_tramo": 129,
+      "fila_desde": 25601,
+      "fila_hasta": 25800,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-04-27",
+      "fecha_maxima": "2026-04-27",
+      "sha256": "7fd9e956d802564e5b76cbb829de7e8fedccba7b1b0321739b320dcfffa14792"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_130.csv",
+      "numero_tramo": 130,
+      "fila_desde": 25801,
+      "fila_hasta": 26000,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-04-27",
+      "fecha_maxima": "2026-04-27",
+      "sha256": "a966cf660f77d6ea579019a866b711c22c870880b5bbbbb7913b227973d0e138"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_131.csv",
+      "numero_tramo": 131,
+      "fila_desde": 26001,
+      "fila_hasta": 26200,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-04-27",
+      "fecha_maxima": "2026-05-04",
+      "sha256": "1c9748d5a65822493d3523dc41c3adeeb170711504f3f1bc81aeae5b74299a37"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_132.csv",
+      "numero_tramo": 132,
+      "fila_desde": 26201,
+      "fila_hasta": 26400,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-05-04",
+      "fecha_maxima": "2026-05-04",
+      "sha256": "796cffafa9a776152bf93dcce0f55573e828c53898c7fce56651ef17cd2ffd37"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_133.csv",
+      "numero_tramo": 133,
+      "fila_desde": 26401,
+      "fila_hasta": 26600,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-05-04",
+      "fecha_maxima": "2026-05-11",
+      "sha256": "86ef55c541319b363c3431343ffa035471a665800fbc33ece5f7ee481f62a0d7"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_134.csv",
+      "numero_tramo": 134,
+      "fila_desde": 26601,
+      "fila_hasta": 26800,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-05-11",
+      "fecha_maxima": "2026-05-11",
+      "sha256": "1b9f61ba4feb75595ecf283f8cd694ed02eb44a93fe14e808a80d3c215064941"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_135.csv",
+      "numero_tramo": 135,
+      "fila_desde": 26801,
+      "fila_hasta": 27000,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-05-11",
+      "fecha_maxima": "2026-05-11",
+      "sha256": "3c1b03aa455aefb19afc7435efc09afeb960174fa208bb53780a467647f48a74"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_136.csv",
+      "numero_tramo": 136,
+      "fila_desde": 27001,
+      "fila_hasta": 27200,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-05-11",
+      "fecha_maxima": "2026-05-18",
+      "sha256": "c558c91b26f4d6eca7b59cee3e225175580a259a1ff641f2145e4423a11462e6"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_137.csv",
+      "numero_tramo": 137,
+      "fila_desde": 27201,
+      "fila_hasta": 27400,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-05-18",
+      "fecha_maxima": "2026-05-18",
+      "sha256": "6712c605a040685ee035f2c80a6d91244ccff58878d366b02ab24227cb8470b6"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_138.csv",
+      "numero_tramo": 138,
+      "fila_desde": 27401,
+      "fila_hasta": 27600,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-05-18",
+      "fecha_maxima": "2026-05-18",
+      "sha256": "20ec6d5d7022b2ae7c136dcd11ccd60174ddf80ce47c9575d627af64cdbca22c"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_139.csv",
+      "numero_tramo": 139,
+      "fila_desde": 27601,
+      "fila_hasta": 27800,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-05-18",
+      "fecha_maxima": "2026-05-18",
+      "sha256": "0449dca4de2c6329566cf79953146da9a1515fdbcf28242b9168b333313f220f"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_140.csv",
+      "numero_tramo": 140,
+      "fila_desde": 27801,
+      "fila_hasta": 28000,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-05-18",
+      "fecha_maxima": "2026-05-25",
+      "sha256": "fa6802afd97bf67541ecfefcca3c83d1cb640ff6e0f0efb3c6466b8feae51769"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_141.csv",
+      "numero_tramo": 141,
+      "fila_desde": 28001,
+      "fila_hasta": 28200,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-05-25",
+      "fecha_maxima": "2026-05-25",
+      "sha256": "b1f0494b164b2ccf3b7d249838575562cbccd65972be878c0df8a3adeeb0ad2c"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_142.csv",
+      "numero_tramo": 142,
+      "fila_desde": 28201,
+      "fila_hasta": 28400,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-05-25",
+      "fecha_maxima": "2026-05-25",
+      "sha256": "41f017bed823f09637cfce8821bc261aeb5f638677ca248954b0d85c5e1e6e3d"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_143.csv",
+      "numero_tramo": 143,
+      "fila_desde": 28401,
+      "fila_hasta": 28600,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-05-25",
+      "fecha_maxima": "2026-06-01",
+      "sha256": "26d56583890222499365df215b71abb71038a7e3a83d3d6732bc52c145fe9612"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_144.csv",
+      "numero_tramo": 144,
+      "fila_desde": 28601,
+      "fila_hasta": 28800,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-06-01",
+      "fecha_maxima": "2026-06-01",
+      "sha256": "c94b01fc09528c98d15c29a8c283434cc045b8d042b3ca9c288430f7a5e9c11d"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_145.csv",
+      "numero_tramo": 145,
+      "fila_desde": 28801,
+      "fila_hasta": 29000,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-06-01",
+      "fecha_maxima": "2026-06-01",
+      "sha256": "51d88b9a272af699d346d7f293812d805979e35c32dcb5a9fba3cd230c77ceed"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_146.csv",
+      "numero_tramo": 146,
+      "fila_desde": 29001,
+      "fila_hasta": 29200,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-06-01",
+      "fecha_maxima": "2026-06-08",
+      "sha256": "4e9002fea157e0f88c5ad27c1f2e3deab2dbb0aceb45f0c1fcd1e5a749d2843a"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_147.csv",
+      "numero_tramo": 147,
+      "fila_desde": 29201,
+      "fila_hasta": 29400,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-06-08",
+      "fecha_maxima": "2026-06-08",
+      "sha256": "3a89998047d425a2d15d75dbf0982982a3e109b32c66f7ad163e5008b648da0b"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_148.csv",
+      "numero_tramo": 148,
+      "fila_desde": 29401,
+      "fila_hasta": 29600,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-06-08",
+      "fecha_maxima": "2026-06-08",
+      "sha256": "a65a76f9e7ccb803a00f5659add0c2b8b8d905b13c48f15d5e9769350cf2ff26"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_149.csv",
+      "numero_tramo": 149,
+      "fila_desde": 29601,
+      "fila_hasta": 29800,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-06-08",
+      "fecha_maxima": "2026-06-08",
+      "sha256": "a63a45faa8cad2a5214fb8a3d82f5fb8ca54df8e76becab06727aa46f2037956"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_150.csv",
+      "numero_tramo": 150,
+      "fila_desde": 29801,
+      "fila_hasta": 30000,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-06-08",
+      "fecha_maxima": "2026-06-15",
+      "sha256": "33d3dde4523d93724eca064e6b33c498943f62e82320f039626ffeaf1e0c0042"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_151.csv",
+      "numero_tramo": 151,
+      "fila_desde": 30001,
+      "fila_hasta": 30200,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-06-15",
+      "fecha_maxima": "2026-06-15",
+      "sha256": "6f99105d6bedaa3356f0f8ca15bc64330cdfc0769f9529f4fb36a29ef89571aa"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_152.csv",
+      "numero_tramo": 152,
+      "fila_desde": 30201,
+      "fila_hasta": 30400,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-06-15",
+      "fecha_maxima": "2026-06-15",
+      "sha256": "82c79a7103b5c508461f910bf0ac7863278e019cb1b33e8be688c6c6769fdbe6"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_153.csv",
+      "numero_tramo": 153,
+      "fila_desde": 30401,
+      "fila_hasta": 30480,
+      "cantidad_filas": 80,
+      "fecha_minima": "2026-06-15",
+      "fecha_maxima": "2026-06-15",
+      "sha256": "48078762aed7724009ff6a2830503364946bc3005d98eedf1ec2569e832ef8db"
+    }
+  ],
+  "archivos_ventas_historicas": [
+    {
+      "archivo": "ventas_historicas/ventas_historicas_001.csv",
+      "numero_tramo": 1,
+      "fila_desde": 1,
+      "fila_hasta": 200,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-05-12",
+      "fecha_maxima": "2025-05-12",
+      "sha256": "f0f87d6aacebbc5f284d6233803da7e8df0cc006b51d78daf892686dd96abe4f"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_002.csv",
+      "numero_tramo": 2,
+      "fila_desde": 201,
+      "fila_hasta": 400,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-05-12",
+      "fecha_maxima": "2025-05-12",
+      "sha256": "3b24a47cd2a2855e4c988461119a29b1a1dc005d6a260bb15c5a3fbf1112f94b"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_003.csv",
+      "numero_tramo": 3,
+      "fila_desde": 401,
+      "fila_hasta": 600,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-05-12",
+      "fecha_maxima": "2025-05-19",
+      "sha256": "10b19ec28f50515c18133c9e3a374725b2809bb04067a6c34a47c15929832c7d"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_004.csv",
+      "numero_tramo": 4,
+      "fila_desde": 601,
+      "fila_hasta": 800,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-05-19",
+      "fecha_maxima": "2025-05-19",
+      "sha256": "fc6545ed721772f3e316e0ca6beb65660df227ab1415ce975a3df81abc387bff"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_005.csv",
+      "numero_tramo": 5,
+      "fila_desde": 801,
+      "fila_hasta": 1000,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-05-19",
+      "fecha_maxima": "2025-05-26",
+      "sha256": "501255eeb65fb102b777f1c2b26bd6b47bab3ee4132c0580189d89cb1c7fc0bf"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_006.csv",
+      "numero_tramo": 6,
+      "fila_desde": 1001,
+      "fila_hasta": 1200,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-05-26",
+      "fecha_maxima": "2025-05-26",
+      "sha256": "2a4d70fed9858d1b98d61ac4356f3aaa1e275713de213dece7a67b4a7a4ac57a"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_007.csv",
+      "numero_tramo": 7,
+      "fila_desde": 1201,
+      "fila_hasta": 1400,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-05-26",
+      "fecha_maxima": "2025-05-26",
+      "sha256": "b502fa92cf829bab52313e6e4d0b74c6278768a8d4f86bde34173ed134ea9a12"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_008.csv",
+      "numero_tramo": 8,
+      "fila_desde": 1401,
+      "fila_hasta": 1600,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-05-26",
+      "fecha_maxima": "2025-06-02",
+      "sha256": "d333d9575cdac07c82149dd8d2e9886cbddade07b8808237c0daab62cbef4714"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_009.csv",
+      "numero_tramo": 9,
+      "fila_desde": 1601,
+      "fila_hasta": 1800,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-06-02",
+      "fecha_maxima": "2025-06-02",
+      "sha256": "e32acfa1bda8001e99b83fc95e9c2ad073f2a6f21e306e00b6ffbdc39be3cfb3"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_010.csv",
+      "numero_tramo": 10,
+      "fila_desde": 1801,
+      "fila_hasta": 2000,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-06-02",
+      "fecha_maxima": "2025-06-09",
+      "sha256": "04594b67de1c608206f74132a74552ee5b748d95e52537ae0e14af37db6f5d14"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_011.csv",
+      "numero_tramo": 11,
+      "fila_desde": 2001,
+      "fila_hasta": 2200,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-06-09",
+      "fecha_maxima": "2025-06-09",
+      "sha256": "865d0bad774dcdca1245c933bd6eaf6133cf36cdc1811f0dc5a60290473c9e49"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_012.csv",
+      "numero_tramo": 12,
+      "fila_desde": 2201,
+      "fila_hasta": 2400,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-06-09",
+      "fecha_maxima": "2025-06-09",
+      "sha256": "d573e78891031acceb67ea0aa773d0cec0b4d57d5ab4d22cfcd94263b26275c2"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_013.csv",
+      "numero_tramo": 13,
+      "fila_desde": 2401,
+      "fila_hasta": 2600,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-06-09",
+      "fecha_maxima": "2025-06-16",
+      "sha256": "96ff909e51ea3ff4f755e2d045dcbdf0fa2f1caaf22b42c82b5c8cd4d736125e"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_014.csv",
+      "numero_tramo": 14,
+      "fila_desde": 2601,
+      "fila_hasta": 2800,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-06-16",
+      "fecha_maxima": "2025-06-16",
+      "sha256": "0c28620b2666948f454eba63ee7fc0f546229c71949d9e4665e7795afe74024d"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_015.csv",
+      "numero_tramo": 15,
+      "fila_desde": 2801,
+      "fila_hasta": 3000,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-06-16",
+      "fecha_maxima": "2025-06-23",
+      "sha256": "f43d17034f2ed391ed247e33f60b32754c82cc334bc65aedc75a782d0ce7aa68"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_016.csv",
+      "numero_tramo": 16,
+      "fila_desde": 3001,
+      "fila_hasta": 3200,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-06-23",
+      "fecha_maxima": "2025-06-23",
+      "sha256": "a86bf49068ca922e4abd52698d44d981a18a00c529fe035df36ddfbd4996544a"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_017.csv",
+      "numero_tramo": 17,
+      "fila_desde": 3201,
+      "fila_hasta": 3400,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-06-23",
+      "fecha_maxima": "2025-06-23",
+      "sha256": "65c542f7dd87d6c56c812da120c012c5171ee2ed3fa2501022053ceac9a83fdf"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_018.csv",
+      "numero_tramo": 18,
+      "fila_desde": 3401,
+      "fila_hasta": 3600,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-06-23",
+      "fecha_maxima": "2025-06-30",
+      "sha256": "7c081dbe8f0f99fdecf2d0eacb80d6baaffceea4851bc266b5fc71935885378f"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_019.csv",
+      "numero_tramo": 19,
+      "fila_desde": 3601,
+      "fila_hasta": 3800,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-06-30",
+      "fecha_maxima": "2025-06-30",
+      "sha256": "53fed86e00847bf97985580cb7b964bf91229fc26be3bae4bddbae5f5a6cc7f0"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_020.csv",
+      "numero_tramo": 20,
+      "fila_desde": 3801,
+      "fila_hasta": 4000,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-06-30",
+      "fecha_maxima": "2025-07-07",
+      "sha256": "bcd8aaa9b13ce6b878ec70647acbc8975fb7c481dcba09ba8bfe357b7c8549c1"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_021.csv",
+      "numero_tramo": 21,
+      "fila_desde": 4001,
+      "fila_hasta": 4200,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-07-07",
+      "fecha_maxima": "2025-07-07",
+      "sha256": "8eb8bf6a05854a21ddc38e6177d057ad3147947147daff231b29eeddd12294c5"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_022.csv",
+      "numero_tramo": 22,
+      "fila_desde": 4201,
+      "fila_hasta": 4400,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-07-07",
+      "fecha_maxima": "2025-07-07",
+      "sha256": "4d489d76a336a8531a38a17ba08990844611d788acf6465444f6cbf03046b18c"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_023.csv",
+      "numero_tramo": 23,
+      "fila_desde": 4401,
+      "fila_hasta": 4600,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-07-07",
+      "fecha_maxima": "2025-07-14",
+      "sha256": "d820d40e3be7103b4f6f9de819623fbfa69c485133c4c4120adef95081776a26"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_024.csv",
+      "numero_tramo": 24,
+      "fila_desde": 4601,
+      "fila_hasta": 4800,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-07-14",
+      "fecha_maxima": "2025-07-14",
+      "sha256": "3b86096968a9e16686071ef96bec9b4456399ae0e6658778ef949a21b797b979"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_025.csv",
+      "numero_tramo": 25,
+      "fila_desde": 4801,
+      "fila_hasta": 5000,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-07-14",
+      "fecha_maxima": "2025-07-21",
+      "sha256": "fdb366e2f3a9c4e0807e1ee0e1975c7bbbf2b56765da5c47950687a4607c815d"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_026.csv",
+      "numero_tramo": 26,
+      "fila_desde": 5001,
+      "fila_hasta": 5200,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-07-21",
+      "fecha_maxima": "2025-07-21",
+      "sha256": "3abc23fdb2af901701dc600477b04646816d5abbab7a30b84b4cc2db66031658"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_027.csv",
+      "numero_tramo": 27,
+      "fila_desde": 5201,
+      "fila_hasta": 5400,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-07-21",
+      "fecha_maxima": "2025-07-21",
+      "sha256": "5165d5598554a5f2602390c6d7b4c1bd5cdfa914b027a092f4b579099903f609"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_028.csv",
+      "numero_tramo": 28,
+      "fila_desde": 5401,
+      "fila_hasta": 5600,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-07-21",
+      "fecha_maxima": "2025-07-28",
+      "sha256": "2191da5730ad49f87c38a580a75ea83215bfa1f23f57c900d09fb218b7ba64f5"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_029.csv",
+      "numero_tramo": 29,
+      "fila_desde": 5601,
+      "fila_hasta": 5800,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-07-28",
+      "fecha_maxima": "2025-07-28",
+      "sha256": "11e7cfc1da768c25a7a39e04763c5105be57458bd37911b9ebefbbbe814e19e8"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_030.csv",
+      "numero_tramo": 30,
+      "fila_desde": 5801,
+      "fila_hasta": 6000,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-07-28",
+      "fecha_maxima": "2025-08-04",
+      "sha256": "5214b52a23790f10118afc50425d95fe0b3c1a8286fcb98c34f9dcd4482a1107"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_031.csv",
+      "numero_tramo": 31,
+      "fila_desde": 6001,
+      "fila_hasta": 6200,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-08-04",
+      "fecha_maxima": "2025-08-04",
+      "sha256": "dea9d2d1199a50ce8805f7a049037dbfdf8608201cd8715220e9e8c938df8f6f"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_032.csv",
+      "numero_tramo": 32,
+      "fila_desde": 6201,
+      "fila_hasta": 6400,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-08-04",
+      "fecha_maxima": "2025-08-04",
+      "sha256": "6a51127219c8e9736eb195aa3281920db4d6a84e3d3739098758b527920f43eb"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_033.csv",
+      "numero_tramo": 33,
+      "fila_desde": 6401,
+      "fila_hasta": 6600,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-08-04",
+      "fecha_maxima": "2025-08-11",
+      "sha256": "cc8cb6cfa5112b03e7c6be5d4c96b7ebb846f894280868ecf2a07349be72c0e5"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_034.csv",
+      "numero_tramo": 34,
+      "fila_desde": 6601,
+      "fila_hasta": 6800,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-08-11",
+      "fecha_maxima": "2025-08-11",
+      "sha256": "e6dd5e53c9e87826399578cdd947f7d97cd13485c0aaee0bd777906f56e68c86"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_035.csv",
+      "numero_tramo": 35,
+      "fila_desde": 6801,
+      "fila_hasta": 7000,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-08-11",
+      "fecha_maxima": "2025-08-18",
+      "sha256": "c73d854abe344424d8fad0fde8eb1ee98edd5f0b3fe7192f2dedba26dcfa6cb5"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_036.csv",
+      "numero_tramo": 36,
+      "fila_desde": 7001,
+      "fila_hasta": 7200,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-08-18",
+      "fecha_maxima": "2025-08-18",
+      "sha256": "21560f33452325acd7f8d0416b02489cf2236a9e9701ca19b3d4609deb6a7271"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_037.csv",
+      "numero_tramo": 37,
+      "fila_desde": 7201,
+      "fila_hasta": 7400,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-08-18",
+      "fecha_maxima": "2025-08-18",
+      "sha256": "aa3ab921cebc25fe201a083ac16fb4756d2f56fe03f81957c0200085200e9146"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_038.csv",
+      "numero_tramo": 38,
+      "fila_desde": 7401,
+      "fila_hasta": 7600,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-08-18",
+      "fecha_maxima": "2025-08-25",
+      "sha256": "ff38b9439be7c45d7b884351ca1313553b1eec1b603ba6bf055c1c49bf1982eb"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_039.csv",
+      "numero_tramo": 39,
+      "fila_desde": 7601,
+      "fila_hasta": 7800,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-08-25",
+      "fecha_maxima": "2025-08-25",
+      "sha256": "7e9368a2694a00ae01da7ea05cbdf73fc7c8fc2ee54416bd3d9c11ebebd9889b"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_040.csv",
+      "numero_tramo": 40,
+      "fila_desde": 7801,
+      "fila_hasta": 8000,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-08-25",
+      "fecha_maxima": "2025-09-01",
+      "sha256": "8d9d299bf0c815f73f66a634f6c5c50f5356cc4f0f43f7f7c0ecd80179e8115c"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_041.csv",
+      "numero_tramo": 41,
+      "fila_desde": 8001,
+      "fila_hasta": 8200,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-09-01",
+      "fecha_maxima": "2025-09-01",
+      "sha256": "4e58a308d90b22c6ac2eea8a83995c2ab6986fdf8e6dc674e1a22ad62435c8a3"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_042.csv",
+      "numero_tramo": 42,
+      "fila_desde": 8201,
+      "fila_hasta": 8400,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-09-01",
+      "fecha_maxima": "2025-09-08",
+      "sha256": "52988b30e441e7f6adc2c3dc3f8d198f595e63d6a8843cda864d9601b5750bfd"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_043.csv",
+      "numero_tramo": 43,
+      "fila_desde": 8401,
+      "fila_hasta": 8600,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-09-08",
+      "fecha_maxima": "2025-09-08",
+      "sha256": "e9cb0e918bcac293642961c5daab23aafdfd27036aa97d34bd8af1651991fbdc"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_044.csv",
+      "numero_tramo": 44,
+      "fila_desde": 8601,
+      "fila_hasta": 8800,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-09-08",
+      "fecha_maxima": "2025-09-08",
+      "sha256": "1e5f20c1ad59aa57765dd904061961dc413841475a93ba81ef7339d86fc72e4d"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_045.csv",
+      "numero_tramo": 45,
+      "fila_desde": 8801,
+      "fila_hasta": 9000,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-09-08",
+      "fecha_maxima": "2025-09-15",
+      "sha256": "c6dd1284f8836eacc4cfce7842eda5c63c8d905ffb3ceeeaeda764872e8ea420"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_046.csv",
+      "numero_tramo": 46,
+      "fila_desde": 9001,
+      "fila_hasta": 9200,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-09-15",
+      "fecha_maxima": "2025-09-15",
+      "sha256": "5945ff16deccb7d9404e3aaab19618c7f8276f22e1b6c50372127315219c85aa"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_047.csv",
+      "numero_tramo": 47,
+      "fila_desde": 9201,
+      "fila_hasta": 9400,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-09-15",
+      "fecha_maxima": "2025-09-22",
+      "sha256": "08ad64067916ccf2225a1be553e406c442f12aa1e4683490740d83f711bb70c0"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_048.csv",
+      "numero_tramo": 48,
+      "fila_desde": 9401,
+      "fila_hasta": 9600,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-09-22",
+      "fecha_maxima": "2025-09-22",
+      "sha256": "754461532ceff43f698d9b98ea05fc0efcafe696db725520dffeddc5898c194a"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_049.csv",
+      "numero_tramo": 49,
+      "fila_desde": 9601,
+      "fila_hasta": 9800,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-09-22",
+      "fecha_maxima": "2025-09-22",
+      "sha256": "ace46cb2a2ba2e6fe325ecfd9952f2716fcd29d174df348b92d908b714865258"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_050.csv",
+      "numero_tramo": 50,
+      "fila_desde": 9801,
+      "fila_hasta": 10000,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-09-22",
+      "fecha_maxima": "2025-09-29",
+      "sha256": "747516912d458acbd69457bf92dbddc3be3d6778c36a9ac37677f1bf54e91b86"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_051.csv",
+      "numero_tramo": 51,
+      "fila_desde": 10001,
+      "fila_hasta": 10200,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-09-29",
+      "fecha_maxima": "2025-09-29",
+      "sha256": "86063f03f570355e07917e1a1f23639b1e328d46d187d6a84f642a863beb57dc"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_052.csv",
+      "numero_tramo": 52,
+      "fila_desde": 10201,
+      "fila_hasta": 10400,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-09-29",
+      "fecha_maxima": "2025-10-06",
+      "sha256": "8be9f9d2f874b24828f7e824e24ebae85f449f1645c7f50fb210a0ea35ab1d38"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_053.csv",
+      "numero_tramo": 53,
+      "fila_desde": 10401,
+      "fila_hasta": 10600,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-10-06",
+      "fecha_maxima": "2025-10-06",
+      "sha256": "da8a22088375acd9b6ac13530b588d994cc14dc1a50dfd675cd8d4651a1be441"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_054.csv",
+      "numero_tramo": 54,
+      "fila_desde": 10601,
+      "fila_hasta": 10800,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-10-06",
+      "fecha_maxima": "2025-10-06",
+      "sha256": "63d978ad57255216e55312364f97060c1d33077f9fa69fa484c839dceed131c3"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_055.csv",
+      "numero_tramo": 55,
+      "fila_desde": 10801,
+      "fila_hasta": 11000,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-10-06",
+      "fecha_maxima": "2025-10-13",
+      "sha256": "7448697dddb1656391fe09eb45a24138cd445e01fcb5930a3f8d312b46996ec1"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_056.csv",
+      "numero_tramo": 56,
+      "fila_desde": 11001,
+      "fila_hasta": 11200,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-10-13",
+      "fecha_maxima": "2025-10-13",
+      "sha256": "83f6d0b81f0068b7dff4842fd8a1b3d1647d8fa6a53b5e94d6dd2387596a69da"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_057.csv",
+      "numero_tramo": 57,
+      "fila_desde": 11201,
+      "fila_hasta": 11400,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-10-13",
+      "fecha_maxima": "2025-10-20",
+      "sha256": "dcf3b289ff7e290a97b74eb49a55847a2c4d8e176b011c50287358b54acb2ad7"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_058.csv",
+      "numero_tramo": 58,
+      "fila_desde": 11401,
+      "fila_hasta": 11600,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-10-20",
+      "fecha_maxima": "2025-10-20",
+      "sha256": "72991095b58b3a87c80a8526f5a00e61486734f1d2b0e23125f9ed7ddf3a8660"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_059.csv",
+      "numero_tramo": 59,
+      "fila_desde": 11601,
+      "fila_hasta": 11800,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-10-20",
+      "fecha_maxima": "2025-10-20",
+      "sha256": "03880d16603581d408a5ef619c88531585090b5a0886a20fed183e43e80952be"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_060.csv",
+      "numero_tramo": 60,
+      "fila_desde": 11801,
+      "fila_hasta": 12000,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-10-20",
+      "fecha_maxima": "2025-10-27",
+      "sha256": "dc3cdfe19b996a143c3678ad7deed1c73733351206ee1e630793797ce3a1c6de"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_061.csv",
+      "numero_tramo": 61,
+      "fila_desde": 12001,
+      "fila_hasta": 12200,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-10-27",
+      "fecha_maxima": "2025-10-27",
+      "sha256": "a8fd7b896c8ba8846b616dfc9c2357cbd498b8b41f2ab238bc4ce10b1233fdd3"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_062.csv",
+      "numero_tramo": 62,
+      "fila_desde": 12201,
+      "fila_hasta": 12400,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-10-27",
+      "fecha_maxima": "2025-11-03",
+      "sha256": "8ebb1cfd0d1680a704bbe99253df09c017b91e590fdc0c94e432dfad2873e6a2"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_063.csv",
+      "numero_tramo": 63,
+      "fila_desde": 12401,
+      "fila_hasta": 12600,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-11-03",
+      "fecha_maxima": "2025-11-03",
+      "sha256": "ad41c2445a0cb9ce601d8b2034bdf843af69268840aa7d77354c10e1a9504a32"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_064.csv",
+      "numero_tramo": 64,
+      "fila_desde": 12601,
+      "fila_hasta": 12800,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-11-03",
+      "fecha_maxima": "2025-11-03",
+      "sha256": "ae42e7a4ff737aae7cbf581a187b6323fce9be2426c19f823fbdefd515bdc1ce"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_065.csv",
+      "numero_tramo": 65,
+      "fila_desde": 12801,
+      "fila_hasta": 13000,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-11-03",
+      "fecha_maxima": "2025-11-10",
+      "sha256": "724cb71f0096bd1c0d972ec07df39a13bf96dd8455d58f24dc8bda9985ddc15b"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_066.csv",
+      "numero_tramo": 66,
+      "fila_desde": 13001,
+      "fila_hasta": 13200,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-11-10",
+      "fecha_maxima": "2025-11-10",
+      "sha256": "73d4cd95f36b97e7d38ffd17f4035b5f584f691ddf9e7338419c29940dd617ef"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_067.csv",
+      "numero_tramo": 67,
+      "fila_desde": 13201,
+      "fila_hasta": 13400,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-11-10",
+      "fecha_maxima": "2025-11-17",
+      "sha256": "8f6679d0e765be30f97af14f639860eaa28aaab30fc4d4d0d6e9285b820ae38c"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_068.csv",
+      "numero_tramo": 68,
+      "fila_desde": 13401,
+      "fila_hasta": 13600,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-11-17",
+      "fecha_maxima": "2025-11-17",
+      "sha256": "d72f89a4f7fcd1d6e3cdfccaa36fdacf475ec9864d641eab5e663eed5b6d12ad"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_069.csv",
+      "numero_tramo": 69,
+      "fila_desde": 13601,
+      "fila_hasta": 13800,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-11-17",
+      "fecha_maxima": "2025-11-17",
+      "sha256": "b4779caa8403e9cb68277e78e92c556fa62a71527846d633441cad5400fa7262"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_070.csv",
+      "numero_tramo": 70,
+      "fila_desde": 13801,
+      "fila_hasta": 14000,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-11-17",
+      "fecha_maxima": "2025-11-24",
+      "sha256": "8f69d33b14aa178612f1098bf61868aa9209a9c967603e7f565a218da75d2e3d"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_071.csv",
+      "numero_tramo": 71,
+      "fila_desde": 14001,
+      "fila_hasta": 14200,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-11-24",
+      "fecha_maxima": "2025-11-24",
+      "sha256": "1519cb2e523564531eca68043bddf4e5fa71082e521239a24ca62bd794cf3e51"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_072.csv",
+      "numero_tramo": 72,
+      "fila_desde": 14201,
+      "fila_hasta": 14400,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-11-24",
+      "fecha_maxima": "2025-12-01",
+      "sha256": "e5d01bf3d043e0e6d9a1145156fa4046e3c8292068f8ceb36c65a909860ab9df"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_073.csv",
+      "numero_tramo": 73,
+      "fila_desde": 14401,
+      "fila_hasta": 14600,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-12-01",
+      "fecha_maxima": "2025-12-01",
+      "sha256": "c64e7d7d2d7f150800bbd4e0ebc33804311fb78e3dee9cdbe17be0cb0b264a4d"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_074.csv",
+      "numero_tramo": 74,
+      "fila_desde": 14601,
+      "fila_hasta": 14800,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-12-01",
+      "fecha_maxima": "2025-12-01",
+      "sha256": "312accfc702dfa356300c7c4178db694215c4c3dbcd6dc2222fc2538f4dc15b1"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_075.csv",
+      "numero_tramo": 75,
+      "fila_desde": 14801,
+      "fila_hasta": 15000,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-12-01",
+      "fecha_maxima": "2025-12-08",
+      "sha256": "1d283d3f74572eb132722caf40ce7622a6b73018f48db712deaf200c37da0078"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_076.csv",
+      "numero_tramo": 76,
+      "fila_desde": 15001,
+      "fila_hasta": 15200,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-12-08",
+      "fecha_maxima": "2025-12-08",
+      "sha256": "eccca6960155dbe8187a2a60e316926c6fe0d8d20b04864b16e2e5fcf0171607"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_077.csv",
+      "numero_tramo": 77,
+      "fila_desde": 15201,
+      "fila_hasta": 15400,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-12-08",
+      "fecha_maxima": "2025-12-15",
+      "sha256": "6c3a7cf3419798af10e71bfa592350b164f466392e4c6b0a1dedd3aafbae910f"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_078.csv",
+      "numero_tramo": 78,
+      "fila_desde": 15401,
+      "fila_hasta": 15600,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-12-15",
+      "fecha_maxima": "2025-12-15",
+      "sha256": "959efaf94dbf26ba32ddad28834c2f89347934958cb8c946ea1e67562049a04a"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_079.csv",
+      "numero_tramo": 79,
+      "fila_desde": 15601,
+      "fila_hasta": 15800,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-12-15",
+      "fecha_maxima": "2025-12-22",
+      "sha256": "63afbdb61cee8b4ee105608d0febfa163d579baa1f7cec1dc2673a1aa3504b74"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_080.csv",
+      "numero_tramo": 80,
+      "fila_desde": 15801,
+      "fila_hasta": 16000,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-12-22",
+      "fecha_maxima": "2025-12-22",
+      "sha256": "f7cfea6e1aa1c21bdbecf0f264165eafdfb87aa807dd841073c5e5802e2a2351"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_081.csv",
+      "numero_tramo": 81,
+      "fila_desde": 16001,
+      "fila_hasta": 16200,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-12-22",
+      "fecha_maxima": "2025-12-22",
+      "sha256": "481b594ffd2ac31fc8ab0517f5d1c3bc7f79fb4e88f1b8e1af2edcd616e72f8b"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_082.csv",
+      "numero_tramo": 82,
+      "fila_desde": 16201,
+      "fila_hasta": 16400,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-12-22",
+      "fecha_maxima": "2025-12-29",
+      "sha256": "34719f73d8e3f14731b250364c5bbdc701a43fc18f6fdf15228011f587952c2e"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_083.csv",
+      "numero_tramo": 83,
+      "fila_desde": 16401,
+      "fila_hasta": 16600,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-12-29",
+      "fecha_maxima": "2025-12-29",
+      "sha256": "6eabf19b1e8b495ed1604c7c731d39230e84ae6d420a23991a15776b4373b0f8"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_084.csv",
+      "numero_tramo": 84,
+      "fila_desde": 16601,
+      "fila_hasta": 16800,
+      "cantidad_filas": 200,
+      "fecha_minima": "2025-12-29",
+      "fecha_maxima": "2026-01-05",
+      "sha256": "ab8afec82f2d9b3e038278e79378b67a2f83d82f38bd942ff905a3f125583833"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_085.csv",
+      "numero_tramo": 85,
+      "fila_desde": 16801,
+      "fila_hasta": 17000,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-01-05",
+      "fecha_maxima": "2026-01-05",
+      "sha256": "cf3f3e81ad6a5a629e216acf4e82a3cab4cb0125d6ff290793eb9ca62f76adae"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_086.csv",
+      "numero_tramo": 86,
+      "fila_desde": 17001,
+      "fila_hasta": 17200,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-01-05",
+      "fecha_maxima": "2026-01-05",
+      "sha256": "fdd56f8f71951fb9cf90fcc301d52b1ec0cc8455edd03e2d39d608a8c5d49984"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_087.csv",
+      "numero_tramo": 87,
+      "fila_desde": 17201,
+      "fila_hasta": 17400,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-01-05",
+      "fecha_maxima": "2026-01-12",
+      "sha256": "aa81328f31be8afd07c20e92dd6e9f5862c50313e3324c28a53ecbe95ccad655"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_088.csv",
+      "numero_tramo": 88,
+      "fila_desde": 17401,
+      "fila_hasta": 17600,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-01-12",
+      "fecha_maxima": "2026-01-12",
+      "sha256": "27b1ca0d944647fa5c33efb7ec5c5c4ed5079c4465cc2d0f4f3554832dbfc68d"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_089.csv",
+      "numero_tramo": 89,
+      "fila_desde": 17601,
+      "fila_hasta": 17800,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-01-12",
+      "fecha_maxima": "2026-01-19",
+      "sha256": "ba9ea4604b7e26b19986667f2b8132554607584a84c8682d9a56592ba4beba77"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_090.csv",
+      "numero_tramo": 90,
+      "fila_desde": 17801,
+      "fila_hasta": 18000,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-01-19",
+      "fecha_maxima": "2026-01-19",
+      "sha256": "88eba862c0044f48df53aadad01d133bc27731e0c623035b865128128fe3453c"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_091.csv",
+      "numero_tramo": 91,
+      "fila_desde": 18001,
+      "fila_hasta": 18200,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-01-19",
+      "fecha_maxima": "2026-01-19",
+      "sha256": "48cb6a311ab6662894be9896f83934a98809041fa8943b5b354bdf8ca2781123"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_092.csv",
+      "numero_tramo": 92,
+      "fila_desde": 18201,
+      "fila_hasta": 18400,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-01-19",
+      "fecha_maxima": "2026-01-26",
+      "sha256": "933d8d94ba65a2e95aad3b82ace5c13173899a1988d51b8fcbc0790e2370341d"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_093.csv",
+      "numero_tramo": 93,
+      "fila_desde": 18401,
+      "fila_hasta": 18600,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-01-26",
+      "fecha_maxima": "2026-01-26",
+      "sha256": "b0997b66766604d1f74e72ef89a9658da49aa13dc8a82f4e6c107982d2a4f1d7"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_094.csv",
+      "numero_tramo": 94,
+      "fila_desde": 18601,
+      "fila_hasta": 18800,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-01-26",
+      "fecha_maxima": "2026-02-02",
+      "sha256": "67fdaf1e4e59b477c6b18ff1b5be04c56acc362b1743739b824b9ede13724e50"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_095.csv",
+      "numero_tramo": 95,
+      "fila_desde": 18801,
+      "fila_hasta": 19000,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-02-02",
+      "fecha_maxima": "2026-02-02",
+      "sha256": "9b7086d1f410890d487525a675480e30c200f325485b45e9e8df1e8036097a05"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_096.csv",
+      "numero_tramo": 96,
+      "fila_desde": 19001,
+      "fila_hasta": 19200,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-02-02",
+      "fecha_maxima": "2026-02-02",
+      "sha256": "196dcd16b47b7c5d803fdd7d60bfdf3c41eee5ce1312cc7f95b4528b26ddcf51"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_097.csv",
+      "numero_tramo": 97,
+      "fila_desde": 19201,
+      "fila_hasta": 19400,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-02-02",
+      "fecha_maxima": "2026-02-09",
+      "sha256": "f8a69a363df123cfb5abd6d67db268f05b02b5b9ab95d3b7888420d67868d37d"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_098.csv",
+      "numero_tramo": 98,
+      "fila_desde": 19401,
+      "fila_hasta": 19600,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-02-09",
+      "fecha_maxima": "2026-02-09",
+      "sha256": "21b461fdaf94d9c09413a2c4accf2d30f85ee5cd4e39065c9e3d51a9feef1c65"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_099.csv",
+      "numero_tramo": 99,
+      "fila_desde": 19601,
+      "fila_hasta": 19800,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-02-09",
+      "fecha_maxima": "2026-02-16",
+      "sha256": "cc602e699a8022737f28fa1c48550554e015e1817a70e088c8ed8c41ba158f7f"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_100.csv",
+      "numero_tramo": 100,
+      "fila_desde": 19801,
+      "fila_hasta": 20000,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-02-16",
+      "fecha_maxima": "2026-02-16",
+      "sha256": "664b0005c22dee3948f0b918f000834e9d560c052284ec3fdc2b33a9a7fb4d15"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_101.csv",
+      "numero_tramo": 101,
+      "fila_desde": 20001,
+      "fila_hasta": 20200,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-02-16",
+      "fecha_maxima": "2026-02-16",
+      "sha256": "828bd700a5b715f258bc33734177cbb3e7591484d43c42a2c9b3d778e0581fe4"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_102.csv",
+      "numero_tramo": 102,
+      "fila_desde": 20201,
+      "fila_hasta": 20400,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-02-16",
+      "fecha_maxima": "2026-02-23",
+      "sha256": "7ab7b47703fb38552623cb9a194296a0aba4465c58eda6b23a0a54e1d5b69c5c"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_103.csv",
+      "numero_tramo": 103,
+      "fila_desde": 20401,
+      "fila_hasta": 20600,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-02-23",
+      "fecha_maxima": "2026-02-23",
+      "sha256": "ac2dae8fdd35e22d11236a3824cb4d81f7bbc028acfbd09f01414686e5dfcada"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_104.csv",
+      "numero_tramo": 104,
+      "fila_desde": 20601,
+      "fila_hasta": 20800,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-02-23",
+      "fecha_maxima": "2026-03-02",
+      "sha256": "381817986dfba567aa91a3ce0e9f422c343c56c11bcddb2caec747a5c639d684"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_105.csv",
+      "numero_tramo": 105,
+      "fila_desde": 20801,
+      "fila_hasta": 21000,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-03-02",
+      "fecha_maxima": "2026-03-02",
+      "sha256": "a47009274c0de8ad85703aebea0351e9610ca2f155e91d31f6574595059f745b"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_106.csv",
+      "numero_tramo": 106,
+      "fila_desde": 21001,
+      "fila_hasta": 21200,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-03-02",
+      "fecha_maxima": "2026-03-02",
+      "sha256": "5a6f7b66e8d7bc88cd1044766b04d397f6d0c7d5dec3536f8eb45ecb48e7a123"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_107.csv",
+      "numero_tramo": 107,
+      "fila_desde": 21201,
+      "fila_hasta": 21400,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-03-02",
+      "fecha_maxima": "2026-03-09",
+      "sha256": "ba70e57938a0bc17230e7a00ddf4c177889aebe5ea7f6d5abfe3cb08c33b50a0"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_108.csv",
+      "numero_tramo": 108,
+      "fila_desde": 21401,
+      "fila_hasta": 21600,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-03-09",
+      "fecha_maxima": "2026-03-09",
+      "sha256": "bb073237f6efef380c4870c1a66b84d347614e7f9869e14b50ccd131b4dc4b49"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_109.csv",
+      "numero_tramo": 109,
+      "fila_desde": 21601,
+      "fila_hasta": 21800,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-03-09",
+      "fecha_maxima": "2026-03-16",
+      "sha256": "a1965d1dd3771674a41c66c0579f0bbdf0c2e42b444799c0c50ce5826ede10e4"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_110.csv",
+      "numero_tramo": 110,
+      "fila_desde": 21801,
+      "fila_hasta": 22000,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-03-16",
+      "fecha_maxima": "2026-03-16",
+      "sha256": "afe47e9ff6a1d848973f6fd27f4052bd0a114251772b67f8b6924f2e8f23a9c9"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_111.csv",
+      "numero_tramo": 111,
+      "fila_desde": 22001,
+      "fila_hasta": 22200,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-03-16",
+      "fecha_maxima": "2026-03-16",
+      "sha256": "24f8fa52fdfb05598f8b3a7ad6c8d4b430338fca03b26cafd5f0d733a30b0e95"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_112.csv",
+      "numero_tramo": 112,
+      "fila_desde": 22201,
+      "fila_hasta": 22400,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-03-16",
+      "fecha_maxima": "2026-03-23",
+      "sha256": "b361f68ba06e5d787292c8c7636ec05fee4b9f3d53b9bc6eb6b219e832e8fede"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_113.csv",
+      "numero_tramo": 113,
+      "fila_desde": 22401,
+      "fila_hasta": 22600,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-03-23",
+      "fecha_maxima": "2026-03-23",
+      "sha256": "34ee3ef562adf8495999881a8db9fdc2767de527d8bb598a21118fc24de79151"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_114.csv",
+      "numero_tramo": 114,
+      "fila_desde": 22601,
+      "fila_hasta": 22800,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-03-23",
+      "fecha_maxima": "2026-03-30",
+      "sha256": "a9bcc6fb912bd8d6a670b2d75124aee9bffbb6fead5f9d5a3c98fe63282cce95"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_115.csv",
+      "numero_tramo": 115,
+      "fila_desde": 22801,
+      "fila_hasta": 23000,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-03-30",
+      "fecha_maxima": "2026-03-30",
+      "sha256": "93c4689dca0233d64102c00200425532e49ee87ce504352b02900d50ec9020f4"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_116.csv",
+      "numero_tramo": 116,
+      "fila_desde": 23001,
+      "fila_hasta": 23200,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-03-30",
+      "fecha_maxima": "2026-04-06",
+      "sha256": "f0d4bb59615ab7cc21af33a8313d633e04d17730e813a4b315599648b0b31166"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_117.csv",
+      "numero_tramo": 117,
+      "fila_desde": 23201,
+      "fila_hasta": 23400,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-04-06",
+      "fecha_maxima": "2026-04-06",
+      "sha256": "bd2fde153d98cb0c76ef144204b5ede3658ce7be4c2f967d74b6e7826b959749"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_118.csv",
+      "numero_tramo": 118,
+      "fila_desde": 23401,
+      "fila_hasta": 23600,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-04-06",
+      "fecha_maxima": "2026-04-06",
+      "sha256": "66c70d79f3b67a067a511a545787d018eaeb528a381c0c90d0324c2a69604cc6"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_119.csv",
+      "numero_tramo": 119,
+      "fila_desde": 23601,
+      "fila_hasta": 23800,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-04-06",
+      "fecha_maxima": "2026-04-13",
+      "sha256": "a752916c6d58c5579035a2dcc5ec8c8c20745947c90252fabc3e8a1d2b9b0e91"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_120.csv",
+      "numero_tramo": 120,
+      "fila_desde": 23801,
+      "fila_hasta": 24000,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-04-13",
+      "fecha_maxima": "2026-04-13",
+      "sha256": "2080ee215f16d71f86e6cedc7c1c7b1295d2da384f07b859b13f0e3462fab13d"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_121.csv",
+      "numero_tramo": 121,
+      "fila_desde": 24001,
+      "fila_hasta": 24200,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-04-13",
+      "fecha_maxima": "2026-04-20",
+      "sha256": "9fabd9441caf20b09f7f1d4d2c066107e23d5cd04f1d34db989f2709f7b0ab06"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_122.csv",
+      "numero_tramo": 122,
+      "fila_desde": 24201,
+      "fila_hasta": 24400,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-04-20",
+      "fecha_maxima": "2026-04-20",
+      "sha256": "06c0b68b5064b15968b951c9047c0af8b9d9944094679469044703828af70b6e"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_123.csv",
+      "numero_tramo": 123,
+      "fila_desde": 24401,
+      "fila_hasta": 24600,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-04-20",
+      "fecha_maxima": "2026-04-20",
+      "sha256": "0b1fa82f47abaa9fff227dd3f3e973b82a6accb91048dd627cba4057587ba93a"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_124.csv",
+      "numero_tramo": 124,
+      "fila_desde": 24601,
+      "fila_hasta": 24800,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-04-20",
+      "fecha_maxima": "2026-04-27",
+      "sha256": "0f12cbd97d1989febb1c41017a952b892c1882349453bfefde0615fd0d0689c4"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_125.csv",
+      "numero_tramo": 125,
+      "fila_desde": 24801,
+      "fila_hasta": 25000,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-04-27",
+      "fecha_maxima": "2026-04-27",
+      "sha256": "7bae62ea2a6ca602f3cc3fa043e26e2d00052930ac8570007e9ec43cd6f5e820"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_126.csv",
+      "numero_tramo": 126,
+      "fila_desde": 25001,
+      "fila_hasta": 25200,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-04-27",
+      "fecha_maxima": "2026-05-04",
+      "sha256": "0f16b65f85fe26e667df5212245c6efd2b3961677449f035ca481a6a265e888b"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_127.csv",
+      "numero_tramo": 127,
+      "fila_desde": 25201,
+      "fila_hasta": 25400,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-05-04",
+      "fecha_maxima": "2026-05-04",
+      "sha256": "d23fec30f9e30e38dd323fed5c901eb2d941e11f5e593539ee4fa45fdb243f57"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_128.csv",
+      "numero_tramo": 128,
+      "fila_desde": 25401,
+      "fila_hasta": 25600,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-05-04",
+      "fecha_maxima": "2026-05-04",
+      "sha256": "82b739f19f07356b6208c32d8f3b1598e907ebc6206ae0cd7cc84f762a803540"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_129.csv",
+      "numero_tramo": 129,
+      "fila_desde": 25601,
+      "fila_hasta": 25800,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-05-04",
+      "fecha_maxima": "2026-05-11",
+      "sha256": "9968b973afb07ea731c5322b537d044b61306bebefa84dac0038b78e7146a631"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_130.csv",
+      "numero_tramo": 130,
+      "fila_desde": 25801,
+      "fila_hasta": 26000,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-05-11",
+      "fecha_maxima": "2026-05-11",
+      "sha256": "88e2293168f2eead22f222d37df44ac45802070cf4448aa654a76c2a9e13108f"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_131.csv",
+      "numero_tramo": 131,
+      "fila_desde": 26001,
+      "fila_hasta": 26200,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-05-11",
+      "fecha_maxima": "2026-05-11",
+      "sha256": "e80439adb3b2dc152c3b289ccd542b7190005eb3525ad71c44b17ec5e5293224"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_132.csv",
+      "numero_tramo": 132,
+      "fila_desde": 26201,
+      "fila_hasta": 26400,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-05-11",
+      "fecha_maxima": "2026-05-18",
+      "sha256": "6418be1b1005346aaa6da5b2fb78c393cddf0d6fb4a652b0fb06cc0f15939cd6"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_133.csv",
+      "numero_tramo": 133,
+      "fila_desde": 26401,
+      "fila_hasta": 26600,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-05-18",
+      "fecha_maxima": "2026-05-18",
+      "sha256": "b0c514a4e364c0a66223d2e362d7fd20d3baf88343f3c54793591b786cb5aa99"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_134.csv",
+      "numero_tramo": 134,
+      "fila_desde": 26601,
+      "fila_hasta": 26800,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-05-18",
+      "fecha_maxima": "2026-05-18",
+      "sha256": "f4b7e6530c2eb16ce48870bbb18ec404d9df0bcb745fc4d88a482f9e693c78c6"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_135.csv",
+      "numero_tramo": 135,
+      "fila_desde": 26801,
+      "fila_hasta": 27000,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-05-18",
+      "fecha_maxima": "2026-05-25",
+      "sha256": "b364ffdefc79f2fd5ea2e5b28af7263d1cb684206af2ff874c436017e6fabbcd"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_136.csv",
+      "numero_tramo": 136,
+      "fila_desde": 27001,
+      "fila_hasta": 27200,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-05-25",
+      "fecha_maxima": "2026-05-25",
+      "sha256": "e542e4c4b3e3f3445c402d9307936aea80b259ab6146f6095d419567f51d8c0d"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_137.csv",
+      "numero_tramo": 137,
+      "fila_desde": 27201,
+      "fila_hasta": 27400,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-05-25",
+      "fecha_maxima": "2026-05-25",
+      "sha256": "96d4784ea83331fbaed117c58b3bc99115eae232b2d2a974752ed94a56620a5d"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_138.csv",
+      "numero_tramo": 138,
+      "fila_desde": 27401,
+      "fila_hasta": 27600,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-05-25",
+      "fecha_maxima": "2026-06-01",
+      "sha256": "a97bad25e30c2f36863f344e5e2f7e21511f315f9cea1712eb2c67fcf6cb2674"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_139.csv",
+      "numero_tramo": 139,
+      "fila_desde": 27601,
+      "fila_hasta": 27800,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-06-01",
+      "fecha_maxima": "2026-06-01",
+      "sha256": "84de465ccdebd4e82716046a3a5542558cadcb6e3709791bf43cda10b87c2703"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_140.csv",
+      "numero_tramo": 140,
+      "fila_desde": 27801,
+      "fila_hasta": 28000,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-06-01",
+      "fecha_maxima": "2026-06-01",
+      "sha256": "e4b1089029e2082b589e0ad0742dda7ace39c82b2e26ee6b7d510376587c19e9"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_141.csv",
+      "numero_tramo": 141,
+      "fila_desde": 28001,
+      "fila_hasta": 28200,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-06-01",
+      "fecha_maxima": "2026-06-01",
+      "sha256": "55152bdc07ec59391463928343d23ce6ecae9fb4753cfd028ff5dc665588d4e4"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_142.csv",
+      "numero_tramo": 142,
+      "fila_desde": 28201,
+      "fila_hasta": 28400,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-06-01",
+      "fecha_maxima": "2026-06-08",
+      "sha256": "c169af90e5b8e026c4ddb5c0820c87572485ab6bd2fde06714e410c490f2368f"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_143.csv",
+      "numero_tramo": 143,
+      "fila_desde": 28401,
+      "fila_hasta": 28600,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-06-08",
+      "fecha_maxima": "2026-06-08",
+      "sha256": "a708a52b490049561f9f5c58f161bedd5b6248d752959efac724fa29b35c1c25"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_144.csv",
+      "numero_tramo": 144,
+      "fila_desde": 28601,
+      "fila_hasta": 28800,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-06-08",
+      "fecha_maxima": "2026-06-08",
+      "sha256": "5e3bb8ef556771c116f787f02dd91c92038f539aea7f90fdcfe59361df15367e"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_145.csv",
+      "numero_tramo": 145,
+      "fila_desde": 28801,
+      "fila_hasta": 29000,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-06-08",
+      "fecha_maxima": "2026-06-15",
+      "sha256": "ec753c11613783951dfb8558f7f758045e40e5ac5b54747acdb3b4aec9c367ae"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_146.csv",
+      "numero_tramo": 146,
+      "fila_desde": 29001,
+      "fila_hasta": 29200,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-06-15",
+      "fecha_maxima": "2026-06-15",
+      "sha256": "a393a26851e2538fddf0d204714946a8e785be8445f5f03c6d92831b2c07ad40"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_147.csv",
+      "numero_tramo": 147,
+      "fila_desde": 29201,
+      "fila_hasta": 29400,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-06-15",
+      "fecha_maxima": "2026-06-15",
+      "sha256": "c4dc69807f4c4974119576d884b5b04506070073b3e32dcc6be8d452c8558c03"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_148.csv",
+      "numero_tramo": 148,
+      "fila_desde": 29401,
+      "fila_hasta": 29500,
+      "cantidad_filas": 100,
+      "fecha_minima": "2026-06-15",
+      "fecha_maxima": "2026-06-15",
+      "sha256": "8843d0f82e05a7602ef90017322984e05453aa1f1611961bdf6c02403e0a3a31"
+    }
+  ],
+  "hashes_sha256": {
+    "02_boticas.csv": "48b7cdc5c97a818dc40f5c62f7e3152d56efad6a766255572b13ff8323c2ac0f",
+    "06_precios.csv": "f2c960e349ec31d9e4634a67dac4430393694dbc48309030502e571e33fa2121",
+    "07_stock_inicial.csv": "56a7b5a21c484c2024b9f0a3b5fbf37d7ea5399ba61d24c82e6796f39df8439e",
+    "08_stock_historico.csv": "1129fe8838a4a86b7fef679cd155b93775b166af41db76c698bdfd487adbd7cf",
+    "09_ventas_historicas.csv": "63ff5a16b76838a14f2a568adf62d22fb469d457a465fc7ed3df767e708179da"
+  },
+  "nota": "Paquete incremental: importar sobre la data ya cargada. No reemplaza ni modifica data/importacion_plataforma."
+}

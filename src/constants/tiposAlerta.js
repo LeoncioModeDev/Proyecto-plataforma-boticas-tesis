@@ -13,6 +13,10 @@ export const TIPOS_ALERTA = {
   RIESGO_DESABASTECIMIENTO: 'riesgo_desabastecimiento',
   RIESGO_STOCK_SEGURIDAD: 'riesgo_stock_seguridad',
   AUMENTO_DEMANDA: 'aumento_demanda',
+  STOCKOUT_INMINENTE: 'stockout_inminente',
+  COMPRA_URGENTE: 'compra_urgente',
+  REPOSICION_RECOMENDADA: 'reposicion_recomendada',
+  VENCIMIENTO_PROXIMO: 'vencimiento_proximo',
 }
 
 export const ETIQUETAS_ALERTA = {
@@ -27,6 +31,10 @@ export const ETIQUETAS_ALERTA = {
   [TIPOS_ALERTA.RIESGO_DESABASTECIMIENTO]: 'Riesgo de desabastecimiento',
   [TIPOS_ALERTA.RIESGO_STOCK_SEGURIDAD]: 'Riesgo bajo stock seguridad',
   [TIPOS_ALERTA.AUMENTO_DEMANDA]: 'Aumento de demanda',
+  [TIPOS_ALERTA.STOCKOUT_INMINENTE]: 'Riesgo de desabastecimiento',
+  [TIPOS_ALERTA.COMPRA_URGENTE]: 'Compra urgente',
+  [TIPOS_ALERTA.REPOSICION_RECOMENDADA]: 'Reposición recomendada',
+  [TIPOS_ALERTA.VENCIMIENTO_PROXIMO]: 'Próximo vencimiento',
 }
 
 export const COLORES_ALERTA = {
@@ -41,4 +49,8 @@ export const COLORES_ALERTA = {
   [TIPOS_ALERTA.RIESGO_DESABASTECIMIENTO]: 'rojo',
   [TIPOS_ALERTA.RIESGO_STOCK_SEGURIDAD]: 'amarillo',
   [TIPOS_ALERTA.AUMENTO_DEMANDA]: 'azul',
+  [TIPOS_ALERTA.STOCKOUT_INMINENTE]: 'rojo',
+  [TIPOS_ALERTA.COMPRA_URGENTE]: 'rojo',
+  [TIPOS_ALERTA.REPOSICION_RECOMENDADA]: 'amarillo',
+  [TIPOS_ALERTA.VENCIMIENTO_PROXIMO]: 'amarillo',
 }
