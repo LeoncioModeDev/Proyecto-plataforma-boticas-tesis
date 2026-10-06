@@ -1,0 +1,7 @@
+id,org_id,tipo,codigo_interno,nombre,ubigeo,direccion,telefono,activa,created_at
+ca6716fb-c442-57c7-805d-4f3ef69a467f,e8aeb018-f679-5670-b210-de4f62ff2111,drogueria,BOT-000001,Droguería Central D&R,150101,Av. Abancay 101,014201001,True,2023-01-15T10:00:00
+26f7241d-a84e-5e4a-a43d-33eea1e54eea,e8aeb018-f679-5670-b210-de4f62ff2111,botica,BOT-000002,Botica D&R Miraflores,150104,Av. Larco 450,014201002,True,2023-01-15T10:00:00
+43616d97-2221-569d-82eb-bcc14bcd6344,e8aeb018-f679-5670-b210-de4f62ff2111,botica,BOT-000003,Botica D&R San Borja,150143,Av. Aviación 2800,014201003,True,2023-01-15T10:00:00
+d6f21f11-7533-52dd-a4dc-2fb8e260c02c,e8aeb018-f679-5670-b210-de4f62ff2111,botica,BOT-000004,Botica D&R San Miguel,150122,Av. La Marina 2200,014201004,True,2023-01-15T10:00:00
+8ecedccf-c230-516b-bbc2-108f7a6fbe63,e8aeb018-f679-5670-b210-de4f62ff2111,botica,BOT-000005,Botica D&R Surco,150106,Av. Caminos del Inca 1200,014201005,True,2023-01-15T10:00:00
+7fb983e8-6848-5425-97a2-14da72722d0f,e8aeb018-f679-5670-b210-de4f62ff2111,botica,BOT-000006,Botica D&R La Molina,150114,Av. La Molina 980,014201006,True,2023-01-15T10:00:00

@@ -1,0 +1,21 @@
+{
+  "linea_base": {
+    "fecha": "2026-06-29",
+    "ventas": 3000,
+    "demanda_insatisfecha": 750,
+    "fill_rate": 80.0,
+    "sku_botica_evaluados": 150,
+    "sku_botica_sobrestock": 21,
+    "tasa_sobrestock": 14.0
+  },
+  "resultado_posterior": {
+    "fecha": "2026-07-06",
+    "ventas": 3150,
+    "demanda_insatisfecha": 285,
+    "fill_rate": 91.7,
+    "sku_botica_evaluados": 150,
+    "sku_botica_sobrestock": 12,
+    "tasa_sobrestock": 8.0,
+    "reduccion_sobrestock_porcentual": 42.86
+  }
+}

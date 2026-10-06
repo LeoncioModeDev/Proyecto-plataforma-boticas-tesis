@@ -1,0 +1,248 @@
+{
+  "version_paquete": "1.0.0",
+  "fuente": "dataset_sintetico_oficial_v4",
+  "fecha_generacion": "2026-07-03T18:39:45.901493+00:00",
+  "orden_importacion": [
+    "categorias_terapeuticas",
+    "boticas",
+    "productos",
+    "proveedores",
+    "proveedor_producto",
+    "precios",
+    "stock_inicial",
+    "stock_historico",
+    "ventas_historicas"
+  ],
+  "conteos": {
+    "categorias_terapeuticas": 14,
+    "boticas": 5,
+    "productos": 30,
+    "proveedores": 5,
+    "proveedor_producto": 30,
+    "precios": 150,
+    "stock_inicial": 150,
+    "stock_historico": 600,
+    "ventas_historicas": 7748
+  },
+  "ventas_historicas_modo": "52w",
+  "ventas_historicas_semanas": 52,
+  "ventas_historicas_fecha_desde": "2025-05-12",
+  "ventas_historicas_fecha_hasta": "2026-05-04",
+  "ventas_historicas_filas_generadas": 7748,
+  "ventas_historicas_filas_cero_omitidas": 52,
+  "stock_historico_modo": "4w",
+  "stock_historico_semanas": 4,
+  "stock_historico_fecha_desde": "2026-04-13",
+  "stock_historico_fecha_hasta": "2026-05-04",
+  "stock_historico_filas_generadas": 600,
+  "tamano_lote": 500,
+  "historicos_divididos": true,
+  "ventas_historicas_total_filas": 7748,
+  "ventas_historicas_total_tramos": 16,
+  "stock_historico_total_filas": 600,
+  "stock_historico_total_tramos": 2,
+  "archivos_ventas_historicas": [
+    {
+      "archivo": "ventas_historicas_001.csv",
+      "numero_tramo": 1,
+      "fila_desde": 1,
+      "fila_hasta": 500,
+      "cantidad_filas": 500,
+      "fecha_minima": "2025-05-12",
+      "fecha_maxima": "2025-06-02",
+      "sha256": "1fd088a90fa9aca712a38910bd8accfd1d430be1ee3779e2b413b0ddfb4076d3"
+    },
+    {
+      "archivo": "ventas_historicas_002.csv",
+      "numero_tramo": 2,
+      "fila_desde": 501,
+      "fila_hasta": 1000,
+      "cantidad_filas": 500,
+      "fecha_minima": "2025-06-02",
+      "fecha_maxima": "2025-06-23",
+      "sha256": "0587c4a0f4a0f6f3350493da8e65216573cb6a6c17dfc599397081fb56039891"
+    },
+    {
+      "archivo": "ventas_historicas_003.csv",
+      "numero_tramo": 3,
+      "fila_desde": 1001,
+      "fila_hasta": 1500,
+      "cantidad_filas": 500,
+      "fecha_minima": "2025-06-23",
+      "fecha_maxima": "2025-07-21",
+      "sha256": "312718179c522a5aa0ddb4e9b0d46314573968f42a84416cfd08e3ecb764ce86"
+    },
+    {
+      "archivo": "ventas_historicas_004.csv",
+      "numero_tramo": 4,
+      "fila_desde": 1501,
+      "fila_hasta": 2000,
+      "cantidad_filas": 500,
+      "fecha_minima": "2025-07-21",
+      "fecha_maxima": "2025-08-11",
+      "sha256": "3294e7fa6c5f384ac50ea67af9ba2268c445096bef59a9ae24312a024c19bbc6"
+    },
+    {
+      "archivo": "ventas_historicas_005.csv",
+      "numero_tramo": 5,
+      "fila_desde": 2001,
+      "fila_hasta": 2500,
+      "cantidad_filas": 500,
+      "fecha_minima": "2025-08-11",
+      "fecha_maxima": "2025-09-01",
+      "sha256": "cefb35fd0ed999710d2b3986769646dbd0b176228c48c6251e0a395ade064a5e"
+    },
+    {
+      "archivo": "ventas_historicas_006.csv",
+      "numero_tramo": 6,
+      "fila_desde": 2501,
+      "fila_hasta": 3000,
+      "cantidad_filas": 500,
+      "fecha_minima": "2025-09-01",
+      "fecha_maxima": "2025-09-29",
+      "sha256": "562e4d130afb3d6d3d30f67f7334bf80f34d1ab035500cfc289bb331aed7206c"
+    },
+    {
+      "archivo": "ventas_historicas_007.csv",
+      "numero_tramo": 7,
+      "fila_desde": 3001,
+      "fila_hasta": 3500,
+      "cantidad_filas": 500,
+      "fecha_minima": "2025-09-29",
+      "fecha_maxima": "2025-10-20",
+      "sha256": "eaa5be765bb56d1446701b34b3baa7e0fd258686044fc98dad4875f2dad15814"
+    },
+    {
+      "archivo": "ventas_historicas_008.csv",
+      "numero_tramo": 8,
+      "fila_desde": 3501,
+      "fila_hasta": 4000,
+      "cantidad_filas": 500,
+      "fecha_minima": "2025-10-20",
+      "fecha_maxima": "2025-11-10",
+      "sha256": "90e218ed7f06a1d61a78351edf9e0935f39d577b6c9ec30d89a5533fec9e59d6"
+    },
+    {
+      "archivo": "ventas_historicas_009.csv",
+      "numero_tramo": 9,
+      "fila_desde": 4001,
+      "fila_hasta": 4500,
+      "cantidad_filas": 500,
+      "fecha_minima": "2025-11-10",
+      "fecha_maxima": "2025-12-08",
+      "sha256": "94d7e282117c9f01f4263757d5e24da7c4d02176a8bd1cdc5a1a03dc59c53127"
+    },
+    {
+      "archivo": "ventas_historicas_010.csv",
+      "numero_tramo": 10,
+      "fila_desde": 4501,
+      "fila_hasta": 5000,
+      "cantidad_filas": 500,
+      "fecha_minima": "2025-12-08",
+      "fecha_maxima": "2025-12-29",
+      "sha256": "67fb68999ca494d001b9e76711efeca5935243dec64fc008e34b983c7d4e76c6"
+    },
+    {
+      "archivo": "ventas_historicas_011.csv",
+      "numero_tramo": 11,
+      "fila_desde": 5001,
+      "fila_hasta": 5500,
+      "cantidad_filas": 500,
+      "fecha_minima": "2025-12-29",
+      "fecha_maxima": "2026-01-19",
+      "sha256": "ce330d6dc8bf156835442416994eadab0bbf2c9a65e2f3dcc085e0d70163d65e"
+    },
+    {
+      "archivo": "ventas_historicas_012.csv",
+      "numero_tramo": 12,
+      "fila_desde": 5501,
+      "fila_hasta": 6000,
+      "cantidad_filas": 500,
+      "fecha_minima": "2026-01-19",
+      "fecha_maxima": "2026-02-16",
+      "sha256": "1892c9a09106991b44b141d51ed2767b9558dcd692ffa9ecfb665bd05aa4c54f"
+    },
+    {
+      "archivo": "ventas_historicas_013.csv",
+      "numero_tramo": 13,
+      "fila_desde": 6001,
+      "fila_hasta": 6500,
+      "cantidad_filas": 500,
+      "fecha_minima": "2026-02-16",
+      "fecha_maxima": "2026-03-09",
+      "sha256": "5f9b3f6e209b6e780ec45d183589e899d538e0c0d2bf41445523963c4df77b74"
+    },
+    {
+      "archivo": "ventas_historicas_014.csv",
+      "numero_tramo": 14,
+      "fila_desde": 6501,
+      "fila_hasta": 7000,
+      "cantidad_filas": 500,
+      "fecha_minima": "2026-03-09",
+      "fecha_maxima": "2026-03-30",
+      "sha256": "bbeb16a8ecb8df1883b9489535a2acbdaf700cbf0132f11b217053e70b9ae6b6"
+    },
+    {
+      "archivo": "ventas_historicas_015.csv",
+      "numero_tramo": 15,
+      "fila_desde": 7001,
+      "fila_hasta": 7500,
+      "cantidad_filas": 500,
+      "fecha_minima": "2026-03-30",
+      "fecha_maxima": "2026-04-27",
+      "sha256": "a6fe5fdef9babcc3d1bacf77bb49dd1794b3d22f2ad6c1f787de39928646c154"
+    },
+    {
+      "archivo": "ventas_historicas_016.csv",
+      "numero_tramo": 16,
+      "fila_desde": 7501,
+      "fila_hasta": 7748,
+      "cantidad_filas": 248,
+      "fecha_minima": "2026-04-27",
+      "fecha_maxima": "2026-05-04",
+      "sha256": "0a05dd00b48ef3b726229009dc3474e3bb411d8cb89e93a21a942a05b31f0d4f"
+    }
+  ],
+  "archivos_stock_historico": [
+    {
+      "archivo": "stock_historico_001.csv",
+      "numero_tramo": 1,
+      "fila_desde": 1,
+      "fila_hasta": 500,
+      "cantidad_filas": 500,
+      "fecha_minima": "2026-04-13",
+      "fecha_maxima": "2026-05-04",
+      "sha256": "eb6e37191d5ad631d4a6c5ac0d7e376377a5ac50e799ca5c2886e188d79b3228"
+    },
+    {
+      "archivo": "stock_historico_002.csv",
+      "numero_tramo": 2,
+      "fila_desde": 501,
+      "fila_hasta": 600,
+      "cantidad_filas": 100,
+      "fecha_minima": "2026-05-04",
+      "fecha_maxima": "2026-05-04",
+      "sha256": "a453f2afa0c0f8dc93901183b92a4b0b0cde344ec42eae0563803a5fe6ead2e7"
+    }
+  ],
+  "errores_division": [],
+  "afecta_resultados_paper": false,
+  "nota": "La reduccion se aplica unicamente al paquete operativo para Supabase. Los artefactos oficiales V4 permanecen intactos. No importar el archivo consolidado y los tramos al mismo tiempo.",
+  "hashes_sha256": {
+    "01_categorias_terapeuticas.csv": "3a7a5173ad79f201bf3764f2b5a6b7ea2bb1f1f465c88dd915a894637614df94",
+    "02_boticas.csv": "46312f549ca52ca0134524441e68b06959a2f2b6ec0cf2c515fd2e2f5547a8d3",
+    "03_productos.csv": "f7af49baa2fb8ba1b8b8899acbba94edd2d41071e28116419742439c8f58beef",
+    "04_proveedores.csv": "63de735a4c63283a2b20306e5ed58095113184b54a086e439d103468a54978a5",
+    "05_proveedor_producto.csv": "5323e554e5bf6fafe0f725260a038c190e6863b9301a8cdce5a245e0dce512c0",
+    "06_precios.csv": "92f8b09ab3210a0859c5fee30de5b6235f2722db77f6ab30976fa8ca29a3fa71",
+    "07_stock_inicial.csv": "ce61960fddfccdb5404ce96c6111c6806a1566f5c6f7fcd674ac048242f9b5ba",
+    "08_stock_historico.csv": "7d9b83f75a0eaba44b2aa30ce975823aeec4b639d2edc3cb919c6b993868dcad",
+    "09_ventas_historicas.csv": "6206651c16c4676c66372faccf5aa563b50a1fd5260b1bbe7ed621fc4eeb65ae"
+  },
+  "modelo_referencia": "v1.0.0",
+  "metricas_referencia": {
+    "xgboost_macro_mape": 12.788940737964031,
+    "sarima_macro_mape": 12.85781441965303,
+    "sarima_xgboost_macro_mape": 12.349016982065416
+  }
+}

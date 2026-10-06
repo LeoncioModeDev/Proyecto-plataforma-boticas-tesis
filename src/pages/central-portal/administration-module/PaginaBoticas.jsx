@@ -1,0 +1,210 @@
+import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { Building2, Plus, Edit, ToggleLeft, ToggleRight, MapPin, Phone, Package } from 'lucide-react'
+import Boton from '@/components/common/Boton'
+import Tabla from '@/components/common/Tabla'
+import Insignia from '@/components/common/Insignia'
+import Alerta from '@/components/common/Alerta'
+import Modal from '@/components/common/Modal'
+import TarjetaMetrica from '@/components/charts/TarjetaMetrica'
+import CampoBusqueda from '@/components/common/CampoBusqueda'
+import BarraFiltros from '@/components/common/BarraFiltros'
+import SelectFiltro from '@/components/common/SelectFiltro'
+import { listarBoticas, toggleBotica } from '@/services/supabase/boticas'
+
+const ESTADOS_BOTICA = {
+  activa: { etiqueta: 'Activa', color: 'verde' },
+  inactiva: { etiqueta: 'Inactiva', color: 'gris' },
+}
+
+const COLORES_TIPO = {
+  botica: 'azul',
+  drogueria: 'verde',
+}
+
+const ETIQUETAS_TIPO = {
+  botica: 'Botica',
+  drogueria: 'Droguería',
+}
+
+export default function PaginaBoticas() {
+  const navegar = useNavigate()
+  const [boticas, setBoticas] = useState([])
+  const [cargando, setCargando] = useState(true)
+  const [error, setError] = useState(null)
+  const [filtroTipo, setFiltroTipo] = useState('')
+  const [filtroEstado, setFiltroEstado] = useState('')
+  const [busqueda, setBusqueda] = useState('')
+  const [exito, setExito] = useState(null)
+  const [confirmarDesactivar, setConfirmarDesactivar] = useState(null)
+  const [detalleBotica, setDetalleBotica] = useState(null)
+  const [desactivando, setDesactivando] = useState(false)
+
+  const cargarBoticas = async () => {
+    setCargando(true)
+    setError(null)
+    try {
+      const datos = await listarBoticas()
+      setBoticas(datos)
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setCargando(false)
+    }
+  }
+
+  useEffect(() => { cargarBoticas() }, [])
+
+  const filtrados = boticas.filter(b => {
+    const matchTipo = filtroTipo ? b.tipo === filtroTipo : true
+    const matchEstado = filtroEstado ? (filtroEstado === 'activa' ? b.activa : !b.activa) : true
+    const matchBusqueda = busqueda
+      ? b.nombre.toLowerCase().includes(busqueda.toLowerCase())
+      : true
+    return matchTipo && matchEstado && matchBusqueda
+  })
+
+  const estadisticas = {
+    total: boticas.length,
+    droguerias: boticas.filter(b => b.tipo === 'drogueria').length,
+    activas: boticas.filter(b => b.activa).length,
+    inactivas: boticas.filter(b => !b.activa).length,
+  }
+
+  const manejarToggleActivo = (id) => {
+    const botica = boticas.find(b => b.id === id)
+    if (botica.activa) {
+      setConfirmarDesactivar(id)
+    } else {
+      ejecutarToggle(id)
+    }
+  }
+
+  const ejecutarToggle = async (id) => {
+    setDesactivando(true)
+    try {
+      const resultado = await toggleBotica(id)
+      setBoticas(boticas.map(b => b.id === id ? { ...b, activa: resultado.activa } : b))
+      setExito(resultado.activa ? 'Botica activada correctamente' : 'Botica desactivada correctamente')
+      setTimeout(() => setExito(null), 2000)
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setDesactivando(false)
+      setConfirmarDesactivar(null)
+    }
+  }
+
+  const limpiarFiltros = () => {
+    setBusqueda('')
+    setFiltroTipo('')
+    setFiltroEstado('')
+  }
+
+  const columnas = [
+    { campo: 'codigoInterno', encabezado: 'Código', render: (r) => <span className="font-mono text-xs font-medium">{r.codigoInterno}</span> },
+    {
+      campo: 'nombre',
+      encabezado: 'Nombre',
+      render: (r) => (
+        <div className="flex items-center gap-2">
+          <div className="p-1.5 bg-marca-claro rounded">
+            <Building2 className="h-4 w-4 text-marca-principal" />
+          </div>
+          <div>
+            <p className="font-medium text-principal">{r.nombre}</p>
+            <div className="flex items-center gap-1 text-xs text-secundario">
+              <MapPin className="h-3 w-3" />
+              <span>{r.direccion}</span>
+            </div>
+          </div>
+        </div>
+      ),
+    },
+    {
+      campo: 'tipo',
+      encabezado: 'Tipo',
+      render: (r) => <Insignia color={COLORES_TIPO[r.tipo] || 'gris'}>{ETIQUETAS_TIPO[r.tipo]}</Insignia>,
+    },
+    {
+      campo: 'telefono',
+      encabezado: 'Teléfono',
+      render: (r) => r.telefono ? (
+        <div className="flex items-center gap-1 text-sm text-secundario">
+          <Phone className="h-3 w-3" />
+          <span>{r.telefono}</span>
+        </div>
+      ) : <span className="text-secundario text-sm">—</span>,
+    },
+    {
+      campo: 'activa',
+      encabezado: 'Estado',
+      render: (r) => <Insignia color={ESTADOS_BOTICA[r.activa ? 'activa' : 'inactiva'].color}>{ESTADOS_BOTICA[r.activa ? 'activa' : 'inactiva'].etiqueta}</Insignia>,
+    },
+  ]
+
+  if (cargando) {
+    return <div className="flex items-center justify-center py-20"><p className="text-secundario">Cargando boticas...</p></div>
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-h1 text-principal">Gestión de Boticas</h1>
+          <p className="text-cuerpo text-secundario mt-1">Administración de la red de boticas y droguerías</p>
+        </div>
+        <Boton variante="primario" icono={Plus} onClick={() => navegar('/central/administracion/boticas/nueva')}>Nueva Botica</Boton>
+      </div>
+
+      {exito && <Alerta tipo="exito" titulo={exito} className="mb-4" />}
+      {error && <Alerta tipo="error" titulo={error} className="mb-4" />}
+
+      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+        <TarjetaMetrica etiqueta="Total Ubicaciones" valor={estadisticas.total} icono={Building2} />
+        <TarjetaMetrica etiqueta="Droguerías" valor={estadisticas.droguerias} icono={Package} />
+        <TarjetaMetrica etiqueta="Activas" valor={estadisticas.activas} icono={ToggleRight} />
+        <TarjetaMetrica etiqueta="Inactivas" valor={estadisticas.inactivas} icono={ToggleLeft} />
+      </div>
+
+      <BarraFiltros alLimpiar={limpiarFiltros}>
+        <CampoBusqueda valor={busqueda} alCambiar={setBusqueda} placeholder="Buscar por nombre..." className="w-full sm:w-80" />
+        <SelectFiltro valor={filtroTipo} alCambiar={setFiltroTipo} opciones={[{ valor: 'drogueria', etiqueta: 'Droguería' }, { valor: 'botica', etiqueta: 'Botica' }]} placeholder="Todos los tipos" />
+        <SelectFiltro valor={filtroEstado} alCambiar={setFiltroEstado} opciones={[{ valor: 'activa', etiqueta: 'Activas' }, { valor: 'inactiva', etiqueta: 'Inactivas' }]} placeholder="Todos los estados" />
+      </BarraFiltros>
+
+      <Tabla columnas={columnas} datos={filtrados} busqueda={false} alClickFila={setDetalleBotica} />
+
+      <Modal abierto={!!detalleBotica} alCerrar={() => setDetalleBotica(null)} titulo="Detalle de ubicación" tamano="md">
+        {detalleBotica && (
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+              <div><p className="text-etiqueta text-secundario">Nombre</p><p className="font-medium text-principal">{detalleBotica.nombre}</p></div>
+              <div><p className="text-etiqueta text-secundario">Código</p><p className="font-mono text-principal">{detalleBotica.codigoInterno}</p></div>
+              <div><p className="text-etiqueta text-secundario">Tipo</p><Insignia color={COLORES_TIPO[detalleBotica.tipo] || 'gris'}>{ETIQUETAS_TIPO[detalleBotica.tipo]}</Insignia></div>
+              <div><p className="text-etiqueta text-secundario">Estado</p><Insignia color={ESTADOS_BOTICA[detalleBotica.activa ? 'activa' : 'inactiva'].color}>{ESTADOS_BOTICA[detalleBotica.activa ? 'activa' : 'inactiva'].etiqueta}</Insignia></div>
+              <div className="sm:col-span-2"><p className="text-etiqueta text-secundario">Dirección</p><p className="font-medium text-principal">{detalleBotica.direccion || '—'}</p></div>
+              <div><p className="text-etiqueta text-secundario">Teléfono</p><p className="font-medium text-principal">{detalleBotica.telefono || '—'}</p></div>
+            </div>
+            <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-3 border-t border-estilo">
+              <Boton variante="secundario" icono={detalleBotica.activa ? ToggleRight : ToggleLeft} onClick={() => { setDetalleBotica(null); manejarToggleActivo(detalleBotica.id) }} deshabilitado={desactivando}>{detalleBotica.activa ? 'Desactivar' : 'Activar'}</Boton>
+              <Boton variante="primario" icono={Edit} onClick={() => navegar(`/central/administracion/boticas/${detalleBotica.id}`)}>Editar</Boton>
+            </div>
+          </div>
+        )}
+      </Modal>
+
+      <Modal abierto={!!confirmarDesactivar} alCerrar={() => setConfirmarDesactivar(null)} titulo="Confirmar">
+        <div className="space-y-4">
+          <p className="text-cuerpo text-secundario">¿Está seguro de que desea desactivar esta ubicación? Los usuarios asociados no podrán operar sobre ella.</p>
+          <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-4 border-t border-estilo">
+            <Boton variante="secundario" onClick={() => setConfirmarDesactivar(null)}>Cancelar</Boton>
+            <Boton variante="peligro" onClick={() => ejecutarToggle(confirmarDesactivar)} deshabilitado={desactivando}>
+              {desactivando ? 'Desactivando…' : 'Desactivar'}
+            </Boton>
+          </div>
+        </div>
+      </Modal>
+    </div>
+  )
+}

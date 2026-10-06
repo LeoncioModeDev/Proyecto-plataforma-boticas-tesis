@@ -1,127 +1,131 @@
 ﻿import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { LogIn } from 'lucide-react'
+import { LogIn, Mail, Key, Eye, EyeOff } from 'lucide-react'
 
 import useAutenticacion from '@/state/useAutenticacion'
-import { ROLES, ETIQUETAS_ROLES } from '@/constants/roles'
 import Boton from '@/components/common/Boton'
+import LogoBoticAI from '@/assets/images/LogoBoticAI.png'
 
-/**
- * Pantalla de inicio de sesión.
- * En modo mock, permite seleccionar un rol para acceder al sistema.
- */
+const RUTA_POR_ROL = {
+  super_admin: '/admin-saas/dashboard',
+  admin_central: '/central/dashboard',
+  operador_drogueria: '/operaciones/dashboard',
+  visor_botica: '/botica/dashboard',
+}
+
 export default function InicioSesion() {
   const [email, setEmail] = useState('')
   const [contrasena, setContrasena] = useState('')
-  const [rolSeleccionado, setRolSeleccionado] = useState(ROLES.ADMIN_CENTRAL)
+  const [verContrasena, setVerContrasena] = useState(false)
+  const [enviando, setEnviando] = useState(false)
+  const [error, setError] = useState(null)
   const { iniciarSesion } = useAutenticacion()
   const navegar = useNavigate()
 
-  const manejarSubmit = (e) => {
+  const manejarSubmit = async (e) => {
     e.preventDefault()
-    iniciarSesion(rolSeleccionado)
-
-    switch (rolSeleccionado) {
-      case ROLES.ADMIN_CENTRAL:
-        navegar('/central/dashboard')
-        break
-      case ROLES.OPERADOR_DROGUERIA:
-        navegar('/botica/stock')
-        break
-      case ROLES.VISOR_BOTICA:
-        navegar('/ml/predicciones')
-        break
-      default:
-        navegar('/')
+    if (!email || !contrasena) {
+      setError('Ingresa tu correo y contraseña')
+      return
     }
+    setEnviando(true)
+    setError(null)
+
+    const { error: errorAuth } = await iniciarSesion(email, contrasena)
+    if (errorAuth) {
+      setError(errorAuth.message === 'Invalid login credentials'
+        ? 'Correo o contraseña incorrectos'
+        : errorAuth.message
+      )
+      setEnviando(false)
+      return
+    }
+
+    const estado = useAutenticacion.getState()
+    const ruta = RUTA_POR_ROL[estado.usuario?.rol] || '/'
+    navegar(ruta)
   }
 
   return (
-    <div className="min-h-screen bg-neutro-blanco-suave flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        {/* Logo */}
-        <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-marca-principal rounded-xl flex items-center justify-center mx-auto mb-4 shadow-suave">
-            <span className="text-white font-bold text-2xl">B</span>
-          </div>
-          <h1 className="text-h1 text-neutro-negro">Botica Demand ML</h1>
-          <p className="text-secundario text-neutro-gris-texto mt-2">
-            Gestión inteligente de inventario y predicción de demanda
-          </p>
+    <div className="min-h-screen bg-fondo flex transition-colors">
+      <div className="flex w-full max-[900px]:flex-col max-[900px]:items-center max-[900px]:p-6">
+        <div className="flex-[55] flex items-center justify-center p-8 lg:px-20 max-[900px]:p-0 max-[900px]:mb-8 max-[900px]:pt-8">
+          <img
+            src={LogoBoticAI}
+            alt="BoticAI"
+            className="w-full max-w-[480px] max-[900px]:max-w-[280px] object-contain"
+          />
         </div>
 
-        {/* Formulario */}
-        <div className="bg-white border border-neutro-gris-borde rounded-tarjeta shadow-suave p-8">
-          <form onSubmit={manejarSubmit} className="space-y-5">
-            <div className="flex flex-col gap-1.5">
-              <label htmlFor="email" className="text-etiqueta font-medium text-neutro-negro-suave">
-                Correo electrónico
-              </label>
-              <input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="usuario@boticaml.pe"
-                className="px-3 py-2.5 text-cuerpo bg-white border border-neutro-gris-borde rounded-boton
-                           placeholder:text-neutro-gris-texto
-                           focus:outline-none focus:border-marca-principal focus:ring-1 focus:ring-marca-principal
-                           transition-colors"
-              />
-            </div>
+        <div className="flex-[45] flex flex-col justify-center px-8 lg:px-16 xl:px-20 max-[900px]:px-0 max-[900px]:w-full max-[900px]:max-w-[480px]">
+          <div className="max-w-[540px]">
+            <h1 className="text-[36px] font-bold text-principal mb-2">
+              Accede a BoticAI
+            </h1>
+            <p className="text-[18px] text-secundario leading-relaxed">
+              Inicia sesión para gestionar el inventario y visualizar predicciones de demanda en tiempo real
+            </p>
 
-            <div className="flex flex-col gap-1.5">
-              <label htmlFor="contrasena" className="text-etiqueta font-medium text-neutro-negro-suave">
-                Contraseña
-              </label>
-              <input
-                id="contrasena"
-                type="password"
-                value={contrasena}
-                onChange={(e) => setContrasena(e.target.value)}
-                placeholder="••••••••"
-                className="px-3 py-2.5 text-cuerpo bg-white border border-neutro-gris-borde rounded-boton
-                           placeholder:text-neutro-gris-texto
-                           focus:outline-none focus:border-marca-principal focus:ring-1 focus:ring-marca-principal
-                           transition-colors"
-              />
-            </div>
+            <form onSubmit={manejarSubmit} className="mt-6 space-y-6">
+              <div className="flex flex-col gap-2">
+                <label htmlFor="email" className="text-[15px] font-semibold text-principal">
+                  Correo electrónico
+                </label>
+                <div className="relative">
+                  <Mail className="absolute left-[18px] top-1/2 -translate-y-1/2 h-5 w-5 text-secundario" />
+                  <input
+                    id="email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="usuario@boticaml.pe"
+                    className="w-full h-[56px] pl-12 pr-[18px] text-sm bg-fondo border border-estilo rounded-xl placeholder:text-secundario focus:outline-none focus:border-marca-principal focus:ring-1 focus:ring-marca-principal transition-colors"
+                  />
+                </div>
+              </div>
 
-            {/* Selector de rol (modo mock) */}
-            <div className="flex flex-col gap-1.5">
-              <label htmlFor="rol" className="text-etiqueta font-medium text-neutro-negro-suave">
-                Acceder como <span className="text-neutro-gris-texto">(modo desarrollo)</span>
-              </label>
-              <select
-                id="rol"
-                value={rolSeleccionado}
-                onChange={(e) => setRolSeleccionado(e.target.value)}
-                className="px-3 py-2.5 text-cuerpo bg-marca-claro border border-marca-principal rounded-boton
-                           text-marca-principal font-medium
-                           focus:outline-none focus:ring-2 focus:ring-marca-principal focus:ring-offset-2
-                           transition-colors"
+              <div className="flex flex-col gap-2">
+                <label htmlFor="contrasena" className="text-[15px] font-semibold text-principal">
+                  Contraseña
+                </label>
+                <div className="relative">
+                  <Key className="absolute left-[18px] top-1/2 -translate-y-1/2 h-5 w-5 text-secundario" />
+                  <input
+                    id="contrasena"
+                    type={verContrasena ? 'text' : 'password'}
+                    value={contrasena}
+                    onChange={(e) => setContrasena(e.target.value)}
+                    placeholder="Ingresa tu contraseña"
+                    className="w-full h-[56px] pl-12 pr-12 text-sm bg-fondo border border-estilo rounded-xl placeholder:text-secundario focus:outline-none focus:border-marca-principal focus:ring-1 focus:ring-marca-principal transition-colors"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setVerContrasena(!verContrasena)}
+                    className="absolute right-[18px] top-1/2 -translate-y-1/2 text-secundario hover:text-principal transition-colors"
+                    tabIndex={-1}
+                  >
+                    {verContrasena ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                  </button>
+                </div>
+              </div>
+
+              {error && (
+                <p className="text-sm text-red-500 dark:text-red-400 text-center">{error}</p>
+              )}
+
+              <Boton
+                tipo="submit"
+                variante="primario"
+                tamano="grande"
+                icono={LogIn}
+                className="w-full h-[50px] rounded-lg text-[15px]"
+                deshabilitado={enviando}
               >
-                <option value={ROLES.ADMIN_CENTRAL}>{ETIQUETAS_ROLES[ROLES.ADMIN_CENTRAL]}</option>
-                <option value={ROLES.OPERADOR_DROGUERIA}>{ETIQUETAS_ROLES[ROLES.OPERADOR_DROGUERIA]}</option>
-                <option value={ROLES.VISOR_BOTICA}>{ETIQUETAS_ROLES[ROLES.VISOR_BOTICA]}</option>
-              </select>
-            </div>
-
-            <Boton tipo="submit" variante="primario" tamano="grande" icono={LogIn} className="w-full">
-              Iniciar sesión
-            </Boton>
-          </form>
-
-          <div className="mt-4 text-center">
-            <a href="/restablecer-contrasena" className="text-secundario text-marca-principal hover:underline">
-              ¿Olvidaste tu contraseña?
-            </a>
+                {enviando ? 'Ingresando…' : 'Iniciar sesión'}
+              </Boton>
+            </form>
           </div>
         </div>
-
-        <p className="text-center text-etiqueta text-neutro-gris-texto mt-6">
-          Universidad Peruana de Ciencias Aplicadas — Tesis 2026
-        </p>
       </div>
     </div>
   )

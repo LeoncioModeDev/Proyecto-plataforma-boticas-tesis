@@ -1,15 +1,22 @@
-﻿import { BrowserRouter } from 'react-router-dom'
+﻿import { useEffect } from 'react'
+import { BrowserRouter } from 'react-router-dom'
 
 import Rutas from '@/routing/Rutas'
+import ProveedorTema from '@/components/common/ProveedorTema'
+import useAutenticacion from '@/state/useAutenticacion'
 
-/**
- * Componente raíz de la aplicación.
- * Envuelve la app con BrowserRouter y renderiza el sistema de rutas.
- */
 function App() {
+  const inicializar = useAutenticacion((s) => s.inicializar)
+
+  useEffect(() => {
+    inicializar()
+  }, [inicializar])
+
   return (
     <BrowserRouter>
-      <Rutas />
+      <ProveedorTema>
+        <Rutas />
+      </ProveedorTema>
     </BrowserRouter>
   )
 }

@@ -1,0 +1,13 @@
+[functions]
+crear-cliente.verify_jwt = true
+proveedores.verify_jwt = true
+productos.verify_jwt = false
+proveedor-producto.verify_jwt = true
+boticas.verify_jwt = true
+usuarios.verify_jwt = true
+auditoria.verify_jwt = true
+ordenes-compra.verify_jwt = true
+inventario-movimientos.verify_jwt = true
+configuracion.verify_jwt = true
+snapshot-stock.verify_jwt = true
+importaciones-datos.verify_jwt = true

@@ -1,0 +1,6 @@
+codigo_interno,razon_social,tipo_identificacion,numero_identificacion,pais_origen,moneda,activo
+PROV-001,Albis Pharma Perú S.A.,ruc,20100345678,PE,PEN,true
+PROV-002,Distribuidora Drokasa S.A.,ruc,20100123456,PE,PEN,true
+PROV-003,Farmacéutica Internacional S.A.,ruc,20100901234,PE,PEN,true
+PROV-004,Laboratorios Roche del Perú,ruc,20100567890,PE,PEN,true
+PROV-005,Quicornac Distribuciones S.A.C.,ruc,20100789012,PE,PEN,true

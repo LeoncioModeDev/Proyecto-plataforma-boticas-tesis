@@ -1,0 +1,16 @@
+{
+  "tabla": "public.categorias_terapeuticas",
+  "rls_activa": true,
+  "politicas": {
+    "super_admin": "acceso global",
+    "admin_central": "CRUD solo org_id = obtener_org_usuario()",
+    "operador_drogueria": "SELECT solo org_id = obtener_org_usuario()",
+    "visor_botica": "SELECT solo org_id = obtener_org_usuario()"
+  },
+  "aislamiento": "Los endpoints tambien filtran explicitamente por usuarios.org_id; el frontend nunca envia org_id editable.",
+  "prueba_sql": [
+    "set role authenticated;",
+    "-- Con JWT de org A: select * from categorias_terapeuticas solo debe devolver org A.",
+    "-- Con JWT de org B: no debe ver registros de org A."
+  ]
+}

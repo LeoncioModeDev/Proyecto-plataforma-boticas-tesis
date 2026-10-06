@@ -1,21 +1,17 @@
-/**
- * Campo de selección (dropdown) integrado con React Hook Form.
- */
-export default function CampoSeleccion({ nombre, etiqueta, opciones = [], requerido, error, register, placeholder = 'Seleccionar...', ...props }) {
+export default function CampoSeleccion({ nombre, etiqueta, opciones = [], requerido, error, register, placeholder = 'Seleccionar...', className, ...props }) {
   return (
     <div className="flex flex-col gap-1.5">
       {etiqueta && (
-        <label htmlFor={nombre} className="text-etiqueta font-medium text-neutro-negro-suave">
+        <label htmlFor={nombre} className="text-sm font-medium text-principal">
           {etiqueta} {requerido && <span className="text-estado-critico">*</span>}
         </label>
       )}
       <select
         id={nombre}
         {...register(nombre)}
-        className="px-3 py-2 text-cuerpo bg-white border border-neutro-gris-borde rounded-boton
-                   text-neutro-negro-suave
+        className={`px-3 py-2 text-sm bg-fondo border border-estilo rounded-md text-principal
                    focus:outline-none focus:border-marca-principal focus:ring-1 focus:ring-marca-principal
-                   transition-colors"
+                   transition-colors ${className}`}
         {...props}
       >
         <option value="">{placeholder}</option>
@@ -23,7 +19,7 @@ export default function CampoSeleccion({ nombre, etiqueta, opciones = [], requer
           <option key={op.valor} value={op.valor}>{op.etiqueta}</option>
         ))}
       </select>
-      {error && <p className="text-etiqueta text-estado-critico">{error}</p>}
+      {error && <p className="text-xs text-estado-critico">{error}</p>}
     </div>
   )
 }

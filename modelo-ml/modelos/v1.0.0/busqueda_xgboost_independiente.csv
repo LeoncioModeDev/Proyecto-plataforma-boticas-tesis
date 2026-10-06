@@ -1,0 +1,7 @@
+objective,config_num,macro_mape_validacion,n_estimators,max_depth,learning_rate,min_child_weight,reg_alpha,reg_lambda,gamma,subsample,colsample_bytree
+reg:squarederror,1,16.87188482981138,108,2,0.03,5,0.1,10.0,0.0,0.8,0.8
+reg:squarederror,2,16.712975726743306,160,2,0.02,10,0.5,10.0,0.1,0.8,0.8
+reg:squarederror,3,16.237098894112393,88,3,0.03,10,0.1,15.0,0.1,0.85,0.8
+reg:pseudohubererror,1,1.2268736987030836e+16,20,2,0.03,5,0.1,10.0,0.0,0.8,0.8
+reg:pseudohubererror,2,1.2268736987030836e+16,20,2,0.02,10,0.5,10.0,0.1,0.8,0.8
+reg:pseudohubererror,3,1.2268736987030836e+16,20,3,0.03,10,0.1,15.0,0.1,0.85,0.8

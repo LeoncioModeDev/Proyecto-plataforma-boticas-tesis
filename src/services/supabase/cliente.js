@@ -1,5 +1,10 @@
-// TODO: Conectar Supabase en Fase 2
-// Este archivo exportará el cliente inicializado de Supabase.
-// Por ahora, exporta un objeto vacío como placeholder.
+import { createClient } from '@supabase/supabase-js'
 
-export const supabase = {}
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
+
+if (!supabaseUrl || !supabaseAnonKey) {
+  throw new Error('Faltan variables de entorno: VITE_SUPABASE_URL y VITE_SUPABASE_ANON_KEY')
+}
+
+export const supabase = createClient(supabaseUrl, supabaseAnonKey)

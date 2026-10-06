@@ -1,0 +1,24 @@
+{
+  "stock_historico": [
+    "stock_historico/stock_historico_001.csv",
+    "stock_historico/stock_historico_002.csv"
+  ],
+  "ventas_historicas": [
+    "ventas_historicas/ventas_historicas_001.csv",
+    "ventas_historicas/ventas_historicas_002.csv",
+    "ventas_historicas/ventas_historicas_003.csv",
+    "ventas_historicas/ventas_historicas_004.csv",
+    "ventas_historicas/ventas_historicas_005.csv",
+    "ventas_historicas/ventas_historicas_006.csv",
+    "ventas_historicas/ventas_historicas_007.csv",
+    "ventas_historicas/ventas_historicas_008.csv",
+    "ventas_historicas/ventas_historicas_009.csv",
+    "ventas_historicas/ventas_historicas_010.csv",
+    "ventas_historicas/ventas_historicas_011.csv",
+    "ventas_historicas/ventas_historicas_012.csv",
+    "ventas_historicas/ventas_historicas_013.csv",
+    "ventas_historicas/ventas_historicas_014.csv",
+    "ventas_historicas/ventas_historicas_015.csv",
+    "ventas_historicas/ventas_historicas_016.csv"
+  ]
+}
