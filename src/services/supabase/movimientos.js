@@ -52,7 +52,13 @@ export async function obtenerMovimientos(filtros = {}) {
     query = query.eq('ubicacion_id', filtros.ubicacionId)
   }
 
-  const { data, error } = await query.order('created_at', { ascending: false })
+  query = query.order('created_at', { ascending: false })
+
+  if (filtros.limite) {
+    query = query.limit(filtros.limite)
+  }
+
+  const { data, error } = await query
 
   if (error) throw new Error('Error al cargar movimientos: ' + error.message)
   return (data || []).map(MAPEAR_MOVIMIENTO)

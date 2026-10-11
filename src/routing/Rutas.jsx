@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { lazy, Suspense, useState } from 'react'
 import { Routes, Route, Navigate, Outlet } from 'react-router-dom'
 
 import useAutenticacion from '@/state/useAutenticacion'
@@ -10,107 +10,111 @@ import BarraLateral from '@/components/navigation/BarraLateral'
 import BarraSuperior from '@/components/navigation/BarraSuperior'
 
 // Autenticación
-import InicioSesion from '@/pages/auth/InicioSesion'
-import RestablecerContrasena from '@/pages/auth/RestablecerContrasena'
-import PaginaNoAutorizado from '@/pages/auth/PaginaNoAutorizado'
+const InicioSesion = lazy(() => import('@/pages/auth/InicioSesion'))
+const RestablecerContrasena = lazy(() => import('@/pages/auth/RestablecerContrasena'))
+const PaginaNoAutorizado = lazy(() => import('@/pages/auth/PaginaNoAutorizado'))
 
 // Portal Central
-import PaginaDashboardCentral from '@/pages/central-portal/PaginaDashboardCentral'
-import PaginaCatalogo from '@/pages/central-portal/inventory-module/catalog/PaginaCatalogo'
-import FormularioProducto from '@/pages/central-portal/inventory-module/catalog/FormularioProducto'
-import DetalleProducto from '@/pages/central-portal/inventory-module/catalog/DetalleProducto'
-import PaginaStock from '@/pages/central-portal/inventory-module/stock/PaginaStock'
-import DetalleStockActual from '@/pages/shared/inventory/DetalleStockActual'
-import PaginaLotes from '@/pages/central-portal/inventory-module/lots/PaginaLotes'
-import PaginaMovimientos from '@/pages/central-portal/inventory-module/movements/PaginaMovimientos'
-import PaginaAjustes from '@/pages/central-portal/inventory-module/adjustments/PaginaAjustes'
-import FormularioAjuste from '@/pages/central-portal/inventory-module/adjustments/FormularioAjuste'
-import PaginaReportes from '@/pages/central-portal/inventory-module/reports/PaginaReportes'
-import ReporteKardex from '@/pages/central-portal/inventory-module/reports/ReporteKardex'
-import ReporteStockCritico from '@/pages/central-portal/inventory-module/reports/ReporteStockCritico'
-import ReporteMovimientos from '@/pages/central-portal/inventory-module/reports/ReporteMovimientos'
-import ReporteRotacion from '@/pages/central-portal/inventory-module/reports/ReporteRotacion'
-import PaginaTransferencias from '@/pages/central-portal/distribution-module/PaginaTransferencias'
-import PaginaRedistribucionCentral from '@/pages/central-portal/distribution-module/PaginaRedistribucion'
-import FormularioTransferencia from '@/pages/central-portal/distribution-module/FormularioTransferencia'
-import PaginaHistorialDistribucion from '@/pages/central-portal/distribution-module/historial/PaginaHistorialDistribucion'
-import PaginaProveedores from '@/pages/central-portal/suppliers-module/PaginaProveedores'
-import PaginaVerProveedor from '@/pages/central-portal/suppliers-module/ver/PaginaVerProveedor'
-import PaginaNuevoProveedor from '@/pages/central-portal/suppliers-module/new/PaginaNuevoProveedor'
-import PaginaEditarProveedor from '@/pages/central-portal/suppliers-module/edit/PaginaEditarProveedor'
-import PaginaOrdenesCompraCentral from '@/pages/central-portal/suppliers-module/PaginaOrdenesCompra'
-import PaginaNuevaOrdenCompraCentral from '@/pages/central-portal/suppliers-module/new/PaginaNuevaOrdenCompra'
-import PaginaRecepcionOrden from '@/pages/central-portal/suppliers-module/PaginaRecepcionOrden'
-import PaginaHistorialOrdenesCentral from '@/pages/central-portal/suppliers-module/PaginaHistorialOrdenes'
-import PaginaRecepcionesCentral from '@/pages/central-portal/suppliers-module/PaginaRecepciones'
-import DetalleRecepcionCentral from '@/pages/central-portal/suppliers-module/DetalleRecepcion'
-import PaginaUsuarios from '@/pages/central-portal/administration-module/PaginaUsuarios'
-import PaginaBoticas from '@/pages/central-portal/administration-module/PaginaBoticas'
-import PaginaConfiguracionGeneral from '@/pages/central-portal/administration-module/PaginaConfiguracionGeneral'
-import PaginaConfiguracionAvanzada from '@/pages/central-portal/administration-module/PaginaConfiguracionAvanzada'
-import PaginaImportacionDatos from '@/pages/central-portal/administration-module/PaginaImportacionDatos'
-import PaginaCategoriasTerapeuticas from '@/pages/central-portal/administration-module/PaginaCategoriasTerapeuticas'
-import DetalleCategoriaTerapeutica from '@/pages/central-portal/administration-module/DetalleCategoriaTerapeutica'
-import FormularioCategoriaTerapeutica from '@/pages/central-portal/administration-module/FormularioCategoriaTerapeutica'
-import PaginaAuditoria from '@/pages/central-portal/administration-module/PaginaAuditoria'
-import PaginaNuevaBotica from '@/pages/central-portal/administration-module/new/PaginaNuevaBotica'
-import PaginaEditarBotica from '@/pages/central-portal/administration-module/edit/PaginaEditarBotica'
-import CrearOrganizacion from '@/pages/admin/CrearOrganizacion'
-import PaginaDashboardSaaS from '@/pages/admin-saas/PaginaDashboardSaaS'
-import PaginaOrganizaciones from '@/pages/admin-saas/PaginaOrganizaciones'
-import PaginaDetalleOrganizacion from '@/pages/admin-saas/PaginaDetalleOrganizacion'
-import PaginaEditarOrganizacion from '@/pages/admin-saas/PaginaEditarOrganizacion'
+const PaginaDashboardCentral = lazy(() => import('@/pages/central-portal/PaginaDashboardCentral'))
+const PaginaCatalogo = lazy(() => import('@/pages/central-portal/inventory-module/catalog/PaginaCatalogo'))
+const FormularioProducto = lazy(() => import('@/pages/central-portal/inventory-module/catalog/FormularioProducto'))
+const DetalleProducto = lazy(() => import('@/pages/central-portal/inventory-module/catalog/DetalleProducto'))
+const PaginaStock = lazy(() => import('@/pages/central-portal/inventory-module/stock/PaginaStock'))
+const DetalleStockActual = lazy(() => import('@/pages/shared/inventory/DetalleStockActual'))
+const PaginaLotes = lazy(() => import('@/pages/central-portal/inventory-module/lots/PaginaLotes'))
+const PaginaMovimientos = lazy(() => import('@/pages/central-portal/inventory-module/movements/PaginaMovimientos'))
+const PaginaAjustes = lazy(() => import('@/pages/central-portal/inventory-module/adjustments/PaginaAjustes'))
+const FormularioAjuste = lazy(() => import('@/pages/central-portal/inventory-module/adjustments/FormularioAjuste'))
+const PaginaReportes = lazy(() => import('@/pages/central-portal/inventory-module/reports/PaginaReportes'))
+const ReporteKardex = lazy(() => import('@/pages/central-portal/inventory-module/reports/ReporteKardex'))
+const ReporteStockCritico = lazy(() => import('@/pages/central-portal/inventory-module/reports/ReporteStockCritico'))
+const ReporteMovimientos = lazy(() => import('@/pages/central-portal/inventory-module/reports/ReporteMovimientos'))
+const ReporteRotacion = lazy(() => import('@/pages/central-portal/inventory-module/reports/ReporteRotacion'))
+const PaginaTransferencias = lazy(() => import('@/pages/central-portal/distribution-module/PaginaTransferencias'))
+const PaginaRedistribucionCentral = lazy(() => import('@/pages/central-portal/distribution-module/PaginaRedistribucion'))
+const FormularioTransferencia = lazy(() => import('@/pages/central-portal/distribution-module/FormularioTransferencia'))
+const PaginaHistorialDistribucion = lazy(() => import('@/pages/central-portal/distribution-module/historial/PaginaHistorialDistribucion'))
+const PaginaProveedores = lazy(() => import('@/pages/central-portal/suppliers-module/PaginaProveedores'))
+const PaginaVerProveedor = lazy(() => import('@/pages/central-portal/suppliers-module/ver/PaginaVerProveedor'))
+const PaginaNuevoProveedor = lazy(() => import('@/pages/central-portal/suppliers-module/new/PaginaNuevoProveedor'))
+const PaginaEditarProveedor = lazy(() => import('@/pages/central-portal/suppliers-module/edit/PaginaEditarProveedor'))
+const PaginaOrdenesCompraCentral = lazy(() => import('@/pages/central-portal/suppliers-module/PaginaOrdenesCompra'))
+const PaginaNuevaOrdenCompraCentral = lazy(() => import('@/pages/central-portal/suppliers-module/new/PaginaNuevaOrdenCompra'))
+const PaginaRecepcionOrden = lazy(() => import('@/pages/central-portal/suppliers-module/PaginaRecepcionOrden'))
+const PaginaHistorialOrdenesCentral = lazy(() => import('@/pages/central-portal/suppliers-module/PaginaHistorialOrdenes'))
+const PaginaRecepcionesCentral = lazy(() => import('@/pages/central-portal/suppliers-module/PaginaRecepciones'))
+const DetalleRecepcionCentral = lazy(() => import('@/pages/central-portal/suppliers-module/DetalleRecepcion'))
+const PaginaUsuarios = lazy(() => import('@/pages/central-portal/administration-module/PaginaUsuarios'))
+const PaginaBoticas = lazy(() => import('@/pages/central-portal/administration-module/PaginaBoticas'))
+const PaginaConfiguracionGeneral = lazy(() => import('@/pages/central-portal/administration-module/PaginaConfiguracionGeneral'))
+const PaginaConfiguracionAvanzada = lazy(() => import('@/pages/central-portal/administration-module/PaginaConfiguracionAvanzada'))
+const PaginaImportacionDatos = lazy(() => import('@/pages/central-portal/administration-module/PaginaImportacionDatos'))
+const PaginaCategoriasTerapeuticas = lazy(() => import('@/pages/central-portal/administration-module/PaginaCategoriasTerapeuticas'))
+const DetalleCategoriaTerapeutica = lazy(() => import('@/pages/central-portal/administration-module/DetalleCategoriaTerapeutica'))
+const FormularioCategoriaTerapeutica = lazy(() => import('@/pages/central-portal/administration-module/FormularioCategoriaTerapeutica'))
+const PaginaAuditoria = lazy(() => import('@/pages/central-portal/administration-module/PaginaAuditoria'))
+const PaginaNuevaBotica = lazy(() => import('@/pages/central-portal/administration-module/new/PaginaNuevaBotica'))
+const PaginaEditarBotica = lazy(() => import('@/pages/central-portal/administration-module/edit/PaginaEditarBotica'))
+const CrearOrganizacion = lazy(() => import('@/pages/admin/CrearOrganizacion'))
+const PaginaDashboardSaaS = lazy(() => import('@/pages/admin-saas/PaginaDashboardSaaS'))
+const PaginaOrganizaciones = lazy(() => import('@/pages/admin-saas/PaginaOrganizaciones'))
+const PaginaDetalleOrganizacion = lazy(() => import('@/pages/admin-saas/PaginaDetalleOrganizacion'))
+const PaginaEditarOrganizacion = lazy(() => import('@/pages/admin-saas/PaginaEditarOrganizacion'))
 
 // Portal Boticas
-import PaginaStockBotica from '@/pages/pharmacy-portal/PaginaStockBotica'
-import PaginaLotesBotica from '@/pages/pharmacy-portal/PaginaLotesBotica'
-import PaginaMovimientosBotica from '@/pages/pharmacy-portal/PaginaMovimientosBotica'
-import PaginaDashboardBotica from '@/pages/pharmacy-portal/PaginaDashboardBotica'
-import PaginaTransferenciasBotica from '@/pages/pharmacy-portal/PaginaTransferenciasBotica'
+const PaginaStockBotica = lazy(() => import('@/pages/pharmacy-portal/PaginaStockBotica'))
+const PaginaLotesBotica = lazy(() => import('@/pages/pharmacy-portal/PaginaLotesBotica'))
+const PaginaMovimientosBotica = lazy(() => import('@/pages/pharmacy-portal/PaginaMovimientosBotica'))
+const PaginaDashboardBotica = lazy(() => import('@/pages/pharmacy-portal/PaginaDashboardBotica'))
+const PaginaTransferenciasBotica = lazy(() => import('@/pages/pharmacy-portal/PaginaTransferenciasBotica'))
 
 // Portal Operaciones
-import PaginaDashboardOperaciones from '@/pages/operations-portal/PaginaDashboardOperaciones'
-import PaginaCatalogoOperaciones from '@/pages/operations-portal/inventory-module/PaginaCatalogo'
-import PaginaStockOperaciones from '@/pages/operations-portal/inventory-module/PaginaStock'
-import PaginaLotesOperaciones from '@/pages/operations-portal/inventory-module/PaginaLotes'
-import PaginaMovimientosOperaciones from '@/pages/operations-portal/inventory-module/PaginaMovimientos'
-import PaginaAjustesOperaciones from '@/pages/operations-portal/inventory-module/PaginaAjustes'
-import PaginaReportesOperaciones from '@/pages/operations-portal/inventory-module/PaginaReportes'
-import PaginaTransferenciasOperaciones from '@/pages/operations-portal/distribution-module/PaginaTransferencias'
-import FormularioTransferenciaOperaciones from '@/pages/operations-portal/distribution-module/FormularioTransferencia'
-import PaginaRedistribucionOperaciones from '@/pages/operations-portal/distribution-module/PaginaRedistribucion'
-import PaginaProveedoresOperaciones from '@/pages/operations-portal/suppliers-module/PaginaProveedores'
-import PaginaVerProveedorOperaciones from '@/pages/central-portal/suppliers-module/ver/PaginaVerProveedor'
-import PaginaOrdenesCompraOperaciones from '@/pages/operations-portal/suppliers-module/PaginaOrdenesCompra'
-import PaginaNuevaOrdenCompraOperaciones from '@/pages/operations-portal/suppliers-module/PaginaNuevaOrdenCompra'
-import PaginaAlertasOperaciones from '@/pages/operations-portal/PaginaAlertas'
+const PaginaDashboardOperaciones = lazy(() => import('@/pages/operations-portal/PaginaDashboardOperaciones'))
+const PaginaCatalogoOperaciones = lazy(() => import('@/pages/operations-portal/inventory-module/PaginaCatalogo'))
+const PaginaStockOperaciones = lazy(() => import('@/pages/operations-portal/inventory-module/PaginaStock'))
+const PaginaLotesOperaciones = lazy(() => import('@/pages/operations-portal/inventory-module/PaginaLotes'))
+const PaginaMovimientosOperaciones = lazy(() => import('@/pages/operations-portal/inventory-module/PaginaMovimientos'))
+const PaginaAjustesOperaciones = lazy(() => import('@/pages/operations-portal/inventory-module/PaginaAjustes'))
+const PaginaReportesOperaciones = lazy(() => import('@/pages/operations-portal/inventory-module/PaginaReportes'))
+const PaginaTransferenciasOperaciones = lazy(() => import('@/pages/operations-portal/distribution-module/PaginaTransferencias'))
+const FormularioTransferenciaOperaciones = lazy(() => import('@/pages/operations-portal/distribution-module/FormularioTransferencia'))
+const PaginaRedistribucionOperaciones = lazy(() => import('@/pages/operations-portal/distribution-module/PaginaRedistribucion'))
+const PaginaProveedoresOperaciones = lazy(() => import('@/pages/operations-portal/suppliers-module/PaginaProveedores'))
+const PaginaVerProveedorOperaciones = lazy(() => import('@/pages/central-portal/suppliers-module/ver/PaginaVerProveedor'))
+const PaginaOrdenesCompraOperaciones = lazy(() => import('@/pages/operations-portal/suppliers-module/PaginaOrdenesCompra'))
+const PaginaNuevaOrdenCompraOperaciones = lazy(() => import('@/pages/operations-portal/suppliers-module/PaginaNuevaOrdenCompra'))
+const PaginaAlertasOperaciones = lazy(() => import('@/pages/operations-portal/PaginaAlertas'))
 // Reused from Central Portal for Operations
-import FormularioProductoOperaciones from '@/pages/central-portal/inventory-module/catalog/FormularioProducto'
-import DetalleProductoOperaciones from '@/pages/central-portal/inventory-module/catalog/DetalleProducto'
-import FormularioAjusteOperaciones from '@/pages/central-portal/inventory-module/adjustments/FormularioAjuste'
-import ReporteKardexOperaciones from '@/pages/central-portal/inventory-module/reports/ReporteKardex'
-import ReporteStockCriticoOperaciones from '@/pages/central-portal/inventory-module/reports/ReporteStockCritico'
-import ReporteMovimientosOperaciones from '@/pages/central-portal/inventory-module/reports/ReporteMovimientos'
-import ReporteRotacionOperaciones from '@/pages/central-portal/inventory-module/reports/ReporteRotacion'
-import PaginaNuevoProveedorOperaciones from '@/pages/central-portal/suppliers-module/new/PaginaNuevoProveedor'
-import PaginaEditarProveedorOperaciones from '@/pages/central-portal/suppliers-module/edit/PaginaEditarProveedor'
-import PaginaRecepcionOrdenOperaciones from '@/pages/central-portal/suppliers-module/PaginaRecepcionOrden'
-import PaginaRecepcionesOperaciones from '@/pages/central-portal/suppliers-module/PaginaRecepciones'
-import DetalleRecepcionOperaciones from '@/pages/central-portal/suppliers-module/DetalleRecepcion'
+const FormularioProductoOperaciones = FormularioProducto
+const DetalleProductoOperaciones = DetalleProducto
+const FormularioAjusteOperaciones = FormularioAjuste
+const ReporteKardexOperaciones = ReporteKardex
+const ReporteStockCriticoOperaciones = ReporteStockCritico
+const ReporteMovimientosOperaciones = ReporteMovimientos
+const ReporteRotacionOperaciones = ReporteRotacion
+const PaginaNuevoProveedorOperaciones = PaginaNuevoProveedor
+const PaginaEditarProveedorOperaciones = PaginaEditarProveedor
+const PaginaRecepcionOrdenOperaciones = PaginaRecepcionOrden
+const PaginaRecepcionesOperaciones = PaginaRecepcionesCentral
+const DetalleRecepcionOperaciones = DetalleRecepcionCentral
 
 // Panel de Predicciones
-import PaginaPredicciones from '@/pages/ml-panel/PaginaPredicciones'
-import PaginaHistorialPredicciones from '@/pages/ml-panel/PaginaHistorialPredicciones'
-import PaginaAlertas from '@/pages/ml-panel/PaginaAlertas'
-import PaginaRecomendaciones from '@/pages/ml-panel/PaginaRecomendaciones'
-import PaginaMonitoreoML from '@/pages/ml-panel/PaginaMonitoreoML'
-import PaginaPrecios from '@/pages/shared/validation-module/PaginaPrecios'
-import PaginaVentasHistoricas from '@/pages/shared/validation-module/PaginaVentasHistoricas'
-import PaginaStockHistorico from '@/pages/shared/validation-module/PaginaStockHistorico'
-import PaginaVentas from '@/pages/shared/sales-module/PaginaVentas'
-import PaginaRegistrarVenta from '@/pages/shared/sales-module/PaginaRegistrarVenta'
-import PaginaDemandaNoAtendida from '@/pages/shared/sales-module/PaginaDemandaNoAtendida'
-import PaginaReportesVentas from '@/pages/shared/sales-module/PaginaReportesVentas'
+const PaginaPredicciones = lazy(() => import('@/pages/ml-panel/PaginaPredicciones'))
+const PaginaHistorialPredicciones = lazy(() => import('@/pages/ml-panel/PaginaHistorialPredicciones'))
+const PaginaAlertas = lazy(() => import('@/pages/ml-panel/PaginaAlertas'))
+const PaginaRecomendaciones = lazy(() => import('@/pages/ml-panel/PaginaRecomendaciones'))
+const PaginaMonitoreoML = lazy(() => import('@/pages/ml-panel/PaginaMonitoreoML'))
+const PaginaPrecios = lazy(() => import('@/pages/shared/validation-module/PaginaPrecios'))
+const PaginaVentasHistoricas = lazy(() => import('@/pages/shared/validation-module/PaginaVentasHistoricas'))
+const PaginaStockHistorico = lazy(() => import('@/pages/shared/validation-module/PaginaStockHistorico'))
+const PaginaVentas = lazy(() => import('@/pages/shared/sales-module/PaginaVentas'))
+const PaginaRegistrarVenta = lazy(() => import('@/pages/shared/sales-module/PaginaRegistrarVenta'))
+const PaginaDemandaNoAtendida = lazy(() => import('@/pages/shared/sales-module/PaginaDemandaNoAtendida'))
+const PaginaReportesVentas = lazy(() => import('@/pages/shared/sales-module/PaginaReportesVentas'))
+
+function CargandoRuta() {
+  return <div className="flex justify-center py-12"><p className="text-secundario">Cargando pantalla...</p></div>
+}
 
 function LayoutPrincipal() {
   const { colapsada } = useBarraLateral()
@@ -161,6 +165,7 @@ function RedirectPorRol() {
  */
 export default function Rutas() {
   return (
+    <Suspense fallback={<CargandoRuta />}>
     <Routes>
       {/* Raíz redirige según rol */}
       <Route path="/" element={<RedirectPorRol />} />
@@ -325,5 +330,6 @@ export default function Rutas() {
       {/* Ruta no encontrada */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
+    </Suspense>
   )
 }

@@ -1,7 +1,3 @@
-import * as XLSX from 'xlsx'
-import { jsPDF } from 'jspdf'
-import { autoTable } from 'jspdf-autotable'
-
 export function exportarCSV(filas, nombreArchivo = 'reporte') {
   if (filas.length === 0) return
   const cabeceras = Object.keys(filas[0])
@@ -19,8 +15,9 @@ export function exportarCSV(filas, nombreArchivo = 'reporte') {
   descargar(blob, `${nombreArchivo}.csv`)
 }
 
-export function exportarExcel(filas, nombreArchivo = 'reporte', nombreHoja = 'Reporte') {
+export async function exportarExcel(filas, nombreArchivo = 'reporte', nombreHoja = 'Reporte') {
   if (filas.length === 0) return
+  const XLSX = await import('xlsx')
   const libro = XLSX.utils.book_new()
   const hoja = XLSX.utils.json_to_sheet(filas)
   XLSX.utils.book_append_sheet(libro, hoja, nombreHoja)
@@ -29,8 +26,12 @@ export function exportarExcel(filas, nombreArchivo = 'reporte', nombreHoja = 'Re
   descargar(blob, `${nombreArchivo}.xlsx`)
 }
 
-export function exportarPDF(titulo, columnas, filas, nombreArchivo = 'reporte') {
+export async function exportarPDF(titulo, columnas, filas, nombreArchivo = 'reporte') {
   if (filas.length === 0) return
+  const [{ jsPDF }, { autoTable }] = await Promise.all([
+    import('jspdf'),
+    import('jspdf-autotable'),
+  ])
   const doc = new jsPDF()
   doc.setFontSize(16)
   doc.text(titulo, 14, 20)

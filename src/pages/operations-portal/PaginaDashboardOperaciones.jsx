@@ -56,10 +56,10 @@ export default function PaginaDashboardOperaciones() {
     Promise.all([
       obtenerStockPorUbicacion(),
       obtenerProductos({ activos: true }),
-      obtenerAlertas({ soloNoResueltas: true }),
+      obtenerAlertas({ soloNoResueltas: true, max: 30 }),
       listarBoticas({ activas: true }),
-      obtenerTransferencias(),
-      obtenerMovimientos(),
+      obtenerTransferencias({ limite: 30 }),
+      obtenerMovimientos({ limite: 120 }),
     ]).then(([stockData, prodData, alertasData, boticasData, transData, movData]) => {
       setStock(stockData)
       setProductos(prodData)

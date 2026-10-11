@@ -68,9 +68,13 @@ const MAPEAR_ITEM = (item) => ({
   lote: item.lote ? { id: item.lote.id, numeroLote: item.lote.numero_lote, fechaVencimiento: item.lote.fecha_vencimiento } : null,
 })
 
-export async function obtenerTransferencias(estado = null) {
-  const params = estado ? `?estado=${encodeURIComponent(estado)}` : ''
-  const { datos } = await peticion('GET', params)
+export async function obtenerTransferencias(filtros = null) {
+  const opciones = typeof filtros === 'string' ? { estado: filtros } : (filtros || {})
+  const params = new URLSearchParams()
+  if (opciones.estado) params.set('estado', opciones.estado)
+  if (opciones.limite) params.set('limite', opciones.limite)
+  const qs = params.toString()
+  const { datos } = await peticion('GET', qs ? `?${qs}` : '')
   return (datos || []).map(MAPEAR_TRANSFERENCIA)
 }
 

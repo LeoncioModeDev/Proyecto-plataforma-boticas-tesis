@@ -5,21 +5,12 @@ import Tarjeta from '@/components/common/Tarjeta'
 import Insignia from '@/components/common/Insignia'
 import useAutenticacion from '@/state/useAutenticacion'
 import { obtenerStockPorUbicacion } from '@/services/supabase/stock'
-import { obtenerLotesActivos, obtenerLotesProximosAVencer } from '@/services/supabase/lotes'
+import { obtenerLotesActivos } from '@/services/supabase/lotes'
 import { obtenerMovimientos } from '@/services/supabase/movimientos'
 import { obtenerTransferencias } from '@/services/supabase/transferencias'
-import { obtenerProductos } from '@/services/supabase/productos'
 import { listarBoticas } from '@/services/supabase/boticas'
 import { formatearFechaRelativa } from '@/utilities/formatearFecha'
-import { ESTADOS_TRANSFERENCIA, ETIQUETAS_TRANSFERENCIA, COLORES_TRANSFERENCIA } from '@/constants/transferencias'
-
-const MAPEO_COLORES = {
-  amarillo: 'amarillo',
-  azul: 'azul',
-  verde: 'verde',
-  rojo: 'rojo',
-  naranja: 'naranja',
-}
+import { ESTADOS_TRANSFERENCIA } from '@/constants/transferencias'
 
 export default function PaginaDashboardBotica() {
   const { usuario } = useAutenticacion()
@@ -27,7 +18,6 @@ export default function PaginaDashboardBotica() {
 
   const [stock, setStock] = useState([])
   const [lotes, setLotes] = useState([])
-  const [productos, setProductos] = useState([])
   const [movimientos, setMovimientos] = useState([])
   const [transferencias, setTransferencias] = useState([])
   const [boticas, setBoticas] = useState([])
@@ -37,14 +27,12 @@ export default function PaginaDashboardBotica() {
     Promise.all([
       obtenerStockPorUbicacion(boticaId),
       obtenerLotesActivos(undefined, undefined, boticaId),
-      obtenerProductos({ activos: true }),
-      obtenerMovimientos({ ubicacionId: boticaId }),
-      obtenerTransferencias(),
+      obtenerMovimientos({ ubicacionId: boticaId, limite: 80 }),
+      obtenerTransferencias({ limite: 30 }),
       listarBoticas({ activas: true }),
-    ]).then(([stockData, lotesData, prodData, movData, transData, botData]) => {
+    ]).then(([stockData, lotesData, movData, transData, botData]) => {
       setStock(stockData)
       setLotes(lotesData)
-      setProductos(prodData)
       setMovimientos(movData)
       setTransferencias(transData)
       setBoticas(botData)

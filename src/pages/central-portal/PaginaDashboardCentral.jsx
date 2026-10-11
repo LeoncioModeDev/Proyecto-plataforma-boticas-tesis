@@ -167,9 +167,9 @@ export default function PaginaDashboardCentral() {
       obtenerStockPorUbicacion(),
       obtenerProductos({ activos: true }),
       listarBoticas({ activas: true }),
-      obtenerAlertas({ soloNoResueltas: true }),
-      obtenerTransferencias(),
-      obtenerPredicciones({ activos: true }).catch(() => []),
+      obtenerAlertas({ soloNoResueltas: true, max: 30 }),
+      obtenerTransferencias({ limite: 30 }),
+      obtenerPredicciones({ limit: 80 }).catch(() => []),
       obtenerRecomendaciones().catch(() => ({ recomendaciones: [] })),
     ]).then((resultados) => {
       if (cancelado) return

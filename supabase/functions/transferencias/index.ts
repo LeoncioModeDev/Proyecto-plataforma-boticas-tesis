@@ -81,6 +81,7 @@ Deno.serve(async (req) => {
 // ─── LISTAR ───────────────────────────────────────────────────
 async function listarTransferencias(supabase, perfil, url) {
   const estado = url.searchParams.get("estado") || null;
+  const limite = Number(url.searchParams.get("limite") || 0);
   const esVisor = perfil.rol === "visor_botica";
 
   let query = supabase
@@ -109,6 +110,10 @@ async function listarTransferencias(supabase, perfil, url) {
 
   if (estado) {
     query = query.eq("estado", estado);
+  }
+
+  if (limite > 0) {
+    query = query.limit(limite);
   }
 
   const { data, error } = await query;
