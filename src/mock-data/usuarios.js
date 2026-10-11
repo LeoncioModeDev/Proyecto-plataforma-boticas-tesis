@@ -1,32 +1,111 @@
-/**
- * Datos de prueba: Usuarios del sistema con los 3 roles.
- */
+import { ROLES } from '@/constants/roles'
+import { boticas } from './boticas'
+
 export const usuarios = [
   {
     id: 'usr-001',
     nombre: 'Carlos Mendoza',
     email: 'carlos.mendoza@boticaml.pe',
-    rol: 'admin_central',
+    rol: ROLES.ADMIN_CENTRAL,
     boticaId: null,
     avatar: null,
+    telefono: '999-111-001',
     activo: true,
+    ultimoAcceso: '2026-05-21T18:30:00',
+    createdAt: '2024-01-10T08:00:00',
   },
   {
     id: 'usr-002',
     nombre: 'Ana Torres',
     email: 'ana.torres@boticaml.pe',
-    rol: 'operador_drogueria',
+    rol: ROLES.OPERADOR_DROGUERIA,
     boticaId: 'ub-002',
     avatar: null,
+    telefono: '999-111-002',
     activo: true,
+    ultimoAcceso: '2026-05-20T14:15:00',
+    createdAt: '2024-02-15T09:00:00',
   },
   {
     id: 'usr-003',
     nombre: 'Luis García',
     email: 'luis.garcia@boticaml.pe',
-    rol: 'visor_botica',
+    rol: ROLES.VISOR_BOTICA,
     boticaId: 'ub-003',
     avatar: null,
+    telefono: '999-111-003',
     activo: true,
+    ultimoAcceso: '2026-05-21T16:45:00',
+    createdAt: '2024-03-01T10:00:00',
+  },
+  {
+    id: 'usr-004',
+    nombre: 'María Torres',
+    email: 'maria.torres@boticaml.pe',
+    rol: ROLES.VISOR_BOTICA,
+    boticaId: 'ub-002',
+    avatar: null,
+    telefono: '999-111-004',
+    activo: true,
+    ultimoAcceso: '2026-05-19T09:00:00',
+    createdAt: '2024-03-15T08:30:00',
+  },
+  {
+    id: 'usr-005',
+    nombre: 'José Ramírez',
+    email: 'jose.ramirez@boticaml.pe',
+    rol: ROLES.OPERADOR_DROGUERIA,
+    boticaId: 'ub-003',
+    avatar: null,
+    telefono: '999-111-005',
+    activo: true,
+    ultimoAcceso: '2026-05-18T11:20:00',
+    createdAt: '2024-04-01T09:00:00',
+  },
+  {
+    id: 'usr-006',
+    nombre: 'Rosa Fernández',
+    email: 'rosa.fernandez@boticaml.pe',
+    rol: ROLES.VISOR_BOTICA,
+    boticaId: 'ub-004',
+    avatar: null,
+    telefono: '999-111-006',
+    activo: false,
+    ultimoAcceso: '2026-04-28T10:00:00',
+    createdAt: '2024-04-20T11:00:00',
+  },
+  {
+    id: 'usr-007',
+    nombre: 'Pedro Castillo',
+    email: 'pedro.castillo@boticaml.pe',
+    rol: ROLES.ADMIN_CENTRAL,
+    boticaId: null,
+    avatar: null,
+    telefono: '999-111-007',
+    activo: true,
+    ultimoAcceso: '2026-05-21T17:00:00',
+    createdAt: '2024-05-05T08:00:00',
+  },
+  {
+    id: 'usr-008',
+    nombre: 'Lucía Mendoza',
+    email: 'lucia.mendoza@boticaml.pe',
+    rol: ROLES.OPERADOR_DROGUERIA,
+    boticaId: 'ub-005',
+    avatar: null,
+    telefono: '999-111-008',
+    activo: true,
+    ultimoAcceso: '2026-05-17T13:30:00',
+    createdAt: '2024-06-01T09:30:00',
   },
 ]
+
+export const OPCIONES_USUARIO_ROL = [
+  { valor: ROLES.ADMIN_CENTRAL, etiqueta: 'Admin Central' },
+  { valor: ROLES.OPERADOR_DROGUERIA, etiqueta: 'Operador de Botica' },
+  { valor: ROLES.VISOR_BOTICA, etiqueta: 'Visor Local de Botica' },
+]
+
+export const OPCIONES_BOTICA_PARA_USUARIO = boticas
+  .filter(b => b.tipo === 'botica' && b.activa)
+  .map(b => ({ valor: b.id, etiqueta: b.nombre }))

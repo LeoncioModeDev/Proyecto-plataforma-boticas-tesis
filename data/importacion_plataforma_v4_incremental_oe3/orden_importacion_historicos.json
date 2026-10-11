@@ -1,0 +1,10 @@
+{
+  "stock_historico": [
+    "stock_historico/stock_historico_001.csv",
+    "stock_historico/stock_historico_002.csv"
+  ],
+  "ventas_historicas": [
+    "ventas_historicas/ventas_historicas_001.csv",
+    "ventas_historicas/ventas_historicas_002.csv"
+  ]
+}

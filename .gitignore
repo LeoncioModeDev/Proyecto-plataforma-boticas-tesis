@@ -8,6 +8,24 @@ dist/
 .env
 .env.local
 .env.*.local
+modelo-ml/.env
+modelo-ml-v2/.env
+
+# Python
+.venv/
+.venv311/
+venv/
+__pycache__/
+*.pyc
+modelo-ml/.venv/
+modelo-ml/.venv311/
+modelo-ml/__pycache__/
+modelo-ml/api/__pycache__/
+modelo-ml-v2/.venv/
+modelo-ml-v2/.venv311/
+modelo-ml-v2/__pycache__/
+modelo-ml-v2/api/__pycache__/
+modelo-ml-v2/src/__pycache__/
 
 # IDE
 .vscode/
@@ -25,3 +43,6 @@ npm-debug.log*
 
 # Caché
 .eslintcache
+
+# Entornos virtuales de Python
+modelo-ml-v2/.venv-diagnostico-py311/

@@ -1,33 +1,73 @@
-/**
- * Datos de prueba: Ubicaciones (droguería y boticas).
- */
 export const boticas = [
   {
     id: 'ub-001',
+    codigoInterno: 'BOT-000001',
     nombre: 'Droguería Central',
     tipo: 'drogueria',
+    ubigeo: '150101',
+    distrito: 'Cercado de Lima',
     direccion: 'Av. Abancay 234, Cercado de Lima',
     telefono: '01-4567890',
     encargado: 'Carlos Mendoza',
     activa: true,
+    organizacionId: 'org-001',
+    createdAt: '2024-01-01T08:00:00',
   },
   {
     id: 'ub-002',
+    codigoInterno: 'BOT-000002',
     nombre: 'Botica Miraflores',
     tipo: 'botica',
+    ubigeo: '150104',
+    distrito: 'Miraflores',
     direccion: 'Calle Schell 412, Miraflores',
     telefono: '01-2345678',
     encargado: 'Ana Torres',
     activa: true,
+    organizacionId: 'org-001',
+    createdAt: '2024-01-15T09:00:00',
   },
   {
     id: 'ub-003',
+    codigoInterno: 'BOT-000003',
     nombre: 'Botica San Borja',
     tipo: 'botica',
+    ubigeo: '150143',
+    distrito: 'San Borja',
     direccion: 'Av. San Luis 1890, San Borja',
     telefono: '01-3456789',
     encargado: 'Luis García',
     activa: true,
+    organizacionId: 'org-001',
+    createdAt: '2024-02-01T10:00:00',
+  },
+  {
+    id: 'ub-004',
+    codigoInterno: 'BOT-000004',
+    nombre: 'Botica Surco',
+    tipo: 'botica',
+    ubigeo: '150114',
+    distrito: 'Santiago de Surco',
+    direccion: 'Av. El Derby 567, Surco',
+    telefono: '01-5678901',
+    encargado: 'Rosa Fernández',
+    activa: false,
+    organizacionId: 'org-001',
+    createdAt: '2024-03-01T08:30:00',
+  },
+  {
+    id: 'ub-005',
+    codigoInterno: 'BOT-000005',
+    nombre: 'Botica Los Olivos',
+    tipo: 'botica',
+    ubigeo: '150116',
+    distrito: 'Los Olivos',
+    direccion: 'Av. Universitaria 3456, Los Olivos',
+    telefono: '01-6789012',
+    encargado: null,
+    activa: true,
+    organizacionId: 'org-001',
+    createdAt: '2024-04-10T11:00:00',
   },
 ]
 
@@ -35,3 +75,8 @@ export const OPCIONES_UBICACION = boticas.map(b => ({
   valor: b.id,
   etiqueta: b.nombre,
 }))
+
+export const OPCIONES_TIPO_BOTICA = [
+  { valor: 'drogueria', etiqueta: 'Droguería' },
+  { valor: 'botica', etiqueta: 'Botica' },
+]

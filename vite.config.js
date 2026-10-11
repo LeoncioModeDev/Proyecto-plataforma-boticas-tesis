@@ -1,13 +1,24 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
-import path from 'path'
 
-// Configuración de Vite para botica-demand-ml
 export default defineConfig({
   plugins: [react()],
+  server: {
+    watch: {
+      ignored: [
+        '**/modelo-ml/**',
+        '**/modelo-ml-v2/**',
+        '**/data/**',
+        '**/reports/**',
+        '**/.venv/**',
+        '**/.venv311/**',
+        '**/__pycache__/**',
+      ],
+    },
+  },
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './src'),
+      '@': '/src',
     },
   },
 })

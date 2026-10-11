@@ -6,6 +6,8 @@ import { colores } from '@/styles/tema'
  * La línea central es la predicción, el área sombreada es el rango.
  */
 export default function GraficaArea({ datos, altura = 300 }) {
+  const tieneIntervalos = datos?.some(d => d.intervaloInf != null || d.intervaloSup != null)
+
   return (
     <ResponsiveContainer width="100%" height={altura}>
       <AreaChart data={datos} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
@@ -21,22 +23,26 @@ export default function GraficaArea({ datos, altura = 300 }) {
           }}
         />
         <Legend wrapperStyle={{ fontSize: '12px' }} />
-        <Area
-          type="monotone"
-          dataKey="intervaloSup"
-          name="Límite superior"
-          stroke="none"
-          fill={colores.marca.claro}
-          fillOpacity={0.6}
-        />
-        <Area
-          type="monotone"
-          dataKey="intervaloInf"
-          name="Límite inferior"
-          stroke="none"
-          fill={colores.neutro.blanco}
-          fillOpacity={1}
-        />
+        {tieneIntervalos && (
+          <>
+            <Area
+              type="monotone"
+              dataKey="intervaloSup"
+              name="Límite superior"
+              stroke="none"
+              fill={colores.marca.claro}
+              fillOpacity={0.6}
+            />
+            <Area
+              type="monotone"
+              dataKey="intervaloInf"
+              name="Límite inferior"
+              stroke="none"
+              fill={colores.neutro.blanco}
+              fillOpacity={1}
+            />
+          </>
+        )}
         <Line
           type="monotone"
           dataKey="real"

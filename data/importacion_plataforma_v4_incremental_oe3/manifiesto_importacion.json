@@ -1,0 +1,126 @@
+{
+  "version_paquete": "4.0.0-oe3-incremental",
+  "fuente": "dataset_piloto_sintetico_controlado",
+  "uso": "validacion_operativa_OE3",
+  "dataset_piloto_sintetico_controlado": true,
+  "fecha_generacion": "2026-07-08T20:11:08.336662+00:00",
+  "carpeta_base_no_modificada": "modelo-ml/data/importacion_plataforma",
+  "no_incluye_catalogos": true,
+  "boticas_reutilizadas": [
+    "BOT-001",
+    "BOT-002",
+    "BOT-003",
+    "BOT-004",
+    "BOT-005"
+  ],
+  "productos_reutilizados": [
+    "SKU-000001",
+    "SKU-000002",
+    "SKU-000003",
+    "SKU-000004",
+    "SKU-000005",
+    "SKU-000006",
+    "SKU-000007",
+    "SKU-000008",
+    "SKU-000009",
+    "SKU-000010",
+    "SKU-000011",
+    "SKU-000012",
+    "SKU-000013",
+    "SKU-000014",
+    "SKU-000015",
+    "SKU-000016",
+    "SKU-000017",
+    "SKU-000018",
+    "SKU-000019",
+    "SKU-000020",
+    "SKU-000021",
+    "SKU-000022",
+    "SKU-000023",
+    "SKU-000024",
+    "SKU-000025",
+    "SKU-000026",
+    "SKU-000027",
+    "SKU-000028",
+    "SKU-000029",
+    "SKU-000030"
+  ],
+  "fechas_validacion": {
+    "linea_base": "2026-06-29",
+    "resultado_posterior": "2026-07-06"
+  },
+  "tamano_lote": 200,
+  "historicos_divididos": true,
+  "advertencia": "No importar archivos consolidados y tramos al mismo tiempo.",
+  "conteos": {
+    "stock_historico": 300,
+    "ventas_historicas": 300,
+    "stock_historico_tramos": 2,
+    "ventas_historicas_tramos": 2
+  },
+  "archivos_stock_historico": [
+    {
+      "archivo": "stock_historico/stock_historico_001.csv",
+      "numero_tramo": 1,
+      "fila_desde": 1,
+      "fila_hasta": 200,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-06-29",
+      "fecha_maxima": "2026-07-06",
+      "sha256": "44dfe9ae536f78dc4db1b4542ee2cfa914c56f0b740dd3a60c5597950f6ca32d"
+    },
+    {
+      "archivo": "stock_historico/stock_historico_002.csv",
+      "numero_tramo": 2,
+      "fila_desde": 201,
+      "fila_hasta": 300,
+      "cantidad_filas": 100,
+      "fecha_minima": "2026-07-06",
+      "fecha_maxima": "2026-07-06",
+      "sha256": "1ee44ea7b53fb3cd7a2bf71a0da7a1321013827e9e6653f1dda5769edfbde7c9"
+    }
+  ],
+  "archivos_ventas_historicas": [
+    {
+      "archivo": "ventas_historicas/ventas_historicas_001.csv",
+      "numero_tramo": 1,
+      "fila_desde": 1,
+      "fila_hasta": 200,
+      "cantidad_filas": 200,
+      "fecha_minima": "2026-06-29",
+      "fecha_maxima": "2026-07-06",
+      "sha256": "6641224edb943a6ba64f0b51d78a897754e27f3641f12f55cb136c68d856ac73"
+    },
+    {
+      "archivo": "ventas_historicas/ventas_historicas_002.csv",
+      "numero_tramo": 2,
+      "fila_desde": 201,
+      "fila_hasta": 300,
+      "cantidad_filas": 100,
+      "fecha_minima": "2026-07-06",
+      "fecha_maxima": "2026-07-06",
+      "sha256": "3954de54b480d567086222a42236180856f9c7b8d89abd263bf8b1bc780338a8"
+    }
+  ],
+  "metricas_validacion": {
+    "linea_base": {
+      "fecha": "2026-06-29",
+      "ventas": 3000,
+      "demanda_insatisfecha": 750,
+      "fill_rate": 80.0,
+      "sku_botica_evaluados": 150,
+      "sku_botica_sobrestock": 21,
+      "tasa_sobrestock": 14.0
+    },
+    "resultado_posterior": {
+      "fecha": "2026-07-06",
+      "ventas": 3150,
+      "demanda_insatisfecha": 285,
+      "fill_rate": 91.7,
+      "sku_botica_evaluados": 150,
+      "sku_botica_sobrestock": 12,
+      "tasa_sobrestock": 8.0,
+      "reduccion_sobrestock_porcentual": 42.86
+    }
+  }
+}

@@ -1,17 +1,201 @@
-import { Users } from 'lucide-react'
-import Tarjeta from '@/components/common/Tarjeta'
+import { useState, useEffect, useCallback } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { Plus, ToggleLeft, ToggleRight, Package, Mail, Phone, Building, Star, Coins } from 'lucide-react'
+import Boton from '@/components/common/Boton'
+import Tabla from '@/components/common/Tabla'
+
+import Insignia from '@/components/common/Insignia'
+import Alerta from '@/components/common/Alerta'
+import Modal from '@/components/common/Modal'
+import TarjetaMetrica from '@/components/charts/TarjetaMetrica'
+import CampoBusqueda from '@/components/common/CampoBusqueda'
+import BarraFiltros from '@/components/common/BarraFiltros'
+import SelectFiltro from '@/components/common/SelectFiltro'
+import { listarProveedores, toggleProveedor } from '@/services/supabase/proveedores'
+
+const ESTADOS_PROVEEDOR = {
+  activo: { etiqueta: 'Activo', color: 'verde' },
+  inactivo: { etiqueta: 'Inactivo', color: 'gris' },
+}
+
+function obtenerContactoPrincipal(proveedor) {
+  return proveedor.contactos?.find(c => c.principal) || proveedor.contactos?.[0]
+}
+
+const ColumnasProveedor = () => [
+  { campo: 'codigoInterno', encabezado: 'Código', render: (r) => <span className="font-mono text-xs font-medium">{r.codigoInterno}</span> },
+  {
+    campo: 'razonSocial',
+    encabezado: 'Razón Social',
+    render: (r) => {
+      const contacto = obtenerContactoPrincipal(r)
+      return (
+        <div className="flex items-center gap-2">
+          <div className="p-1.5 bg-marca-claro rounded">
+            <Building className="h-4 w-4 text-marca-principal" />
+          </div>
+          <div>
+            <p className="font-medium text-principal">{r.razonSocial}</p>
+            {contacto && <p className="text-xs text-secundario">{contacto.nombre}</p>}
+          </div>
+        </div>
+      )
+    },
+  },
+  {
+    campo: 'numeroIdentificacion',
+    encabezado: 'Identificación',
+    render: (r) => (
+      <div>
+        <span className="font-mono text-cuerpo">{r.numeroIdentificacion}</span>
+        <span className="ml-2 text-xs text-secundario">({r.tipoIdentificacion.toUpperCase()}-{r.paisOrigen})</span>
+      </div>
+    ),
+  },
+    {
+      campo: 'moneda',
+      encabezado: 'Moneda',
+      render: (r) => (
+        <div className="flex items-center gap-1.5">
+          <Coins className="h-4 w-4 text-secundario" />
+          {r.moneda
+            ? <span>{r.moneda.simbolo} {r.moneda.codigo}</span>
+            : <span className="text-secundario">—</span>}
+        </div>
+      ),
+    },
+    {
+      campo: 'contacto',
+      encabezado: 'Contacto',
+    render: (r) => {
+      const contacto = obtenerContactoPrincipal(r)
+      if (!contacto) return <span className="text-secundario">—</span>
+      return (
+        <div className="space-y-1">
+          <p className="text-principal flex items-center gap-1">
+            {contacto.nombre}
+            {contacto.principal && <Star className="h-3 w-3 text-estado-exito" />}
+          </p>
+          {contacto.telefono && (
+            <div className="flex items-center gap-1 text-xs text-secundario">
+              <Phone className="h-3 w-3" />{contacto.telefono}
+            </div>
+          )}
+          {contacto.correo && (
+            <div className="flex items-center gap-1 text-xs text-secundario">
+              <Mail className="h-3 w-3" />
+              <span className="truncate max-w-[150px]">{contacto.correo}</span>
+            </div>
+          )}
+        </div>
+      )
+    },
+  },
+  {
+    campo: 'activo',
+    encabezado: 'Estado',
+    render: (r) => <Insignia color={ESTADOS_PROVEEDOR[r.activo ? 'activo' : 'inactivo'].color}>{ESTADOS_PROVEEDOR[r.activo ? 'activo' : 'inactivo'].etiqueta}</Insignia>,
+  },
+]
 
 export default function PaginaProveedores() {
+  const navegar = useNavigate()
+  const [proveedores, setProveedores] = useState([])
+  const [cargando, setCargando] = useState(true)
+  const [error, setError] = useState(null)
+  const [filtroEstado, setFiltroEstado] = useState('')
+  const [busqueda, setBusqueda] = useState('')
+  const [exito, setExito] = useState(null)
+  const [confirmarDesactivar, setConfirmarDesactivar] = useState(null)
+
+  const cargarDatos = useCallback(async () => {
+    try {
+      setCargando(true)
+      setError(null)
+      const datos = await listarProveedores()
+      setProveedores(datos)
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setCargando(false)
+    }
+  }, [])
+
+  useEffect(() => { cargarDatos() }, [cargarDatos])
+
+  const filtrados = proveedores.filter(p => {
+    const matchEstado = filtroEstado ? (filtroEstado === 'activo' ? p.activo : !p.activo) : true
+    const matchBusqueda = busqueda
+      ? p.razonSocial.toLowerCase().includes(busqueda.toLowerCase()) ||
+        p.numeroIdentificacion.includes(busqueda)
+      : true
+    return matchEstado && matchBusqueda
+  })
+
+  const estadisticas = {
+    total: proveedores.length,
+    activos: proveedores.filter(p => p.activo).length,
+    inactivos: proveedores.filter(p => !p.activo).length,
+  }
+
+  const confirmarDesactivacion = async () => {
+    try {
+      await toggleProveedor(confirmarDesactivar)
+      setProveedores(proveedores.map(p => p.id === confirmarDesactivar ? { ...p, activo: false } : p))
+      setExito('Proveedor desactivado correctamente')
+      setConfirmarDesactivar(null)
+      setTimeout(() => setExito(null), 2000)
+    } catch (err) {
+      setError(err.message)
+      setConfirmarDesactivar(null)
+    }
+  }
+
+  const columnas = ColumnasProveedor()
+  const limpiarFiltros = () => {
+    setBusqueda('')
+    setFiltroEstado('')
+  }
+
+  if (cargando) return <div className="flex items-center justify-center py-20"><p className="text-secundario">Cargando proveedores...</p></div>
+
   return (
     <div className="space-y-6">
-      <h1 className="text-h1 text-neutro-negro">Proveedores</h1>
-      <Tarjeta>
-        <div className="flex flex-col items-center justify-center py-16 text-center">
-          <Users className="h-12 w-12 text-neutro-gris-borde mb-4" />
-          <h3 className="text-h3 text-neutro-negro mb-2">Módulo en Desarrollo</h3>
-          <p className="text-cuerpo text-neutro-gris-texto">Este módulo estará disponible en el próximo sprint.</p>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-h1 text-principal">Proveedores</h1>
+          <p className="text-cuerpo text-secundario mt-1">Gestión de proveedores</p>
         </div>
-      </Tarjeta>
+        <Boton variante="primario" icono={Plus} onClick={() => navegar('/central/proveedores/nuevo')}>
+          Nuevo Proveedor
+        </Boton>
+      </div>
+
+      {error && !cargando && <Alerta tipo="error" titulo={error} className="mb-4" />}
+      {exito && <Alerta tipo="exito" titulo={exito} className="mb-4" />}
+
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <TarjetaMetrica etiqueta="Total Proveedores" valor={estadisticas.total} icono={Package} />
+        <TarjetaMetrica etiqueta="Activos" valor={estadisticas.activos} icono={ToggleRight} />
+        <TarjetaMetrica etiqueta="Inactivos" valor={estadisticas.inactivos} icono={ToggleLeft} />
+      </div>
+
+      <BarraFiltros alLimpiar={limpiarFiltros}>
+        <CampoBusqueda valor={busqueda} alCambiar={setBusqueda} placeholder="Buscar por razón social o RUC..." className="w-full sm:w-80" />
+        <SelectFiltro valor={filtroEstado} alCambiar={setFiltroEstado} opciones={[{ valor: 'activo', etiqueta: 'Activos' }, { valor: 'inactivo', etiqueta: 'Inactivos' }]} placeholder="Todos los estados" />
+      </BarraFiltros>
+
+      <Tabla columnas={columnas} datos={filtrados} busqueda={false} alClickFila={(p) => navegar(`/central/proveedores/${p.id}`)} />
+
+      <Modal abierto={!!confirmarDesactivar} alCerrar={() => setConfirmarDesactivar(null)} titulo="Confirmar Desactivación">
+        <div className="space-y-4">
+          <p className="text-cuerpo text-secundario">¿Está seguro de que desea desactivar este proveedor? Los productos asociados no se eliminarán, pero no aparecerán en nuevas órdenes.</p>
+          <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-4 border-t border-estilo">
+            <Boton variante="secundario" onClick={() => setConfirmarDesactivar(null)}>Cancelar</Boton>
+            <Boton variante="peligro" onClick={confirmarDesactivacion}>Desactivar</Boton>
+          </div>
+        </div>
+      </Modal>
     </div>
   )
 }

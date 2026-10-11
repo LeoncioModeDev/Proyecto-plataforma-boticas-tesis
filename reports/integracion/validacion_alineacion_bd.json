@@ -1,0 +1,169 @@
+{
+  "generado_en": "2026-06-29T20:25:02.570Z",
+  "fuente": "supabase_remoto",
+  "organizaciones_existentes": 17,
+  "checks": {
+    "categorias_accesible": {
+      "ok": true,
+      "filas": 0,
+      "error": null
+    },
+    "productos_sin_categoria": {
+      "ok": true,
+      "count": 11,
+      "error": null
+    },
+    "precios_sin_org_id": {
+      "ok": true,
+      "count": 0,
+      "error": null
+    },
+    "ventas_sin_importacion_id": {
+      "ok": true,
+      "count": 0,
+      "error": null
+    },
+    "predicciones_sin_org_id": {
+      "ok": true,
+      "count": 0,
+      "error": null
+    },
+    "inferencias_sin_org_id": {
+      "ok": true,
+      "count": 0,
+      "error": null
+    },
+    "alertas_sin_org_id": {
+      "ok": true,
+      "count": 0,
+      "error": null
+    },
+    "recomendaciones_sin_org_id": {
+      "ok": true,
+      "count": 0,
+      "error": null
+    },
+    "drift_sin_org_id": {
+      "ok": true,
+      "count": 0,
+      "error": null
+    },
+    "vista_ml": {
+      "ok": true,
+      "filas": 0,
+      "error": null
+    },
+    "anon_sin_jwt_categorias": {
+      "ok": true,
+      "filas": 0,
+      "error": null
+    }
+  },
+  "vista_ml": {
+    "filas_muestra": 0,
+    "duplicados_en_muestra": 0,
+    "semanas_con_cero_en_muestra": 0,
+    "error": null
+  },
+  "rls": {
+    "ejecutada": true,
+    "motivo_omision": null,
+    "pruebas": [
+      {
+        "nombre": "operador A no lee categorias B",
+        "ok": true
+      },
+      {
+        "nombre": "operador B no lee categorias A",
+        "ok": true
+      },
+      {
+        "nombre": "operador A no escribe org B",
+        "ok": true
+      },
+      {
+        "nombre": "super_admin lee ambas organizaciones",
+        "ok": true
+      },
+      {
+        "nombre": "super_admin escribe org B",
+        "ok": true
+      },
+      {
+        "nombre": "accion super_admin auditada",
+        "ok": true
+      }
+    ]
+  },
+  "pruebas": [
+    {
+      "nombre": "categorias_terapeuticas consultable",
+      "ok": true
+    },
+    {
+      "nombre": "precios org_id obligatorio",
+      "ok": true
+    },
+    {
+      "nombre": "predicciones_ml org_id obligatorio",
+      "ok": true
+    },
+    {
+      "nombre": "inferencias org_id obligatorio",
+      "ok": true
+    },
+    {
+      "nombre": "alertas_ml org_id obligatorio",
+      "ok": true
+    },
+    {
+      "nombre": "recomendaciones_ml org_id obligatorio",
+      "ok": true
+    },
+    {
+      "nombre": "drift_metricas org_id obligatorio",
+      "ok": true
+    },
+    {
+      "nombre": "vista ML consultable",
+      "ok": true
+    },
+    {
+      "nombre": "vista ML sin duplicados en muestra",
+      "ok": true
+    },
+    {
+      "nombre": "anonimo sin JWT no lee categorias",
+      "ok": true
+    },
+    {
+      "nombre": "operador A no lee categorias B",
+      "ok": true
+    },
+    {
+      "nombre": "operador B no lee categorias A",
+      "ok": true
+    },
+    {
+      "nombre": "operador A no escribe org B",
+      "ok": true
+    },
+    {
+      "nombre": "super_admin lee ambas organizaciones",
+      "ok": true
+    },
+    {
+      "nombre": "super_admin escribe org B",
+      "ok": true
+    },
+    {
+      "nombre": "accion super_admin auditada",
+      "ok": true
+    }
+  ],
+  "resumen": {
+    "aprobadas": 16,
+    "fallidas": 0,
+    "rls_completa": true
+  }
+}

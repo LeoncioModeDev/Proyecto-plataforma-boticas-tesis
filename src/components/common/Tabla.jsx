@@ -10,10 +10,6 @@ import {
 import { ChevronUp, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react'
 import CampoBusqueda from './CampoBusqueda'
 
-/**
- * Tabla genérica con TanStack Table.
- * Soporta paginación, búsqueda global y ordenamiento.
- */
 export default function Tabla({
   columnas,
   datos,
@@ -21,6 +17,8 @@ export default function Tabla({
   busqueda = true,
   tamanoPagina = 10,
   alClickFila,
+  renderFilaExpandida,
+  mensajeVacio = 'No se encontraron resultados',
 }) {
   const [filtroGlobal, setFiltroGlobal] = useState('')
   const [ordenamiento, setOrdenamiento] = useState([])
@@ -51,29 +49,29 @@ export default function Tabla({
   })
 
   return (
-    <div>
+    <div className="w-full">
       {busqueda && (
         <div className="mb-4">
           <CampoBusqueda
             valor={filtroGlobal}
             alCambiar={setFiltroGlobal}
             placeholder="Buscar en tabla..."
-            className="max-w-sm"
+            className="w-full sm:max-w-sm"
           />
         </div>
       )}
 
-      <div className="border border-neutro-gris-borde rounded-tarjeta overflow-hidden">
+      <div className="border border-estilo rounded-lg overflow-hidden max-w-full">
         <div className="overflow-x-auto">
-          <table className="w-full">
+          <table className="w-full min-w-max">
             <thead>
               {tabla.getHeaderGroups().map(grupo => (
-                <tr key={grupo.id} className="bg-neutro-blanco-suave border-b border-neutro-gris-borde">
+                <tr key={grupo.id} className="bg-fondo border-b border-estilo">
                   {grupo.headers.map(encabezado => (
                     <th
                       key={encabezado.id}
                       onClick={encabezado.column.getToggleSortingHandler()}
-                      className="px-4 py-3 text-left text-etiqueta font-semibold text-neutro-negro-suave cursor-pointer select-none hover:bg-gray-100 transition-colors"
+                      className="px-3 sm:px-4 py-3 text-left text-xs sm:text-sm font-semibold text-principal cursor-pointer select-none hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                     >
                       <div className="flex items-center gap-1">
                         {flexRender(encabezado.column.columnDef.header, encabezado.getContext())}
@@ -88,25 +86,38 @@ export default function Tabla({
             <tbody>
               {tabla.getRowModel().rows.length === 0 ? (
                 <tr>
-                  <td colSpan={columnas.length} className="px-4 py-8 text-center text-secundario text-neutro-gris-texto">
-                    No se encontraron resultados
+                  <td colSpan={columnas.length} className="px-4 py-8 text-center text-secundario">
+                    {mensajeVacio}
                   </td>
                 </tr>
               ) : (
-                tabla.getRowModel().rows.map(fila => (
-                  <tr
-                    key={fila.id}
-                    onClick={() => alClickFila && alClickFila(fila.original)}
-                    className={`border-b border-neutro-gris-borde last:border-b-0 hover:bg-marca-claro transition-colors ${alClickFila ? 'cursor-pointer' : ''}`}
-                    style={{ minHeight: '44px' }}
-                  >
-                    {fila.getVisibleCells().map(celda => (
-                      <td key={celda.id} className="px-4 py-3 text-cuerpo text-neutro-negro-suave">
-                        {flexRender(celda.column.columnDef.cell, celda.getContext())}
-                      </td>
-                    ))}
-                  </tr>
-                ))
+                tabla.getRowModel().rows.flatMap(fila => {
+                  const filaTr = (
+                    <tr
+                      key={fila.id}
+                      onClick={() => alClickFila && alClickFila(fila.original)}
+                      className={`border-b border-estilo last:border-b-0 hover:bg-marca-claro dark:hover:bg-marca-claro transition-colors ${alClickFila ? 'cursor-pointer' : ''}`}
+                      style={{ minHeight: '44px' }}
+                    >
+                      {fila.getVisibleCells().map(celda => (
+                        <td key={celda.id} className="px-3 sm:px-4 py-2.5 text-xs sm:text-sm text-principal align-middle">
+                          {flexRender(celda.column.columnDef.cell, celda.getContext())}
+                        </td>
+                      ))}
+                    </tr>
+                  )
+                  const expandida = renderFilaExpandida?.(fila.original)
+                  if (expandida) {
+                    return [filaTr, (
+                      <tr key={`exp-${fila.id}`} className="border-b border-estilo">
+                        <td colSpan={columnas.length} className="p-0">
+                          {expandida}
+                        </td>
+                      </tr>
+                    )]
+                  }
+                  return [filaTr]
+                })
               )}
             </tbody>
           </table>
@@ -114,15 +125,15 @@ export default function Tabla({
       </div>
 
       {paginacion && tabla.getPageCount() > 1 && (
-        <div className="flex items-center justify-between mt-4 text-secundario text-neutro-gris-texto">
-          <span>
+        <div className="flex flex-col sm:flex-row items-center justify-between mt-4 gap-2 text-xs sm:text-sm text-secundario">
+          <span className="order-2 sm:order-1">
             Página {tabla.getState().pagination.pageIndex + 1} de {tabla.getPageCount()} — {tabla.getFilteredRowModel().rows.length} registros
           </span>
-          <div className="flex items-center gap-1">
-            <button onClick={() => tabla.previousPage()} disabled={!tabla.getCanPreviousPage()} className="p-1.5 rounded hover:bg-neutro-blanco-suave disabled:opacity-30 disabled:cursor-not-allowed">
+          <div className="flex items-center gap-1 order-1 sm:order-2">
+            <button onClick={() => tabla.previousPage()} disabled={!tabla.getCanPreviousPage()} className="p-1.5 rounded hover:bg-fondo disabled:opacity-30 disabled:cursor-not-allowed">
               <ChevronLeft className="h-4 w-4" />
             </button>
-            <button onClick={() => tabla.nextPage()} disabled={!tabla.getCanNextPage()} className="p-1.5 rounded hover:bg-neutro-blanco-suave disabled:opacity-30 disabled:cursor-not-allowed">
+            <button onClick={() => tabla.nextPage()} disabled={!tabla.getCanNextPage()} className="p-1.5 rounded hover:bg-fondo disabled:opacity-30 disabled:cursor-not-allowed">
               <ChevronRight className="h-4 w-4" />
             </button>
           </div>

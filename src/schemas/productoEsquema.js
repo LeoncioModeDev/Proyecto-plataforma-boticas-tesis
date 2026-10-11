@@ -1,19 +1,21 @@
 import { z } from 'zod'
 
-/**
- * Esquema de validación para productos farmacéuticos.
- */
+const concentracionSchema = z.object({
+  principioActivoId: z.string().min(1, 'Seleccione un principio activo'),
+  concentracion: z.coerce.number().positive('Ingrese una concentración válida'),
+  unidadMedidaId: z.string().min(1, 'Seleccione la unidad de medida'),
+})
+
 export const productoEsquema = z.object({
   nombreComercial: z.string().min(1, 'El nombre comercial es obligatorio').max(200),
-  principioActivo: z.string().min(1, 'El principio activo es obligatorio').max(200),
-  formaFarmaceutica: z.enum(['tableta', 'capsula', 'jarabe', 'crema', 'suspension', 'inyectable'], {
-    errorMap: () => ({ message: 'Seleccione una forma farmacéutica válida' }),
-  }),
-  concentracion: z.string().min(1, 'La concentración es obligatoria'),
-  laboratorio: z.string().min(1, 'El laboratorio es obligatorio'),
-  codigoBarras: z.string().optional(),
-  clasificacion: z.enum(['otc', 'receta', 'generico'], {
+  categoriaTerapeuticaId: z.string().min(1, 'Seleccione una categoría terapéutica'),
+  formaFarmaceuticaId: z.string().min(1, 'Seleccione una forma farmacéutica'),
+  presentacion: z.string().optional(),
+  clasificacion: z.enum(['OTC', 'receta', 'generico'], {
     errorMap: () => ({ message: 'Seleccione una clasificación válida' }),
   }),
   estado: z.enum(['activo', 'inactivo', 'descontinuado']).default('activo'),
+  principiosActivos: z.array(concentracionSchema).min(1, 'Agregue al menos un principio activo'),
 })
+
+export const productoEsquemaParcial = productoEsquema.partial()

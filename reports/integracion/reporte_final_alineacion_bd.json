@@ -1,0 +1,69 @@
+{
+  "generado_en": "2026-06-29T20:25:02.570Z",
+  "fuente": "supabase_remoto",
+  "migraciones_creadas": [
+    "supabase/migrations/00000000000036_alineacion_modelo_datos_ml_importaciones.sql"
+  ],
+  "migraciones_aplicadas": [
+    "00000000000032_unique_dominio_correo.sql",
+    "00000000000033_ml_local_integration.sql",
+    "00000000000034_ml_vistas_productivas.sql",
+    "00000000000035_categorias_terapeuticas_importacion.sql",
+    "00000000000036_alineacion_modelo_datos_ml_importaciones.sql"
+  ],
+  "edge_functions_desplegadas": [
+    "importaciones-datos"
+  ],
+  "diagnostico_duplicados": {
+    "tablas_diagnosticadas": 6,
+    "proveedor_producto": { "filas": 10, "grupos_duplicados": 0 },
+    "stock_ubicaciones": { "filas": 22, "grupos_duplicados": 0 },
+    "stock_historico": { "filas": 0, "grupos_duplicados": 0 },
+    "lotes": { "filas": 42, "grupos_duplicados": 0 },
+    "predicciones_ml": { "filas": 0, "grupos_duplicados": 0 },
+    "inferencias": { "filas": 0, "grupos_duplicados": 0 },
+    "duplicados_consolidados": 0,
+    "duplicados_pendientes_revision": 0
+  },
+  "validaciones_datos": {
+    "organizaciones_existentes": 17,
+    "productos_activos_sin_categoria": 11,
+    "precios_sin_org_id": 0,
+    "ventas_sin_importacion_id": 0,
+    "predicciones_sin_org_id": 0,
+    "inferencias_sin_org_id": 0,
+    "alertas_sin_org_id": 0,
+    "recomendaciones_sin_org_id": 0,
+    "drift_sin_org_id": 0
+  },
+  "vista_ml": {
+    "consultable": true,
+    "filas_muestra": 0,
+    "duplicados_en_muestra": 0,
+    "semanas_con_cero_en_muestra": 0,
+    "nota": "No hay filas en la vista porque el entorno remoto no contiene ventas historicas vigentes para series producto-botica. La vista esta preparada para completar semanas mediante generate_series."
+  },
+  "rls": {
+    "pruebas_ejecutadas": 6,
+    "pruebas_aprobadas": 6,
+    "super_admin_acceso_global": true,
+    "aislamiento_operador_org_a_b": true,
+    "auditoria_super_admin": true
+  },
+  "pruebas": {
+    "automatizadas_remotas": 16,
+    "aprobadas": 16,
+    "fallidas": 0,
+    "reporte": "reports/integracion/validacion_alineacion_bd.json"
+  },
+  "lint": {
+    "comando": "npm run lint",
+    "estado": "fallido",
+    "motivo": "Errores preexistentes fuera del alcance: archivos en modelo-ml/.venv311, reglas React Compiler set-state-in-effect en multiples paginas, no-unused-vars en pantallas existentes y Deno no definido en Edge Functions JS generadas."
+  },
+  "pendientes": [
+    "Asignar categoria terapeutica a 11 productos activos existentes sin categoria. No se hizo backfill arbitrario.",
+    "Si se requiere evidencia de semanas completadas con cero, cargar o conservar al menos una serie con ventas historicas y consultar vw_demanda_semanal_ml.",
+    "Corregir configuracion o errores preexistentes de ESLint para que npm run lint pueda pasar en todo el repositorio."
+  ]
+}

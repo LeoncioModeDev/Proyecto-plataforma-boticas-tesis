@@ -1,0 +1,160 @@
+{
+  "generado_en": "2026-06-29T21:07:45.415Z",
+  "modo": "dry_run_local_estructural",
+  "edge_function_dry_run": {
+    "ejecutado": false,
+    "motivo": "No se ejecuta dry-run Edge completo porque esta fase no debe importar datos previos. Los archivos dependientes fallarian si categorias/productos/proveedores aun no existen en Supabase."
+  },
+  "valido": true,
+  "archivos": [
+    {
+      "archivo": "01_categorias_terapeuticas.csv",
+      "tipo_importacion": "categorias_terapeuticas",
+      "total_filas": 14,
+      "filas_validas": 14,
+      "filas_invalidas": 0,
+      "total_errores": 0,
+      "errores_principales": []
+    },
+    {
+      "archivo": "02_boticas.csv",
+      "tipo_importacion": "boticas",
+      "total_filas": 6,
+      "filas_validas": 6,
+      "filas_invalidas": 0,
+      "total_errores": 0,
+      "errores_principales": []
+    },
+    {
+      "archivo": "03_productos.csv",
+      "tipo_importacion": "productos",
+      "total_filas": 30,
+      "filas_validas": 30,
+      "filas_invalidas": 0,
+      "total_errores": 0,
+      "errores_principales": []
+    },
+    {
+      "archivo": "04_proveedores.csv",
+      "tipo_importacion": "proveedores",
+      "total_filas": 5,
+      "filas_validas": 5,
+      "filas_invalidas": 0,
+      "total_errores": 0,
+      "errores_principales": []
+    },
+    {
+      "archivo": "05_proveedor_producto.csv",
+      "tipo_importacion": "proveedor_producto",
+      "total_filas": 30,
+      "filas_validas": 30,
+      "filas_invalidas": 0,
+      "total_errores": 0,
+      "errores_principales": []
+    },
+    {
+      "archivo": "06_precios.csv",
+      "tipo_importacion": "precios",
+      "total_filas": 150,
+      "filas_validas": 150,
+      "filas_invalidas": 0,
+      "total_errores": 0,
+      "errores_principales": []
+    },
+    {
+      "archivo": "07_stock_inicial.csv",
+      "tipo_importacion": "stock_inicial",
+      "total_filas": 150,
+      "filas_validas": 150,
+      "filas_invalidas": 0,
+      "total_errores": 0,
+      "errores_principales": []
+    },
+    {
+      "archivo": "08_stock_historico.csv",
+      "tipo_importacion": "stock_historico",
+      "total_filas": 18450,
+      "filas_validas": 18450,
+      "filas_invalidas": 0,
+      "total_errores": 0,
+      "errores_principales": []
+    },
+    {
+      "archivo": "09_ventas_historicas.csv",
+      "tipo_importacion": "ventas_historicas",
+      "total_filas": 18311,
+      "filas_validas": 18311,
+      "filas_invalidas": 0,
+      "total_errores": 0,
+      "errores_principales": []
+    }
+  ],
+  "productos_existentes_sin_categoria": [
+    {
+      "codigo_interno": "SKU-000001",
+      "nombre": "Paracetamol 500mg",
+      "coincide_con_paquete": false,
+      "accion_recomendada": "No incluir en el paquete, no eliminar y no categorizar automaticamente."
+    },
+    {
+      "codigo_interno": "SKU-000001",
+      "nombre": "Paracetamol 500mg",
+      "coincide_con_paquete": false,
+      "accion_recomendada": "No incluir en el paquete, no eliminar y no categorizar automaticamente."
+    },
+    {
+      "codigo_interno": "SKU-000001",
+      "nombre": "Paracetamol 500mg",
+      "coincide_con_paquete": false,
+      "accion_recomendada": "No incluir en el paquete, no eliminar y no categorizar automaticamente."
+    },
+    {
+      "codigo_interno": "SKU-000001",
+      "nombre": "Paracetamol 500mg",
+      "coincide_con_paquete": false,
+      "accion_recomendada": "No incluir en el paquete, no eliminar y no categorizar automaticamente."
+    },
+    {
+      "codigo_interno": "SKU-000001",
+      "nombre": "Paracetamol 500mg",
+      "coincide_con_paquete": false,
+      "accion_recomendada": "No incluir en el paquete, no eliminar y no categorizar automaticamente."
+    },
+    {
+      "codigo_interno": "SKU-000001",
+      "nombre": "XD",
+      "coincide_con_paquete": false,
+      "accion_recomendada": "No incluir en el paquete, no eliminar y no categorizar automaticamente."
+    },
+    {
+      "codigo_interno": "SKU-000002",
+      "nombre": "Diclofenaco Gel 1%",
+      "coincide_con_paquete": false,
+      "accion_recomendada": "No incluir en el paquete, no eliminar y no categorizar automaticamente."
+    },
+    {
+      "codigo_interno": "SKU-000002",
+      "nombre": "Diclofenaco Gel 1%",
+      "coincide_con_paquete": false,
+      "accion_recomendada": "No incluir en el paquete, no eliminar y no categorizar automaticamente."
+    },
+    {
+      "codigo_interno": "SKU-000003",
+      "nombre": "Amoxicilina 300 mg",
+      "coincide_con_paquete": false,
+      "accion_recomendada": "No incluir en el paquete, no eliminar y no categorizar automaticamente."
+    },
+    {
+      "codigo_interno": "SKU-000004",
+      "nombre": "Ibuprofeno 200 mg",
+      "coincide_con_paquete": false,
+      "accion_recomendada": "No incluir en el paquete, no eliminar y no categorizar automaticamente."
+    },
+    {
+      "codigo_interno": "SKU-000005",
+      "nombre": "Cetirizina 200mg",
+      "coincide_con_paquete": false,
+      "accion_recomendada": "No incluir en el paquete, no eliminar y no categorizar automaticamente."
+    }
+  ]
+}

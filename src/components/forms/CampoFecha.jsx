@@ -1,11 +1,8 @@
-/**
- * Campo de fecha integrado con React Hook Form.
- */
-export default function CampoFecha({ nombre, etiqueta, requerido, error, register, ...props }) {
+export default function CampoFecha({ nombre, etiqueta, requerido, error, register, className, ...props }) {
   return (
     <div className="flex flex-col gap-1.5">
       {etiqueta && (
-        <label htmlFor={nombre} className="text-etiqueta font-medium text-neutro-negro-suave">
+        <label htmlFor={nombre} className="text-sm font-medium text-principal">
           {etiqueta} {requerido && <span className="text-estado-critico">*</span>}
         </label>
       )}
@@ -13,13 +10,12 @@ export default function CampoFecha({ nombre, etiqueta, requerido, error, registe
         id={nombre}
         type="date"
         {...register(nombre)}
-        className="px-3 py-2 text-cuerpo bg-white border border-neutro-gris-borde rounded-boton
-                   text-neutro-negro-suave
+        className={`px-3 py-2 text-sm bg-fondo border border-estilo rounded-md text-principal
                    focus:outline-none focus:border-marca-principal focus:ring-1 focus:ring-marca-principal
-                   transition-colors"
+                   transition-colors ${className}`}
         {...props}
       />
-      {error && <p className="text-etiqueta text-estado-critico">{error}</p>}
+      {error && <p className="text-xs text-estado-critico">{error}</p>}
     </div>
   )
 }
