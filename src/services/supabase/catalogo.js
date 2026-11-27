@@ -53,18 +53,21 @@ export async function obtenerOpcionesPaises() {
 }
 
 export async function obtenerOpcionesUbigeos() {
-  const { data, error } = await supabase
-    .from('ubigeos')
-    .select('*')
-    .order('departamento')
-    .order('provincia')
-    .order('distrito')
-
-  if (error) throw new Error('Error al cargar ubigeos: ' + error.message)
-  return (data || []).map(u => ({
-    valor: u.codigo,
-    etiqueta: `${u.distrito}, ${u.provincia}, ${u.departamento}`,
-  }))
+  const opciones = []
+  const limite = 500
+  let ultimoCodigo
+  while (true) {
+    let consulta = supabase.from('ubigeos').select('codigo, distrito, provincia, departamento')
+      .order('codigo').limit(limite)
+    if (ultimoCodigo) consulta = consulta.gt('codigo', ultimoCodigo)
+    const { data, error } = await consulta
+    if (error) throw new Error('Error al cargar ubigeos: ' + error.message)
+    if (!data?.length) break
+    for (const u of data) opciones.push({ valor: u.codigo, etiqueta: `${u.distrito}, ${u.provincia}, ${u.departamento}` })
+    ultimoCodigo = data.at(-1).codigo
+    if (data.length < limite) break
+  }
+  return opciones
 }
 
 export async function obtenerOpcionesMonedas() {

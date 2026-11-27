@@ -1,27 +1,15 @@
 ﻿import { supabase } from './cliente'
 
-function mapearUsuario(user, perfil) {
-  if (perfil) {
-    return {
-      id: perfil.id,
-      email: perfil.email,
-      nombre: perfil.nombre,
-      rol: perfil.rol,
-      avatar: perfil.avatar,
-      telefono: perfil.telefono,
-      orgId: perfil.org_id,
-      boticaId: perfil.botica_id,
-    }
-  }
+function mapearUsuario(perfil) {
   return {
-    id: user.id,
-    email: user.email,
-    nombre: user.user_metadata?.nombre || user.email?.split('@')[0] || 'Usuario',
-    rol: user.user_metadata?.rol || 'visor_botica',
-    avatar: user.user_metadata?.avatar || null,
-    telefono: user.user_metadata?.telefono || null,
-    orgId: user.user_metadata?.org_id || null,
-    boticaId: user.user_metadata?.botica_id || null,
+    id: perfil.id,
+    email: perfil.email,
+    nombre: perfil.nombre,
+    rol: perfil.rol,
+    avatar: perfil.avatar,
+    telefono: perfil.telefono,
+    orgId: perfil.org_id,
+    boticaId: perfil.botica_id,
   }
 }
 
@@ -40,9 +28,9 @@ export async function iniciarSesion(email, password) {
   if (error) return { usuario: null, error }
 
   const perfil = await obtenerPerfil(data.user)
-  if (perfil && !perfil.activo) {
-    await supabase.auth.signOut()
-    return { usuario: null, error: { message: 'Usuario desactivado. Contacta al administrador.' } }
+  if (!perfil?.activo) {
+    await supabase.auth.signOut({ scope: 'local' })
+    return { usuario: null, error: { message: perfil ? 'Usuario desactivado. Contacta al administrador.' : 'No se pudo validar tu perfil.' } }
   }
 
   supabase
@@ -52,7 +40,7 @@ export async function iniciarSesion(email, password) {
     .then()
     .catch(() => {})
 
-  return { usuario: mapearUsuario(data.user, perfil), error: null }
+  return { usuario: mapearUsuario(perfil), error: null }
 }
 
 export async function cerrarSesion() {
@@ -62,12 +50,12 @@ export async function cerrarSesion() {
 
 export async function obtenerSesion() {
   const { data, error } = await supabase.auth.getSession()
-  if (error || !data.session) return { sesion: null, error }
+  if (error || !data.session) return { sesion: null, error: error && { message: 'No se pudo verificar tu sesión. Inicia sesión nuevamente.' } }
 
   const perfil = await obtenerPerfil(data.session.user)
-  if (perfil && !perfil.activo) {
-    await supabase.auth.signOut()
-    return { sesion: null, error: { message: 'Usuario desactivado.' } }
+  if (!perfil?.activo) {
+    // Un fallo al leer el perfil no equivale a un token inválido.
+    return { sesion: null, error: { message: perfil ? 'Usuario desactivado.' : 'No se pudo validar tu perfil.' } }
   }
-  return { sesion: { usuario: mapearUsuario(data.session.user, perfil) }, error: null }
+  return { sesion: { usuario: mapearUsuario(perfil) }, error: null }
 }

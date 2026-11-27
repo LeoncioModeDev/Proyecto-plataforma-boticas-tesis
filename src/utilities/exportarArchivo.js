@@ -1,17 +1,25 @@
+function codificarCeldaCSV(valor) {
+  if (valor == null) return ''
+  let texto = String(valor)
+  if (typeof valor === 'string' && /^(?:[\t\r\n]|\s*[=+\-@＝＋－＠])/.test(texto)) {
+    texto = `'${texto}`
+  }
+  return /[,"\r\n]/.test(texto) ? `"${texto.replaceAll('"', '""')}"` : texto
+}
+
+export function serializarCSV(filas) {
+  if (filas.length === 0) return ''
+  const cabeceras = Object.keys(filas[0])
+  return [
+    cabeceras.map(codificarCeldaCSV).join(','),
+    ...filas.map(f => cabeceras.map(c => codificarCeldaCSV(f[c])).join(',')),
+  ].join('\r\n')
+}
+
 export function exportarCSV(filas, nombreArchivo = 'reporte') {
   if (filas.length === 0) return
-  const cabeceras = Object.keys(filas[0])
-  const lineas = [
-    cabeceras.join(','),
-    ...filas.map(f => cabeceras.map(c => {
-      const val = f[c]
-      if (val == null) return ''
-      const str = String(val)
-      return str.includes(',') || str.includes('"') ? `"${str.replace(/"/g, '""')}"` : str
-    }).join(',')),
-  ]
   const bom = '\uFEFF'
-  const blob = new Blob([bom + lineas.join('\n')], { type: 'text/csv;charset=utf-8;' })
+  const blob = new Blob([bom + serializarCSV(filas)], { type: 'text/csv;charset=utf-8;' })
   descargar(blob, `${nombreArchivo}.csv`)
 }
 

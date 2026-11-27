@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { validarRangoFechas } from "../_shared/validarRangoFechas.js";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -48,8 +49,11 @@ serve(async (req) => {
     return json({ error: "Perfil de usuario no encontrado" }, 403);
   }
 
-  if (!perfil.activo) {
-    return json({ error: "Usuario desactivado. Contacta al administrador." }, 403);
+  if (!perfil.activo || !perfil.org_id || !["admin_central", "operador_drogueria", "visor_botica"].includes(perfil.rol)) {
+    return json({ error: "No tienes acceso al stock histórico." }, 403);
+  }
+  if (perfil.rol === "visor_botica" && !perfil.botica_id) {
+    return json({ error: "No tienes una botica asignada." }, 403);
   }
 
   try {
@@ -71,6 +75,9 @@ async function listarStockHistorico(supabase: any, perfil: PerfilUsuario, url: U
   const stockout = params.get("stockout") || "";
   const fechaDesde = params.get("fechaDesde") || "";
   const fechaHasta = params.get("fechaHasta") || "";
+  const errorRango = validarRangoFechas(fechaDesde, fechaHasta);
+  if (errorRango) return json({ error: errorRango }, 400);
+
   const ordenCampo = normalizarOrden(params.get("ordenCampo") || "fecha_snapshot");
   const ascendente = params.get("ascendente") === "true";
 

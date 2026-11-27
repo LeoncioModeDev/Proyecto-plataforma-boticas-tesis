@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useForm, useFieldArray } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams, useLocation } from 'react-router-dom'
 import { Save, ArrowLeft, Eraser } from 'lucide-react'
 import Boton from '@/components/common/Boton'
 import Tarjeta from '@/components/common/Tarjeta'
@@ -15,10 +15,12 @@ import { OPCIONES_ESTADO } from '@/constants/estadoProducto'
 import { crearProducto, actualizarProducto, obtenerProductoPorId } from '@/services/supabase/productos'
 import { obtenerOpcionesFormasFarmaceuticas, obtenerOpcionesPrincipiosActivos, obtenerOpcionesUnidadesMedida } from '@/services/supabase/catalogo'
 import { listarCategoriasTerapeuticas } from '@/services/supabase/categoriasTerapeuticas'
+import { obtenerRutaCatalogo } from './catalogoProductos'
 
 export default function FormularioProducto({ productoEditar }) {
   const navegar = useNavigate()
   const { id } = useParams()
+  const rutaCatalogo = obtenerRutaCatalogo(useLocation().pathname)
   const [cargando, setCargando] = useState(!!id && !productoEditar)
   const [error, setError] = useState(null)
   const [opcionesFormas, setOpcionesFormas] = useState([])
@@ -126,10 +128,10 @@ export default function FormularioProducto({ productoEditar }) {
 
       if (esEdicion) {
         await actualizarProducto(id, payload)
-        navegar(`/central/inventario/catalogo/${id}`)
+        navegar(`${rutaCatalogo}/${id}`)
       } else {
         const result = await crearProducto(payload)
-        navegar(`/central/inventario/catalogo/${result.id}`)
+        navegar(`${rutaCatalogo}/${result.id}`)
       }
     } catch (err) {
       setError(err.message)
@@ -152,7 +154,7 @@ export default function FormularioProducto({ productoEditar }) {
   return (
     <div className="space-y-6 max-w-2xl">
       <div className="flex items-center gap-4">
-        <Boton variante="texto" icono={ArrowLeft} onClick={() => navegar(esEdicion ? `/central/inventario/catalogo/${id}` : '/central/inventario/catalogo')}>Volver</Boton>
+        <Boton variante="texto" icono={ArrowLeft} onClick={() => navegar(id ? `${rutaCatalogo}/${id}` : rutaCatalogo)}>Volver</Boton>
         <h1 className="text-h1 text-principal">{esEdicion ? 'Editar Producto' : 'Nuevo Producto'}</h1>
       </div>
       {error && <Alerta tipo="error" titulo={error} />}

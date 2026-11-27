@@ -1,4 +1,4 @@
-import { supabase } from './cliente'
+import { fetchConSesion, supabase } from './cliente'
 
 const EDGE_FN_URL = import.meta.env.VITE_SUPABASE_URL
   ? `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ventas-historicas`
@@ -16,7 +16,7 @@ async function llamarEdgeFunction(params = {}) {
   })
   const queryString = qs.toString()
 
-  const res = await fetch(`${EDGE_FN_URL}${queryString ? `?${queryString}` : ''}`, {
+  const res = await fetchConSesion(`${EDGE_FN_URL}${queryString ? `?${queryString}` : ''}`, {
     method: 'GET',
     headers: {
       Authorization: `Bearer ${session.access_token}`,

@@ -1,4 +1,4 @@
-import { supabase } from './cliente'
+import { fetchConSesion, supabase } from './cliente'
 
 const URL_AUDITORIA = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/auditoria`
 
@@ -10,7 +10,7 @@ async function obtenerToken() {
 
 async function peticion(method, path) {
   const token = await obtenerToken()
-  const res = await fetch(`${URL_AUDITORIA}${path}`, {
+  const res = await fetchConSesion(`${URL_AUDITORIA}${path}`, {
     method,
     headers: {
       Authorization: `Bearer ${token}`,

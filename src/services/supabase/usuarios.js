@@ -1,4 +1,4 @@
-import { supabase } from './cliente'
+import { fetchConSesion, supabase } from './cliente'
 
 const URL_USUARIOS = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/usuarios`
 
@@ -19,7 +19,7 @@ async function peticion(method, path, body = null) {
   }
   if (body) opciones.body = JSON.stringify(body)
 
-  const res = await fetch(`${URL_USUARIOS}${path}`, opciones)
+  const res = await fetchConSesion(`${URL_USUARIOS}${path}`, opciones)
   const data = await res.json()
 
   if (!res.ok) throw new Error(data.error || 'Error en la solicitud')

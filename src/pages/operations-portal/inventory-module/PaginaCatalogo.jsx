@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Plus, Truck } from 'lucide-react'
 import Boton from '@/components/common/Boton'
@@ -15,6 +15,7 @@ import { listarProveedores } from '@/services/supabase/proveedores'
 import { listarPorProducto, guardarRelacion, eliminarRelacion } from '@/services/supabase/proveedorProducto'
 import { ETIQUETAS_CLASIFICACION, COLORES_CLASIFICACION } from '@/constants/clasificacionProducto'
 import { ETIQUETAS_ESTADO, COLORES_ESTADO } from '@/constants/estadoProducto'
+import { crearFiltroPrincipios } from '@/pages/central-portal/inventory-module/catalog/catalogoProductos'
 
 function enriquecerProductos(productos) {
   return productos.map(p => ({
@@ -37,40 +38,41 @@ export default function PaginaCatalogo() {
   const [proveedoresDisponibles, setProveedoresDisponibles] = useState([])
   const [busqueda, setBusqueda] = useState('')
   const [filtroPrincipioActivo, setFiltroPrincipioActivo] = useState('')
+  const [filtroConcentracion, setFiltroConcentracion] = useState('')
   const [principiosActivos, setPrincipiosActivos] = useState([])
   const [nuevoProvProd, setNuevoProvProd] = useState({ proveedorId: '', leadTimeEspecifico: '', precioCompraReferencial: '', cantidadMinimaCompra: '1', multiploEmpaque: '1' })
 
-  const cargarDatos = useCallback(async () => {
-    try {
-      setCargando(true)
-      setError(null)
-      const [datos, principiosData] = await Promise.all([
-        obtenerProductos(),
-        obtenerOpcionesPrincipiosActivos().catch(() => []),
-      ])
-      setProductos(enriquecerProductos(datos))
-      setPrincipiosActivos(principiosData)
-    } catch (err) {
-      setError(err.message)
-    } finally {
-      setCargando(false)
+  useEffect(() => {
+    async function cargarDatos() {
+      try {
+        const [datos, principiosData] = await Promise.all([
+          obtenerProductos(),
+          obtenerOpcionesPrincipiosActivos().catch(() => []),
+        ])
+        setProductos(enriquecerProductos(datos))
+        setPrincipiosActivos(principiosData)
+      } catch (err) {
+        setError(err.message)
+      } finally {
+        setCargando(false)
+      }
     }
+    cargarDatos()
   }, [])
 
-  useEffect(() => { cargarDatos() }, [cargarDatos])
-
+  const termino = busqueda.trim().toLowerCase()
+  const coincidePrincipios = crearFiltroPrincipios(filtroPrincipioActivo, filtroConcentracion)
   const productosFiltrados = productos.filter(p => {
-    const termino = busqueda.trim().toLowerCase()
     const matchBusqueda = termino
       ? [p.id, p.nombreComercial, p.principioActivoDisplay].some(valor => (valor || '').toLowerCase().includes(termino))
       : true
-    const matchPrincipioActivo = filtroPrincipioActivo ? p.principiosActivos?.some(pa => pa.principioActivoId === filtroPrincipioActivo) : true
-    return matchBusqueda && matchPrincipioActivo
+    return matchBusqueda && coincidePrincipios(p)
   })
 
   const limpiarFiltros = () => {
     setBusqueda('')
     setFiltroPrincipioActivo('')
+    setFiltroConcentracion('')
   }
 
   const abrirConfigurarProveedores = async (producto) => {
@@ -163,6 +165,7 @@ export default function PaginaCatalogo() {
       <BarraFiltros alLimpiar={limpiarFiltros}>
         <CampoBusqueda valor={busqueda} alCambiar={setBusqueda} placeholder="Buscar producto..." className="w-full sm:w-72" />
         <SelectBusquedaFiltro valor={filtroPrincipioActivo} alCambiar={setFiltroPrincipioActivo} opciones={principiosActivos} placeholder="Principio activo" />
+        <CampoBusqueda valor={filtroConcentracion} alCambiar={setFiltroConcentracion} placeholder="Concentración (ej. 500 mg)" className="w-full sm:w-56" />
       </BarraFiltros>
 
       <Tabla columnas={columnas} datos={productosFiltrados} busqueda={false} alClickFila={(p) => navegar(`/operaciones/inventario/catalogo/${p.id}`)} />

@@ -1,4 +1,4 @@
-import { supabase } from './cliente'
+import { fetchConSesion, supabase } from './cliente'
 
 const URL_CONFIG = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/configuracion`
 const URL_IMPORTACIONES = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/importaciones-datos`
@@ -19,7 +19,7 @@ async function peticion(urlBase, method, path, body = null) {
     },
   }
   if (body) opciones.body = JSON.stringify(body)
-  const res = await fetch(`${urlBase}${path}`, opciones)
+  const res = await fetchConSesion(`${urlBase}${path}`, opciones)
   const data = await res.json()
   if (!res.ok) throw new Error(data.error || 'Error en la solicitud')
   return data
@@ -87,6 +87,13 @@ export async function obtenerConfiguracion() {
   return mapearConfig(datos)
 }
 
+export async function obtenerAlertaVencimiento(orgId, senal) {
+  const { data, error } = await supabase.from('configuracion_organizacion')
+    .select('alerta_vencimiento_dias').eq('org_id', orgId).abortSignal(senal).maybeSingle()
+  if (error) throw error
+  return data?.alerta_vencimiento_dias
+}
+
 export async function actualizarConfiguracion(campos) {
   const body = mapearInverso(campos)
   const { exito } = await peticion(URL_CONFIG, 'PATCH', '', body)
@@ -110,7 +117,7 @@ export async function obtenerImportacion(id) {
 
 export async function descargarErrores(id) {
   const token = await obtenerToken()
-  const res = await fetch(`${URL_IMPORTACIONES}/${id}/errores`, {
+  const res = await fetchConSesion(`${URL_IMPORTACIONES}/${id}/errores`, {
     headers: { Authorization: `Bearer ${token}` },
   })
   if (!res.ok) throw new Error('Error al descargar errores')
@@ -119,7 +126,7 @@ export async function descargarErrores(id) {
 
 export async function descargarPlantilla(tipo) {
   const token = await obtenerToken()
-  const res = await fetch(`${URL_IMPORTACIONES}/plantillas/${tipo}`, {
+  const res = await fetchConSesion(`${URL_IMPORTACIONES}/plantillas/${tipo}`, {
     headers: { Authorization: `Bearer ${token}` },
   })
   if (!res.ok) throw new Error('Error al descargar plantilla')

@@ -1,10 +1,11 @@
 import { supabase } from '@/services/supabase/cliente'
 
-const BASE_URL = (import.meta.env.VITE_ML_API_URL || 'http://127.0.0.1:8000').replace(/\/$/, '')
+const BASE_URL = (import.meta.env.VITE_ML_API_URL || 'http://127.0.0.1:8000').trim().replace(/\/+$/, '')
 
 function construirUrl(path) {
-  if (path === '/health') return `${BASE_URL}${path}`
-  return `${BASE_URL}${path.startsWith('/api/v1') ? path : `/api/v1${path}`}`
+  const base = import.meta.env.DEV ? '/ml-api' : BASE_URL
+  if (path === '/health') return `${base}${path}`
+  return `${base}${path.startsWith('/api/v1') ? path : `/api/v1${path}`}`
 }
 
 function extraerMensajeError(data, estado) {

@@ -1,6 +1,8 @@
 import { create } from 'zustand'
 import { obtenerConfiguracion, actualizarConfiguracion } from '@/services/supabase/configuracion'
 
+export const ALERTA_VENCIMIENTO_PREDETERMINADA = 30
+
 const useConfiguracion = create((set, get) => ({
   config: null,
   cargando: false,
@@ -33,7 +35,7 @@ const useConfiguracion = create((set, get) => ({
   limpiarError: () => set({ error: null }),
 
   obtenerDominioCorreo: () => get().config?.dominioCorreoOrganizacion || null,
-  obtenerAlertaVencimientoDias: () => get().config?.alertaVencimientoDias ?? 30,
+  obtenerAlertaVencimientoDias: () => get().config?.alertaVencimientoDias ?? ALERTA_VENCIMIENTO_PREDETERMINADA,
   obtenerUmbralSobrestockDias: () => get().config?.umbralSobrestockDias ?? 60,
   obtenerHorizonteQuiebreDias: () => get().config?.horizonteAlertaQuiebreDias ?? 30,
 }))

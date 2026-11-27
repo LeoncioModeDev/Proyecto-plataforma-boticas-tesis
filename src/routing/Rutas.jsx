@@ -8,6 +8,7 @@ import { ROLES } from '@/constants/roles'
 
 import BarraLateral from '@/components/navigation/BarraLateral'
 import BarraSuperior from '@/components/navigation/BarraSuperior'
+import PaginaNoEncontrada from '@/pages/shared/PaginaNoEncontrada'
 
 // Autenticación
 const InicioSesion = lazy(() => import('@/pages/auth/InicioSesion'))
@@ -22,6 +23,7 @@ const DetalleProducto = lazy(() => import('@/pages/central-portal/inventory-modu
 const PaginaStock = lazy(() => import('@/pages/central-portal/inventory-module/stock/PaginaStock'))
 const DetalleStockActual = lazy(() => import('@/pages/shared/inventory/DetalleStockActual'))
 const PaginaLotes = lazy(() => import('@/pages/central-portal/inventory-module/lots/PaginaLotes'))
+const DetalleLote = lazy(() => import('@/pages/shared/inventory/DetalleLote'))
 const PaginaMovimientos = lazy(() => import('@/pages/central-portal/inventory-module/movements/PaginaMovimientos'))
 const PaginaAjustes = lazy(() => import('@/pages/central-portal/inventory-module/adjustments/PaginaAjustes'))
 const FormularioAjuste = lazy(() => import('@/pages/central-portal/inventory-module/adjustments/FormularioAjuste'))
@@ -191,6 +193,11 @@ export default function Rutas() {
         <Route path="/central/inventario/stock-historico" element={<Navigate to="/central/administracion/stock-historico" replace />} />
         <Route path="/central/inventario/categorias-terapeuticas" element={<Navigate to="/central/administracion/categorias-terapeuticas" replace />} />
         <Route path="/central/inventario/lotes" element={<PaginaLotes />} />
+        <Route path="/central/inventario/lotes/:id" element={<DetalleLote rutaListado="/central/inventario/lotes" />} />
+        <Route path="/central/inventario/vencimientos" element={<PaginaLotes key="vencimientos" vista="vencimientos" />} />
+        <Route path="/central/inventario/vencimientos/:id" element={<DetalleLote rutaListado="/central/inventario/vencimientos" etiquetaVolver="Volver a vencimientos" />} />
+        <Route path="/central/inventario/trazabilidad-lotes" element={<PaginaLotes key="trazabilidad" vista="trazabilidad" />} />
+        <Route path="/central/inventario/trazabilidad-lotes/:id" element={<DetalleLote rutaListado="/central/inventario/trazabilidad-lotes" etiquetaVolver="Volver a trazabilidad" />} />
 
         <Route path="/central/inventario/movimientos" element={<PaginaMovimientos />} />
         <Route path="/central/inventario/ajustes" element={<PaginaAjustes />} />
@@ -248,6 +255,7 @@ export default function Rutas() {
         <Route path="/botica/ventas" element={<PaginaVentas />} />
         <Route path="/botica/ventas/registrar" element={<PaginaRegistrarVenta />} />
         <Route path="/botica/lotes" element={<PaginaLotesBotica />} />
+        <Route path="/botica/lotes/:id" element={<DetalleLote rutaListado="/botica/lotes" />} />
         <Route path="/botica/movimientos" element={<PaginaMovimientosBotica />} />
         <Route path="/botica/dashboard" element={<PaginaDashboardBotica />} />
         <Route path="/botica/transferencias" element={<PaginaTransferenciasBotica />} />
@@ -269,6 +277,11 @@ export default function Rutas() {
         <Route path="/operaciones/inventario/precios" element={<Navigate to="/operaciones/administracion/precios" replace />} />
         <Route path="/operaciones/inventario/stock-historico" element={<Navigate to="/operaciones/administracion/stock-historico" replace />} />
         <Route path="/operaciones/inventario/lotes" element={<PaginaLotesOperaciones />} />
+        <Route path="/operaciones/inventario/lotes/:id" element={<DetalleLote rutaListado="/operaciones/inventario/lotes" />} />
+        <Route path="/operaciones/inventario/vencimientos" element={<PaginaLotesOperaciones key="vencimientos" vista="vencimientos" />} />
+        <Route path="/operaciones/inventario/vencimientos/:id" element={<DetalleLote rutaListado="/operaciones/inventario/vencimientos" etiquetaVolver="Volver a vencimientos" />} />
+        <Route path="/operaciones/inventario/trazabilidad-lotes" element={<PaginaLotesOperaciones key="trazabilidad" vista="trazabilidad" />} />
+        <Route path="/operaciones/inventario/trazabilidad-lotes/:id" element={<DetalleLote rutaListado="/operaciones/inventario/trazabilidad-lotes" etiquetaVolver="Volver a trazabilidad" />} />
 
         <Route path="/operaciones/inventario/movimientos" element={<PaginaMovimientosOperaciones />} />
         <Route path="/operaciones/inventario/ajustes" element={<PaginaAjustesOperaciones />} />
@@ -328,7 +341,7 @@ export default function Rutas() {
       <Route path="/no-autorizado" element={<PaginaNoAutorizado />} />
 
       {/* Ruta no encontrada */}
-      <Route path="*" element={<Navigate to="/" replace />} />
+      <Route path="*" element={<PaginaNoEncontrada />} />
     </Routes>
     </Suspense>
   )

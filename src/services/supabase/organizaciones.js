@@ -1,4 +1,4 @@
-import { supabase } from './cliente'
+import { fetchConSesion, supabase } from './cliente'
 
 const URL_BASE = import.meta.env.VITE_SUPABASE_URL
   ? `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/organizaciones`
@@ -17,7 +17,7 @@ export async function listarOrganizaciones() {
   if (!URL_BASE) throw new Error('VITE_SUPABASE_URL no está configurado')
 
   const token = await obtenerToken()
-  const res = await fetch(URL_BASE, {
+  const res = await fetchConSesion(URL_BASE, {
     headers: { Authorization: `Bearer ${token}` },
   })
   const data = await res.json()
@@ -32,7 +32,7 @@ export async function obtenerOrganizacion(id) {
   if (!URL_BASE) throw new Error('VITE_SUPABASE_URL no está configurado')
 
   const token = await obtenerToken()
-  const res = await fetch(`${URL_BASE}/${id}`, {
+  const res = await fetchConSesion(`${URL_BASE}/${id}`, {
     headers: { Authorization: `Bearer ${token}` },
   })
   const data = await res.json()
@@ -49,7 +49,7 @@ export async function actualizarOrganizacion(id, campos) {
   if (!URL_BASE) throw new Error('VITE_SUPABASE_URL no está configurado')
 
   const token = await obtenerToken()
-  const res = await fetch(`${URL_BASE}/${id}`, {
+  const res = await fetchConSesion(`${URL_BASE}/${id}`, {
     method: 'PATCH',
     headers: {
       Authorization: `Bearer ${token}`,

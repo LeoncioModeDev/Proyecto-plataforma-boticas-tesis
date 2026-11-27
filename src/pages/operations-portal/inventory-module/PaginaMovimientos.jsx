@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import Tabla from '@/components/common/Tabla'
+import Alerta from '@/components/common/Alerta'
 import Modal from '@/components/common/Modal'
 import CampoBusqueda from '@/components/common/CampoBusqueda'
 import BarraFiltros from '@/components/common/BarraFiltros'
@@ -11,6 +12,7 @@ import Insignia from '@/components/common/Insignia'
 import { obtenerMovimientos } from '@/services/supabase/movimientos'
 import { ETIQUETAS_MOVIMIENTO, COLORES_MOVIMIENTO, OPCIONES_MOVIMIENTO } from '@/constants/tiposMovimiento'
 import { formatearFechaHora } from '@/utilities/formatearFecha'
+import { validarRangoFechas } from '../../../../supabase/functions/_shared/validarRangoFechas.js'
 
 export default function PaginaMovimientos() {
   const [searchParams] = useSearchParams()
@@ -26,7 +28,6 @@ export default function PaginaMovimientos() {
   const [detalle, setDetalle] = useState(null)
 
   useEffect(() => {
-    setCargando(true)
     obtenerMovimientos()
       .then(data => {
         setDatos(data)
@@ -47,8 +48,9 @@ export default function PaginaMovimientos() {
   const ubicacionId = searchParams.get('ubicacionId')
   if (productoId) filtrados = filtrados.filter(m => m.productoId === productoId)
   if (ubicacionId) filtrados = filtrados.filter(m => m.ubicacionId === ubicacionId)
-  if (fechaHoraDesde) filtrados = filtrados.filter(m => new Date(m.createdAt) >= new Date(fechaHoraDesde))
-  if (fechaHoraHasta) filtrados = filtrados.filter(m => new Date(m.createdAt) <= new Date(fechaHoraHasta))
+  const errorRango = validarRangoFechas(fechaHoraDesde, fechaHoraHasta, 'datetime-local')
+  if (!errorRango && fechaHoraDesde) filtrados = filtrados.filter(m => new Date(m.createdAt) >= new Date(fechaHoraDesde))
+  if (!errorRango && fechaHoraHasta) filtrados = filtrados.filter(m => new Date(m.createdAt) <= new Date(fechaHoraHasta))
 
   const productosUnicos = [...new Map(datos.map(m => [m.productoId, { valor: m.productoId, etiqueta: m.nombreProducto }])).values()]
   const ubicacionesUnicas = [...new Map(datos.map(m => [m.ubicacionId || 'drogueria', { valor: m.ubicacionId || 'drogueria', etiqueta: m.nombreUbicacion }])).values()]
@@ -81,10 +83,12 @@ export default function PaginaMovimientos() {
         <SelectBusquedaFiltro valor={filtroProducto} alCambiar={setFiltroProducto} opciones={productosUnicos} placeholder="Producto" />
         <SelectFiltro valor={filtroUbicacion} alCambiar={setFiltroUbicacion} opciones={ubicacionesUnicas} placeholder="Todas las ubicaciones" />
         <SelectFiltro valor={filtroTipo} alCambiar={setFiltroTipo} opciones={OPCIONES_MOVIMIENTO} placeholder="Todos los tipos" />
-        <label className="flex flex-col gap-1 text-xs text-secundario">Fecha/hora inicial<input type="datetime-local" value={fechaHoraDesde} onChange={e => setFechaHoraDesde(e.target.value)} className="px-3 py-2 text-sm bg-fondo border border-estilo rounded-md text-principal" /></label>
-        <label className="flex flex-col gap-1 text-xs text-secundario">Fecha/hora final<input type="datetime-local" value={fechaHoraHasta} onChange={e => setFechaHoraHasta(e.target.value)} className="px-3 py-2 text-sm bg-fondo border border-estilo rounded-md text-principal" /></label>
+        <label className="flex flex-col gap-1 text-xs text-secundario">Fecha/hora inicial<input type="datetime-local" value={fechaHoraDesde} onChange={e => setFechaHoraDesde(e.target.value)} aria-invalid={!!errorRango} aria-describedby={errorRango ? 'error-rango' : undefined} className="px-3 py-2 text-sm bg-fondo border border-estilo rounded-md text-principal" /></label>
+        <label className="flex flex-col gap-1 text-xs text-secundario">Fecha/hora final<input type="datetime-local" value={fechaHoraHasta} onChange={e => setFechaHoraHasta(e.target.value)} aria-invalid={!!errorRango} aria-describedby={errorRango ? 'error-rango' : undefined} className="px-3 py-2 text-sm bg-fondo border border-estilo rounded-md text-principal" /></label>
       </BarraFiltros>
-      <Tabla columnas={columnas} datos={filtrados} busqueda={false} alClickFila={setDetalle} />
+      {errorRango ? (
+        <div id="error-rango" role="alert"><Alerta tipo="advertencia" mensaje={errorRango} /></div>
+      ) : <Tabla columnas={columnas} datos={filtrados} busqueda={false} alClickFila={setDetalle} />}
       <Modal abierto={!!detalle} alCerrar={() => setDetalle(null)} titulo="Detalle de movimiento" tamano="lg">
         {detalle && <div className="grid gap-3 sm:grid-cols-2 text-sm"><div><p className="text-etiqueta text-secundario">Producto</p><p className="font-medium text-principal">{detalle.nombreProducto}</p></div><div><p className="text-etiqueta text-secundario">Ubicación</p><p className="font-medium text-principal">{detalle.nombreUbicacion}</p></div><div><p className="text-etiqueta text-secundario">Fecha/hora</p><p className="font-medium text-principal">{formatearFechaHora(detalle.createdAt)}</p></div><div><p className="text-etiqueta text-secundario">Cantidad</p><p className="font-medium text-principal">{detalle.cantidad}</p></div><div className="sm:col-span-2"><p className="text-etiqueta text-secundario">Motivo</p><p className="font-medium text-principal whitespace-pre-wrap">{detalle.motivo || '-'}</p></div></div>}
       </Modal>

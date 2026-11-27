@@ -1,4 +1,4 @@
-import { supabase } from './cliente'
+import { fetchConSesion, supabase } from './cliente'
 
 const EDGE_FN_URL = import.meta.env.VITE_SUPABASE_URL
   ? `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ordenes-compra`
@@ -10,7 +10,7 @@ async function llamarEdgeFunction(method, path, body) {
   const { data: { session } } = await supabase.auth.getSession()
   if (!session) throw new Error('No hay sesión activa')
 
-  const res = await fetch(`${EDGE_FN_URL}${path}`, {
+  const res = await fetchConSesion(`${EDGE_FN_URL}${path}`, {
     method,
     headers: {
       'Content-Type': 'application/json',

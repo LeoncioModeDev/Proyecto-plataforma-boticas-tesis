@@ -14,6 +14,7 @@ import { listarCategoriasTerapeuticas } from '@/services/supabase/categoriasTera
 import { obtenerOpcionesFormasFarmaceuticas, obtenerOpcionesPrincipiosActivos } from '@/services/supabase/catalogo'
 import { ETIQUETAS_CLASIFICACION, COLORES_CLASIFICACION, OPCIONES_CLASIFICACION } from '@/constants/clasificacionProducto'
 import { ETIQUETAS_ESTADO, COLORES_ESTADO } from '@/constants/estadoProducto'
+import { crearFiltroPrincipios } from './catalogoProductos'
 
 function enriquecerProductos(productos) {
   return productos.map(p => ({
@@ -35,6 +36,7 @@ export default function PaginaCatalogo() {
   const [busqueda, setBusqueda] = useState('')
   const [filtroCategoria, setFiltroCategoria] = useState('')
   const [filtroPrincipioActivo, setFiltroPrincipioActivo] = useState('')
+  const [filtroConcentracion, setFiltroConcentracion] = useState('')
   const [filtroForma, setFiltroForma] = useState('')
   const [filtroClasificacion, setFiltroClasificacion] = useState('')
   const [filtroEstado, setFiltroEstado] = useState('')
@@ -75,23 +77,24 @@ export default function PaginaCatalogo() {
   // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { cargarDatos() }, [cargarDatos])
 
+  const termino = busqueda.trim().toLowerCase()
+  const coincidePrincipios = crearFiltroPrincipios(filtroPrincipioActivo, filtroConcentracion)
   const datosFiltrados = productos.filter(p => {
-    const termino = busqueda.trim().toLowerCase()
     const matchBusqueda = termino
       ? [p.codigoInterno, p.nombreComercial, p.principioActivoDisplay].some(valor => (valor || '').toLowerCase().includes(termino))
       : true
     const matchCategoria = filtroCategoria ? p.categoriaTerapeuticaId === filtroCategoria : true
-    const matchPrincipioActivo = filtroPrincipioActivo ? p.principiosActivos?.some(pa => pa.principioActivoId === filtroPrincipioActivo) : true
     const matchForma = filtroForma ? p.formaFarmaceuticaId === filtroForma : true
     const matchClasificacion = filtroClasificacion ? p.clasificacion === filtroClasificacion : true
     const matchEstado = filtroEstado ? p.estado === filtroEstado : true
-    return matchBusqueda && matchCategoria && matchPrincipioActivo && matchForma && matchClasificacion && matchEstado
+    return matchBusqueda && matchCategoria && matchForma && matchClasificacion && matchEstado && coincidePrincipios(p)
   })
 
   const limpiarFiltros = () => {
     setBusqueda('')
     setFiltroCategoria('')
     setFiltroPrincipioActivo('')
+    setFiltroConcentracion('')
     setFiltroForma('')
     setFiltroClasificacion('')
     setFiltroEstado('')
@@ -129,6 +132,7 @@ export default function PaginaCatalogo() {
         <CampoBusqueda valor={busqueda} alCambiar={setBusqueda} placeholder="Buscar producto..." className="w-full sm:w-72" />
         <SelectBusquedaFiltro valor={filtroCategoria} alCambiar={setFiltroCategoria} opciones={categorias} placeholder="Categoría terapéutica" />
         <SelectBusquedaFiltro valor={filtroPrincipioActivo} alCambiar={setFiltroPrincipioActivo} opciones={principiosActivos} placeholder="Principio activo" />
+        <CampoBusqueda valor={filtroConcentracion} alCambiar={setFiltroConcentracion} placeholder="Concentración (ej. 500 mg)" className="w-full sm:w-56" />
         <SelectBusquedaFiltro valor={filtroForma} alCambiar={setFiltroForma} opciones={formas} placeholder="Forma farmacéutica" />
         <SelectFiltro valor={filtroClasificacion} alCambiar={setFiltroClasificacion} opciones={OPCIONES_CLASIFICACION} placeholder="Todas las clasificaciones" />
         <SelectFiltro valor={filtroEstado} alCambiar={setFiltroEstado} opciones={[{ valor: 'activo', etiqueta: 'Activo' }, { valor: 'inactivo', etiqueta: 'Inactivo' }, { valor: 'descontinuado', etiqueta: 'Descontinuado' }]} placeholder="Todos los estados" />

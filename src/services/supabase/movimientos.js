@@ -1,5 +1,7 @@
 ﻿import { supabase } from './cliente'
 
+import { documentoDelMovimiento, esMovimientoDelLote } from '@/utilities/trazabilidadLote'
+
 const MAPEAR_MOVIMIENTO = (item) => ({
   id: item.id,
   tipo: item.tipo_movimiento,
@@ -36,6 +38,47 @@ const SELECCION = `
   boticas:ubicacion_id (nombre),
   usuarios:usuario_id (nombre)
 `
+
+export async function obtenerMovimientosPorLote(lote, senal) {
+  const { data, error } = await supabase
+    .from('movimientos_inventario')
+    .select(`${SELECCION}, venta_id`)
+    .eq('lote_id', lote.id)
+    .eq('org_id', lote.orgId)
+    .order('created_at', { ascending: false })
+    .order('id', { ascending: false })
+    .abortSignal(senal)
+
+  if (error) throw new Error('Error al cargar movimientos: ' + error.message)
+  const filas = (data || []).filter(movimiento => esMovimientoDelLote(movimiento, lote))
+
+  async function cargarDocumentos(tabla, campo, seleccion) {
+    const ids = [...new Set(filas.map(movimiento => movimiento[campo]).filter(Boolean))]
+    const documentos = new Map()
+    // Limitar la longitud de las URLs de PostgREST para historiales con muchas referencias.
+    for (let inicio = 0; inicio < ids.length; inicio += 100) {
+      const { data, error } = await supabase.from(tabla).select(seleccion)
+        .eq('org_id', lote.orgId).in('id', ids.slice(inicio, inicio + 100)).abortSignal(senal)
+      if (error) throw error
+      for (const documento of data || []) documentos.set(documento.id, documento)
+    }
+    return documentos
+  }
+
+  // transferencia_id no tiene FK en movimientos; resolver ambos documentos por su ID bajo RLS.
+  const [ventas, transferencias] = await Promise.allSettled([
+    cargarDocumentos('ventas', 'venta_id', 'id, numero_venta, estado, botica_id'),
+    cargarDocumentos('transferencias', 'transferencia_id', 'id, numero_transferencia, estado, origen_tipo, origen_id, destino_tipo, destino_id'),
+  ])
+  const sinDocumentos = new Map()
+  return {
+    movimientos: filas.map(fila => ({
+      ...MAPEAR_MOVIMIENTO(fila),
+      documento: documentoDelMovimiento(fila, ventas.value ?? sinDocumentos, transferencias.value ?? sinDocumentos),
+    })),
+    errorDocumentos: ventas.status === 'rejected' || transferencias.status === 'rejected',
+  }
+}
 
 export async function obtenerMovimientos(filtros = {}) {
   let query = supabase

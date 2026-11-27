@@ -393,7 +393,7 @@ async function actualizarUsuario(supabase: any, perfil: PerfilUsuario, id: strin
     .eq("id", id)
     .eq("org_id", perfil.org_id);
 
-  if (errUpd) return json({ error: errUpd.message }, 400);
+  if (errUpd) return respuestaErrorEscrituraUsuario(errUpd);
 
   const cambios: string[] = [];
   if (nombre !== undefined && nombre !== actual.nombre) cambios.push(`nombre: "${actual.nombre}" → "${nombre}"`);
@@ -436,7 +436,7 @@ async function toggleUsuario(supabase: any, perfil: PerfilUsuario, id: string) {
     .eq("id", id)
     .eq("org_id", perfil.org_id);
 
-  if (errUpd) return json({ error: errUpd.message }, 400);
+  if (errUpd) return respuestaErrorEscrituraUsuario(errUpd);
 
   // Sync activo flag to Auth user metadata so frontend can check on login
   await supabase.auth.admin.updateUserById(id, {
@@ -459,6 +459,10 @@ async function toggleUsuario(supabase: any, perfil: PerfilUsuario, id: string) {
   });
 
   return json({ exito: true, activo: nuevoEstado });
+}
+
+function respuestaErrorEscrituraUsuario(error: { code: string; message: string }) {
+  return json({ error: error.message }, error.code === "PT409" ? 409 : 400);
 }
 
 function json(data: unknown, status = 200) {

@@ -2,6 +2,7 @@
 
 const MAPEAR_LOTE = (item) => ({
   id: item.id,
+  orgId: item.org_id,
   productoId: item.producto_id,
   ubicacionTipo: item.ubicacion_tipo,
   ubicacionId: item.ubicacion_id,
@@ -16,6 +17,7 @@ const MAPEAR_LOTE = (item) => ({
 
 const SELECCION = `
   id,
+  org_id,
   producto_id,
   ubicacion_tipo,
   ubicacion_id,
@@ -26,6 +28,45 @@ const SELECCION = `
   productos:producto_id (nombre_comercial, codigo_interno),
   boticas:ubicacion_id (nombre)
 `
+
+const UUID_LOTE = /^[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i
+
+export async function obtenerLotePorId(id, senal) {
+  if (!UUID_LOTE.test(id)) return null
+
+  let query = supabase.from('lotes').select(SELECCION).eq('id', id)
+  if (senal) query = query.abortSignal(senal)
+
+  const { data, error } = await query.maybeSingle()
+  if (error) throw new Error('Error al cargar lote: ' + error.message)
+  return data ? MAPEAR_LOTE(data) : null
+}
+
+export async function obtenerRecepcionesPorLote(lote, senal) {
+  // El ítem tiene el UUID del lote, pero no una FK al movimiento de entrada.
+  const { data, error } = await supabase.from('recepcion_items')
+    .select(`id, cantidad_recibida, recepciones_orden!inner (
+      id, numero_recepcion, fecha_recepcion, resultado,
+      ordenes_compra!inner (id, numero_orden, estado)
+    )`)
+    .eq('lote_id', lote.id)
+    .eq('recepciones_orden.org_id', lote.orgId)
+    .eq('recepciones_orden.ordenes_compra.org_id', lote.orgId)
+    .order('created_at', { ascending: false })
+    .order('id', { ascending: false })
+    .abortSignal(senal)
+
+  if (error) throw error
+  return (data || []).map(({ id, cantidad_recibida, recepciones_orden: recepcion }) => ({
+    id,
+    cantidad: cantidad_recibida,
+    fecha: recepcion.fecha_recepcion,
+    recepcion: recepcion.numero_recepcion || recepcion.id,
+    resultado: recepcion.resultado,
+    orden: recepcion.ordenes_compra.numero_orden || recepcion.ordenes_compra.id,
+    estadoOrden: recepcion.ordenes_compra.estado,
+  }))
+}
 
 export async function obtenerLotesActivos(productoId, ubicacionTipo, ubicacionId, soloActivos = true) {
   let query = supabase

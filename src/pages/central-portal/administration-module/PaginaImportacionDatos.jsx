@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import {
   Upload, FileSpreadsheet, FileText, Download, CheckCircle2,
-  Building2, Package, Truck, Users,
+  Building2, Package, Truck,
   Handshake, PackageOpen, BarChart3, Eye, Tags, DollarSign, History,
 } from 'lucide-react'
 import Boton from '@/components/common/Boton'
@@ -66,7 +66,6 @@ export default function PaginaImportacionDatos() {
   const [resultadoImportacion, setResultadoImportacion] = useState(null)
   const [historial, setHistorial] = useState([])
   const [error, setError] = useState(null)
-  const [previewUrl, setPreviewUrl] = useState(null)
   const [previewLineas, setPreviewLineas] = useState([])
   const [descargando, setDescargando] = useState(false)
 
@@ -95,7 +94,6 @@ export default function PaginaImportacionDatos() {
     setValidacionesMultiples([])
     setResultadoImportacion(null)
     setError(null)
-    setPreviewUrl(null)
     setPreviewLineas([])
     setProgresoMulti(null)
     setImportacionSecuencial(false)
@@ -116,10 +114,6 @@ export default function PaginaImportacionDatos() {
       files.sort((a, b) => extraerNumeroTramo(a.name) - extraerNumeroTramo(b.name))
       setArchivosMultiples(files)
 
-      if (previewUrl) URL.revokeObjectURL(previewUrl)
-      const url = URL.createObjectURL(files[0])
-      setPreviewUrl(url)
-
       if (files[0].name.endsWith('.csv')) {
         const reader = new FileReader()
         reader.onload = (ev) => {
@@ -135,10 +129,6 @@ export default function PaginaImportacionDatos() {
     const file = files[0]
     if (!file) return
     setArchivo(file)
-
-    if (previewUrl) URL.revokeObjectURL(previewUrl)
-    const url = URL.createObjectURL(file)
-    setPreviewUrl(url)
 
     if (file.name.endsWith('.csv')) {
       const reader = new FileReader()

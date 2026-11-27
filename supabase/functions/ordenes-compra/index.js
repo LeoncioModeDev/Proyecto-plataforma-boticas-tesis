@@ -61,6 +61,9 @@ serve(async (req) => {
       return crearOC(supabase, perfil, await req.json());
     }
     if (req.method === "PUT") {
+      if (id && (accion === "aprobar" || accion === "rechazar") && perfil.rol !== "admin_central") {
+        return json({ error: "No autorizado para aprobar o rechazar órdenes de compra" }, 403);
+      }
       if (id && accion === "aprobar") {
         return aprobarOC(supabase, perfil, id);
       }
@@ -191,7 +194,7 @@ async function actualizarOC(supabase, perfil, id, body) {
   return json({ exito: true });
 }
 async function aprobarOC(supabase, perfil, id) {
-  const { data: oc, error: errOC } = await supabase.from("ordenes_compra").select("id, estado").eq("id", id).single();
+  const { data: oc, error: errOC } = await supabase.from("ordenes_compra").select("id, estado").eq("id", id).eq("org_id", perfil.org_id).single();
   if (errOC || !oc) return json({ error: "Orden no encontrada" }, 404);
   if (!puedeTransicionar(oc.estado, "aprobada")) {
     return json({ error: `No se puede aprobar una orden en estado ${oc.estado}` }, 400);
@@ -200,7 +203,7 @@ async function aprobarOC(supabase, perfil, id) {
     estado: "aprobada",
     aprobado_por: perfil.id,
     fecha_aprobacion: (/* @__PURE__ */ new Date()).toISOString()
-  }).eq("id", id);
+  }).eq("id", id).eq("org_id", perfil.org_id).select("id").single();
   if (errUpd) return json({ error: errUpd.message }, 400);
   return json({ exito: true, estado: "aprobada" });
 }
@@ -217,7 +220,7 @@ async function marcarPorRecibir(supabase, perfil, id) {
   return json({ exito: true, estado: "por_recibir" });
 }
 async function rechazarOC(supabase, perfil, id, body) {
-  const { data: oc } = await supabase.from("ordenes_compra").select("id, estado").eq("id", id).single();
+  const { data: oc } = await supabase.from("ordenes_compra").select("id, estado").eq("id", id).eq("org_id", perfil.org_id).single();
   if (!oc) return json({ error: "Orden no encontrada" }, 404);
   if (!puedeTransicionar(oc.estado, "rechazada")) {
     return json({ error: `No se puede rechazar una orden en estado ${oc.estado}` }, 400);
@@ -227,7 +230,7 @@ async function rechazarOC(supabase, perfil, id, body) {
     rechazado_por: perfil.id,
     fecha_rechazo: (/* @__PURE__ */ new Date()).toISOString(),
     motivo_rechazo: body.motivo || null
-  }).eq("id", id);
+  }).eq("id", id).eq("org_id", perfil.org_id).select("id").single();
   if (error) return json({ error: error.message }, 400);
   return json({ exito: true, estado: "rechazada" });
 }

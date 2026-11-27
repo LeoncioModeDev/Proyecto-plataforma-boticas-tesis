@@ -1,4 +1,4 @@
-import { supabase } from './cliente'
+import { fetchConSesion, supabase } from './cliente'
 
 const EDGE_FN_URL = import.meta.env.VITE_SUPABASE_URL
   ? `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ventas`
@@ -13,7 +13,7 @@ async function obtenerToken() {
 async function peticion(method, path = '', body) {
   if (!EDGE_FN_URL) throw new Error('VITE_SUPABASE_URL no configurado')
   const token = await obtenerToken()
-  const res = await fetch(`${EDGE_FN_URL}${path}`, {
+  const res = await fetchConSesion(`${EDGE_FN_URL}${path}`, {
     method,
     headers: {
       Authorization: `Bearer ${token}`,

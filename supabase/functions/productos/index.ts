@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { actualizarStockConfig } from "./stock-config.ts";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -60,7 +61,7 @@ serve(async (req) => {
 
       case "PATCH":
         if (accion === "toggle" && id) return toggleProducto(supabase, perfil, id);
-        if (accion === "stock-config" && id) return actualizarStockConfig(supabase, perfil, id, await req.json());
+        if (accion === "stock-config" && id) return await actualizarStockConfig(supabase, perfil, id, req, json);
         if (id) return actualizarProducto(supabase, perfil, id, await req.json());
         return json({ error: "ID de producto requerido" }, 400);
 
@@ -311,107 +312,6 @@ async function toggleProducto(supabase: any, perfil: PerfilUsuario, id: string) 
   if (errUpd) return json({ error: errUpd.message }, 400);
 
   return json({ exito: true, estado: nuevoEstado });
-}
-
-async function actualizarStockConfig(supabase: any, perfil: PerfilUsuario, productoId: string, body: any) {
-  if (perfil.rol !== "admin_central") {
-    return json({ error: "Solo el admin central puede modificar la configuración de stock" }, 403);
-  }
-
-  const { ubicacion_tipo, ubicacion_id, stock_minimo, stock_maximo } = body;
-
-  if (!ubicacion_tipo) {
-    return json({ error: "ubicacion_tipo es requerido" }, 400);
-  }
-
-  if (stock_minimo !== undefined && (typeof stock_minimo !== "number" || stock_minimo < 0)) {
-    return json({ error: "stock_minimo debe ser un número mayor o igual a 0" }, 400);
-  }
-
-  if (stock_maximo !== undefined && (typeof stock_maximo !== "number" || stock_maximo < 0)) {
-    return json({ error: "stock_maximo debe ser un número mayor o igual a 0" }, 400);
-  }
-
-  let query = supabase
-    .from("stock_ubicaciones")
-    .select("id")
-    .eq("producto_id", productoId)
-    .eq("ubicacion_tipo", ubicacion_tipo)
-
-  if (ubicacion_id != null) {
-    query = query.eq("ubicacion_id", ubicacion_id)
-  } else {
-    query = query.is("ubicacion_id", null)
-  }
-
-  const { data: existente } = await query.maybeSingle()
-
-  if (existente) {
-    const updates: Record<string, unknown> = {};
-    if (stock_minimo !== undefined) updates.stock_minimo = stock_minimo;
-    if (stock_maximo !== undefined) updates.stock_maximo = stock_maximo;
-    updates.modified_at = new Date().toISOString();
-    updates.modified_by = perfil.id;
-
-    const { data: anterior } = await supabase
-      .from("stock_ubicaciones")
-      .select("stock_minimo, stock_maximo")
-      .eq("id", existente.id)
-      .maybeSingle();
-
-    const { error } = await supabase
-      .from("stock_ubicaciones")
-      .update(updates)
-      .eq("id", existente.id);
-
-    if (error) return json({ error: error.message }, 400);
-    await supabase.from("auditoria").insert({
-      org_id: perfil.org_id,
-      usuario_id: perfil.id,
-      accion: "CONFIGURAR_STOCK",
-      entidad: "stock_ubicaciones",
-      entidad_id: existente.id,
-      nivel: "info",
-      detalle: "Configuración de stock mínimo/máximo actualizada",
-      metadata_jsonb: { producto_id: productoId, valores_anteriores: anterior, valores_nuevos: updates },
-    });
-    return json({ exito: true, id: existente.id });
-  }
-
-  if (stock_minimo === undefined || stock_maximo === undefined) {
-    return json({ error: "No existe registro de stock para esta ubicación. Debe enviar stock_minimo y stock_maximo." }, 400);
-  }
-
-  const { data: nuevo, error } = await supabase
-    .from("stock_ubicaciones")
-    .insert({
-      producto_id: productoId,
-      ubicacion_tipo,
-      ubicacion_id: ubicacion_id || null,
-      stock_fisico: 0,
-      stock_por_recibir: 0,
-      stock_en_transito: 0,
-      stock_minimo,
-      stock_maximo,
-      org_id: perfil.org_id,
-      created_by: perfil.id,
-      modified_by: perfil.id,
-    })
-    .select("id")
-    .single();
-
-  if (error) return json({ error: error.message }, 400);
-  await supabase.from("auditoria").insert({
-    org_id: perfil.org_id,
-    usuario_id: perfil.id,
-    accion: "CONFIGURAR_STOCK",
-    entidad: "stock_ubicaciones",
-    entidad_id: nuevo.id,
-    nivel: "info",
-    detalle: "Configuración de stock mínimo/máximo creada",
-    metadata_jsonb: { producto_id: productoId, valores_nuevos: { ubicacion_tipo, ubicacion_id: ubicacion_id || null, stock_minimo, stock_maximo } },
-  });
-  return json({ exito: true, id: nuevo.id });
 }
 
 function json(data: unknown, status = 200) {

@@ -1,4 +1,4 @@
-﻿import { supabase } from './cliente'
+﻿import { fetchConSesion, supabase } from './cliente'
 
 const URL_TRANSFERENCIAS = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/transferencias`
 
@@ -19,7 +19,7 @@ async function peticion(method, path, body = null) {
   }
   if (body) opciones.body = JSON.stringify(body)
 
-  const res = await fetch(`${URL_TRANSFERENCIAS}${path}`, opciones)
+  const res = await fetchConSesion(`${URL_TRANSFERENCIAS}${path}`, opciones)
   const data = await res.json()
 
   if (!res.ok) {

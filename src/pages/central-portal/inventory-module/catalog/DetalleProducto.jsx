@@ -1,4 +1,4 @@
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import { ArrowLeft, Edit, Truck } from 'lucide-react'
 import Boton from '@/components/common/Boton'
@@ -12,10 +12,13 @@ import { listarProveedores } from '@/services/supabase/proveedores'
 import { listarPorProducto, guardarRelacion, eliminarRelacion } from '@/services/supabase/proveedorProducto'
 import { ETIQUETAS_CLASIFICACION, COLORES_CLASIFICACION } from '@/constants/clasificacionProducto'
 import { ETIQUETAS_ESTADO, COLORES_ESTADO } from '@/constants/estadoProducto'
+import { obtenerRutaCatalogo } from './catalogoProductos'
 
 export default function DetalleProducto() {
   const { id } = useParams()
   const navegar = useNavigate()
+  const rutaCatalogo = obtenerRutaCatalogo(useLocation().pathname)
+  const volverAlCatalogo = () => navegar(rutaCatalogo)
   const [producto, setProducto] = useState(null)
   const [cargando, setCargando] = useState(true)
   const [error, setError] = useState(null)
@@ -100,7 +103,7 @@ export default function DetalleProducto() {
   }
 
   if (error || !producto) {
-    return <SinDatos titulo="Producto no encontrado" descripcion={error || 'El producto solicitado no existe.'} textoAccion="Volver al catálogo" alAccionar={() => navegar('/central/inventario/catalogo')} />
+    return <SinDatos titulo="Producto no encontrado" descripcion={error || 'El producto solicitado no existe.'} textoAccion="Volver al catálogo" alAccionar={volverAlCatalogo} />
   }
 
   const infoPrincipios = (producto.principiosActivos || []).map(pa => ({
@@ -118,12 +121,12 @@ export default function DetalleProducto() {
       {error && <Alerta tipo="error" titulo={error} className="mb-4" />}
       {exito && <Alerta tipo="exito" titulo={exito} className="mb-4" />}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
-        <Boton variante="texto" icono={ArrowLeft} onClick={() => navegar('/central/inventario/catalogo')}>Volver</Boton>
+        <Boton variante="texto" icono={ArrowLeft} onClick={volverAlCatalogo}>Volver</Boton>
         <h1 className="text-h1 text-principal">{producto.nombreComercial}</h1>
         <Insignia color={COLORES_ESTADO[producto.estado]}>{ETIQUETAS_ESTADO[producto.estado]}</Insignia>
         <div className="ml-auto flex gap-2">
           <Boton variante="secundario" icono={Truck} onClick={abrirConfigurarProveedores}>Configurar Lead Times</Boton>
-          <Boton variante="primario" icono={Edit} onClick={() => navegar(`/central/inventario/catalogo/${producto.id}/editar`)}>Editar</Boton>
+          <Boton variante="primario" icono={Edit} onClick={() => navegar(`${rutaCatalogo}/${producto.id}/editar`)}>Editar</Boton>
         </div>
       </div>
       <Tarjeta titulo="Información del Producto">

@@ -12,6 +12,7 @@ import { obtenerProductos } from '@/services/supabase/productos'
 import { listarCategoriasTerapeuticas } from '@/services/supabase/categoriasTerapeuticas'
 import useAutenticacion from '@/state/useAutenticacion'
 import { ROLES } from '@/constants/roles'
+import { validarRangoFechas } from '../../../../supabase/functions/_shared/validarRangoFechas.js'
 
 const LIMITE = 10
 
@@ -41,6 +42,7 @@ export default function PaginaVistaValidacion({
   const [fechaHasta, setFechaHasta] = useState('')
   const [extra, setExtra] = useState({})
   const [opciones, setOpciones] = useState({ boticas: [], productos: [], categorias: [] })
+  const errorRango = validarRangoFechas(fechaDesde, fechaHasta)
 
   useEffect(() => {
     Promise.all([
@@ -54,6 +56,7 @@ export default function PaginaVistaValidacion({
   }, [esVisorBotica, usuario?.boticaId])
 
   useEffect(() => {
+    if (errorRango) return
     let cancelado = false
     async function cargar() {
       setCargando(true)
@@ -82,10 +85,11 @@ export default function PaginaVistaValidacion({
     }
     cargar()
     return () => { cancelado = true }
-  }, [busqueda, boticaId, productoId, categoria, fechaDesde, fechaHasta, extra, pagina, cargarDatos, esVisorBotica, usuario?.boticaId])
+  }, [busqueda, boticaId, productoId, categoria, fechaDesde, fechaHasta, errorRango, extra, pagina, cargarDatos, esVisorBotica, usuario?.boticaId])
 
   const totalPaginas = Math.max(Math.ceil(total / LIMITE), 1)
-  const tarjetasMetricas = typeof metricas === 'function' ? metricas({ total, datos, resumen }) : null
+  const mostrarResultados = !errorRango && !cargando
+  const tarjetasMetricas = mostrarResultados && typeof metricas === 'function' ? metricas({ total, datos, resumen }) : null
 
   function actualizarFiltro(setter, valor) {
     setter(valor)
@@ -108,19 +112,15 @@ export default function PaginaVistaValidacion({
     setPagina(1)
   }
 
-  if (cargando) {
-    return <div className="flex justify-center py-12"><p className="text-secundario">{mensajeCargando}</p></div>
-  }
-
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-h1 text-principal">{titulo}</h1>
-        <p className="text-secundario mt-1">{descripcion || `${total} registros encontrados`}</p>
-        {descripcion && <p className="text-secundario mt-1">{total} registros encontrados</p>}
+        {descripcion && <p className="text-secundario mt-1">{descripcion}</p>}
+        {mostrarResultados && <p className="text-secundario mt-1">{total} registros encontrados</p>}
       </div>
 
-      {error && <Alerta tipo="error" titulo="No fue posible cargar la vista" mensaje={error} />}
+      {mostrarResultados && error && <Alerta tipo="error" titulo="No fue posible cargar la vista" mensaje={error} />}
 
       {tarjetasMetricas?.length > 0 && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
@@ -145,11 +145,11 @@ export default function PaginaVistaValidacion({
           <SelectBusquedaFiltro valor={categoria} alCambiar={valor => actualizarFiltro(setCategoria, valor)} opciones={opciones.categorias.map(cat => ({ valor: cat.nombre, etiqueta: cat.nombre }))} placeholder="Categoría" />
           <label className="flex flex-col gap-1 text-xs text-secundario">
             Desde
-            <input type="date" value={fechaDesde} onChange={e => actualizarFiltro(setFechaDesde, e.target.value)} className="px-3 py-2 text-sm bg-fondo border border-estilo rounded-md text-principal" />
+            <input type="date" value={fechaDesde} onChange={e => actualizarFiltro(setFechaDesde, e.target.value)} aria-invalid={!!errorRango} aria-describedby={errorRango ? 'error-rango' : undefined} className="px-3 py-2 text-sm bg-fondo border border-estilo rounded-md text-principal" />
           </label>
           <label className="flex flex-col gap-1 text-xs text-secundario">
             Hasta
-            <input type="date" value={fechaHasta} onChange={e => actualizarFiltro(setFechaHasta, e.target.value)} className="px-3 py-2 text-sm bg-fondo border border-estilo rounded-md text-principal" />
+            <input type="date" value={fechaHasta} onChange={e => actualizarFiltro(setFechaHasta, e.target.value)} aria-invalid={!!errorRango} aria-describedby={errorRango ? 'error-rango' : undefined} className="px-3 py-2 text-sm bg-fondo border border-estilo rounded-md text-principal" />
           </label>
           {filtrosExtra?.map(filtro => filtro.tipo === 'texto' ? (
             <input
@@ -165,8 +165,14 @@ export default function PaginaVistaValidacion({
           ))}
       </BarraFiltros>
 
-      <Tabla columnas={columnas} datos={datos} busqueda={false} paginacion={false} />
-      <Paginacion pagina={pagina} totalPaginas={totalPaginas} total={total} alCambiar={setPagina} />
+      {errorRango && <div id="error-rango" role="alert"><Alerta tipo="advertencia" mensaje={errorRango} /></div>}
+      {!errorRango && cargando && <p role="status" className="text-center text-secundario py-12">{mensajeCargando}</p>}
+      {mostrarResultados && (
+        <>
+          <Tabla columnas={columnas} datos={datos} busqueda={false} paginacion={false} />
+          <Paginacion pagina={pagina} totalPaginas={totalPaginas} total={total} alCambiar={setPagina} />
+        </>
+      )}
     </div>
   )
 }

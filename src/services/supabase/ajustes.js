@@ -1,4 +1,4 @@
-import { supabase } from './cliente'
+import { fetchConSesion, supabase } from './cliente'
 
 const EDGE_FUNCTION_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/inventario-movimientos`
 
@@ -40,7 +40,7 @@ export async function obtenerAjustesYMermas(filtros = {}) {
   if (filtros.orgId) params.set('org_id', filtros.orgId)
 
   const url = `${EDGE_FUNCTION_URL}?${params.toString()}`
-  const res = await fetch(url, { headers })
+  const res = await fetchConSesion(url, { headers })
 
   if (!res.ok) {
     const body = await res.json().catch(() => ({}))
@@ -64,7 +64,7 @@ export async function registrarAjuste(datos) {
     motivo: datos.motivo,
   }
 
-  const res = await fetch(`${EDGE_FUNCTION_URL}/ajuste`, {
+  const res = await fetchConSesion(`${EDGE_FUNCTION_URL}/ajuste`, {
     method: 'POST',
     headers,
     body: JSON.stringify(body),
@@ -91,7 +91,7 @@ export async function registrarMerma(datos) {
     motivo: datos.motivo,
   }
 
-  const res = await fetch(`${EDGE_FUNCTION_URL}/merma`, {
+  const res = await fetchConSesion(`${EDGE_FUNCTION_URL}/merma`, {
     method: 'POST',
     headers,
     body: JSON.stringify(body),

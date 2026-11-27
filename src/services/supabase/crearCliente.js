@@ -1,4 +1,4 @@
-import { supabase } from "./cliente";
+import { fetchConSesion, supabase } from "./cliente";
 
 const EDGE_FUNCTION_URL = import.meta.env.VITE_SUPABASE_URL
   ? `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/crear-cliente`
@@ -17,7 +17,7 @@ export async function crearOrganizacion(datos) {
   }
 
   try {
-    const respuesta = await fetch(EDGE_FUNCTION_URL, {
+    const respuesta = await fetchConSesion(EDGE_FUNCTION_URL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

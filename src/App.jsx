@@ -7,10 +7,13 @@ import useAutenticacion from '@/state/useAutenticacion'
 
 function App() {
   const inicializar = useAutenticacion((s) => s.inicializar)
+  const observarSesion = useAutenticacion((s) => s.observarSesion)
 
   useEffect(() => {
+    const dejarDeObservar = observarSesion()
     inicializar()
-  }, [inicializar])
+    return dejarDeObservar
+  }, [inicializar, observarSesion])
 
   return (
     <BrowserRouter>

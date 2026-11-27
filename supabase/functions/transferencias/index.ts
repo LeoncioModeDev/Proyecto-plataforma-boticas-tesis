@@ -252,58 +252,7 @@ async function crearTransferencia(supabase, perfil, body) {
       }
     }
 
-    const { data: trfNum, error: errTrf } = await supabase.rpc("generar_numero_transferencia", {
-      p_org_id: perfil.org_id,
-    });
-    if (errTrf || !trfNum) {
-      return json({ error: "Error al generar número de transferencia: " + (errTrf?.message || "respuesta vacía") }, 500);
-    }
-
-    // Insertar cabecera de redistribución
-    const { data: transferencia, error: errIns } = await supabase
-      .from("transferencias")
-      .insert({
-        tipo_transferencia: "redistribucion",
-        numero_transferencia: trfNum,
-        origen_tipo: "botica",
-        origen_id,
-        destino_tipo: "botica",
-        destino_id,
-        estado: "creada",
-        creado_por: perfil.id,
-        observaciones: observaciones || null,
-        org_id: perfil.org_id,
-      })
-      .select("id")
-      .single();
-
-    if (errIns) return json({ error: errIns.message }, 400);
-
-    const itemsInsert = items.map((item) => ({
-      transferencia_id: transferencia.id,
-      producto_id: item.producto_id,
-      lote_id: item.lote_id,
-      cantidad: item.cantidad,
-      org_id: perfil.org_id,
-    }));
-
-    const { error: errItems } = await supabase
-      .from("transferencias_items")
-      .insert(itemsInsert);
-
-    if (errItems) return json({ error: errItems.message }, 400);
-
-    await supabase.from("auditoria").insert({
-      org_id: perfil.org_id,
-      usuario_id: perfil.id,
-      accion: "CREAR_REDISTRIBUCION",
-      entidad: "transferencias",
-      entidad_id: transferencia.id,
-      nivel: "info",
-      detalle: `Se creó redistribución de botica ${origen_id} a botica ${destino_id} con ${items.length} producto(s)`,
-    });
-
-    return json({ exito: true, id: transferencia.id, numero_transferencia: trfNum });
+    return persistirTransferencia(supabase, perfil, "redistribucion", origen_id, destino_id, observaciones, items);
   }
 
   // ─── TRANSFERENCIA CENTRAL (droguería → botica) ─────────
@@ -383,57 +332,27 @@ async function crearTransferencia(supabase, perfil, body) {
     }
   }
 
-  const { data: trfNum, error: errTrf } = await supabase.rpc("generar_numero_transferencia", {
+  return persistirTransferencia(supabase, perfil, "transferencia_central", drogueria.id, destino_id, observaciones, items);
+}
+
+async function persistirTransferencia(supabase, perfil, tipo, origenId, destinoId, observaciones, items) {
+  const { data, error } = await supabase.rpc("crear_transferencia", {
     p_org_id: perfil.org_id,
+    p_usuario_id: perfil.id,
+    p_tipo_transferencia: tipo,
+    p_origen_id: origenId,
+    p_destino_id: destinoId,
+    p_observaciones: observaciones || null,
+    p_items: items.map(({ producto_id, lote_id, cantidad }) => ({ producto_id, lote_id, cantidad })),
   });
-  if (errTrf || !trfNum) {
-    return json({ error: "Error al generar número de transferencia: " + (errTrf?.message || "respuesta vacía") }, 500);
+  if (error?.code === "55P03") {
+    return json({ error: "Un lote está ocupado por otra operación. Vuelve a intentar el alta." }, 409);
   }
-
-  const { data: transferencia, error: errIns } = await supabase
-    .from("transferencias")
-    .insert({
-      tipo_transferencia: "transferencia_central",
-      numero_transferencia: trfNum,
-      origen_tipo: "drogueria",
-      origen_id: drogueria.id,
-      destino_tipo: "botica",
-      destino_id,
-      estado: "creada",
-      creado_por: perfil.id,
-      observaciones: observaciones || null,
-      org_id: perfil.org_id,
-    })
-    .select("id")
-    .single();
-
-  if (errIns) return json({ error: errIns.message }, 400);
-
-  const itemsInsert = items.map((item) => ({
-    transferencia_id: transferencia.id,
-    producto_id: item.producto_id,
-    lote_id: item.lote_id,
-    cantidad: item.cantidad,
-    org_id: perfil.org_id,
-  }));
-
-  const { error: errItems } = await supabase
-    .from("transferencias_items")
-    .insert(itemsInsert);
-
-  if (errItems) return json({ error: errItems.message }, 400);
-
-  await supabase.from("auditoria").insert({
-    org_id: perfil.org_id,
-    usuario_id: perfil.id,
-    accion: "CREAR_TRANSFERENCIA",
-    entidad: "transferencias",
-    entidad_id: transferencia.id,
-    nivel: "info",
-    detalle: `Se creó transferencia a botica ${destino_id} con ${items.length} producto(s)`,
-  });
-
-  return json({ exito: true, id: transferencia.id, numero_transferencia: trfNum });
+  if (error) return json({ error: error.message }, 400);
+  if (!data?.id || !data.numero_transferencia) {
+    return json({ error: "Respuesta vacía al crear la transferencia" }, 500);
+  }
+  return json(data);
 }
 
 // ─── ENVIAR ───────────────────────────────────────────────────

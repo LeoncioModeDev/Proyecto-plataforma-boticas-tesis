@@ -84,6 +84,9 @@ serve(async (req) => {
   }
 
   if (req.method === "PUT") {
+    if (id && (accion === "aprobar" || accion === "rechazar") && perfil.rol !== "admin_central") {
+      return json({ error: "No autorizado para aprobar o rechazar órdenes de compra" }, 403);
+    }
     if (id && accion === "aprobar") {
       return aprobarOC(supabase, perfil, id);
     }
@@ -345,6 +348,7 @@ async function aprobarOC(supabase: any, perfil: PerfilUsuario, id: string) {
     .from("ordenes_compra")
     .select("id, estado")
     .eq("id", id)
+    .eq("org_id", perfil.org_id)
     .single();
 
   if (errOC || !oc) return json({ error: "Orden no encontrada" }, 404);
@@ -391,6 +395,7 @@ async function rechazarOC(supabase: any, perfil: PerfilUsuario, id: string, body
     .from("ordenes_compra")
     .select("id, estado")
     .eq("id", id)
+    .eq("org_id", perfil.org_id)
     .single();
 
   if (!oc) return json({ error: "Orden no encontrada" }, 404);

@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { ChevronDown } from 'lucide-react'
+import { buscarUbigeos } from '@/utilities/buscarUbigeos'
 
 export default function CampoSeleccionUbigeo({ etiqueta, opciones = [], valor, alCambiar, error, requerido }) {
   const [abierto, setAbierto] = useState(false)
@@ -8,9 +9,7 @@ export default function CampoSeleccionUbigeo({ etiqueta, opciones = [], valor, a
 
   const seleccionada = opciones.find(op => op.valor === valor)
 
-  const filtrados = busqueda
-    ? opciones.filter(op => op.etiqueta.toLowerCase().includes(busqueda.toLowerCase()))
-    : opciones
+  const filtrados = buscarUbigeos(opciones, busqueda)
 
   useEffect(() => {
     function handleClickOutside(e) {
@@ -39,15 +38,16 @@ export default function CampoSeleccionUbigeo({ etiqueta, opciones = [], valor, a
           <input
             type="text"
             className="flex-1 bg-transparent border-none outline-none text-principal placeholder:text-secundario"
-            placeholder="Buscar ubigeo..."
+            placeholder="Buscar distrito o código Ubigeo..."
             value={busqueda}
-            onChange={e => setBusqueda(e.target.value)}
+            onClick={e => { e.stopPropagation(); setAbierto(true) }}
+            onChange={e => { setBusqueda(e.target.value); setAbierto(true) }}
             onFocus={() => setAbierto(true)}
           />
           <ChevronDown className={`size-4 text-secundario transition-transform ${abierto ? 'rotate-180' : ''}`} />
         </div>
         {seleccionada && !abierto && (
-          <p className="text-xs text-secundario mt-1">{seleccionada.etiqueta}</p>
+          <p className="text-xs text-secundario mt-1">{seleccionada.etiqueta} · {seleccionada.valor}</p>
         )}
         {abierto && (
           <div className="absolute z-10 mt-1 w-full bg-fondo border border-estilo rounded-md shadow-lg max-h-48 overflow-y-auto">
@@ -62,7 +62,8 @@ export default function CampoSeleccionUbigeo({ etiqueta, opciones = [], valor, a
                   setBusqueda('')
                 }}
               >
-                <span className="text-principal">{op.etiqueta}</span>
+                 <span className="text-principal">{op.etiqueta}</span>
+                 <span className="ml-2 text-xs text-secundario">{op.valor}</span>
               </button>
             )) : (
               <p className="px-3 py-2 text-sm text-secundario">Sin resultados</p>

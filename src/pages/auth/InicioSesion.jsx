@@ -19,7 +19,8 @@ export default function InicioSesion() {
   const [verContrasena, setVerContrasena] = useState(false)
   const [enviando, setEnviando] = useState(false)
   const [error, setError] = useState(null)
-  const { iniciarSesion } = useAutenticacion()
+  const iniciarSesion = useAutenticacion(s => s.iniciarSesion)
+  const avisoSesion = useAutenticacion(s => s.avisoSesion)
   const navegar = useNavigate()
 
   const manejarSubmit = async (e) => {
@@ -66,6 +67,7 @@ export default function InicioSesion() {
               Inicia sesión para gestionar el inventario y visualizar predicciones de demanda en tiempo real
             </p>
 
+            {avisoSesion && <p role="status" className="mt-4 text-sm text-secundario">{avisoSesion}</p>}
             <form onSubmit={manejarSubmit} className="mt-6 space-y-6">
               <div className="flex flex-col gap-2">
                 <label htmlFor="email" className="text-[15px] font-semibold text-principal">
